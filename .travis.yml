@@ -1,7 +1,7 @@
 language: java
 jdk: oraclejdk8
 script:
-- cd .. && mvn test
+- mvn verify
 notifications:
   hipchat:
     rooms:
