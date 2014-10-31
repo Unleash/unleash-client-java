@@ -1,3 +1,13 @@
-# [unleash](http://finn-no.github.io/unleash/) [![Build Status](https://travis-ci.org/finn-no/unleash.svg?branch=master)](https://travis-ci.org/finn-no/unleash) [![Coverage Status](https://coveralls.io/repos/finn-no/unleash/badge.png?branch=master)](https://coveralls.io/r/finn-no/unleash?branch=master)
+# The Unleash Client 4 Java
 
-feature toggle service
+## Awesome API
+
+It is really simple to use unleash.
+
+```java
+if(unleash.isEnabled("AwesomeFeature")) {
+  //do some magic
+} else {
+  //do old boring stuff
+}
+```
