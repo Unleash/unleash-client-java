@@ -1,5 +1,7 @@
 # The Unleash Client 4 Java
 
+[![Build Status](https://travis-ci.org/finn-no/unleash-client-java.svg?branch=master)](https://travis-ci.org/finn-no/unleash-client-java)
+
 ## Awesome API
 
 It is really simple to use unleash.
