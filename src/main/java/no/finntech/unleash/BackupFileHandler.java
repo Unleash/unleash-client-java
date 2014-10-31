@@ -1,4 +1,4 @@
-package no.finn.unleash;
+package no.finntech.unleash;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
