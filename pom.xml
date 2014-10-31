@@ -10,7 +10,7 @@
         <version>7</version>
     </parent>
 
-    <groupId>no.finn.unleash</groupId>
+    <groupId>no.finntech.unleash</groupId>
     <artifactId>unleash-client-java</artifactId>
     <version>1.0-SNAPSHOT</version>
 

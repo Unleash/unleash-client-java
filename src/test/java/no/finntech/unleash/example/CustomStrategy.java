@@ -1,6 +1,6 @@
-package no.finn.unleash.example;
+package no.finntech.unleash.example;
 
-import no.finn.unleash.Strategy;
+import no.finntech.unleash.Strategy;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package no.finn.unleash;
+package no.finntech.unleash;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

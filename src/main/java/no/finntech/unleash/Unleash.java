@@ -1,4 +1,4 @@
-package no.finn.unleash;
+package no.finntech.unleash;
 
 import java.util.HashMap;
 import java.util.Map;
