@@ -32,6 +32,10 @@ public final class FeatureToggleRepository implements ToggleRepository {
 
     private ToggleCollection toggleCollection;
 
+    public FeatureToggleRepository(URI featuresUri) {
+        this(featuresUri, 10l);
+    }
+
     public FeatureToggleRepository(URI featuresUri, long pollIntervalSeconds) {
         featureToggleBackupFileHandler = new BackupFileHandler();
         toggleFetcher = new HttpToggleFetcher(featuresUri);
