@@ -48,8 +48,8 @@ public final class FeatureToggleRepository implements ToggleRepository {
                     try {
                         Response response = toggleFetcher.fetchToggles();
                         if (response.getStatus() == Response.Status.CHANGED) {
-                            featureToggleBackupFileHandler.write(toggleCollection);
                             toggleCollection = response.getToggleCollection();
+                            featureToggleBackupFileHandler.write(response.getToggleCollection());
                         }
                     } catch (UnleashException e) {
                         LOG.warn("Could not refresh feature toggles", e);
