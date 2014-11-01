@@ -8,7 +8,7 @@ import no.finntech.unleash.Toggle;
 
 final class ToggleCollection {
     private Collection<Toggle> features = Collections.emptyList();
-    private Map<String, Toggle> cache;
+    private transient Map<String, Toggle> cache;
 
     ToggleCollection(final Collection<Toggle> features) {
         this.features = features;
