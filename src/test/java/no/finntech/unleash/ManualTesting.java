@@ -2,6 +2,8 @@ package no.finntech.unleash;
 
 import java.net.URI;
 import java.util.Random;
+import no.finntech.unleash.repository.FeatureToggleRepository;
+import no.finntech.unleash.repository.ToggleRepository;
 
 public class ManualTesting {
     public static void main(String[] args) throws Exception {

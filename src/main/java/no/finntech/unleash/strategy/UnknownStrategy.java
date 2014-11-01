@@ -1,8 +1,8 @@
-package no.finntech.unleash;
+package no.finntech.unleash.strategy;
 
 import java.util.Map;
 
-final class UnknownStrategy implements Strategy {
+public final class UnknownStrategy implements Strategy {
     public static final String NAME = "unknown";
 
     @Override

@@ -1,8 +1,8 @@
-package no.finntech.unleash;
+package no.finntech.unleash.strategy;
 
 import java.util.Map;
 
-final class DefaultStrategy implements Strategy {
+public final class DefaultStrategy implements Strategy {
     public static final String NAME = "default";
 
     @Override
