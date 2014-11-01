@@ -17,7 +17,7 @@ public class UnleashTest {
     @Before
     public void setup() {
         toggleRepository = mock(ToggleRepository.class);
-        unleash = new Unleash(toggleRepository);
+        unleash = new UnleashImpl(toggleRepository);
     }
 
     @Test
@@ -48,7 +48,7 @@ public class UnleashTest {
         when(customStrategy.getName()).thenReturn("custom");
 
         //register custom strategy
-        unleash = new Unleash(toggleRepository, customStrategy);
+        unleash = new UnleashImpl(toggleRepository, customStrategy);
         when(toggleRepository.getToggle("test")).thenReturn(new Toggle("test", true, "custom", null));
 
         unleash.isEnabled("test");

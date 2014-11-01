@@ -10,7 +10,7 @@ public class ManualTesting {
         ToggleRepository repository = new FeatureToggleRepository(URI.create("http://localhost:4242/features"), 1);
 
 
-        Unleash unleash = new Unleash(repository);
+        Unleash unleash = new UnleashImpl(repository);
 
         for(int i=0;i<100;i++) {
             (new Thread(new UnleashThread(unleash, "thread-"+i, 100))).start();
