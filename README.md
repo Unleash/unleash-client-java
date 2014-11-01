@@ -10,7 +10,10 @@ Spring or Guice to manage this.
 
 You create a new instance with the following command:
 ```java
-ToggleRepository repository = new ToggleRepository(URI.create("http://unelash.finn.no"), 10);
+URI uri = URI.create("http://unelash.finn.no");
+long pollinterval = 10l;
+
+ToggleRepository repository = new ToggleRepository(uri, pollinterval);
 Unleash unleash = new Unleash(toggleRepository);
 ```
 
