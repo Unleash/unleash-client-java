@@ -2,7 +2,7 @@ package no.finntech.unleash.example;
 
 import no.finntech.unleash.repository.FeatureToggleRepository;
 import no.finntech.unleash.repository.ToggleRepository;
-import no.finntech.unleash.Unleash;
+import no.finntech.unleash.UnleashImpl;
 import org.junit.Test;
 
 import java.net.URI;
@@ -15,7 +15,7 @@ public class UnleashUsageTest {
     public void wire() {
         ToggleRepository repository = new FeatureToggleRepository(URI.create("http://localhost:4242/features"), 1);
 
-        Unleash unleash = new Unleash(repository, new CustomStrategy());
+        UnleashImpl unleash = new UnleashImpl(repository, new CustomStrategy());
 
         assertFalse(unleash.isEnabled("myFeature"));
     }

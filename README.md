@@ -10,8 +10,9 @@ Spring or Guice to manage this.
 
 You create a new instance with the following command:
 ```java
-ToggleRepository repository = new ToggleRepository(URI.create("http://unelash.finn.no"));
-Unleash unleash = new Unleash(toggleRepository);
+URI unleashServer = URI.create("http://unelash.finn.no")
+ToggleRepository repository = new FeatureToggleRepository(unleashServer);
+Unleash unleash = new UnleashImpl(toggleRepository);
 ```
 
 ## Awesome feature toggle API
