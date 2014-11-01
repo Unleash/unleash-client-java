@@ -13,7 +13,9 @@ final class ToggleCollection {
     ToggleCollection(final Collection<Toggle> features) {
         this.features = features;
         cache = new HashMap<>();
-        features.forEach(toggle -> cache.put(toggle.getName(), toggle));
+        for(Toggle toggle : features) {
+            cache.put(toggle.getName(), toggle);
+        }
     }
 
     Collection<Toggle> getFeatures() {

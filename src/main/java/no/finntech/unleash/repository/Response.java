@@ -15,7 +15,7 @@ final class Response {
 
     public Response(Status status) {
         this.status = status;
-        this.toggleCollection = new ToggleCollection(Collections.emptyList());
+        this.toggleCollection = new ToggleCollection(Collections.EMPTY_LIST);
     }
 
     public Status getStatus() {
