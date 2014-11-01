@@ -22,7 +22,7 @@ class BackupFileHandler {
         } catch (IOException e) {
             LOG.error("Failed to read backup file:'{}'", BACKUP_FILE, e);
         }
-        return new ToggleCollection(Collections.emptyList());
+        return new ToggleCollection(Collections.EMPTY_LIST);
     }
 
     void write(ToggleCollection toggleCollection) {
