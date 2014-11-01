@@ -2,6 +2,10 @@ package no.finntech.unleash;
 
 import java.util.HashMap;
 import java.util.Map;
+import no.finntech.unleash.repository.ToggleRepository;
+import no.finntech.unleash.strategy.DefaultStrategy;
+import no.finntech.unleash.strategy.Strategy;
+import no.finntech.unleash.strategy.UnknownStrategy;
 
 public final class Unleash {
     private static final DefaultStrategy DEFAULT_STRATEGY = new DefaultStrategy();

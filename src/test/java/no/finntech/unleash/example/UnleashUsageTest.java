@@ -1,7 +1,7 @@
 package no.finntech.unleash.example;
 
-import no.finntech.unleash.FeatureToggleRepository;
-import no.finntech.unleash.ToggleRepository;
+import no.finntech.unleash.repository.FeatureToggleRepository;
+import no.finntech.unleash.repository.ToggleRepository;
 import no.finntech.unleash.Unleash;
 import org.junit.Test;
 
