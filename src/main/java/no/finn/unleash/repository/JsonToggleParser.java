@@ -1,11 +1,11 @@
-package no.finntech.unleash.repository;
+package no.finn.unleash.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.Reader;
 import java.util.Collection;
-import no.finntech.unleash.Toggle;
+import no.finn.unleash.Toggle;
 
 final class JsonToggleParser {
 

@@ -1,4 +1,4 @@
-package no.finntech.unleash;
+package no.finn.unleash;
 
 public class UnleashException extends RuntimeException {
 

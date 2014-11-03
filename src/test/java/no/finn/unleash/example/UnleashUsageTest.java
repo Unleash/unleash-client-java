@@ -1,8 +1,8 @@
-package no.finntech.unleash.example;
+package no.finn.unleash.example;
 
-import no.finntech.unleash.repository.FeatureToggleRepository;
-import no.finntech.unleash.repository.ToggleRepository;
-import no.finntech.unleash.UnleashImpl;
+import no.finn.unleash.repository.FeatureToggleRepository;
+import no.finn.unleash.repository.ToggleRepository;
+import no.finn.unleash.UnleashImpl;
 import org.junit.Test;
 
 import java.net.URI;

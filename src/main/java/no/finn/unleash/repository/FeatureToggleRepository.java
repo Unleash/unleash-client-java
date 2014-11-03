@@ -1,12 +1,12 @@
-package no.finntech.unleash.repository;
+package no.finn.unleash.repository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.URI;
 import java.util.concurrent.*;
-import no.finntech.unleash.Toggle;
-import no.finntech.unleash.UnleashException;
+import no.finn.unleash.Toggle;
+import no.finn.unleash.UnleashException;
 
 public final class FeatureToggleRepository implements ToggleRepository {
     private static final Logger LOG = LogManager.getLogger();

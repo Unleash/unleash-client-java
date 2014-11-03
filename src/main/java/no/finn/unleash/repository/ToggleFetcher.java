@@ -1,6 +1,6 @@
-package no.finntech.unleash.repository;
+package no.finn.unleash.repository;
 
-import no.finntech.unleash.UnleashException;
+import no.finn.unleash.UnleashException;
 
 public interface ToggleFetcher {
    Response fetchToggles() throws UnleashException;

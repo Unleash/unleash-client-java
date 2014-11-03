@@ -1,11 +1,11 @@
-package no.finntech.unleash;
+package no.finn.unleash;
 
 import java.util.HashMap;
 import java.util.Map;
-import no.finntech.unleash.repository.ToggleRepository;
-import no.finntech.unleash.strategy.DefaultStrategy;
-import no.finntech.unleash.strategy.Strategy;
-import no.finntech.unleash.strategy.UnknownStrategy;
+import no.finn.unleash.repository.ToggleRepository;
+import no.finn.unleash.strategy.DefaultStrategy;
+import no.finn.unleash.strategy.Strategy;
+import no.finn.unleash.strategy.UnknownStrategy;
 
 public final class UnleashImpl implements Unleash {
     private static final DefaultStrategy DEFAULT_STRATEGY = new DefaultStrategy();

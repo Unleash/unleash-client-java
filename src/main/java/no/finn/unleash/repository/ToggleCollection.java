@@ -1,10 +1,10 @@
-package no.finntech.unleash.repository;
+package no.finn.unleash.repository;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import no.finntech.unleash.Toggle;
+import no.finn.unleash.Toggle;
 
 final class ToggleCollection {
     private Collection<Toggle> features = Collections.emptyList();
