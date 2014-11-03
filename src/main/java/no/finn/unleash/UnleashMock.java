@@ -1,4 +1,4 @@
-package no.finntech.unleash;
+package no.finn.unleash;
 
 import java.util.HashSet;
 import java.util.Set;

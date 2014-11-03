@@ -1,4 +1,4 @@
-package no.finntech.unleash.repository;
+package no.finn.unleash.repository;
 
 import java.util.Collections;
 

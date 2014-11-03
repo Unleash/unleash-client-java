@@ -1,7 +1,7 @@
-package no.finntech.unleash;
+package no.finn.unleash;
 
-import no.finntech.unleash.repository.ToggleRepository;
-import no.finntech.unleash.strategy.Strategy;
+import no.finn.unleash.repository.ToggleRepository;
+import no.finn.unleash.strategy.Strategy;
 import org.junit.Before;
 import org.junit.Test;
 

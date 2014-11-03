@@ -1,4 +1,4 @@
-package no.finntech.unleash.strategy;
+package no.finn.unleash.strategy;
 
 import java.util.Map;
 

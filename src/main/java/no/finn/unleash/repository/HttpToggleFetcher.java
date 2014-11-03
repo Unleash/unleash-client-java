@@ -1,4 +1,4 @@
-package no.finntech.unleash.repository;
+package no.finn.unleash.repository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import no.finntech.unleash.UnleashException;
+import no.finn.unleash.UnleashException;
 
 final class HttpToggleFetcher implements ToggleFetcher {
     public static final int CONNECT_TIMEOUT = 10000;

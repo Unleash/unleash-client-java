@@ -1,4 +1,4 @@
-package no.finntech.unleash.repository;
+package no.finn.unleash.repository;
 
 import org.junit.Test;
 
@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.finntech.unleash.Toggle;
+import no.finn.unleash.Toggle;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

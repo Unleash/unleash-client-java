@@ -1,6 +1,6 @@
-package no.finntech.unleash.repository;
+package no.finn.unleash.repository;
 
-import no.finntech.unleash.Toggle;
+import no.finn.unleash.Toggle;
 
 public interface ToggleRepository {
     Toggle getToggle(String name);
