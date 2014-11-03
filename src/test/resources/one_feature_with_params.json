@@ -1,0 +1,10 @@
+{"features": [
+    {
+        "name": "featureX",
+        "enabled": true,
+        "strategy": "default",
+        "parameters": {
+            "foo": "rab"
+        }
+    }
+]}

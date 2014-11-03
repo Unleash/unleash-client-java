@@ -9,7 +9,8 @@
         "enabled": false,
         "strategy": "baz",
         "parameters": {
-            "foo": "bar"
+            "foo": "bar",
+            "a": "b"
         }
     },
     {

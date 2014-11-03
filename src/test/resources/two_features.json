@@ -1,0 +1,12 @@
+{"features": [
+    {
+        "name": "featureX",
+        "enabled": true,
+        "strategy": "default"
+    },
+    {
+        "name": "featureY",
+        "enabled": false,
+        "strategy": "test-strategy"
+    }
+]}

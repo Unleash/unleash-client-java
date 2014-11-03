@@ -1,0 +1,7 @@
+{"features": [
+    {
+        "name": "featureX",
+        "enabled": true,
+        "strategy": "default"
+    }
+]}
