@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertNull;
 
 
-public class FeatureToggleRepositoryTest {
+public class FeatureFeatureToggleRepositoryTest {
     private ToggleRepository toggleRepository;
 
     @Test

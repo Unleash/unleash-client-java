@@ -1,20 +1,26 @@
 package no.finn.unleash;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import no.finn.unleash.repository.FeatureToggleRepository;
 import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.DefaultStrategy;
 import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.strategy.UnknownStrategy;
 
-public final class UnleashImpl implements Unleash {
+public final class DefaultUnleash implements Unleash {
     private static final DefaultStrategy DEFAULT_STRATEGY = new DefaultStrategy();
     private static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
     private final ToggleRepository toggleRepository;
     private final Map<String, Strategy> strategyMap;
 
-    public UnleashImpl(ToggleRepository toggleRepository, Strategy... strategies) {
+    public DefaultUnleash(URI unleashServer, Strategy... strategies) {
+        this(new FeatureToggleRepository(unleashServer), strategies);
+    }
+
+    public DefaultUnleash(ToggleRepository toggleRepository, Strategy... strategies) {
         this.toggleRepository = toggleRepository;
         this.strategyMap = buildStrategyMap(strategies);
     }
@@ -26,14 +32,14 @@ public final class UnleashImpl implements Unleash {
 
     @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
-        Toggle toggle = toggleRepository.getToggle(toggleName);
+        FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
 
-        if (toggle == null) {
+        if (featureToggle == null) {
             return defaultSetting;
         }
 
-        Strategy strategy = getStrategy(toggle.getStrategy());
-        return toggle.isEnabled() && strategy.isEnabled(toggle.getParameters());
+        Strategy strategy = getStrategy(featureToggle.getStrategy());
+        return featureToggle.isEnabled() && strategy.isEnabled(featureToggle.getParameters());
     }
 
     private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {

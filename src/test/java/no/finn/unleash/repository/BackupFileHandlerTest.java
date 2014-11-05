@@ -1,6 +1,5 @@
 package no.finn.unleash.repository;
 
-import no.finn.unleash.Toggle;
 import org.junit.Test;
 
 import java.io.File;
