@@ -4,25 +4,25 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import no.finn.unleash.Toggle;
+import no.finn.unleash.FeatureToggle;
 
 final class ToggleCollection {
-    private Collection<Toggle> features = Collections.emptyList();
-    private transient Map<String, Toggle> cache;
+    private Collection<FeatureToggle> features = Collections.emptyList();
+    private transient Map<String, FeatureToggle> cache;
 
-    ToggleCollection(final Collection<Toggle> features) {
+    ToggleCollection(final Collection<FeatureToggle> features) {
         this.features = features;
         cache = new HashMap<>();
-        for(Toggle toggle : features) {
-            cache.put(toggle.getName(), toggle);
+        for(FeatureToggle featureToggle : features) {
+            cache.put(featureToggle.getName(), featureToggle);
         }
     }
 
-    Collection<Toggle> getFeatures() {
+    Collection<FeatureToggle> getFeatures() {
         return features;
     }
 
-    Toggle getToggle(final String name) {
+    FeatureToggle getToggle(final String name) {
         return cache.get(name);
     }
 }

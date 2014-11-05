@@ -22,14 +22,14 @@ public class UnleashTest {
 
     @Test
     public void known_toogle_and_strategy_should_be_active() {
-        when(toggleRepository.getToggle("test")).thenReturn(new Toggle("test", true, "default", null));
+        when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, "default", null));
 
         assertThat(unleash.isEnabled("test"), is(true));
     }
 
     @Test
     public void unknown_strategy_should_be_considered_inactive() {
-        when(toggleRepository.getToggle("test")).thenReturn(new Toggle("test", true, "whoot_strat", null));
+        when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, "whoot_strat", null));
 
         assertThat(unleash.isEnabled("test"), is(false));
     }
@@ -49,7 +49,7 @@ public class UnleashTest {
 
         //register custom strategy
         unleash = new UnleashImpl(toggleRepository, customStrategy);
-        when(toggleRepository.getToggle("test")).thenReturn(new Toggle("test", true, "custom", null));
+        when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, "custom", null));
 
         unleash.isEnabled("test");
 
