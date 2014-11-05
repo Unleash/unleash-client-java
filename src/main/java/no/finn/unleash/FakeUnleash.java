@@ -3,7 +3,7 @@ package no.finn.unleash;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class UnleashMock implements Unleash {
+public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private Set<String> enabledFeatures = new HashSet<>();
 
