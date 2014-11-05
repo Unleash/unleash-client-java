@@ -6,3 +6,5 @@ notifications:
   hipchat:
     rooms:
       secure: OcnZTYXPm0YxnEyz0w/8/QsRQpdO0flYOpxae7VxhMxf28Uxai3d7whC7pHDDrKJ25iw4OaVWHpaua3wdU17oLlzpPK2fsNyrUekoJEYhoErYb4YhU2+3/glV3Gk9Zr5New3KMEm/NZ24MP8hrt6e4v38Npk0hYhJPsFh/8hhuk=
+after_success:
+  - mvn clean cobertura:cobertura coveralls:report
