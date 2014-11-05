@@ -21,7 +21,7 @@ public class FeatureToggleRepositoryTest {
     @Before
     public void setup() throws URISyntaxException {
         System.setProperty("java.io.tmpdir", getTmpDir());
-        toggleRepository = new FeatureToggleRepository(URI.create("http://localhost:4242/features"));
+        toggleRepository = new FeatureToggleRepository(URI.create("http://trigger.file/fallback"));
     }
 
     @After
