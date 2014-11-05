@@ -15,6 +15,7 @@
 
     <properties>
         <version.log4j2>2.0-rc1</version.log4j2>
+        <coberturaFormat>xml</coberturaFormat>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -110,7 +111,7 @@
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
-                    <format>xml</format>
+                    <format>${coberturaFormat}</format>
                     <maxmem>256m</maxmem>
                 </configuration>
             </plugin>

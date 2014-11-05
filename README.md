@@ -31,3 +31,16 @@ I need a trueish default value in case the feature toggle is not defined, or the
 ```java
 unleash.isEnabled("AwesomeFeature", true)
 ```
+
+## Development
+
+Build:
+```bash
+mvn clean install
+```
+
+Cobertura coverage reports:
+```bash
+mvn cobertura:cobertura -DcoberturaFormat=html
+```
+The generated report will be available at ```target/site/cobertura/index.html```
