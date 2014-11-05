@@ -15,11 +15,13 @@
 
     <properties>
         <version.log4j2>2.0-rc1</version.log4j2>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <name>${project.groupId}:${project.artifactId}</name>
+    <name>no.finn.unleash:unleash-client-java</name>
     <description>A client library for Unleash</description>
     <url>http://github.com/finn-no/unleash-client-java</url>
+    <inceptionYear>2014</inceptionYear>
 
     <licenses>
         <license>
