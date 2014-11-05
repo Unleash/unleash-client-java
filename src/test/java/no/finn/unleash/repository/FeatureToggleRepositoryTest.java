@@ -1,27 +1,18 @@
 package no.finn.unleash.repository;
 
-import no.finn.unleash.Toggle;
+import java.net.URI;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNull;
 
-import java.net.URI;
-
-import static org.junit.Assert.*;
 
 public class FeatureToggleRepositoryTest {
     private ToggleRepository toggleRepository;
 
-
-
     @Test
-    public void readDisabledToggleFromRepository(){
+    public void noBackupFileAndNoRepositoryAvailable(){
         toggleRepository = new FeatureToggleRepository(URI.create("http://localhost:4242/features"));
-        Toggle unknownFeature = toggleRepository.getToggle("unknownFeature");
-        assertNull("should be null", unknownFeature);
-
+        assertNull("should be null", toggleRepository.getToggle("unknownFeature"));
     }
-
-
-
 
 }
