@@ -26,14 +26,14 @@ public final class UnleashImpl implements Unleash {
 
     @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
-        Toggle toggle = toggleRepository.getToggle(toggleName);
+        FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
 
-        if (toggle == null) {
+        if (featureToggle == null) {
             return defaultSetting;
         }
 
-        Strategy strategy = getStrategy(toggle.getStrategy());
-        return toggle.isEnabled() && strategy.isEnabled(toggle.getParameters());
+        Strategy strategy = getStrategy(featureToggle.getStrategy());
+        return featureToggle.isEnabled() && strategy.isEnabled(featureToggle.getParameters());
     }
 
     private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {

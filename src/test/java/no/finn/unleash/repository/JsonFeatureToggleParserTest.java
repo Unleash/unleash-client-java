@@ -1,5 +1,6 @@
 package no.finn.unleash.repository;
 
+import no.finn.unleash.FeatureToggle;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -9,19 +10,17 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.finn.unleash.Toggle;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class JsonToggleParserTest {
+public class JsonFeatureToggleParserTest {
 
     @Test
     public void should_deserialize_correctly() throws IOException {
         String content = readFile("/features.json");
-        List<Toggle> toggles = new ArrayList<>(JsonToggleParser.fromJson(content));
+        List<FeatureToggle> featureToggles = new ArrayList<>(JsonToggleParser.fromJson(content));
 
-        assertThat(toggles.size(), is(3));
+        assertThat(featureToggles.size(), is(3));
     }
 
     private String readFile(String filename) throws IOException {

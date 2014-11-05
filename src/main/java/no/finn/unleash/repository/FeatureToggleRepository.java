@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.URI;
 import java.util.concurrent.*;
-import no.finn.unleash.Toggle;
+import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
 
 public final class FeatureToggleRepository implements ToggleRepository {
@@ -67,7 +67,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
     }
 
     @Override
-    public Toggle getToggle(String name) {
+    public FeatureToggle getToggle(String name) {
         return toggleCollection.getToggle(name);
     }
 }

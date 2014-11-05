@@ -1,7 +1,7 @@
 package no.finn.unleash.repository;
 
-import no.finn.unleash.Toggle;
+import no.finn.unleash.FeatureToggle;
 
 public interface ToggleRepository {
-    Toggle getToggle(String name);
+    FeatureToggle getToggle(String name);
 }
