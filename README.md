@@ -11,8 +11,7 @@ Spring or Guice to manage this.
 You create a new instance with the following command:
 ```java
 URI unleashServer = URI.create("http://unelash.finn.no")
-ToggleRepository repository = new FeatureToggleRepository(unleashServer);
-Unleash unleash = new UnleashImpl(toggleRepository);
+Unleash unleash = new DefaultUnleash(unleashServer);
 ```
 
 ## Awesome feature toggle API
