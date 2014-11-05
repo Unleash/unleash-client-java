@@ -1,0 +1,25 @@
+{"features": [
+    {
+        "name": "presentFeature",
+        "enabled": true,
+        "strategy": "default"
+    },
+    {
+        "name": "enabledFeature",
+        "enabled": true,
+        "strategy": "default"
+    },
+    {
+        "name": "disabledFeature",
+        "enabled": false,
+        "strategy": "default"
+    },
+    {
+        "name": "featureCustomStrategy",
+        "enabled": false,
+        "strategy": "someCustomStrategy",
+        "parameters": {
+            "customParameter": "customValue"
+        }
+    }
+]}
