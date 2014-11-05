@@ -17,7 +17,8 @@ public class FeatureToggleRepositoryTest {
     public void readDisabledToggleFromRepository(){
         toggleRepository = new FeatureToggleRepository(URI.create("http://localhost:4242/features"));
         Toggle unknownFeature = toggleRepository.getToggle("unknownFeature");
-        assertFalse("should be disabled", unknownFeature.isEnabled());
+        assertNull("should be null", unknownFeature);
+
     }
 
 
