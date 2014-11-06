@@ -11,7 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import no.finn.unleash.UnleashException;
 
-final class HttpToggleFetcher implements ToggleFetcher {
+public final class HttpToggleFetcher implements ToggleFetcher {
     public static final int CONNECT_TIMEOUT = 10000;
     private String etag = "";
 

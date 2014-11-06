@@ -2,12 +2,14 @@ package no.finn.unleash;
 
 import java.net.URI;
 import java.util.Random;
-import no.finn.unleash.repository.FeatureToggleRepository;
-import no.finn.unleash.repository.ToggleRepository;
+
+import no.finn.unleash.repository.*;
 
 public class ManualTesting {
     public static void main(String[] args) throws Exception {
-        ToggleRepository repository = new FeatureToggleRepository(URI.create("http://localhost:4242/features"), 1);
+        ToggleFetcher toggleFetcher = new HttpToggleFetcher(URI.create("http://localhost:4242/features"));
+        ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile();
+        ToggleRepository repository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 1);
         Unleash unleash = new DefaultUnleash(repository);
 
         for(int i=0;i<100;i++) {

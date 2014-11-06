@@ -3,7 +3,6 @@ package no.finn.unleash.repository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.net.URI;
 import java.util.concurrent.*;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
@@ -27,20 +26,20 @@ public final class FeatureToggleRepository implements ToggleRepository {
         TIMER.setRemoveOnCancelPolicy(true);
     }
 
-    private final BackupFileHandler featureToggleBackupFileHandler;
+    private final ToggleBackupHandler toggleBackupHandler;
     private final ToggleFetcher toggleFetcher;
 
     private ToggleCollection toggleCollection;
 
-    public FeatureToggleRepository(URI featuresUri) {
-        this(featuresUri, 10l);
+    public FeatureToggleRepository(ToggleFetcher toggleFetcher, ToggleBackupHandler toggleBackupHandler) {
+        this(toggleFetcher, toggleBackupHandler, 10L);
     }
 
-    public FeatureToggleRepository(URI featuresUri, long pollIntervalSeconds) {
-        featureToggleBackupFileHandler = new BackupFileHandler();
-        toggleFetcher = new HttpToggleFetcher(featuresUri);
+    public FeatureToggleRepository(ToggleFetcher toggleFetcher, ToggleBackupHandler toggleBackupHandler, long pollIntervalSeconds) {
+        this.toggleBackupHandler = toggleBackupHandler;
+        this.toggleFetcher = toggleFetcher;
 
-        toggleCollection = featureToggleBackupFileHandler.read();
+        toggleCollection = toggleBackupHandler.read();
         startBackgroundPolling(pollIntervalSeconds);
     }
 
@@ -53,7 +52,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
                         Response response = toggleFetcher.fetchToggles();
                         if (response.getStatus() == Response.Status.CHANGED) {
                             toggleCollection = response.getToggleCollection();
-                            featureToggleBackupFileHandler.write(response.getToggleCollection());
+                            toggleBackupHandler.write(response.getToggleCollection());
                         }
                     } catch (UnleashException e) {
                         LOG.warn("Could not refresh feature toggles", e);
