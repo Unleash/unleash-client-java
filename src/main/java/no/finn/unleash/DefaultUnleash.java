@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import no.finn.unleash.repository.FeatureToggleRepository;
+import no.finn.unleash.repository.ToggleBackupHandlerFile;
+import no.finn.unleash.repository.HttpToggleFetcher;
 import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.DefaultStrategy;
 import no.finn.unleash.strategy.Strategy;
@@ -17,7 +19,10 @@ public final class DefaultUnleash implements Unleash {
     private final Map<String, Strategy> strategyMap;
 
     public DefaultUnleash(URI unleashServer, Strategy... strategies) {
-        this(new FeatureToggleRepository(unleashServer), strategies);
+        this(new FeatureToggleRepository(
+                        new HttpToggleFetcher(unleashServer),
+                        new ToggleBackupHandlerFile()),
+                strategies);
     }
 
     public DefaultUnleash(ToggleRepository toggleRepository, Strategy... strategies) {

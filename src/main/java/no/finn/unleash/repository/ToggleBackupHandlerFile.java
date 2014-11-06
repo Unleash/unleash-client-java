@@ -1,25 +1,28 @@
 package no.finn.unleash.repository;
 
+import no.finn.unleash.FeatureToggle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.Collections;
+import java.util.List;
 
-class BackupFileHandler {
+public class ToggleBackupHandlerFile implements ToggleBackupHandler {
     private static final Logger LOG = LogManager.getLogger();
     private final String backupFile;
 
-    BackupFileHandler(){
+    public ToggleBackupHandlerFile(){
         this(System.getProperty("java.io.tmpdir") + File.separatorChar + "unleash-repo.json");
     }
 
-    BackupFileHandler(String backupFile){
+    public ToggleBackupHandlerFile(String backupFile){
         this.backupFile = backupFile;
     }
 
 
-    ToggleCollection read() {
+    @Override
+    public ToggleCollection read() {
         LOG.info("Unleash will try to load feature toggle states from temporary backup");
         try (FileReader reader = new FileReader(backupFile)) {
             BufferedReader br = new BufferedReader(reader);
@@ -30,10 +33,12 @@ class BackupFileHandler {
         } catch (IOException e) {
             LOG.error("Failed to read backup file:'{}'", backupFile, e);
         }
-        return new ToggleCollection(Collections.EMPTY_LIST);
+        List<FeatureToggle> emptyList = Collections.emptyList();
+        return new ToggleCollection(emptyList);
     }
 
-    void write(ToggleCollection toggleCollection) {
+    @Override
+    public void write(ToggleCollection toggleCollection) {
         try (FileWriter writer = new FileWriter(backupFile)) {
             writer.write(JsonToggleParser.toJsonString(toggleCollection));
         } catch (IOException e) {
