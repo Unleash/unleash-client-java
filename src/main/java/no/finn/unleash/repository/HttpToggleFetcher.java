@@ -20,8 +20,8 @@ final class HttpToggleFetcher implements ToggleFetcher {
     public HttpToggleFetcher(URI repo) {
         try {
             toggleUrl = repo.toURL();
-        } catch (MalformedURLException ex) {
-            throw new UnleashException("Invalid repo uri", ex);
+        } catch (MalformedURLException|IllegalArgumentException ex) {
+            throw new UnleashException("Invalid unleash repository uri [" + repo.toString() + "]", ex);
         }
     }
 
