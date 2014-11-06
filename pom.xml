@@ -14,7 +14,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <version.log4j2>2.0-rc1</version.log4j2>
+        <version.log4j2>2.1</version.log4j2>
         <coberturaFormat>xml</coberturaFormat>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
