@@ -33,6 +33,7 @@ final class HttpToggleFetcher implements ToggleFetcher {
             connection.setConnectTimeout(CONNECT_TIMEOUT);
             connection.setReadTimeout(CONNECT_TIMEOUT);
             connection.setRequestProperty("If-None-Match", etag);
+            connection.setUseCaches(true);
             connection.connect();
 
             int responseCode = connection.getResponseCode();
