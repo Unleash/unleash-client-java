@@ -59,7 +59,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
                         LOG.warn("Could not refresh feature toggles", e);
                     }
                 }
-            }, pollIntervalSeconds, pollIntervalSeconds, TimeUnit.SECONDS);
+            }, 0, pollIntervalSeconds, TimeUnit.SECONDS);
         } catch (RejectedExecutionException ex) {
             LOG.error("Unleash background task crashed", ex);
             return null;
