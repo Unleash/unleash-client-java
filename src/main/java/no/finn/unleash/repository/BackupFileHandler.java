@@ -25,7 +25,8 @@ class BackupFileHandler {
             BufferedReader br = new BufferedReader(reader);
             return JsonToggleParser.fromJson(br);
         } catch (FileNotFoundException e) {
-            LOG.warn("Unable to locate backup file:'{}'", backupFile, e);
+            LOG.warn(" Unleash could not find the backup-file '" + backupFile + "'. \n" +
+                    "This is expected behavior the first time unleash runs in a new environment.");
         } catch (IOException e) {
             LOG.error("Failed to read backup file:'{}'", backupFile, e);
         }
