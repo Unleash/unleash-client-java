@@ -32,6 +32,8 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             connection = (HttpURLConnection) toggleUrl.openConnection();
             connection.setConnectTimeout(CONNECT_TIMEOUT);
             connection.setReadTimeout(CONNECT_TIMEOUT);
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("If-None-Match", etag);
             connection.setUseCaches(true);
             connection.connect();
