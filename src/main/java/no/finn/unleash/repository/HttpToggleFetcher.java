@@ -46,6 +46,8 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             }
         } catch (IOException e) {
             throw new UnleashException("Could not fetch toggles", e);
+        } catch (NullPointerException e) {
+            throw new UnleashException(e.getMessage(), e);
         } finally {
             if(connection != null) {
                 connection.disconnect();
@@ -53,7 +55,7 @@ public final class HttpToggleFetcher implements ToggleFetcher {
         }
     }
 
-    private Response getToggleResponse(HttpURLConnection request) throws IOException {
+    private Response getToggleResponse(HttpURLConnection request) throws IOException, NullPointerException {
         etag = request.getHeaderField("ETag");
 
         try(BufferedReader reader = new BufferedReader(
