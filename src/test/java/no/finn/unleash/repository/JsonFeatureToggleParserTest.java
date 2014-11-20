@@ -1,37 +1,37 @@
 package no.finn.unleash.repository;
 
-import no.finn.unleash.FeatureToggle;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.io.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class JsonFeatureToggleParserTest {
 
     @Test
     public void should_deserialize_correctly() throws IOException {
-        String content = readFile("/features.json");
-        List<FeatureToggle> featureToggles = new ArrayList<>(JsonToggleParser.fromJson(content));
+        Reader content = getFileReader("/features.json");
+        ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
 
-        assertThat(featureToggles.size(), is(3));
+        assertThat(toggleCollection.getFeatures().size(), is(3));
     }
 
-    private String readFile(String filename) throws IOException {
+    @Test
+    public void shouldThrow() throws IOException {
+        Reader content = getFileReader("/empty.json");
+        try {
+            JsonToggleParser.fromJson(content);
+        } catch (IllegalStateException e) {
+            assertTrue("Expected IllegalStateException", e instanceof IllegalStateException);
+        }
+    }
+
+    private Reader getFileReader(String filename) throws IOException {
         InputStream in = this.getClass().getResourceAsStream(filename);
         InputStreamReader reader = new InputStreamReader(in);
-        BufferedReader br = new BufferedReader(reader);
-        StringBuilder builder = new StringBuilder();
-        String line;
-        while((line = br.readLine()) != null) {
-            builder.append(line);
-        }
-        return builder.toString();
+        return new BufferedReader(reader);
     }
 }

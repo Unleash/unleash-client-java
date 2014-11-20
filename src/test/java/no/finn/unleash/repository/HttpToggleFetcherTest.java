@@ -76,7 +76,7 @@ public class HttpToggleFetcherTest {
         try {
             httpToggleFetcher.fetchToggles();
         } catch (UnleashException e) {
-            assertTrue("Expected NullPointerException", e.getCause() instanceof NullPointerException);
+            assertTrue("Expected IllegalStateException", e.getCause() instanceof IllegalStateException);
 
         }
 
