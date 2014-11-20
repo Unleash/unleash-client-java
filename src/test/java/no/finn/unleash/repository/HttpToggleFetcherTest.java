@@ -43,7 +43,7 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void exampleTest() throws URISyntaxException {
+    public void happyPathTest() throws URISyntaxException {
 
         stubFor(get(urlEqualTo("/features"))
                 .withHeader("Accept", equalTo("application/json"))
