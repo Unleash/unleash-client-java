@@ -22,9 +22,12 @@ final class JsonToggleParser {
         return gson.fromJson(jsonString, ToggleCollection.class).getFeatures();
     }
 
-    public static ToggleCollection fromJson(Reader reader) {
+    public static ToggleCollection fromJson(Reader reader) throws NullPointerException {
         Gson gson = new GsonBuilder().create();
         ToggleCollection gsonCollection = gson.fromJson(reader, ToggleCollection.class);
+        if(gsonCollection == null) {
+            throw new NullPointerException("Could not extract toggles from json");
+        }
         return new ToggleCollection(gsonCollection.getFeatures());
     }
 }

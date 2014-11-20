@@ -44,7 +44,6 @@ public class HttpToggleFetcherTest {
 
     @Test
     public void happyPathTest() throws URISyntaxException {
-
         stubFor(get(urlEqualTo("/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
@@ -59,6 +58,27 @@ public class HttpToggleFetcherTest {
 
         assertTrue(featureX.isEnabled());
 
+
+        verify(getRequestedFor(urlMatching("/features"))
+                .withHeader("Content-Type", matching("application/json")));
+    }
+
+    @Test
+    public void givenEmptyBody() throws URISyntaxException {
+        stubFor(get(urlEqualTo("/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")));
+
+        URI uri = new URI("http://localhost:"+wireMockRule.port()+ "/features");
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(uri);
+        try {
+            httpToggleFetcher.fetchToggles();
+        } catch (UnleashException e) {
+            assertTrue("Expected NullPointerException", e.getCause() instanceof NullPointerException);
+
+        }
 
         verify(getRequestedFor(urlMatching("/features"))
                 .withHeader("Content-Type", matching("application/json")));
