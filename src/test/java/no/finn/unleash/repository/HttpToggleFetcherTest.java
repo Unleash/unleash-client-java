@@ -104,5 +104,27 @@ public class HttpToggleFetcherTest {
     }
 
 
+    @Test
+    public void shouldHandleErrors() throws URISyntaxException {
+        int httpCodes[] = {400,401,403,404,500,503};
+        for(int httpCode:httpCodes) {
+            stubFor(get(urlEqualTo("/features"))
+                    .withHeader("Accept", equalTo("application/json"))
+                    .willReturn(aResponse()
+                            .withStatus(httpCode)
+                            .withHeader("Content-Type", "application/json")));
 
-}
+            URI uri = new URI("http://localhost:" + wireMockRule.port() + "/features");
+            HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(uri);
+            Response response = httpToggleFetcher.fetchToggles();
+            assertEquals("Should return status NOT_CHANGED", response.getStatus(), Response.Status.NOT_CHANGED);
+
+
+            verify(getRequestedFor(urlMatching("/features"))
+                    .withHeader("Content-Type", matching("application/json")));
+        }
+
+    }
+
+
+    }
