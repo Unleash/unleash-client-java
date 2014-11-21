@@ -21,25 +21,32 @@ public class HttpToggleFetcherTest {
     @Test
     public void uriIsNotAbsoulute() throws URISyntaxException {
         URI badUri = new URI("notAbsolute");
+        boolean exceptionCatched = false;
         try {
             new HttpToggleFetcher(badUri);
             fail("Should give IllegalArgumentException");
         } catch (UnleashException e) {
             assertTrue("Expected IllegalArgumentException",e.getCause() instanceof IllegalArgumentException);
+            exceptionCatched = true;
         }
+        assertTrue("Expected UnleashException", exceptionCatched);
     }
 
     @Test
     public void givenMalformedUrlShouldGiveException() throws URISyntaxException {
         String unknownProtocolUrl = "foo://bar";
         URI badUrl = new URI(unknownProtocolUrl);
+        boolean exceptionCatched = false;
         try {
             new HttpToggleFetcher(badUrl);
             fail("Should give MalformedURLException");
         } catch (UnleashException e) {
             assertTrue("Expected MalformedURLException", e.getCause() instanceof MalformedURLException);
             assertTrue("Exception message should contain URI, got:" + e.getMessage(), e.getMessage().contains(unknownProtocolUrl));
+            exceptionCatched = true;
         }
+
+        assertTrue("Expected UnleashException", exceptionCatched);
     }
 
     @Test
@@ -57,7 +64,6 @@ public class HttpToggleFetcherTest {
         FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
         assertTrue(featureX.isEnabled());
-
 
         verify(getRequestedFor(urlMatching("/features"))
                 .withHeader("Content-Type", matching("application/json")));
@@ -79,7 +85,6 @@ public class HttpToggleFetcherTest {
         } catch (UnleashException e) {
             assertTrue("Expected IllegalStateException", e.getCause() instanceof IllegalStateException);
             exceptionCatched = true;
-
         }
         assertTrue("Expected IllegalStateException", exceptionCatched);
 
@@ -100,12 +105,10 @@ public class HttpToggleFetcherTest {
         Response response = httpToggleFetcher.fetchToggles();
         assertEquals("Should return status NOT_CHANGED", response.getStatus(), Response.Status.NOT_CHANGED);
 
-
         verify(getRequestedFor(urlMatching("/features"))
                 .withHeader("Content-Type", matching("application/json")));
 
     }
-
 
     @Test
     public void shouldHandleErrors() throws URISyntaxException {
@@ -122,12 +125,10 @@ public class HttpToggleFetcherTest {
             Response response = httpToggleFetcher.fetchToggles();
             assertEquals("Should return status NOT_CHANGED", response.getStatus(), Response.Status.NOT_CHANGED);
 
-
             verify(getRequestedFor(urlMatching("/features"))
                     .withHeader("Content-Type", matching("application/json")));
         }
 
     }
 
-
-    }
+}
