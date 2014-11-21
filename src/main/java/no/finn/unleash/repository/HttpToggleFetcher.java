@@ -55,7 +55,7 @@ public final class HttpToggleFetcher implements ToggleFetcher {
         }
     }
 
-    private Response getToggleResponse(HttpURLConnection request) throws IOException, NullPointerException {
+    private Response getToggleResponse(HttpURLConnection request) throws IOException {
         etag = request.getHeaderField("ETag");
 
         try(BufferedReader reader = new BufferedReader(
