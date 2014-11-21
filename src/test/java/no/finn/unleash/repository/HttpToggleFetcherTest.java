@@ -73,12 +73,15 @@ public class HttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:"+wireMockRule.port()+ "/features");
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(uri);
+        boolean exceptionCatched = false;
         try {
             httpToggleFetcher.fetchToggles();
         } catch (UnleashException e) {
             assertTrue("Expected IllegalStateException", e.getCause() instanceof IllegalStateException);
+            exceptionCatched = true;
 
         }
+        assertTrue("Expected IllegalStateException", exceptionCatched);
 
         verify(getRequestedFor(urlMatching("/features"))
                 .withHeader("Content-Type", matching("application/json")));
