@@ -6,8 +6,8 @@ import no.finn.unleash.UnleashException;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -18,35 +18,24 @@ public class HttpToggleFetcherTest {
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(0);
 
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
     @Test
     public void uriIsNotAbsoulute() throws URISyntaxException {
         URI badUri = new URI("notAbsolute");
-        boolean exceptionCatched = false;
-        try {
-            new HttpToggleFetcher(badUri);
-            fail("Should give IllegalArgumentException");
-        } catch (UnleashException e) {
-            assertTrue("Expected IllegalArgumentException",e.getCause() instanceof IllegalArgumentException);
-            exceptionCatched = true;
-        }
-        assertTrue("Expected UnleashException", exceptionCatched);
+        exception.expectMessage("Invalid unleash repository uri [notAbsolute]");
+        exception.expect(UnleashException.class);
+        new HttpToggleFetcher(badUri);
     }
 
     @Test
     public void givenMalformedUrlShouldGiveException() throws URISyntaxException {
         String unknownProtocolUrl = "foo://bar";
         URI badUrl = new URI(unknownProtocolUrl);
-        boolean exceptionCatched = false;
-        try {
-            new HttpToggleFetcher(badUrl);
-            fail("Should give MalformedURLException");
-        } catch (UnleashException e) {
-            assertTrue("Expected MalformedURLException", e.getCause() instanceof MalformedURLException);
-            assertTrue("Exception message should contain URI, got:" + e.getMessage(), e.getMessage().contains(unknownProtocolUrl));
-            exceptionCatched = true;
-        }
-
-        assertTrue("Expected UnleashException", exceptionCatched);
+        exception.expectMessage("Invalid unleash repository uri [" + unknownProtocolUrl + "]");
+        exception.expect(UnleashException.class);
+        new HttpToggleFetcher(badUrl);
     }
 
     @Test
@@ -79,14 +68,9 @@ public class HttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:"+wireMockRule.port()+ "/features");
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(uri);
-        boolean exceptionCatched = false;
-        try {
-            httpToggleFetcher.fetchToggles();
-        } catch (UnleashException e) {
-            assertTrue("Expected IllegalStateException", e.getCause() instanceof IllegalStateException);
-            exceptionCatched = true;
-        }
-        assertTrue("Expected IllegalStateException", exceptionCatched);
+        exception.expect(UnleashException.class);
+        httpToggleFetcher.fetchToggles();
+
 
         verify(getRequestedFor(urlMatching("/features"))
                 .withHeader("Content-Type", matching("application/json")));
