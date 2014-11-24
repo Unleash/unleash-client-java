@@ -3,6 +3,8 @@ package no.finn.unleash.repository;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertNotNull;
@@ -29,7 +31,9 @@ public class ToggleBackupHandlerFileTest {
 
     @Test
     public void testWrite(){
-        ToggleCollection toggleCollection = new ToggleCollection(JsonToggleParser.fromJson("{\"features\": [{\"name\": \"writableFeature\",\"enabled\": true,\"strategy\": \"default\"}]}"));
+        String staticData = "{\"features\": [{\"name\": \"writableFeature\",\"enabled\": true,\"strategy\": \"default\"}]}";
+        Reader staticReader = new StringReader(staticData);
+        ToggleCollection toggleCollection = JsonToggleParser.fromJson(staticReader);
         String backupFile = System.getProperty("java.io.tmpdir") + File.separatorChar + "unleash-repo-test-write.json";
         ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(backupFile);
         toggleBackupHandlerFile.write(toggleCollection);

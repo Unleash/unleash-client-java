@@ -46,6 +46,8 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             }
         } catch (IOException e) {
             throw new UnleashException("Could not fetch toggles", e);
+        } catch (IllegalStateException e) {
+            throw new UnleashException(e.getMessage(), e);
         } finally {
             if(connection != null) {
                 connection.disconnect();
