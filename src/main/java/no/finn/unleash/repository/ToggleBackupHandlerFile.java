@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.util.Collections;
 import java.util.List;
+import com.google.gson.JsonParseException;
 
 public class ToggleBackupHandlerFile implements ToggleBackupHandler {
     private static final Logger LOG = LogManager.getLogger();
@@ -30,7 +31,7 @@ public class ToggleBackupHandlerFile implements ToggleBackupHandler {
         } catch (FileNotFoundException e) {
             LOG.warn(" Unleash could not find the backup-file '" + backupFile + "'. \n" +
                     "This is expected behavior the first time unleash runs in a new environment.");
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException | JsonParseException e) {
             LOG.error("Failed to read backup file:'{}'", backupFile, e);
         }
         List<FeatureToggle> emptyList = Collections.emptyList();
