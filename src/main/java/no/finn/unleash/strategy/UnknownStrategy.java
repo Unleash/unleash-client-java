@@ -3,11 +3,12 @@ package no.finn.unleash.strategy;
 import java.util.Map;
 
 public final class UnknownStrategy implements Strategy {
-    public static final String NAME = "unknown";
+
+    private static final String STRATEGY_NAME = "unknown";
 
     @Override
     public String getName() {
-        return NAME;
+        return STRATEGY_NAME;
     }
 
     @Override
