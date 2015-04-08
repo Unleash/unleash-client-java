@@ -6,5 +6,7 @@ notifications:
   hipchat:
     rooms:
       secure: OcnZTYXPm0YxnEyz0w/8/QsRQpdO0flYOpxae7VxhMxf28Uxai3d7whC7pHDDrKJ25iw4OaVWHpaua3wdU17oLlzpPK2fsNyrUekoJEYhoErYb4YhU2+3/glV3Gk9Zr5New3KMEm/NZ24MP8hrt6e4v38Npk0hYhJPsFh/8hhuk=
+  slack:
+    secure: TKZfAB5V7KEuCz/ruHowtsnuIMxCf0BSYbK1x3g2qiB+OFxEbIoy+7jp/ANAgmEepDEKdnil6qaiGwTJq13V2qMTWoLdzpvxWnRkbuzd/lWPXc6S/51733CncYsAQ+mW+KU2nZxkHvXNN4nHsskFHi9aDktMpgXc5krhFK2eZrI=
 after_success:
   - mvn clean cobertura:cobertura coveralls:report
