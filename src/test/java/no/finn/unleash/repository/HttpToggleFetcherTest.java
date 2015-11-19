@@ -77,6 +77,24 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
+    public void givenJsonWithoutFeatureField() throws Exception {
+        stubFor(get(urlEqualTo("/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{}")));
+
+        URI uri = new URI("http://localhost:"+wireMockRule.port()+ "/features");
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(uri);
+        exception.expect(UnleashException.class);
+        httpToggleFetcher.fetchToggles();
+
+        verify(getRequestedFor(urlMatching("/features"))
+                .withHeader("Content-Type", matching("application/json")));
+    }
+
+    @Test
     public void shouldHandleNotChanged() throws URISyntaxException {
         stubFor(get(urlEqualTo("/features"))
                 .withHeader("Accept", equalTo("application/json"))
