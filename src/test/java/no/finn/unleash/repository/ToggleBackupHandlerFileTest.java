@@ -1,11 +1,11 @@
 package no.finn.unleash.repository;
 
-import org.junit.Test;
-
 import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -18,6 +18,12 @@ public class ToggleBackupHandlerFileTest {
         ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(getClass().getResource("/unleash-repo.json").getFile());
         ToggleCollection toggleCollection = toggleBackupHandlerFile.read();
         assertNotNull("presentFeature should be present", toggleCollection.getToggle("presentFeature"));
+    }
+
+    @Test
+    public void testReadFileWithInvalidData() throws Exception {
+        ToggleBackupHandlerFile fileGivingNullFeature = new ToggleBackupHandlerFile(getClass().getResource("/unleash-repo-without-feature-field.json").getFile());
+        assertNotNull(fileGivingNullFeature.read());
     }
 
     @Test
