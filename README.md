@@ -26,10 +26,16 @@ if(unleash.isEnabled("AwesomeFeature")) {
 }
 ```
 
-I need a trueish default value in case the feature toggle is not defined, or the unleash-server is unavailable:
+Calling `unleash.isEnabled("AwesomeFeature")` is the equvivalent of calling `unleash.isEnabled("AwesomeFeature", false)`. Which means that it will return `false` if it cannot find the named toggle. 
+
+If you want it to default to true, you can pass `true` as the second argument:
 ```java
 unleash.isEnabled("AwesomeFeature", true)
 ```
+
+By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the result in `unleash-repo.json` which is located in the `java.io.tmpdir` directory. This means that if the unleash-server becomes unavailable, the unleash-client will still be able to toggle the features based on the values stored in `unleash-repo.json`. As a result of this, the second argument of `isEnabled` will be returned in two cases:
+* When `unleash-repo.json` does not exists
+* When the named feature toggle does not exist in `unleash-repo.json`
 
 ## Development
 
