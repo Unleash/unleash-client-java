@@ -44,4 +44,41 @@ public class FakeUnleashTest {
         assertThat(fakeUnleash.isEnabled("t1"), is(true));
         assertThat(fakeUnleash.isEnabled("t2"), is(false));
     }
+
+    @Test
+    public void should_be_disabled_even_when_true_is_default() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.disable("t1");
+
+        assertThat(fakeUnleash.isEnabled("t1", true), is(false));
+    }
+
+    @Test
+    public void should_be_disabled_on_disable_all_with_true_as_default() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.disableAll();
+
+        assertThat(fakeUnleash.isEnabled("t1", true), is(false));
+    }
+
+    @Test
+    public void should_be_able_to_reset_all_disables() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.disable("t1");
+        fakeUnleash.resetAll();
+        assertThat(fakeUnleash.isEnabled("t1", true), is(true));
+
+    }
+
+    @Test
+    public void should_be_able_to_reset_single_disable() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.disable("t1");
+        fakeUnleash.disable("t2");
+        fakeUnleash.reset("t1");
+
+        assertThat(fakeUnleash.isEnabled("t1", true), is(true));
+        assertThat(fakeUnleash.isEnabled("t2", true), is(false));
+
+    }
 }

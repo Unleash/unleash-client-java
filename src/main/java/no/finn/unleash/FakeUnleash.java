@@ -1,11 +1,12 @@
 package no.finn.unleash;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
-    private Set<String> enabledFeatures = new HashSet<>();
+    private boolean disableAll = false;
+    private Map<String, Boolean> features = new HashMap<>();
 
     @Override
     public boolean isEnabled(String toggleName) {
@@ -16,31 +17,46 @@ public final class FakeUnleash implements Unleash {
     public boolean isEnabled(String toggleName, boolean defaultSetting) {
         if(enableAll) {
             return true;
-        } else if(enabledFeatures.contains(toggleName)) {
-            return true;
+        } else if(disableAll) {
+            return false;
         } else {
-            return defaultSetting;
+            return features.getOrDefault(toggleName, defaultSetting);
         }
     }
 
     public void enableAll() {
+        disableAll = false;
         enableAll = true;
+        features.clear();
     }
 
     public void disableAll() {
-        enabledFeatures = new HashSet<>();
+        disableAll = true;
         enableAll = false;
+        features.clear();
+    }
+
+    public void resetAll() {
+        disableAll = false;
+        enableAll = false;
+        features.clear();
     }
 
     public void enable(String... features) {
         for(String name: features) {
-            enabledFeatures.add(name);
+            this.features.put(name, true);
         }
     }
 
     public void disable(String... features) {
         for(String name: features) {
-            enabledFeatures.remove(name);
+            this.features.put(name, false);
+        }
+    }
+
+    public void reset(String... features) {
+        for(String name: features) {
+            this.features.remove(name);
         }
     }
 }
