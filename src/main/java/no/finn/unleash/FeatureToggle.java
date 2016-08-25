@@ -1,18 +1,16 @@
 package no.finn.unleash;
 
-import java.util.Map;
+import java.util.List;
 
 public final class FeatureToggle {
     private final String name;
     private final boolean enabled;
-    private final String strategy;
-    private final Map<String, String> parameters;
+    private final List<ActivationStrategy> strategies;
 
-    public FeatureToggle(String name, boolean enabled, String strategy, Map<String, String> parameters) {
+    public FeatureToggle(String name, boolean enabled, List<ActivationStrategy> strategies) {
         this.name = name;
         this.enabled = enabled;
-        this.strategy = strategy;
-        this.parameters = parameters;
+        this.strategies = strategies;
     }
 
     public String getName() {
@@ -23,12 +21,8 @@ public final class FeatureToggle {
         return enabled;
     }
 
-    public String getStrategy() {
-        return strategy;
-    }
-
-    public Map<String, String> getParameters() {
-        return parameters;
+    public List<ActivationStrategy> getStrategies() {
+        return this.strategies;
     }
 
     @Override
@@ -36,8 +30,7 @@ public final class FeatureToggle {
         return "FeatureToggle{" +
                 "name='" + name + '\'' +
                 ", enabled=" + enabled +
-                ", strategy='" + strategy + '\'' +
-                ", parameters=" + parameters +
+                ", strategies='" + strategies + '\'' +
                 '}';
     }
 }
