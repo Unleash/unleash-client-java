@@ -12,14 +12,11 @@ public final class FeatureToggleRepository implements ToggleRepository {
 
     private static final ScheduledThreadPoolExecutor TIMER = new ScheduledThreadPoolExecutor(
             1,
-            new ThreadFactory() {
-                @Override
-                public Thread newThread(final Runnable r) {
-                    Thread thread = Executors.defaultThreadFactory().newThread(r);
-                    thread.setName("unleash-toggle-repository");
-                    thread.setDaemon(true);
-                    return thread;
-                }
+            r -> {
+                Thread thread = Executors.defaultThreadFactory().newThread(r);
+                thread.setName("unleash-toggle-repository");
+                thread.setDaemon(true);
+                return thread;
             });
 
     static {
@@ -45,18 +42,15 @@ public final class FeatureToggleRepository implements ToggleRepository {
 
     private ScheduledFuture startBackgroundPolling(long pollIntervalSeconds) {
         try {
-            return TIMER.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Response response = toggleFetcher.fetchToggles();
-                        if (response.getStatus() == Response.Status.CHANGED) {
-                            toggleCollection = response.getToggleCollection();
-                            toggleBackupHandler.write(response.getToggleCollection());
-                        }
-                    } catch (UnleashException e) {
-                        LOG.warn("Could not refresh feature toggles", e);
+            return TIMER.scheduleAtFixedRate(() -> {
+                try {
+                    Response response = toggleFetcher.fetchToggles();
+                    if (response.getStatus() == Response.Status.CHANGED) {
+                        toggleCollection = response.getToggleCollection();
+                        toggleBackupHandler.write(response.getToggleCollection());
                     }
+                } catch (UnleashException e) {
+                    LOG.warn("Could not refresh feature toggles", e);
                 }
             }, 0, pollIntervalSeconds, TimeUnit.SECONDS);
         } catch (RejectedExecutionException ex) {

@@ -5,6 +5,9 @@ import no.finn.unleash.strategy.Strategy;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
@@ -22,14 +25,14 @@ public class UnleashTest {
 
     @Test
     public void known_toogle_and_strategy_should_be_active() {
-        when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, "default", null));
+        when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, Arrays.asList(new ActivationStrategy("default", null))));
 
         assertThat(unleash.isEnabled("test"), is(true));
     }
 
     @Test
     public void unknown_strategy_should_be_considered_inactive() {
-        when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, "whoot_strat", null));
+        when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, Arrays.asList(new ActivationStrategy("whoot_strat", null))));
 
         assertThat(unleash.isEnabled("test"), is(false));
     }
@@ -49,7 +52,7 @@ public class UnleashTest {
 
         //register custom strategy
         unleash = new DefaultUnleash(toggleRepository, customStrategy);
-        when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, "custom", null));
+        when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, Arrays.asList(new ActivationStrategy("custom", null))));
 
         unleash.isEnabled("test");
 

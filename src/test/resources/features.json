@@ -2,22 +2,39 @@
     {
         "name": "featureX",
         "enabled": true,
-        "strategy": "default"
+        "strategies": [
+            {
+                "name": "default"
+            }
+        ]
     },
     {
         "name": "featureY",
         "enabled": false,
-        "strategy": "baz",
-        "parameters": {
-            "foo": "bar"
-        }
+        "strategies": [
+            {
+                "name": "baz",
+                "parameters": {
+                    "foo": "bar"
+                }
+            }
+        ]
+
     },
     {
         "name": "featureZ",
         "enabled": true,
-        "strategy": "baz",
-        "parameters": {
-            "foo": "rab"
-        }
+        "strategies": [
+            {
+                "name": "default"
+            },
+            {
+                "name": "hola",
+                "parameters": {
+                    "name": "val"
+                }
+            }
+        ]
+
     }
 ]}

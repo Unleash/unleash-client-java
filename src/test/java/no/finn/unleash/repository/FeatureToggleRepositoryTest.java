@@ -1,5 +1,6 @@
 package no.finn.unleash.repository;
 
+import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
 import org.junit.Test;
 
@@ -38,10 +39,10 @@ public class FeatureToggleRepositoryTest {
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
 
-        ToggleCollection toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", false, "custom", null));
+        ToggleCollection toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", false, new ArrayList<>()));
         when(toggleBackupHandler.read()).thenReturn(toggleCollection);
 
-        toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", true, "custom", null));
+        toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", true, new ArrayList<>()));
         Response response = new Response(Response.Status.CHANGED, toggleCollection);
         when(toggleFetcher.fetchToggles()).thenReturn(response);
 
