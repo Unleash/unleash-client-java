@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -46,8 +47,15 @@ public class ToggleBackupHandlerFileTest {
         toggleBackupHandlerFile = new ToggleBackupHandlerFile(backupFile);
         toggleCollection = toggleBackupHandlerFile.read();
         assertNotNull("writableFeature should be present", toggleCollection.getToggle("writableFeature"));
+    }
 
-
+    @Test
+    public void testReadOldFormatWithStrategies() {
+        ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(getClass().getResource("/unleash-repo-v0.json").getFile());
+        ToggleCollection toggleCollection = toggleBackupHandlerFile.read();
+        assertNotNull("presentFeature should be present", toggleCollection.getToggle("featureCustomStrategy"));
+        assertEquals("should have 1 strategy", toggleCollection.getToggle("featureCustomStrategy").getStrategies().size(), 1);
+        assertEquals(toggleCollection.getToggle("featureCustomStrategy").getStrategies().get(0).getParameters().get("customParameter"), "customValue");
     }
 
 }

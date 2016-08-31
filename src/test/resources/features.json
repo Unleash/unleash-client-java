@@ -1,4 +1,7 @@
-{"features": [
+
+{
+    "version": 1,
+    "features": [
     {
         "name": "featureX",
         "enabled": true,
