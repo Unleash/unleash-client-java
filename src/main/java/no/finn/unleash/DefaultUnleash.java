@@ -45,13 +45,10 @@ public final class DefaultUnleash implements Unleash {
             return false;
         }
 
-
-        for(ActivationStrategy activationStrategy : featureToggle.getStrategies()) {
-            if(getStrategy(activationStrategy.getName()).isEnabled(activationStrategy.getParameters())) {
-                return true;
-            }
-        }
-        return false;
+        return featureToggle.getStrategies().stream()
+                .filter(as -> getStrategy(as.getName()).isEnabled(as.getParameters()))
+                .findFirst()
+                .isPresent();
     }
 
     private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {

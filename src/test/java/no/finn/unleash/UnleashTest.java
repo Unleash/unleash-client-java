@@ -45,6 +45,13 @@ public class UnleashTest {
     }
 
     @Test
+    public void unknown_feature_should_use_default_setting() {
+        when(toggleRepository.getToggle("test")).thenReturn(null);
+
+        assertThat(unleash.isEnabled("test", true), is(true));
+    }
+
+    @Test
     public void should_register_custom_strategies() {
         //custom strategy
         Strategy customStrategy = mock(Strategy.class);
@@ -57,5 +64,26 @@ public class UnleashTest {
         unleash.isEnabled("test");
 
         verify(customStrategy, times(1)).isEnabled(anyMap());
+    }
+
+    @Test
+    public void should_support_multiple_strategies() {
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
+        ActivationStrategy activeStrategy = new ActivationStrategy("default", null);
+
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Arrays.asList(strategy1, activeStrategy));
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(unleash.isEnabled("test"), is(true));
+    }
+
+    @Test
+    public void inactive_feature_toggle() {
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
+        FeatureToggle featureToggle = new FeatureToggle("test", false, Arrays.asList(strategy1));
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(unleash.isEnabled("test"), is(false));
     }
 }
