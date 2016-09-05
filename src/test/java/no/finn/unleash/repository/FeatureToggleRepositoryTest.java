@@ -38,25 +38,26 @@ public class FeatureToggleRepositoryTest {
     @Test
     public void feature_toggles_should_be_updated() throws URISyntaxException, InterruptedException {
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
-        ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
 
+        //setup backupHandler
+        ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
         ToggleCollection toggleCollection = populatedToggleCollection(
                 new FeatureToggle("toggleFetcherCalled", false, Arrays.asList(new ActivationStrategy("custom", null))));
         when(toggleBackupHandler.read()).thenReturn(toggleCollection);
 
+        //setup fetcher
         toggleCollection = populatedToggleCollection(
                 new FeatureToggle("toggleFetcherCalled", true, Arrays.asList(new ActivationStrategy("custom", null))));
         Response response = new Response(Response.Status.CHANGED, toggleCollection);
         when(toggleFetcher.fetchToggles()).thenReturn(response);
 
+        //init
         ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 200L);
 
-        assertFalse(toggleRepository.getToggle("toggleFetcherCalled").isEnabled());
+        Thread.sleep(250L); //wait for background fetching
+
         verify(toggleBackupHandler, times(1)).read();
-
-        Thread.sleep(500L); //wait for background fetching
         verify(toggleFetcher, times(1)).fetchToggles();
-
         assertTrue(toggleRepository.getToggle("toggleFetcherCalled").isEnabled());
     }
 
