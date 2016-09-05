@@ -119,6 +119,7 @@
                 <configuration>
                     <format>${coberturaFormat}</format>
                     <maxmem>256m</maxmem>
+                    <check />
                 </configuration>
             </plugin>
         </plugins>
