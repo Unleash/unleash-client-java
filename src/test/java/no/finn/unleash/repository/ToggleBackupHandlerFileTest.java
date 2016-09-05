@@ -16,7 +16,7 @@ public class ToggleBackupHandlerFileTest {
 
     @Test
     public void test_read() {
-        ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(getClass().getResource("/unleash-repo.json").getFile());
+        ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(getClass().getResource("/unleash-repo-v0.json").getFile());
         ToggleCollection toggleCollection = toggleBackupHandlerFile.read();
         assertNotNull("presentFeature should be present", toggleCollection.getToggle("presentFeature"));
     }
