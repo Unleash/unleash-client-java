@@ -3,7 +3,6 @@ package no.finn.unleash.repository;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -39,13 +38,13 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void happy_path_test() throws URISyntaxException {
+    public void happy_path_test_version0() throws URISyntaxException {
         stubFor(get(urlEqualTo("/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBodyFile("features.json")));
+                        .withBodyFile("features-v0.json")));
 
         URI uri = new URI("http://localhost:"+wireMockRule.port()+ "/features");
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(uri);
@@ -57,6 +56,27 @@ public class HttpToggleFetcherTest {
         verify(getRequestedFor(urlMatching("/features"))
                 .withHeader("Content-Type", matching("application/json")));
     }
+
+    @Test
+    public void happy_path_test_version1() throws URISyntaxException {
+        stubFor(get(urlEqualTo("/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("features-v1.json")));
+
+        URI uri = new URI("http://localhost:"+wireMockRule.port()+ "/features");
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(uri);
+        Response response = httpToggleFetcher.fetchToggles();
+        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+
+        assertTrue(featureX.isEnabled());
+
+        verify(getRequestedFor(urlMatching("/features"))
+                .withHeader("Content-Type", matching("application/json")));
+    }
+
 
     @Test
     public void given_empty_body() throws URISyntaxException {

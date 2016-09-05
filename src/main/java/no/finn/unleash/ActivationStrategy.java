@@ -6,7 +6,7 @@ public final class ActivationStrategy {
     private final String name;
     private final Map<String, String> parameters;
 
-    ActivationStrategy(String name, Map<String, String> parameters) {
+    public ActivationStrategy(String name, Map<String, String> parameters) {
         this.name = name;
         this.parameters = parameters;
     }

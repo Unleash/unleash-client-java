@@ -1,66 +1,74 @@
 package no.finn.unleash.repository;
 
-import java.lang.reflect.Type;
-import java.util.Collection;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
 
+import java.lang.reflect.Type;
+import java.util.*;
+
 public class JsonToggleCollectionDeserializer implements JsonDeserializer<ToggleCollection> {
+    private static final Type PARAMS_TYPE = new TypeToken<Map<String, String>>() {}.getType();
+    private  static final Type FEATURE_COLLECTION_TYPE = new TypeToken<Collection<FeatureToggle>>() {}.getType();
 
     @Override
     public ToggleCollection deserialize(
-            JsonElement jsonElement,
+            JsonElement rootElement,
             Type type,
-            JsonDeserializationContext jsonDeserializationContext
-    ) throws JsonParseException {
-        if(!jsonElement.getAsJsonObject().has("features")) {
+            JsonDeserializationContext context) throws JsonParseException {
+
+        int version = getVersion(rootElement);
+
+        switch (version) {
+            case 0:
+                return deserializeVersion0(rootElement, context);
+            case 1:
+            default:
+                return deserializeVersion1(rootElement, context);
+        }
+    }
+
+    static ToggleCollection deserializeVersion0(JsonElement rootElement, JsonDeserializationContext context) {
+        if(!rootElement.getAsJsonObject().has("features")) {
             return null;
         }
 
-        JsonElement features = jsonElement.getAsJsonObject().get("features");
+        Collection<FeatureToggle> featureToggles = new ArrayList<>();
 
-        if(!jsonElement.getAsJsonObject().has("version")) {
-            //TODO; do not mutate, but return a new list of features instead!
-            fixFormat(jsonElement);
-        }
-
-        Type collectionType = new TypeToken<Collection<FeatureToggle>>() {}.getType();
-
-        Collection<FeatureToggle> featureToggles = jsonDeserializationContext.deserialize(features, collectionType);
-        ToggleCollection collection = new ToggleCollection(featureToggles);
-        return collection;
-    }
-
-    private void fixFormat(JsonElement jsonElement) {
-        if(!jsonElement.getAsJsonObject().has("features")) {
-            return;
-        }
-
-
-        JsonArray features = jsonElement.getAsJsonObject().getAsJsonArray("features");
-        jsonElement.getAsJsonObject().add("version", new JsonPrimitive(1));
+        JsonArray features = rootElement.getAsJsonObject().getAsJsonArray("features");
 
         features.forEach(elm -> {
-            JsonObject feature = elm.getAsJsonObject();
-            JsonObject strategy = new JsonObject();
+            JsonObject featureObj = elm.getAsJsonObject();
 
-            strategy.add("name", feature.get("strategy"));
-            strategy.add("parameters", feature.getAsJsonObject().get("parameters"));
+            String name = featureObj.get("name").getAsString();
+            boolean enabled = featureObj.get("enabled").getAsBoolean();
+            String strategyName = featureObj.get("strategy").getAsString();
+            Map<String, String> strategyParams = context.deserialize(featureObj.get("parameters"), PARAMS_TYPE);
 
-            JsonArray strategies = new JsonArray();
-            strategies.add(strategy);
-
-            feature.add("strategies", strategies);
-            feature.remove("strategy");
-            feature.remove("parameters");
+            ActivationStrategy strategy = new ActivationStrategy(strategyName, strategyParams);
+            featureToggles.add(new FeatureToggle(name, enabled, Arrays.asList(strategy)));
         });
 
+        return new ToggleCollection(featureToggles);
+    }
+
+    static ToggleCollection deserializeVersion1(JsonElement rootElement, JsonDeserializationContext context) {
+        if(!rootElement.getAsJsonObject().has("features")) {
+            return null;
+        }
+
+        JsonArray featureArray = rootElement.getAsJsonObject().getAsJsonArray("features");
+
+        Collection<FeatureToggle> featureTgggles =  context.deserialize(featureArray, FEATURE_COLLECTION_TYPE);
+        return new ToggleCollection(featureTgggles);
+    }
+
+    private int getVersion(JsonElement rootElement) {
+        if(!rootElement.getAsJsonObject().has("version")) {
+            return 0;
+        } else {
+            return rootElement.getAsJsonObject().get("version").getAsInt();
+        }
     }
 }
