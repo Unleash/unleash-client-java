@@ -32,6 +32,7 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
         }
 
         Type collectionType = new TypeToken<Collection<FeatureToggle>>() {}.getType();
+
         Collection<FeatureToggle> featureToggles = jsonDeserializationContext.deserialize(features, collectionType);
         ToggleCollection collection = new ToggleCollection(featureToggles);
         return collection;
@@ -41,6 +42,7 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
         if(!jsonElement.getAsJsonObject().has("features")) {
             return;
         }
+
 
         JsonArray features = jsonElement.getAsJsonObject().getAsJsonArray("features");
         jsonElement.getAsJsonObject().add("version", new JsonPrimitive(1));

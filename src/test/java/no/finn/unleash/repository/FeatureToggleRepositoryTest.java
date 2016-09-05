@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 public class FeatureToggleRepositoryTest {
 
     @Test
-    public void noBackupFileAndNoRepositoryAvailable() {
+    public void no_backup_file_and_no_repository_available_should_give_empty_repo() {
         ToggleFetcher toggleFetcher = new HttpToggleFetcher(URI.create("http://localhost:4242/features"));
         ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile();
         ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler);
@@ -35,7 +35,7 @@ public class FeatureToggleRepositoryTest {
     }
 
     @Test
-    public void featureTogglesShouldBeUpdated() throws URISyntaxException, InterruptedException {
+    public void feature_toggles_should_be_updated() throws URISyntaxException, InterruptedException {
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
 

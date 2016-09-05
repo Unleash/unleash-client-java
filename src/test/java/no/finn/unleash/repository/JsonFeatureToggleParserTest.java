@@ -44,7 +44,7 @@ public class JsonFeatureToggleParserTest {
 
 
     @Test
-    public void shouldThrow() throws IOException {
+    public void should_throw() throws IOException {
         Reader content = getFileReader("/empty.json");
         try {
             JsonToggleParser.fromJson(content);
