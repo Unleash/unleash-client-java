@@ -49,12 +49,12 @@ public class FeatureToggleRepositoryTest {
         Response response = new Response(Response.Status.CHANGED, toggleCollection);
         when(toggleFetcher.fetchToggles()).thenReturn(response);
 
-        ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 100L);
+        ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 1L);
 
         assertFalse(toggleRepository.getToggle("toggleFetcherCalled").isEnabled());
         verify(toggleBackupHandler, times(1)).read();
 
-        Thread.sleep(800L); //wait for background fetching
+        Thread.sleep(500L); //wait for background fetching
         verify(toggleFetcher, times(1)).fetchToggles();
 
         assertTrue(toggleRepository.getToggle("toggleFetcherCalled").isEnabled());
