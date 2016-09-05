@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
@@ -39,16 +40,18 @@ public class FeatureToggleRepositoryTest {
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
 
-        ToggleCollection toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", false, new ArrayList<>()));
+        ToggleCollection toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", false, Arrays.asList(new ActivationStrategy("custom", null))));
         when(toggleBackupHandler.read()).thenReturn(toggleCollection);
 
-        toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", true, new ArrayList<>()));
+        toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", true, Arrays.asList(new ActivationStrategy("custom", null))));
         Response response = new Response(Response.Status.CHANGED, toggleCollection);
         when(toggleFetcher.fetchToggles()).thenReturn(response);
 
         ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 100L);
+
         assertFalse(toggleRepository.getToggle("toggleFetcherCalled").isEnabled());
         verify(toggleBackupHandler, times(1)).read();
+
         Thread.sleep(800L); //wait for background fetching
         verify(toggleFetcher, times(1)).fetchToggles();
 
