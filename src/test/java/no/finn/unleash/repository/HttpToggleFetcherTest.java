@@ -3,7 +3,6 @@ package no.finn.unleash.repository;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -22,7 +21,7 @@ public class HttpToggleFetcherTest {
     public ExpectedException exception = ExpectedException.none();
 
     @Test
-    public void uriIsNotAbsoulute() throws URISyntaxException {
+    public void uri_is_not_absoulute() throws URISyntaxException {
         URI badUri = new URI("notAbsolute");
         exception.expectMessage("Invalid unleash repository uri [notAbsolute]");
         exception.expect(UnleashException.class);
@@ -30,7 +29,7 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void givenMalformedUrlShouldGiveException() throws URISyntaxException {
+    public void given_malformed_url_should_give_exception() throws URISyntaxException {
         String unknownProtocolUrl = "foo://bar";
         URI badUrl = new URI(unknownProtocolUrl);
         exception.expectMessage("Invalid unleash repository uri [" + unknownProtocolUrl + "]");
@@ -39,13 +38,13 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void happyPathTest() throws URISyntaxException {
+    public void happy_path_test_version0() throws URISyntaxException {
         stubFor(get(urlEqualTo("/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBodyFile("features.json")));
+                        .withBodyFile("features-v0.json")));
 
         URI uri = new URI("http://localhost:"+wireMockRule.port()+ "/features");
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(uri);
@@ -59,7 +58,28 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void givenEmptyBody() throws URISyntaxException {
+    public void happy_path_test_version1() throws URISyntaxException {
+        stubFor(get(urlEqualTo("/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("features-v1.json")));
+
+        URI uri = new URI("http://localhost:"+wireMockRule.port()+ "/features");
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(uri);
+        Response response = httpToggleFetcher.fetchToggles();
+        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+
+        assertTrue(featureX.isEnabled());
+
+        verify(getRequestedFor(urlMatching("/features"))
+                .withHeader("Content-Type", matching("application/json")));
+    }
+
+
+    @Test
+    public void given_empty_body() throws URISyntaxException {
         stubFor(get(urlEqualTo("/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
@@ -77,7 +97,7 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void givenJsonWithoutFeatureField() throws Exception {
+    public void given_json_without_feature_field() throws Exception {
         stubFor(get(urlEqualTo("/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
@@ -95,7 +115,7 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void shouldHandleNotChanged() throws URISyntaxException {
+    public void should_handle_not_changed() throws URISyntaxException {
         stubFor(get(urlEqualTo("/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
@@ -113,7 +133,7 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void shouldHandleErrors() throws URISyntaxException {
+    public void should_handle_errors() throws URISyntaxException {
         int httpCodes[] = {400,401,403,404,500,503};
         for(int httpCode:httpCodes) {
             stubFor(get(urlEqualTo("/features"))

@@ -17,7 +17,9 @@ final class JsonToggleParser {
 
 
     public static ToggleCollection fromJson(Reader reader) throws IllegalStateException {
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(ToggleCollection.class, new JsonToggleCollectionDeserializer())
+                .create();
         ToggleCollection gsonCollection = gson.fromJson(reader, ToggleCollection.class);
         if(gsonCollection == null || gsonCollection.getFeatures() == null) {
             throw new IllegalStateException("Could not extract toggles from json");

@@ -41,10 +41,14 @@ public final class DefaultUnleash implements Unleash {
 
         if (featureToggle == null) {
             return defaultSetting;
+        } else if(!featureToggle.isEnabled()) {
+            return false;
         }
 
-        Strategy strategy = getStrategy(featureToggle.getStrategy());
-        return featureToggle.isEnabled() && strategy.isEnabled(featureToggle.getParameters());
+        return featureToggle.getStrategies().stream()
+                .filter(as -> getStrategy(as.getName()).isEnabled(as.getParameters()))
+                .findFirst()
+                .isPresent();
     }
 
     private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {

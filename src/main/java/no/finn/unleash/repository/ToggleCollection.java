@@ -9,6 +9,7 @@ import no.finn.unleash.FeatureToggle;
 
 final class ToggleCollection {
     private final Collection<FeatureToggle> features;
+    private final int version = 1;
     private final transient Map<String, FeatureToggle> cache;
 
     ToggleCollection(final Collection<FeatureToggle> features) {

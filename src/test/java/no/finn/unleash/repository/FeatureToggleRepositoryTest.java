@@ -1,11 +1,13 @@
 package no.finn.unleash.repository;
 
+import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
 import org.junit.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
@@ -17,7 +19,7 @@ import static org.mockito.Mockito.*;
 public class FeatureToggleRepositoryTest {
 
     @Test
-    public void noBackupFileAndNoRepositoryAvailable() {
+    public void no_backup_file_and_no_repository_available_should_give_empty_repo() {
         ToggleFetcher toggleFetcher = new HttpToggleFetcher(URI.create("http://localhost:4242/features"));
         ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile();
         ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler);
@@ -34,23 +36,28 @@ public class FeatureToggleRepositoryTest {
     }
 
     @Test
-    public void featureTogglesShouldBeUpdated() throws URISyntaxException, InterruptedException {
+    public void feature_toggles_should_be_updated() throws URISyntaxException, InterruptedException {
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
-        ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
 
-        ToggleCollection toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", false, "custom", null));
+        //setup backupHandler
+        ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+        ToggleCollection toggleCollection = populatedToggleCollection(
+                new FeatureToggle("toggleFetcherCalled", false, Arrays.asList(new ActivationStrategy("custom", null))));
         when(toggleBackupHandler.read()).thenReturn(toggleCollection);
 
-        toggleCollection = populatedToggleCollection(new FeatureToggle("toggleFetcherCalled", true, "custom", null));
+        //setup fetcher
+        toggleCollection = populatedToggleCollection(
+                new FeatureToggle("toggleFetcherCalled", true, Arrays.asList(new ActivationStrategy("custom", null))));
         Response response = new Response(Response.Status.CHANGED, toggleCollection);
         when(toggleFetcher.fetchToggles()).thenReturn(response);
 
-        ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 100L);
-        assertFalse(toggleRepository.getToggle("toggleFetcherCalled").isEnabled());
-        verify(toggleBackupHandler, times(1)).read();
-        Thread.sleep(500L); //wait for background fetching
-        verify(toggleFetcher, times(1)).fetchToggles();
+        //init
+        ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 200L);
 
+        Thread.sleep(250L); //wait for background fetching
+
+        verify(toggleBackupHandler, times(1)).read();
+        verify(toggleFetcher, times(1)).fetchToggles();
         assertTrue(toggleRepository.getToggle("toggleFetcherCalled").isEnabled());
     }
 
