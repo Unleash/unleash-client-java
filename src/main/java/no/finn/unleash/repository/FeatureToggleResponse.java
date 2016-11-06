@@ -5,18 +5,18 @@ import no.finn.unleash.FeatureToggle;
 import java.util.Collections;
 import java.util.List;
 
-final class Response {
+public final class FeatureToggleResponse {
     enum Status {NOT_CHANGED, CHANGED}
 
     private final Status status;
     private final ToggleCollection toggleCollection;
 
-    public Response(Status status, ToggleCollection toggleCollection) {
+    public FeatureToggleResponse(Status status, ToggleCollection toggleCollection) {
         this.status = status;
         this.toggleCollection = toggleCollection;
     }
 
-    public Response(Status status) {
+    public FeatureToggleResponse(Status status) {
         this.status = status;
         List<FeatureToggle> emptyList = Collections.emptyList();
         this.toggleCollection = new ToggleCollection(emptyList);

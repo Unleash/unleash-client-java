@@ -5,28 +5,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import no.finn.unleash.UnleashException;
+import no.finn.unleash.util.UnleashConfig;
 
 public final class HttpToggleFetcher implements ToggleFetcher {
     public static final int CONNECT_TIMEOUT = 10000;
     private String etag = "";
 
     private final URL toggleUrl;
+    private UnleashConfig unleashConfig;
 
-    public HttpToggleFetcher(URI repo) {
-        try {
-            toggleUrl = repo.toURL();
-        } catch (MalformedURLException|IllegalArgumentException ex) {
-            throw new UnleashException("Invalid unleash repository uri [" + repo.toString() + "]", ex);
-        }
+    public HttpToggleFetcher(UnleashConfig unleashConfig) {
+        this.unleashConfig = unleashConfig;
+        this.toggleUrl = unleashConfig.getUnleashURLs().getFetchTogglesURL();
     }
 
     @Override
-    public Response fetchToggles() throws UnleashException {
+    public FeatureToggleResponse fetchToggles() throws UnleashException {
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) toggleUrl.openConnection();
@@ -34,6 +31,9 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             connection.setReadTimeout(CONNECT_TIMEOUT);
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("UNLEASH-APPNAME", this.unleashConfig.getAppName());
+            connection.setRequestProperty("UNLEASH-INSTANCEID", this.unleashConfig.getInstanceId());
+
             connection.setRequestProperty("If-None-Match", etag);
             connection.setUseCaches(true);
             connection.connect();
@@ -42,7 +42,7 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             if(responseCode < 300) {
                 return getToggleResponse(connection);
             } else {
-                return new Response(Response.Status.NOT_CHANGED);
+                return new FeatureToggleResponse(FeatureToggleResponse.Status.NOT_CHANGED);
             }
         } catch (IOException e) {
             throw new UnleashException("Could not fetch toggles", e);
@@ -55,14 +55,14 @@ public final class HttpToggleFetcher implements ToggleFetcher {
         }
     }
 
-    private Response getToggleResponse(HttpURLConnection request) throws IOException {
+    private FeatureToggleResponse getToggleResponse(HttpURLConnection request) throws IOException {
         etag = request.getHeaderField("ETag");
 
         try(BufferedReader reader = new BufferedReader(
                 new InputStreamReader((InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
             ToggleCollection toggles = JsonToggleParser.fromJson(reader);
-            return new Response(Response.Status.CHANGED, toggles);
+            return new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggles);
         }
     }
 }
