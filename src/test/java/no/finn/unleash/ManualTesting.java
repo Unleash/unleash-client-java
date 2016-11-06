@@ -4,15 +4,21 @@ import java.net.URI;
 import java.util.Random;
 
 import no.finn.unleash.repository.*;
+import no.finn.unleash.util.UnleashConfig;
 
 public class ManualTesting {
     public static void main(String[] args) throws Exception {
-        ToggleFetcher toggleFetcher = new HttpToggleFetcher(URI.create("http://localhost:4242/features"));
-        ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile();
-        ToggleRepository repository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 1);
-        Unleash unleash = new DefaultUnleash(repository);
+        UnleashConfig unleashConfig = new UnleashConfig.Builder()
+                .appName("java-test")
+                .instanceId("instance x")
+                .unleashAPI("http://localhost:4242")
+                .fetchTogglesInterval(1)
+                .sendMetricsInterval(10)
+                .build();
 
-        for(int i=0;i<100;i++) {
+        Unleash unleash = new DefaultUnleash(unleashConfig);
+
+        for(int i=0;i<10;i++) {
             (new Thread(new UnleashThread(unleash, "thread-"+i, 100))).start();
         }
     }

@@ -11,7 +11,14 @@ Spring or Guice to manage this.
 
 You create a new instance with the following command:
 ```java
+
+UnleashConfig unleashConfig = new UnleashConfig.Builder()
+            .appName("java-test")
+            .instanceId("instance x")
+            .unleashAPI("http://unleash.herokuapp.com")
+            .build();
 URI unleashServer = URI.create("http://unleash.herokuapp.com/features")
+
 Unleash unleash = new DefaultUnleash(unleashServer);
 ```
 
