@@ -20,7 +20,7 @@
 
     <name>no.finn.unleash:unleash-client-java</name>
     <description>A client library for Unleash</description>
-    <url>http://github.com/finn-no/unleash-client-java</url>
+    <url>http://github.com/Unleash/unleash-client-java</url>
     <inceptionYear>2014</inceptionYear>
 
     <licenses>
@@ -32,9 +32,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/finn-no/unleash-client-java</url>
-        <connection>scm:git:git@github.com:finn-no/unleash-client-java.git</connection>
-        <developerConnection>scm:git:git@github.com:finn-no/unleash-client-java.git</developerConnection>
+        <url>https://github.com/Unleash/unleash-client-java</url>
+        <connection>scm:git:git@github.com:Unleash/unleash-client-java.git</connection>
+        <developerConnection>scm:git:git@github.com:Unleash/unleash-client-java.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
