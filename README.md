@@ -17,7 +17,6 @@ UnleashConfig unleashConfig = new UnleashConfig.Builder()
             .instanceId("instance x")
             .unleashAPI("http://unleash.herokuapp.com")
             .build();
-URI unleashServer = URI.create("http://unleash.herokuapp.com/features")
 
 Unleash unleash = new DefaultUnleash(unleashServer);
 ```
