@@ -12,13 +12,13 @@ Spring or Guice to manage this.
 You create a new instance with the following command:
 ```java
 
-UnleashConfig unleashConfig = new UnleashConfig.Builder()
+UnleashConfig config = UnleashConfig.builder()
             .appName("java-test")
             .instanceId("instance x")
             .unleashAPI("http://unleash.herokuapp.com")
             .build();
 
-Unleash unleash = new DefaultUnleash(unleashServer);
+Unleash unleash = new DefaultUnleash(config);
 ```
 
 ## Awesome feature toggle API
