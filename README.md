@@ -1,7 +1,7 @@
 # The Unleash Client 4 Java
 
 [![Build Status](https://travis-ci.org/Unleash/unleash-client-java.svg?branch=master)](https://travis-ci.org/Unleash/unleash-client-java)
-[![Coverage Status](https://coveralls.io/repos/Unleash/unleash-client-java/badge.png?branch=master)](https://coveralls.io/r/Unleash/unleash-client-java?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/Unleash/unleash-client-java/badge.svg?branch=master)](https://coveralls.io/github/Unleash/unleash-client-java?branch=master)
 
 ## Create a new a Unleash instance
 
