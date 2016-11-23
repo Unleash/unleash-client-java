@@ -46,18 +46,22 @@ public class UnleashMetricsSender {
     }
 
     public void registerClient(ClientRegistration registration) {
-        try {
-            post(clientRegistrationURL, registration);
-        } catch(UnleashException ex) {
-            LOG.warn("failed to register client", ex);
+        if(!unleashConfig.isDisableMetrics()) {
+            try {
+                post(clientRegistrationURL, registration);
+            } catch(UnleashException ex) {
+                LOG.warn("failed to register client", ex);
+            }
         }
     }
 
     public void sendMetrics(ClientMetrics metrics) {
-        try {
-            post(clientMetricsURL, metrics);
-        } catch(UnleashException ex) {
-            LOG.warn("failed to send metrics", ex);
+        if(!unleashConfig.isDisableMetrics()) {
+            try {
+                post(clientMetricsURL, metrics);
+            } catch(UnleashException ex) {
+                LOG.warn("failed to send metrics", ex);
+            }
         }
     }
 

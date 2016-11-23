@@ -9,13 +9,15 @@ public class UnleashConfig {
     private final String instanceId;
     private final long fetchTogglesInterval;
     private final long sendMetricsInterval;
+    private final boolean disableMetrics;
 
     public UnleashConfig(
             URI unleashAPI,
             String appName,
             String instanceId,
             long fetchTogglesInterval,
-            long sendMetricsInterval) {
+            long sendMetricsInterval,
+            boolean disableMetrics) {
 
         if(appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -31,6 +33,7 @@ public class UnleashConfig {
         this.instanceId = instanceId;
         this.fetchTogglesInterval = fetchTogglesInterval;
         this.sendMetricsInterval = sendMetricsInterval;
+        this.disableMetrics = disableMetrics;
     }
 
     public URI getUnleashAPI() {
@@ -61,12 +64,17 @@ public class UnleashConfig {
         return new Builder();
     }
 
+    public boolean isDisableMetrics() {
+        return disableMetrics;
+    }
+
     public static class Builder {
         private URI unleashAPI;
         private String appName;
         private String instanceId = "generated-"+Math.round(Math.random() * 1000000);
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
+        private boolean disableMetrics = false;
 
 
         public Builder unleashAPI(URI unleashAPI) {
@@ -99,8 +107,20 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder disableMetrics() {
+            this.disableMetrics = true;
+            return this;
+        }
+
+
         public UnleashConfig build() {
-            return new UnleashConfig(unleashAPI, appName, instanceId, fetchTogglesInterval, sendMetricsInterval);
+            return new UnleashConfig(
+                    unleashAPI,
+                    appName,
+                    instanceId,
+                    fetchTogglesInterval,
+                    sendMetricsInterval,
+                    disableMetrics);
         }
     }
 }
