@@ -1,16 +1,34 @@
 package no.finn.unleash;
 
-import java.net.URI;
+import java.util.Map;
 import java.util.Random;
 
-import no.finn.unleash.repository.*;
+import no.finn.unleash.strategy.Strategy;
+import no.finn.unleash.util.UnleashConfig;
 
 public class ManualTesting {
     public static void main(String[] args) throws Exception {
-        ToggleFetcher toggleFetcher = new HttpToggleFetcher(URI.create("http://localhost:4242/features"));
-        ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile();
-        ToggleRepository repository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 1);
-        Unleash unleash = new DefaultUnleash(repository);
+        Strategy strategy = new Strategy() {
+            @Override
+            public String getName() {
+                return "ActiveForUserWithId";
+            }
+
+            @Override
+            public boolean isEnabled(Map<String, String> parameters) {
+                System.out.println("parameters = " + parameters);
+                return true;
+            }
+        };
+        UnleashConfig unleashConfig = new UnleashConfig.Builder()
+                .appName("java-test")
+                .instanceId("instance y")
+                .unleashAPI("https://unleash-new-ui.herokuapp.com/api/")
+                .fetchTogglesInterval(1)
+                .sendMetricsInterval(10)
+                .build();
+
+        Unleash unleash = new DefaultUnleash(unleashConfig, strategy);
 
         for(int i=0;i<100;i++) {
             (new Thread(new UnleashThread(unleash, "thread-"+i, 100))).start();
@@ -34,10 +52,10 @@ public class ManualTesting {
             while(currentRound < maxRounds) {
                 currentRound++;
                 long startTime = System.nanoTime();
-                boolean enabled = unleash.isEnabled("featureX");
+                boolean enabled = unleash.isEnabled("Demo");
                 long timeUsed = System.nanoTime() - startTime;
 
-                System.out.println(name + "\t" +"featureX" +":"  + enabled + "\t " + timeUsed + "ns");
+                System.out.println(name + "\t" +"Demo" +":"  + enabled + "\t " + timeUsed + "ns");
 
                 try {
                     //Wait 1 to 10ms before next round

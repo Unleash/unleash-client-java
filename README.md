@@ -11,8 +11,14 @@ Spring or Guice to manage this.
 
 You create a new instance with the following command:
 ```java
-URI unleashServer = URI.create("http://unleash.herokuapp.com/features")
-Unleash unleash = new DefaultUnleash(unleashServer);
+
+UnleashConfig config = UnleashConfig.builder()
+            .appName("java-test")
+            .instanceId("instance x")
+            .unleashAPI("http://unleash.herokuapp.com")
+            .build();
+
+Unleash unleash = new DefaultUnleash(config);
 ```
 
 ## Awesome feature toggle API

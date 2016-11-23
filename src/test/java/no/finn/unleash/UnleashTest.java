@@ -2,9 +2,11 @@ package no.finn.unleash;
 
 import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.Strategy;
+import no.finn.unleash.util.UnleashConfig;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -20,7 +22,11 @@ public class UnleashTest {
     @Before
     public void setup() {
         toggleRepository = mock(ToggleRepository.class);
-        unleash = new DefaultUnleash(toggleRepository);
+        UnleashConfig config = new UnleashConfig.Builder()
+                .appName("test")
+                .unleashAPI("http://localhost:4242")
+                .build();
+        unleash = new DefaultUnleash(config, toggleRepository);
     }
 
     @Test
@@ -58,7 +64,11 @@ public class UnleashTest {
         when(customStrategy.getName()).thenReturn("custom");
 
         //register custom strategy
-        unleash = new DefaultUnleash(toggleRepository, customStrategy);
+        UnleashConfig config = new UnleashConfig.Builder()
+                .appName("test")
+                .unleashAPI("http://localhost:4242")
+                .build();
+        unleash = new DefaultUnleash(config, toggleRepository, customStrategy);
         when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, Arrays.asList(new ActivationStrategy("custom", null))));
 
         unleash.isEnabled("test");

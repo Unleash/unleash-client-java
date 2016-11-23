@@ -2,9 +2,11 @@ package no.finn.unleash.repository;
 
 import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
+import no.finn.unleash.util.UnleashConfig;
+import no.finn.unleash.util.UnleashScheduledExecutor;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,17 +22,28 @@ public class FeatureToggleRepositoryTest {
 
     @Test
     public void no_backup_file_and_no_repository_available_should_give_empty_repo() {
-        ToggleFetcher toggleFetcher = new HttpToggleFetcher(URI.create("http://localhost:4242/features"));
+        UnleashConfig config = UnleashConfig.builder()
+                .appName("test")
+                .unleashAPI("http://localhost:4242/").build();
+        ToggleFetcher toggleFetcher = new HttpToggleFetcher(config);
         ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile();
-        ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler);
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ToggleRepository toggleRepository = new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
         assertNull("should be null", toggleRepository.getToggle("unknownFeature"));
     }
 
     @Test
     public void backup_toggles_should_be_loaded_at_startup() {
+        UnleashConfig config = UnleashConfig.builder()
+                .appName("test")
+                .unleashAPI("http://localhost:4242/")
+                .fetchTogglesInterval(Long.MAX_VALUE)
+                .build();
+
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
-        new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, Long.MAX_VALUE);
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
 
         verify(toggleBackupHandler, times(1)).read();
     }
@@ -48,13 +61,26 @@ public class FeatureToggleRepositoryTest {
         //setup fetcher
         toggleCollection = populatedToggleCollection(
                 new FeatureToggle("toggleFetcherCalled", true, Arrays.asList(new ActivationStrategy("custom", null))));
-        Response response = new Response(Response.Status.CHANGED, toggleCollection);
+        FeatureToggleResponse response = new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggleCollection);
         when(toggleFetcher.fetchToggles()).thenReturn(response);
 
         //init
-        ToggleRepository toggleRepository = new FeatureToggleRepository(toggleFetcher, toggleBackupHandler, 200L);
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
 
-        Thread.sleep(250L); //wait for background fetching
+
+        UnleashConfig config = new UnleashConfig.Builder()
+                .appName("test")
+                .unleashAPI("http://localhost:4242")
+                .fetchTogglesInterval(200l)
+                .build();
+
+        ToggleRepository toggleRepository = new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+
+        //run the toggle fetcher callback
+        verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
+        verify(toggleFetcher, times(0)).fetchToggles();
+        runnableArgumentCaptor.getValue().run();
 
         verify(toggleBackupHandler, times(1)).read();
         verify(toggleFetcher, times(1)).fetchToggles();

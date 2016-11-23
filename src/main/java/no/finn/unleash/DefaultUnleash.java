@@ -1,8 +1,10 @@
 package no.finn.unleash;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import no.finn.unleash.metric.UnleashMetricService;
+import no.finn.unleash.metric.UnleashMetricServiceImpl;
 import no.finn.unleash.repository.FeatureToggleRepository;
 import no.finn.unleash.repository.ToggleBackupHandlerFile;
 import no.finn.unleash.repository.HttpToggleFetcher;
@@ -10,24 +12,37 @@ import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.DefaultStrategy;
 import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.strategy.UnknownStrategy;
+import no.finn.unleash.util.UnleashConfig;
+import no.finn.unleash.util.UnleashScheduledExecutor;
+import no.finn.unleash.util.UnleashScheduledExecutorImpl;
 
 public final class DefaultUnleash implements Unleash {
     private static final DefaultStrategy DEFAULT_STRATEGY = new DefaultStrategy();
     private static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
+    private static final UnleashScheduledExecutor unleashScheduledExecutor = new UnleashScheduledExecutorImpl();
 
+    private final UnleashMetricService metricService;
     private final ToggleRepository toggleRepository;
     private final Map<String, Strategy> strategyMap;
 
-    public DefaultUnleash(URI unleashServer, Strategy... strategies) {
-        this(new FeatureToggleRepository(
-                        new HttpToggleFetcher(unleashServer),
-                        new ToggleBackupHandlerFile()),
-                strategies);
+
+    private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
+        return new FeatureToggleRepository(
+                unleashConfig,
+                unleashScheduledExecutor,
+                new HttpToggleFetcher(unleashConfig),
+                new ToggleBackupHandlerFile());
     }
 
-    public DefaultUnleash(ToggleRepository toggleRepository, Strategy... strategies) {
+    public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {
+        this(unleashConfig, defaultToggleRepository(unleashConfig), strategies);
+    }
+
+    public DefaultUnleash(UnleashConfig unleashConfig, ToggleRepository toggleRepository, Strategy... strategies) {
         this.toggleRepository = toggleRepository;
         this.strategyMap = buildStrategyMap(strategies);
+        this.metricService = new UnleashMetricServiceImpl(unleashConfig, unleashScheduledExecutor);
+        metricService.register(strategyMap.keySet());
     }
 
     @Override
@@ -37,18 +52,22 @@ public final class DefaultUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
+        boolean enabled = false;
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
 
         if (featureToggle == null) {
-            return defaultSetting;
+            enabled = defaultSetting;
         } else if(!featureToggle.isEnabled()) {
-            return false;
+            enabled = false;
+        } else {
+            enabled = featureToggle.getStrategies().stream()
+                    .filter(as -> getStrategy(as.getName()).isEnabled(as.getParameters()))
+                    .findFirst()
+                    .isPresent();
         }
 
-        return featureToggle.getStrategies().stream()
-                .filter(as -> getStrategy(as.getName()).isEnabled(as.getParameters()))
-                .findFirst()
-                .isPresent();
+        metricService.count(toggleName, enabled);
+        return enabled;
     }
 
     private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {
