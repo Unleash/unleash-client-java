@@ -31,7 +31,7 @@ public final class DefaultUnleash implements Unleash {
                 unleashConfig,
                 unleashScheduledExecutor,
                 new HttpToggleFetcher(unleashConfig),
-                new ToggleBackupHandlerFile());
+                new ToggleBackupHandlerFile(unleashConfig));
     }
 
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {

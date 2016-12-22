@@ -26,7 +26,7 @@ public class FeatureToggleRepositoryTest {
                 .appName("test")
                 .unleashAPI("http://localhost:4242/").build();
         ToggleFetcher toggleFetcher = new HttpToggleFetcher(config);
-        ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile();
+        ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile(config);
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         ToggleRepository toggleRepository = new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
         assertNull("should be null", toggleRepository.getToggle("unknownFeature"));

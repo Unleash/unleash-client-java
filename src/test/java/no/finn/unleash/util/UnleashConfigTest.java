@@ -37,4 +37,26 @@ public class UnleashConfigTest {
         assertThat(config.getUnleashAPI(), is(URI.create("http://unleash.org")));
     }
 
+    @Test
+    public void should_generate_backupfile() {
+        UnleashConfig config = UnleashConfig.builder()
+                .appName("my-app")
+                .unleashAPI("http://unleash.org")
+                .build();
+
+        assertThat(config.getAppName(), is("my-app"));
+        assertThat(config.getBackupFile(), is(System.getProperty("java.io.tmpdir") + "/unleash-my-app-repo.json"));
+    }
+
+    @Test
+    public void should_use_provided_backupfile() {
+        UnleashConfig config = UnleashConfig.builder()
+                .appName("my-app")
+                .backupFile("/test/unleash-backup.json")
+                .unleashAPI("http://unleash.org")
+                .build();
+
+        assertThat(config.getAppName(), is("my-app"));
+        assertThat(config.getBackupFile(), is("/test/unleash-backup.json"));
+    }
 }

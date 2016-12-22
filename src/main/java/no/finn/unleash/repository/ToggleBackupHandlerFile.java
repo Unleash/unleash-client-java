@@ -1,6 +1,7 @@
 package no.finn.unleash.repository;
 
 import no.finn.unleash.FeatureToggle;
+import no.finn.unleash.util.UnleashConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,14 +14,9 @@ public class ToggleBackupHandlerFile implements ToggleBackupHandler {
     private static final Logger LOG = LogManager.getLogger();
     private final String backupFile;
 
-    public ToggleBackupHandlerFile(){
-        this(System.getProperty("java.io.tmpdir") + File.separatorChar + "unleash-repo.json");
+    public ToggleBackupHandlerFile(UnleashConfig config){
+        this.backupFile = config.getBackupFile();
     }
-
-    public ToggleBackupHandlerFile(String backupFile){
-        this.backupFile = backupFile;
-    }
-
 
     @Override
     public ToggleCollection read() {
