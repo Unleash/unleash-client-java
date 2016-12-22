@@ -1,5 +1,6 @@
 package no.finn.unleash.util;
 
+import java.io.File;
 import java.net.URI;
 
 public class UnleashConfig {
@@ -7,6 +8,7 @@ public class UnleashConfig {
     private final UnleashURLs unleashURLs;
     private final String appName;
     private final String instanceId;
+    private final String backupFile;
     private final long fetchTogglesInterval;
     private final long sendMetricsInterval;
     private final boolean disableMetrics;
@@ -15,6 +17,7 @@ public class UnleashConfig {
             URI unleashAPI,
             String appName,
             String instanceId,
+            String backupFile,
             long fetchTogglesInterval,
             long sendMetricsInterval,
             boolean disableMetrics) {
@@ -31,6 +34,7 @@ public class UnleashConfig {
         this.unleashURLs = new UnleashURLs(unleashAPI);
         this.appName = appName;
         this.instanceId = instanceId;
+        this.backupFile = backupFile;
         this.fetchTogglesInterval = fetchTogglesInterval;
         this.sendMetricsInterval = sendMetricsInterval;
         this.disableMetrics = disableMetrics;
@@ -68,10 +72,15 @@ public class UnleashConfig {
         return disableMetrics;
     }
 
+    public String getBackupFile() {
+        return this.backupFile;
+    }
+
     public static class Builder {
         private URI unleashAPI;
         private String appName;
         private String instanceId = "generated-"+Math.round(Math.random() * 1000000);
+        private String backupFile;
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
@@ -112,12 +121,26 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder backupFile(String backupFile) {
+            this.backupFile = backupFile;
+            return this;
+        }
+
+        private String getBackupFile() {
+            if(backupFile != null) {
+                return backupFile;
+            } else {
+                String fileName = "unleash-" + appName + "-repo.json";
+                return System.getProperty("java.io.tmpdir") + File.separatorChar + fileName;
+            }
+        }
 
         public UnleashConfig build() {
             return new UnleashConfig(
                     unleashAPI,
                     appName,
                     instanceId,
+                    getBackupFile(),
                     fetchTogglesInterval,
                     sendMetricsInterval,
                     disableMetrics);
