@@ -52,6 +52,11 @@ public final class DefaultUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
+        return isEnabled(toggleName, UnleashContext.builder().build(), defaultSetting);
+    }
+
+    @Override
+    public boolean isEnabled(final String toggleName, final UnleashContext context ,final boolean defaultSetting) {
         boolean enabled = false;
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
 
