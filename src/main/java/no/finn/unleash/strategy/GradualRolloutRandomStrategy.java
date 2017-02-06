@@ -7,7 +7,7 @@ import java.util.Random;
 import no.finn.unleash.strategy.Strategy;
 
 public final class GradualRolloutRandomStrategy implements Strategy {
-
+    protected static final String PERCENTAGE = "percentage";
     private static final String STRATEGY_NAME = "gradualRolloutRandom";
 
     private final Random random;
@@ -27,10 +27,8 @@ public final class GradualRolloutRandomStrategy implements Strategy {
 
     @Override
     public boolean isEnabled(final Map<String, String> parameters) {
-        return Optional.ofNullable(parameters.get("percentage"))
-                .filter(percentageStr -> percentageStr.matches("^100|0|[1-9][0-9]?$"))
-                .map(Integer::parseInt)
-                .map(percentage -> percentage >= random.nextInt(100) + 1)
-                .orElse(false);
+        int percentage = StrategyUtils.getPercentage(parameters.get(PERCENTAGE));
+        int randomNumber = random.nextInt(100) + 1;
+        return percentage >= randomNumber;
     }
 }

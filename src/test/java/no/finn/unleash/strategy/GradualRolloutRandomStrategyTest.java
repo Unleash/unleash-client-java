@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -44,7 +45,7 @@ public final class GradualRolloutRandomStrategyTest {
     @Test
     public void should_not_be_enabled_when_percentage_is_not_a_not_a_valid_percentage_value() {
         final Map<String, String> parameters = new HashMap<String, String>() {{
-            put("percentage", "09");
+            put("percentage", "ab");
         }};
 
         final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
@@ -73,8 +74,27 @@ public final class GradualRolloutRandomStrategyTest {
 
         for (int i = 0; i < 1000; i++) {
             final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
-            assertTrue(enabled);
+            assertTrue("Should be enabled for p="+i, enabled);
         }
+    }
 
+    @Ignore
+    @Test
+    public void localTest() {
+        final Map<String, String> parameters = new HashMap<String, String>() {{
+            put("percentage", "55");
+        }};
+
+        int rounds = 20000;
+        int countEnabled = 0;
+
+        for (int i = 0; i < rounds; i++) {
+            final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
+            if(enabled) {
+                countEnabled = countEnabled + 1;
+            }
+        }
+        
+        System.out.println("Percentage: " + ((double)countEnabled / rounds));
     }
 }
