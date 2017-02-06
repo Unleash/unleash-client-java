@@ -6,9 +6,9 @@ import java.util.Optional;
 import no.finn.unleash.UnleashContext;
 
 /**
- * Implements a gradual roll-out strategy based on userId.
+ * Implements a gradual roll-out strategy based on session id.
  *
- * Using this strategy you can target only logged in users and gradually expose your
+ * Using this strategy you can target only users bound to a session and gradually expose your
  * feature to higher percentage of the logged in user.
  *
  * This strategy takes two parameters:
@@ -17,11 +17,11 @@ import no.finn.unleash.UnleashContext;
  *                  toggles you can correlate the user experience across toggles.
  *
  */
-public final class GradualRolloutForUserWithIdStrategy implements Strategy {
+public final class GradualRolloutSessionIdStrategy implements Strategy {
     protected static final String PERCENTAGE = "percentage";
     protected static final String GROUP_ID = "groupId";
 
-    private static final String NAME = "gradualRolloutForUserWithId";
+    private static final String NAME = "gradualRolloutSessionId";
 
     @Override
     public String getName() {
@@ -35,18 +35,18 @@ public final class GradualRolloutForUserWithIdStrategy implements Strategy {
 
     @Override
     public boolean isEnabled(final Map<String, String> parameters, UnleashContext unleashContext) {
-        Optional<String> userId = unleashContext.getUserId();
+        Optional<String> sessionId = unleashContext.getSessionId();
 
-        if(!userId.isPresent()) {
+        if(!sessionId.isPresent()) {
             return false;
         }
 
         final int percentage = StrategyUtils.getPercentage(parameters.get(PERCENTAGE));
         final String groupId = Optional.ofNullable(parameters.get(GROUP_ID)).orElse("");
 
-        final int normalizedUserId = StrategyUtils.getNormalizedNumber(userId.get(), groupId);
+        final int normalizedSessionId = StrategyUtils.getNormalizedNumber(sessionId.get(), groupId);
 
-        return percentage > 0 && normalizedUserId <= percentage;
+        return percentage > 0 && normalizedSessionId <= percentage;
     }
 
 

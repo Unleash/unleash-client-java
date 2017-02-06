@@ -51,7 +51,7 @@ public class UnleashContext {
         }
 
         public Builder sessionId(String sessionId) {
-            this.userId = sessionId;
+            this.sessionId = sessionId;
             return this;
         }
 
