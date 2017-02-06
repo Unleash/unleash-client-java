@@ -72,7 +72,7 @@ public final class GradualRolloutRandomStrategyTest {
             put("percentage", "100");
         }};
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i <= 100; i++) {
             final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
             assertTrue("Should be enabled for p="+i, enabled);
         }
