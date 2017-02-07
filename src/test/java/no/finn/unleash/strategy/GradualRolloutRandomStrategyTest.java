@@ -74,15 +74,18 @@ public final class GradualRolloutRandomStrategyTest {
 
         for (int i = 0; i <= 100; i++) {
             final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
-            assertTrue("Should be enabled for p="+i, enabled);
+            assertTrue("Should be enabled for p=" + i, enabled);
         }
     }
 
-    @Ignore
     @Test
-    public void localTest() {
+    public void should_diverage_at_most_with_one_percent_point() {
+        int percentage = 55;
+        final int min= percentage - 1;
+        final int max = percentage + 1;
+
         final Map<String, String> parameters = new HashMap<String, String>() {{
-            put("percentage", "55");
+            put("percentage", ""+percentage);
         }};
 
         int rounds = 20000;
@@ -94,7 +97,10 @@ public final class GradualRolloutRandomStrategyTest {
                 countEnabled = countEnabled + 1;
             }
         }
-        
-        System.out.println("Percentage: " + ((double)countEnabled / rounds));
+
+        long measuredPercentage = Math.round(((double) countEnabled / rounds * 100));
+
+        assertTrue(measuredPercentage >= min);
+        assertTrue(measuredPercentage <= max);
     }
 }
