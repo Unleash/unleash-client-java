@@ -116,6 +116,35 @@ public class GradualRolloutUserIdStrategyTest {
         }
     }
 
+    @Test
+    public void should_at_most_miss_with_one_percent_when_rolling_out_to_specified_percentage() {
+        String groupId = "group1";
+        int percentage = 25;
+        int rounds = 20000;
+        int enabledCount = 0;
+
+        Map<String, String> params = buildParams(percentage, groupId);
+
+        GradualRolloutUserIdStrategy gradualRolloutStrategy = new GradualRolloutUserIdStrategy();
+
+
+        for(int userId=0; userId < rounds; userId++) {
+            UnleashContext context = UnleashContext.builder().userId("user"+ userId).build();
+
+            if(gradualRolloutStrategy.isEnabled(params, context)) {
+                enabledCount++;
+            }
+        }
+
+        double actualPercentage = ((double) enabledCount / (double) rounds) * 100.0;
+
+        assertTrue("Expected " + percentage + "%, but was "+ actualPercentage + "%" ,
+                (percentage-1) < actualPercentage);
+
+        assertTrue("Expected " + percentage + "%, but was "+ actualPercentage + "%" ,
+                (percentage+1) > actualPercentage);
+    }
+
 
     @Ignore // Intended for manual execution
     @Test
