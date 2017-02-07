@@ -2,6 +2,7 @@ package no.finn.unleash.util;
 
 import java.io.File;
 import java.net.URI;
+import no.finn.unleash.UnleashContextProvider;
 
 public class UnleashConfig {
     private final URI unleashAPI;
@@ -12,6 +13,7 @@ public class UnleashConfig {
     private final long fetchTogglesInterval;
     private final long sendMetricsInterval;
     private final boolean disableMetrics;
+    private final UnleashContextProvider contextProvider;
 
     public UnleashConfig(
             URI unleashAPI,
@@ -20,7 +22,9 @@ public class UnleashConfig {
             String backupFile,
             long fetchTogglesInterval,
             long sendMetricsInterval,
-            boolean disableMetrics) {
+            boolean disableMetrics,
+            UnleashContextProvider contextProvider) {
+
 
         if(appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -38,6 +42,7 @@ public class UnleashConfig {
         this.fetchTogglesInterval = fetchTogglesInterval;
         this.sendMetricsInterval = sendMetricsInterval;
         this.disableMetrics = disableMetrics;
+        this.contextProvider = contextProvider;
     }
 
     public URI getUnleashAPI() {
@@ -76,6 +81,10 @@ public class UnleashConfig {
         return this.backupFile;
     }
 
+    public UnleashContextProvider getContextProvider() {
+        return contextProvider;
+    }
+
     public static class Builder {
         private URI unleashAPI;
         private String appName;
@@ -84,6 +93,7 @@ public class UnleashConfig {
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
+        private UnleashContextProvider contextProvider = UnleashContextProvider.getDefaultProvider();
 
 
         public Builder unleashAPI(URI unleashAPI) {
@@ -126,6 +136,11 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder unleashContextProvider(UnleashContextProvider contextProvider) {
+            this.contextProvider = contextProvider;
+            return this;
+        }
+
         private String getBackupFile() {
             if(backupFile != null) {
                 return backupFile;
@@ -143,7 +158,8 @@ public class UnleashConfig {
                     getBackupFile(),
                     fetchTogglesInterval,
                     sendMetricsInterval,
-                    disableMetrics);
+                    disableMetrics,
+                    contextProvider);
         }
     }
 }

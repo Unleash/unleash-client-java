@@ -24,6 +24,7 @@ public final class DefaultUnleash implements Unleash {
     private final UnleashMetricService metricService;
     private final ToggleRepository toggleRepository;
     private final Map<String, Strategy> strategyMap;
+    private final UnleashContextProvider contextProvider;
 
 
     private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
@@ -41,6 +42,7 @@ public final class DefaultUnleash implements Unleash {
     public DefaultUnleash(UnleashConfig unleashConfig, ToggleRepository toggleRepository, Strategy... strategies) {
         this.toggleRepository = toggleRepository;
         this.strategyMap = buildStrategyMap(strategies);
+        this.contextProvider = unleashConfig.getContextProvider();
         this.metricService = new UnleashMetricServiceImpl(unleashConfig, unleashScheduledExecutor);
         metricService.register(strategyMap.keySet());
     }
@@ -52,7 +54,7 @@ public final class DefaultUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
-        return isEnabled(toggleName, UnleashContext.builder().build(), defaultSetting);
+        return isEnabled(toggleName, contextProvider.getContext(), defaultSetting);
     }
 
     @Override
@@ -66,7 +68,7 @@ public final class DefaultUnleash implements Unleash {
             enabled = false;
         } else {
             enabled = featureToggle.getStrategies().stream()
-                    .filter(as -> getStrategy(as.getName()).isEnabled(as.getParameters()))
+                    .filter(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), context))
                     .findFirst()
                     .isPresent();
         }
