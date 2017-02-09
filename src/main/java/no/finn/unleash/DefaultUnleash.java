@@ -1,6 +1,8 @@
 package no.finn.unleash;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import no.finn.unleash.metric.UnleashMetricService;
@@ -9,15 +11,28 @@ import no.finn.unleash.repository.FeatureToggleRepository;
 import no.finn.unleash.repository.ToggleBackupHandlerFile;
 import no.finn.unleash.repository.HttpToggleFetcher;
 import no.finn.unleash.repository.ToggleRepository;
+import no.finn.unleash.strategy.ApplicationHostnameStrategy;
 import no.finn.unleash.strategy.DefaultStrategy;
+import no.finn.unleash.strategy.GradualRolloutRandomStrategy;
+import no.finn.unleash.strategy.GradualRolloutSessionIdStrategy;
+import no.finn.unleash.strategy.GradualRolloutUserIdStrategy;
+import no.finn.unleash.strategy.RemoteAddressStrategy;
 import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.strategy.UnknownStrategy;
+import no.finn.unleash.strategy.UserWithIdStrategy;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 import no.finn.unleash.util.UnleashScheduledExecutorImpl;
 
 public final class DefaultUnleash implements Unleash {
-    private static final DefaultStrategy DEFAULT_STRATEGY = new DefaultStrategy();
+    private static final List<Strategy> BUILTIN_STRATEGIES = Arrays.asList(new DefaultStrategy(),
+            new ApplicationHostnameStrategy(),
+            new GradualRolloutRandomStrategy(),
+            new GradualRolloutSessionIdStrategy(),
+            new GradualRolloutUserIdStrategy(),
+            new RemoteAddressStrategy(),
+            new UserWithIdStrategy());
+
     private static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
     private static final UnleashScheduledExecutor unleashScheduledExecutor = new UnleashScheduledExecutorImpl();
 
@@ -80,7 +95,7 @@ public final class DefaultUnleash implements Unleash {
     private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {
         Map<String, Strategy> map = new HashMap<>();
 
-        map.put(DEFAULT_STRATEGY.getName(), DEFAULT_STRATEGY);
+        BUILTIN_STRATEGIES.forEach(strategy -> map.put(strategy.getName(), strategy));
 
         if (strategies != null) {
             for (Strategy strategy : strategies) {
@@ -93,10 +108,6 @@ public final class DefaultUnleash implements Unleash {
 
 
     private Strategy getStrategy(String strategy) {
-        if (strategyMap.containsKey(strategy)) {
-            return strategyMap.get(strategy);
-        } else {
-            return UNKNOWN_STRATEGY;
-        }
+        return strategyMap.containsKey(strategy) ? strategyMap.get(strategy) : UNKNOWN_STRATEGY;
     }
 }
