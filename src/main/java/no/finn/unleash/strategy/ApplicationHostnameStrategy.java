@@ -36,7 +36,8 @@ public class ApplicationHostnameStrategy implements Strategy {
     public boolean isEnabled(Map<String, String> parameters) {
         return Optional.ofNullable(parameters.get(HOST_NAMES_PARAM))
                 .map(hostString -> hostString.toLowerCase())
-                .map(hostString -> Arrays.asList(hostString.split("\\s?,\\s?")))
-                .map(hostList -> hostList.contains(hostname)).orElse(false);
+                .map(hostString -> Arrays.asList(hostString.split(",\\s*")))
+                .map(hostList -> hostList.contains(hostname.toLowerCase()))
+                .orElse(false);
     }
 }

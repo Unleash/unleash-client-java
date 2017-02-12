@@ -23,9 +23,14 @@ public class ManualTesting {
         UnleashConfig unleashConfig = new UnleashConfig.Builder()
                 .appName("java-test")
                 .instanceId("instance y")
-                .unleashAPI("https://unleash-new-ui.herokuapp.com/api/")
+                .unleashAPI("https://unleash.herokuapp.com/api/")
                 .fetchTogglesInterval(1)
-                .sendMetricsInterval(10)
+                .sendMetricsInterval(2)
+                .unleashContextProvider(() -> UnleashContext.builder()
+                        .sessionId(new Random().nextInt(10000) + "")
+                        .userId(new Random().nextInt(10000) + "")
+                        .remoteAddress("192.168.1.1")
+                        .build())
                 .build();
 
         Unleash unleash = new DefaultUnleash(unleashConfig, strategy);
@@ -52,6 +57,7 @@ public class ManualTesting {
             while(currentRound < maxRounds) {
                 currentRound++;
                 long startTime = System.nanoTime();
+
                 boolean enabled = unleash.isEnabled("Demo");
                 long timeUsed = System.nanoTime() - startTime;
 

@@ -87,6 +87,18 @@ public class ApplicationHostnameStrategyTest {
     }
 
     @Test
+    public void should_be_enabled_for_dashed_host() throws UnknownHostException {
+        String hostName  = "super-wiEred-host";
+        System.setProperty("hostname", hostName);
+
+        Strategy strategy = new ApplicationHostnameStrategy();
+
+        Map<String, String> params = new HashMap<>();
+        params.put("hostNames", "MegaHost," + hostName + ",MiniHost, happyHost");
+        assertTrue(strategy.isEnabled(params));
+    }
+
+    @Test
     public void null_test(){
         Strategy strategy = new ApplicationHostnameStrategy();
         assertFalse(strategy.isEnabled(new HashMap<>()));
