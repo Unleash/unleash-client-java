@@ -67,7 +67,7 @@ provided by unleash.
 - RemoteAddressStrategy
 - ApplicationHostnameStrategy
 
-Read more about the strategies in [activation-strategy.md](https://github.com/Unleash/unleash/blob/master/docs/activation-strategies.md);
+Read more about the strategies in [activation-strategy.md](https://github.com/Unleash/unleash/blob/master/docs/activation-strategies.md).
 
 #### Custom strategies
 You may also specify and implement your own strategy. The specification must be registered in the Unleash UI and 
