@@ -1,7 +1,10 @@
 package no.finn.unleash.util;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
+
 import no.finn.unleash.UnleashContextProvider;
 
 public class UnleashConfig {
@@ -88,13 +91,22 @@ public class UnleashConfig {
     public static class Builder {
         private URI unleashAPI;
         private String appName;
-        private String instanceId = "generated-"+Math.round(Math.random() * 1000000);
+        private String instanceId = getDefaultInstanceId();
         private String backupFile;
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
         private UnleashContextProvider contextProvider = UnleashContextProvider.getDefaultProvider();
 
+        static String getDefaultInstanceId() {
+            String hostName = "";
+            try {
+                hostName = InetAddress.getLocalHost().getHostName() + "-";
+            } catch (UnknownHostException e) {
+
+            }
+            return hostName + "generated-" + Math.round(Math.random() * 1000000.0D);
+        }
 
         public Builder unleashAPI(URI unleashAPI) {
             this.unleashAPI = unleashAPI;
