@@ -1,4 +1,6 @@
 # Changelog
+## 2.1.1 (March 2017)
+- Default instanceId should include hostname. 
 
 ## 2.1.0 (Febrary 2017)
 - Includes implementation of pre-defined activation strategies. 
