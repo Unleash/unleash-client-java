@@ -31,9 +31,7 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             connection.setReadTimeout(CONNECT_TIMEOUT);
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("UNLEASH-APPNAME", this.unleashConfig.getAppName());
-            connection.setRequestProperty("UNLEASH-INSTANCEID", this.unleashConfig.getInstanceId());
-
+            UnleashConfig.setRequestProperties(connection, this.unleashConfig);
             connection.setRequestProperty("If-None-Match", etag);
             connection.setUseCaches(true);
             connection.connect();
