@@ -1,15 +1,22 @@
 package no.finn.unleash.util;
 
 import java.io.File;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 import no.finn.unleash.UnleashContextProvider;
 
 public class UnleashConfig {
+    protected static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
+    protected static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
+
     private final URI unleashAPI;
     private final UnleashURLs unleashURLs;
+    private final Map<String, String> customHttpHeaders;
     private final String appName;
     private final String instanceId;
     private final String backupFile;
@@ -20,6 +27,7 @@ public class UnleashConfig {
 
     public UnleashConfig(
             URI unleashAPI,
+            Map<String, String> customHttpHeaders,
             String appName,
             String instanceId,
             String backupFile,
@@ -38,6 +46,7 @@ public class UnleashConfig {
         }
 
         this.unleashAPI = unleashAPI;
+        this.customHttpHeaders = customHttpHeaders;
         this.unleashURLs = new UnleashURLs(unleashAPI);
         this.appName = appName;
         this.instanceId = instanceId;
@@ -50,6 +59,10 @@ public class UnleashConfig {
 
     public URI getUnleashAPI() {
         return unleashAPI;
+    }
+
+    public Map<String, String> getCustomHttpHeaders() {
+        return customHttpHeaders;
     }
 
     public String getAppName() {
@@ -88,8 +101,17 @@ public class UnleashConfig {
         return contextProvider;
     }
 
+    public static void setRequestProperties(HttpURLConnection connection, UnleashConfig config) {
+        connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
+        connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
+        for (String name : config.getCustomHttpHeaders().keySet()) {
+            connection.setRequestProperty(name, config.getCustomHttpHeaders().get(name));
+        }
+    }
+
     public static class Builder {
         private URI unleashAPI;
+        private Map<String, String> customHttpHeaders = new HashMap<>();
         private String appName;
         private String instanceId = getDefaultInstanceId();
         private String backupFile;
@@ -115,6 +137,11 @@ public class UnleashConfig {
 
         public Builder unleashAPI(String unleashAPI) {
             this.unleashAPI = URI.create(unleashAPI);
+            return this;
+        }
+
+        public Builder customHttpHeader(String name, String value) {
+            this.customHttpHeaders.put(name, value);
             return this;
         }
 
@@ -165,6 +192,7 @@ public class UnleashConfig {
         public UnleashConfig build() {
             return new UnleashConfig(
                     unleashAPI,
+                    customHttpHeaders,
                     appName,
                     instanceId,
                     getBackupFile(),

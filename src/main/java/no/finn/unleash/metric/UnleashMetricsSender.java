@@ -75,8 +75,7 @@ public class UnleashMetricsSender {
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("UNLEASH-APPNAME", this.unleashConfig.getAppName());
-            connection.setRequestProperty("UNLEASH-INSTANCEID", this.unleashConfig.getInstanceId());
+            UnleashConfig.setRequestProperties(connection, this.unleashConfig);
             connection.setUseCaches (false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
