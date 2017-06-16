@@ -11,8 +11,8 @@ import java.util.Map;
 import no.finn.unleash.UnleashContextProvider;
 
 public class UnleashConfig {
-    protected static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
-    protected static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
+    static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
+    static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
 
     private final URI unleashAPI;
     private final UnleashURLs unleashURLs;
@@ -104,9 +104,10 @@ public class UnleashConfig {
     public static void setRequestProperties(HttpURLConnection connection, UnleashConfig config) {
         connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
         connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
-        for (String name : config.getCustomHttpHeaders().keySet()) {
-            connection.setRequestProperty(name, config.getCustomHttpHeaders().get(name));
-        }
+        connection.setRequestProperty("User-Agent", config.getAppName());
+        config.getCustomHttpHeaders().forEach((name, value) -> {
+            connection.setRequestProperty(name, value);
+        });
     }
 
     public static class Builder {

@@ -65,7 +65,7 @@ public class UnleashConfigTest {
     }
 
     @Test
-    public void should_add_app_name_and_instance_id_to_connection() throws IOException {
+    public void should_add_app_name_and_instance_id_and_user_agent_to_connection() throws IOException {
         String appName = "my-app";
         String instanceId = "my-instance-1";
         String unleashAPI = "http://unleash.org";
@@ -82,6 +82,7 @@ public class UnleashConfigTest {
         UnleashConfig.setRequestProperties(connection, unleashConfig);
         assertThat(connection.getRequestProperty(UNLEASH_APP_NAME_HEADER), is(appName));
         assertThat(connection.getRequestProperty(UNLEASH_INSTANCE_ID_HEADER), is(instanceId));
+        assertThat(connection.getRequestProperty("User-Agent"), is(appName));
     }
 
     @Test
