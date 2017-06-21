@@ -122,6 +122,20 @@ UnleashConfig config = new UnleashConfig.Builder()
 unleash.isEnabled("someToggle");
 ``` 
 
+## Custom HTTP headers
+If you want the client to send some custom HTTP Headers with all requests to the Unleash API 
+you can define that by setting them as path of the `UnleashConfig`. 
+
+```java
+UnleashConfig unleashConfig = UnleashConfig.builder()
+                .appName("my-app")
+                .instanceId("my-instance-1")
+                .unleashAPI(unleashAPI)
+                .customHttpHeader("Authorization", "12312Random")
+                .build();
+```
+
+
 ## Local backup
 By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the 
 result in `unleash-repo.json` which is located in the `java.io.tmpdir` directory. This means that if 
