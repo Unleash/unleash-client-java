@@ -122,7 +122,7 @@ UnleashConfig config = new UnleashConfig.Builder()
 unleash.isEnabled("someToggle");
 ``` 
 
-## Custom HTTP headers
+### Custom HTTP headers
 If you want the client to send some custom HTTP Headers with all requests to the Unleash API 
 you can define that by setting them as path of the `UnleashConfig`. 
 
