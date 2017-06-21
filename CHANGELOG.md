@@ -1,4 +1,8 @@
 # Changelog
+
+## 2.1.2 
+- Added options for defining custom headers. 
+
 ## 2.1.1 (March 2017)
 - Default instanceId should include hostname. 
 

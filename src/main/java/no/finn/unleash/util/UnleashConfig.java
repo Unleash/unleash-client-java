@@ -105,9 +105,7 @@ public class UnleashConfig {
         connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
         connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
         connection.setRequestProperty("User-Agent", config.getAppName());
-        config.getCustomHttpHeaders().forEach((name, value) -> {
-            connection.setRequestProperty(name, value);
-        });
+        config.getCustomHttpHeaders().forEach(connection::setRequestProperty);
     }
 
     public static class Builder {
