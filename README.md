@@ -123,8 +123,8 @@ unleash.isEnabled("someToggle");
 ``` 
 
 ### Custom HTTP headers
-If you want the client to send some custom HTTP Headers with all requests to the Unleash API 
-you can define that by setting them as path of the `UnleashConfig`. 
+If you want the client to send custom HTTP Headers with all requests to the Unleash API 
+you can define that by setting them via the `UnleashConfig`. 
 
 ```java
 UnleashConfig unleashConfig = UnleashConfig.builder()
