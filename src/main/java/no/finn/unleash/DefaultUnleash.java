@@ -92,6 +92,11 @@ public final class DefaultUnleash implements Unleash {
         return enabled;
     }
 
+    @Override
+    public FeatureToggle getFeatureToggleDefinition(String toggleName) {
+        return toggleRepository.getToggle(toggleName);
+    }
+
     private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {
         Map<String, Strategy> map = new HashMap<>();
 
