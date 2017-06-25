@@ -74,7 +74,7 @@ public final class DefaultUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(final String toggleName, final UnleashContext context ,final boolean defaultSetting) {
-        boolean enabled = false;
+        final boolean enabled;
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
 
         if (featureToggle == null) {
@@ -109,7 +109,6 @@ public final class DefaultUnleash implements Unleash {
 
         return map;
     }
-
 
     private Strategy getStrategy(String strategy) {
         return strategyMap.containsKey(strategy) ? strategyMap.get(strategy) : UNKNOWN_STRATEGY;
