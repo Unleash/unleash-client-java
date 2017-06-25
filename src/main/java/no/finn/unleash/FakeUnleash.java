@@ -24,7 +24,6 @@ public final class FakeUnleash implements Unleash {
         }
     }
 
-    @Override
     public FeatureToggle getFeatureToggleDefinition(String toggleName) {
         throw new UnsupportedOperationException();
     }
