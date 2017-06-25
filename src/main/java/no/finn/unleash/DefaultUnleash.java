@@ -92,7 +92,6 @@ public final class DefaultUnleash implements Unleash {
         return enabled;
     }
 
-    @Override
     public FeatureToggle getFeatureToggleDefinition(String toggleName) {
         return toggleRepository.getToggle(toggleName);
     }

@@ -12,6 +12,4 @@ public interface Unleash {
     default boolean isEnabled(String toggleName, UnleashContext context, boolean defaultSetting) {
         return isEnabled(toggleName, defaultSetting);
     }
-
-    FeatureToggle getFeatureToggleDefinition(String toggleName);
 }
