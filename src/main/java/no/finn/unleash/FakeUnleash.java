@@ -24,10 +24,6 @@ public final class FakeUnleash implements Unleash {
         }
     }
 
-    public FeatureToggle getFeatureToggleDefinition(String toggleName) {
-        throw new UnsupportedOperationException();
-    }
-
     public void enableAll() {
         disableAll = false;
         enableAll = true;
