@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.3 Expose Feature Toggle Definition
+- Exposing the Feature Toggle Definition via the getFeatureToggleDefinition method on DefaultUnleash to make it easier to extend it with new functionality. 
+
 ## 2.1.2 
 - Added options for defining custom headers. 
 
