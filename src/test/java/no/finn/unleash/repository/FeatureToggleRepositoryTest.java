@@ -24,7 +24,7 @@ public class FeatureToggleRepositoryTest {
     public void no_backup_file_and_no_repository_available_should_give_empty_repo() {
         UnleashConfig config = UnleashConfig.builder()
                 .appName("test")
-                .unleashAPI("http://localhost:4242/").build();
+                .unleashAPI("http://localhost:4242/api/").build();
         ToggleFetcher toggleFetcher = new HttpToggleFetcher(config);
         ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile(config);
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
@@ -36,7 +36,7 @@ public class FeatureToggleRepositoryTest {
     public void backup_toggles_should_be_loaded_at_startup() {
         UnleashConfig config = UnleashConfig.builder()
                 .appName("test")
-                .unleashAPI("http://localhost:4242/")
+                .unleashAPI("http://localhost:4242/api/")
                 .fetchTogglesInterval(Long.MAX_VALUE)
                 .build();
 
@@ -71,7 +71,7 @@ public class FeatureToggleRepositoryTest {
 
         UnleashConfig config = new UnleashConfig.Builder()
                 .appName("test")
-                .unleashAPI("http://localhost:4242")
+                .unleashAPI("http://localhost:4242/api/")
                 .fetchTogglesInterval(200l)
                 .build();
 

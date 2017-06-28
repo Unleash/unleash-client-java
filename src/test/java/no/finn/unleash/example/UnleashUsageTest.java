@@ -14,7 +14,7 @@ public class UnleashUsageTest {
         UnleashConfig config = new UnleashConfig.Builder()
                 .appName("test")
                 .instanceId("my-hostname:6517")
-                .unleashAPI("http://localhost:4242")
+                .unleashAPI("http://localhost:4242/api")
                 .build();
 
         Unleash unleash = new DefaultUnleash(config, new CustomStrategy());
