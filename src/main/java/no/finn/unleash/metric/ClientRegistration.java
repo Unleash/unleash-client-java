@@ -8,6 +8,7 @@
 class ClientRegistration {
     private final String appName;
     private final String instanceId;
+    private final String sdkVersion;
     private final Set<String> strategies;
     private final LocalDateTime started;
     private final long interval;
@@ -15,6 +16,7 @@ class ClientRegistration {
     ClientRegistration(UnleashConfig config, LocalDateTime started, Set<String> strategies) {
         this.appName = config.getAppName();
         this.instanceId = config.getInstanceId();
+        this.sdkVersion = config.getSdkVersion();
         this.started = started;
         this.strategies = strategies;
         this.interval = config.getSendMetricsInterval();
@@ -26,6 +28,10 @@ class ClientRegistration {
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    public String getSdkVersion() {
+        return sdkVersion;
     }
 
     public Set<String> getStrategies() {
