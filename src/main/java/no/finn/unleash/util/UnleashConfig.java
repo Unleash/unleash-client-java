@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import no.finn.unleash.UnleashContextProvider;
 
@@ -19,6 +20,7 @@ public class UnleashConfig {
     private final Map<String, String> customHttpHeaders;
     private final String appName;
     private final String instanceId;
+    private final String sdkVersion;
     private final String backupFile;
     private final long fetchTogglesInterval;
     private final long sendMetricsInterval;
@@ -30,6 +32,7 @@ public class UnleashConfig {
             Map<String, String> customHttpHeaders,
             String appName,
             String instanceId,
+            String sdkVersion,
             String backupFile,
             long fetchTogglesInterval,
             long sendMetricsInterval,
@@ -50,6 +53,7 @@ public class UnleashConfig {
         this.unleashURLs = new UnleashURLs(unleashAPI);
         this.appName = appName;
         this.instanceId = instanceId;
+        this.sdkVersion = sdkVersion;
         this.backupFile = backupFile;
         this.fetchTogglesInterval = fetchTogglesInterval;
         this.sendMetricsInterval = sendMetricsInterval;
@@ -71,6 +75,10 @@ public class UnleashConfig {
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    public String getSdkVersion() {
+        return sdkVersion;
     }
 
     public long getFetchTogglesInterval() {
@@ -113,6 +121,7 @@ public class UnleashConfig {
         private Map<String, String> customHttpHeaders = new HashMap<>();
         private String appName;
         private String instanceId = getDefaultInstanceId();
+        private String sdkVersion = getDefaultSdkVersion();
         private String backupFile;
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
@@ -194,11 +203,18 @@ public class UnleashConfig {
                     customHttpHeaders,
                     appName,
                     instanceId,
+                    sdkVersion,
                     getBackupFile(),
                     fetchTogglesInterval,
                     sendMetricsInterval,
                     disableMetrics,
                     contextProvider);
+        }
+
+        public String getDefaultSdkVersion() {
+            String version = Optional.ofNullable(getClass().getPackage().getImplementationVersion())
+                    .orElse("development");
+            return "unleash-client-java:" + version;
         }
     }
 }
