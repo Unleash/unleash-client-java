@@ -31,7 +31,7 @@ public class UnleashTest {
 
         UnleashConfig config = new UnleashConfig.Builder()
                 .appName("test")
-                .unleashAPI("http://localhost:4242")
+                .unleashAPI("http://localhost:4242/api/")
                 .unleashContextProvider(contextProvider)
                 .build();
 
@@ -75,7 +75,7 @@ public class UnleashTest {
         //register custom strategy
         UnleashConfig config = new UnleashConfig.Builder()
                 .appName("test")
-                .unleashAPI("http://localhost:4242")
+                .unleashAPI("http://localhost:4242/api/")
                 .build();
         unleash = new DefaultUnleash(config, toggleRepository, customStrategy);
         when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, Arrays.asList(new ActivationStrategy("custom", null))));
