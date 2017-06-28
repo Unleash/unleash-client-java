@@ -1,5 +1,10 @@
 package no.finn.unleash;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.strategy.UserWithIdStrategy;
@@ -7,15 +12,14 @@ import no.finn.unleash.util.UnleashConfig;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class UnleashTest {
 
@@ -136,5 +140,23 @@ public class UnleashTest {
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
         assertThat(unleash.isEnabled("test"), is(false));
+    }
+
+    @Test
+    public void should_return_known_feature_toggle_definition() {
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
+        FeatureToggle featureToggle = new FeatureToggle("test", false, Arrays.asList(strategy1));
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(((DefaultUnleash)unleash).getFeatureToggleDefinition("test"), is(Optional.of(featureToggle)));
+    }
+
+    @Test
+    public void should_return_empty_for_unknown_feature_toggle_definition() {
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
+        FeatureToggle featureToggle = new FeatureToggle("test", false, Arrays.asList(strategy1));
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(((DefaultUnleash)unleash).getFeatureToggleDefinition("another toggle"), is(Optional.empty()));
     }
 }

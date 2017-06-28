@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import no.finn.unleash.metric.UnleashMetricService;
 import no.finn.unleash.metric.UnleashMetricServiceImpl;
@@ -92,8 +93,8 @@ public final class DefaultUnleash implements Unleash {
         return enabled;
     }
 
-    public FeatureToggle getFeatureToggleDefinition(String toggleName) {
-        return toggleRepository.getToggle(toggleName);
+    public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
+        return Optional.ofNullable(toggleRepository.getToggle(toggleName));
     }
 
     private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {
