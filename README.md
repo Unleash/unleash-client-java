@@ -88,7 +88,7 @@ This is the simplest and most explicit way of providing the unleash context.
 You just add it as an argument to the `isEnabled` call. 
 
 
-```
+```java
 UnleashContext context = UnleashContext.builder()
   .userId("user@mail.com").build();
 
@@ -106,7 +106,7 @@ If you are using Spring the `UnleashContextProvider` will typically be a
 'request scoped' bean. 
 
 
-```
+```java
 UnleashContextProvider contextProvider = new MyAwesomeContextProvider();
 
 UnleashConfig config = new UnleashConfig.Builder()
