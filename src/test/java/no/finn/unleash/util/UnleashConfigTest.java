@@ -65,6 +65,16 @@ public class UnleashConfigTest {
     }
 
     @Test
+    public void should_set_sdk_version() {
+        UnleashConfig config = UnleashConfig.builder()
+                .appName("my-app")
+                .unleashAPI("http://unleash.org")
+                .build();
+
+        assertThat(config.getSdkVersion(), is("unleash-client-java:development"));
+    }
+
+    @Test
     public void should_add_app_name_and_instance_id_and_user_agent_to_connection() throws IOException {
         String appName = "my-app";
         String instanceId = "my-instance-1";
