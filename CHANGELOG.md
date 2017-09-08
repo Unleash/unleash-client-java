@@ -1,6 +1,6 @@
 # Changelog
 
-## [unreleased]
+## 2.1.3
 - Add sdkVersion in client-register call
 
 ## 2.1.3 Expose Feature Toggle Definition
