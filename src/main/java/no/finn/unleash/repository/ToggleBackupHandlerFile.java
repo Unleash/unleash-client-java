@@ -28,7 +28,7 @@ public class ToggleBackupHandlerFile implements ToggleBackupHandler {
             LOG.warn(" Unleash could not find the backup-file '" + backupFile + "'. \n" +
                     "This is expected behavior the first time unleash runs in a new environment.");
         } catch (IOException | IllegalStateException | JsonParseException e) {
-            LOG.error("Failed to read backup file:'{}'", backupFile, e);
+            LOG.warn("Failed to read backup file:'{}'", backupFile, e);
         }
         List<FeatureToggle> emptyList = Collections.emptyList();
         return new ToggleCollection(emptyList);
