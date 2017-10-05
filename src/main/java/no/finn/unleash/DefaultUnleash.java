@@ -89,12 +89,16 @@ public final class DefaultUnleash implements Unleash {
                     .isPresent();
         }
 
-        metricService.count(toggleName, enabled);
+        count(toggleName, enabled);
         return enabled;
     }
 
     public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
         return Optional.ofNullable(toggleRepository.getToggle(toggleName));
+    }
+
+    public void count(final String toggleName, boolean enabled) {
+        metricService.count(toggleName, enabled);
     }
 
     private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {
@@ -110,6 +114,8 @@ public final class DefaultUnleash implements Unleash {
 
         return map;
     }
+
+
 
     private Strategy getStrategy(String strategy) {
         return strategyMap.containsKey(strategy) ? strategyMap.get(strategy) : UNKNOWN_STRATEGY;
