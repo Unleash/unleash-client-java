@@ -51,6 +51,12 @@
             <version>${version.log4j2}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.sangupta</groupId>
+            <artifactId>murmur</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
