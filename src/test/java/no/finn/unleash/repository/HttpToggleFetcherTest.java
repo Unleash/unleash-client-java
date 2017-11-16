@@ -42,14 +42,14 @@ public class HttpToggleFetcherTest {
 
     @Test
     public void happy_path_test_version0() throws URISyntaxException {
-        stubFor(get(urlEqualTo("/features"))
+        stubFor(get(urlEqualTo("/api/client/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("features-v0.json")));
 
-        URI uri = new URI("http://localhost:"+wireMockRule.port());
+        URI uri = new URI("http://localhost:"+wireMockRule.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
@@ -57,20 +57,20 @@ public class HttpToggleFetcherTest {
 
         assertTrue(featureX.isEnabled());
 
-        verify(getRequestedFor(urlMatching("/features"))
+        verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
     }
 
     @Test
     public void happy_path_test_version1() throws URISyntaxException {
-        stubFor(get(urlEqualTo("/features"))
+        stubFor(get(urlEqualTo("/api/client/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("features-v1.json")));
 
-        URI uri = new URI("http://localhost:"+wireMockRule.port());
+        URI uri = new URI("http://localhost:"+wireMockRule.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
@@ -78,64 +78,64 @@ public class HttpToggleFetcherTest {
 
         assertTrue(featureX.isEnabled());
 
-        verify(getRequestedFor(urlMatching("/features"))
+        verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
     }
 
 
     @Test
     public void given_empty_body() throws URISyntaxException {
-        stubFor(get(urlEqualTo("/features"))
+        stubFor(get(urlEqualTo("/api/client/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:"+wireMockRule.port());
+        URI uri = new URI("http://localhost:"+wireMockRule.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         exception.expect(UnleashException.class);
         httpToggleFetcher.fetchToggles();
 
 
-        verify(getRequestedFor(urlMatching("/features"))
+        verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
     }
 
     @Test
     public void given_json_without_feature_field() throws Exception {
-        stubFor(get(urlEqualTo("/features"))
+        stubFor(get(urlEqualTo("/api/client/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody("{}")));
 
-        URI uri = new URI("http://localhost:"+wireMockRule.port());
+        URI uri = new URI("http://localhost:"+wireMockRule.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         exception.expect(UnleashException.class);
         httpToggleFetcher.fetchToggles();
 
-        verify(getRequestedFor(urlMatching("/features"))
+        verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
     }
 
     @Test
     public void should_handle_not_changed() throws URISyntaxException {
-        stubFor(get(urlEqualTo("/features"))
+        stubFor(get(urlEqualTo("/api/client/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
                         .withStatus(302)
                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:"+wireMockRule.port());
+        URI uri = new URI("http://localhost:"+wireMockRule.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
         assertEquals("Should return status NOT_CHANGED", response.getStatus(), FeatureToggleResponse.Status.NOT_CHANGED);
 
-        verify(getRequestedFor(urlMatching("/features"))
+        verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
 
     }
@@ -144,19 +144,19 @@ public class HttpToggleFetcherTest {
     public void should_handle_errors() throws URISyntaxException {
         int httpCodes[] = {400,401,403,404,500,503};
         for(int httpCode:httpCodes) {
-            stubFor(get(urlEqualTo("/features"))
+            stubFor(get(urlEqualTo("/api/client/features"))
                     .withHeader("Accept", equalTo("application/json"))
                     .willReturn(aResponse()
                             .withStatus(httpCode)
                             .withHeader("Content-Type", "application/json")));
 
-            URI uri = new URI("http://localhost:" + wireMockRule.port());
+            URI uri = new URI("http://localhost:" + wireMockRule.port() + "/api/");
             UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
             HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
             FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
             assertEquals("Should return status NOT_CHANGED", response.getStatus(), FeatureToggleResponse.Status.NOT_CHANGED);
 
-            verify(getRequestedFor(urlMatching("/features"))
+            verify(getRequestedFor(urlMatching("/api/client/features"))
                     .withHeader("Content-Type", matching("application/json")));
         }
 
