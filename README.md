@@ -3,6 +3,9 @@
 [![Build Status](https://travis-ci.org/Unleash/unleash-client-java.svg?branch=master)](https://travis-ci.org/Unleash/unleash-client-java)
 [![Coverage Status](https://coveralls.io/repos/github/Unleash/unleash-client-java/badge.svg?branch=master)](https://coveralls.io/github/Unleash/unleash-client-java?branch=master)
 
+This is the node client for Unleash. Read more about the [Unleash project](https://github.com/finn-no/unleash)
+**Version 3.x of the client requires `unleash-server` v3.x or higher. 
+
 ## Getting started
 You will require unleash on your class path, pop it in to your pom:
 
