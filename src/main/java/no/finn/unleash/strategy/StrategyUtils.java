@@ -1,5 +1,7 @@
 package no.finn.unleash.strategy;
 
+import com.sangupta.murmur.Murmur3;
+
 public final class StrategyUtils {
     private static final int ONE_HUNDRED = 100;
 
@@ -25,15 +27,20 @@ public final class StrategyUtils {
     }
 
     /**
-     * Takes to string inputs concat them, produce a hashCode and return a normalized value between 0 and 100;
+     * Takes to string inputs concat them, produce a hash and return a normalized value between 0 and 100;
      *
      * @param identifier
      * @param groupId
      * @return
      */
     public static int getNormalizedNumber(String identifier, String groupId) {
-        int hashCode = Math.abs((groupId + ':' + identifier).hashCode());
-        return hashCode % ONE_HUNDRED + 1;
+        return getNormalizedNumber(identifier, groupId, ONE_HUNDRED);
+    }
+
+    public static int getNormalizedNumber(String identifier, String groupId, int normalizer) {
+        byte[] value = (groupId + ':' + identifier).getBytes();
+        long hash = Murmur3.hash_x86_32(value, value.length, 0);
+        return (int)(hash % normalizer) + 1;
     }
 
     /**
