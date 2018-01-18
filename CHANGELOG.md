@@ -1,7 +1,9 @@
 # Changelog
 
 ## 3.0.0 (unreleased)
+- This version requires `unleash-server` v3 or higher. 
 - Switch hashing to MurmurHash (https://github.com/Unleash/unleash/issues/247)
+- Update API endoint paths for Unleash 3.x (https://github.com/Unleash/unleash-client-java/issues/40)
 
 ## 2.1.3
 - Add sdkVersion in client-register call

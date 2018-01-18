@@ -12,7 +12,7 @@ public class UnleashURLs {
     public UnleashURLs(URI unleashAPI) {
         try {
             String unleashAPIstr = unleashAPI.toString();
-            fetchTogglesURL = URI.create(unleashAPIstr + "/features").normalize().toURL();
+            fetchTogglesURL = URI.create(unleashAPIstr + "/client/features").normalize().toURL();
             clientMetricsURL = URI.create(unleashAPIstr + "/client/metrics").normalize().toURL();
             clientRegisterURL = URI.create(unleashAPIstr + "/client/register").normalize().toURL();
 
