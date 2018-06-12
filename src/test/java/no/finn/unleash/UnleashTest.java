@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
 import static org.mockito.Mockito.mock;
@@ -158,5 +159,12 @@ public class UnleashTest {
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
         assertThat(((DefaultUnleash)unleash).getFeatureToggleDefinition("another toggle"), is(Optional.empty()));
+    }
+
+    @Test
+    public void get_feature_names_should_return_list_of_feature_names() {
+        when(toggleRepository.getFeatureNames()).thenReturn(Arrays.asList("toggleFeatureName1", "toggleFeatureName2"));
+        assertTrue(2 == unleash.getFeatureToggleNames().size());
+        assertTrue("toggleFeatureName2".equals(unleash.getFeatureToggleNames().get(1)));
     }
 }

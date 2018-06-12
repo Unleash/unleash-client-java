@@ -97,6 +97,10 @@ public final class DefaultUnleash implements Unleash {
         return Optional.ofNullable(toggleRepository.getToggle(toggleName));
     }
 
+    public List<String> getFeatureToggleNames() {
+        return toggleRepository.getFeatureNames();
+    }
+
     public void count(final String toggleName, boolean enabled) {
         metricService.count(toggleName, enabled);
     }
