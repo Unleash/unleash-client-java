@@ -1,7 +1,9 @@
 package no.finn.unleash;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
@@ -22,6 +24,11 @@ public final class FakeUnleash implements Unleash {
         } else {
             return features.getOrDefault(toggleName, defaultSetting);
         }
+    }
+
+    @Override
+    public List<String> getFeatureToggleNames() {
+        return features.keySet().stream().collect(Collectors.toList());
     }
 
     public void enableAll() {
