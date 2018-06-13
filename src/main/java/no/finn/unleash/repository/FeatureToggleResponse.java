@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class FeatureToggleResponse {
-    enum Status {NOT_CHANGED, CHANGED}
+    public enum Status {NOT_CHANGED, CHANGED, UNAVAILABLE}
 
     private final Status status;
     private final ToggleCollection toggleCollection;

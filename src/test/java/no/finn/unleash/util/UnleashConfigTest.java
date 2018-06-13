@@ -1,5 +1,6 @@
 package no.finn.unleash.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -49,7 +50,7 @@ public class UnleashConfigTest {
                 .build();
 
         assertThat(config.getAppName(), is("my-app"));
-        assertThat(config.getBackupFile(), is(System.getProperty("java.io.tmpdir") + "/unleash-my-app-repo.json"));
+        assertThat(config.getBackupFile(), is(System.getProperty("java.io.tmpdir") + File.separatorChar + "unleash-my-app-repo.json"));
     }
 
     @Test
