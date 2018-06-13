@@ -126,7 +126,7 @@ public class HttpToggleFetcherTest {
         stubFor(get(urlEqualTo("/api/client/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
-                        .withStatus(302)
+                        .withStatus(304)
                         .withHeader("Content-Type", "application/json")));
 
         URI uri = new URI("http://localhost:"+wireMockRule.port() + "/api/");
@@ -154,7 +154,7 @@ public class HttpToggleFetcherTest {
             UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
             HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
             FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-            assertEquals("Should return status NOT_CHANGED", response.getStatus(), FeatureToggleResponse.Status.NOT_CHANGED);
+            assertEquals("Should return status UNAVAILABLE", response.getStatus(), FeatureToggleResponse.Status.UNAVAILABLE);
 
             verify(getRequestedFor(urlMatching("/api/client/features"))
                     .withHeader("Content-Type", matching("application/json")));
