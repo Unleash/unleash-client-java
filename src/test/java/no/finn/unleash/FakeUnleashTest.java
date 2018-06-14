@@ -2,6 +2,9 @@ package no.finn.unleash;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
@@ -81,4 +84,16 @@ public class FakeUnleashTest {
         assertThat(fakeUnleash.isEnabled("t2", true), is(false));
 
     }
+
+
+    @Test
+    public void should_get_all_feature_names() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.enable("t1", "t2");
+        fakeUnleash.disable("t2");
+
+        List<String> expected = Arrays.asList(new String[]{"t1", "t2"});
+        assertTrue(fakeUnleash.getFeatureToggleNames().containsAll(expected));
+    }
+
 }

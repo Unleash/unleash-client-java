@@ -2,11 +2,12 @@ package no.finn.unleash.repository;
 
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
-import no.finn.unleash.util.UnleashScheduledExecutorImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.concurrent.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
 
@@ -49,5 +50,10 @@ public final class FeatureToggleRepository implements ToggleRepository {
     @Override
     public FeatureToggle getToggle(String name) {
         return toggleCollection.getToggle(name);
+    }
+
+    @Override
+    public List<String> getFeatureNames() {
+        return toggleCollection.getFeatures().stream().map(toggle -> toggle.getName()).collect(Collectors.toList());
     }
 }

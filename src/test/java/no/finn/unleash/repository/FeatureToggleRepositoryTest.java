@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -87,9 +86,27 @@ public class FeatureToggleRepositoryTest {
         assertTrue(toggleRepository.getToggle("toggleFetcherCalled").isEnabled());
     }
 
-    private ToggleCollection populatedToggleCollection(FeatureToggle featureToggle) {
+    @Test
+    public void get_feature_names_should_return_list_of_names() {
+        UnleashConfig config = mock(UnleashConfig.class);
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
+
+        ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+        ToggleCollection toggleCollection = populatedToggleCollection(
+                new FeatureToggle("toggleFeatureName1", true, Arrays.asList(new ActivationStrategy("custom", null))),
+                new FeatureToggle("toggleFeatureName2", true, Arrays.asList(new ActivationStrategy("custom", null)))
+        );
+        when(toggleBackupHandler.read()).thenReturn(toggleCollection);
+
+        ToggleRepository toggleRepository = new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        assertTrue(2 == toggleRepository.getFeatureNames().size());
+        assertTrue("toggleFeatureName2".equals(toggleRepository.getFeatureNames().get(1)));
+    }
+
+    private ToggleCollection populatedToggleCollection(FeatureToggle... featureToggles) {
         List<FeatureToggle> list = new ArrayList();
-        list.add(featureToggle);
+        list.addAll(Arrays.asList(featureToggles));
         return new ToggleCollection(list);
 
     }

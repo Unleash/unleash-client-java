@@ -1,5 +1,7 @@
 package no.finn.unleash;
 
+import java.util.List;
+
 public interface Unleash {
     boolean isEnabled(String toggleName);
 
@@ -12,4 +14,6 @@ public interface Unleash {
     default boolean isEnabled(String toggleName, UnleashContext context, boolean defaultSetting) {
         return isEnabled(toggleName, defaultSetting);
     }
+
+    List<String> getFeatureToggleNames();
 }
