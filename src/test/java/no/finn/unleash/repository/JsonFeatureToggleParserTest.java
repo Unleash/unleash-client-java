@@ -65,6 +65,16 @@ public class JsonFeatureToggleParserTest {
     }
 
     @Test
+    public void should_deserialize_with_group_strategies() throws IOException {
+        Reader content = getFileReader("/features-v2-strategy-groups.json");
+        ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
+        FeatureToggle feature = toggleCollection.getToggle("Feature.A");
+
+        assertThat("Should have to groups", feature.getStrategies().size(), is(2));
+        assertThat("Should have to strategies in first groups", feature.getStrategies().get(0).getGroup().size(), is(2));
+    }
+
+    @Test
     public void should_throw() throws IOException {
         Reader content = getFileReader("/empty.json");
         assertThrows(IllegalStateException.class, () -> JsonToggleParser.fromJson(content));
