@@ -56,10 +56,6 @@ public final class DefaultUnleash implements Unleash {
     }
 
     public DefaultUnleash(UnleashConfig unleashConfig, ToggleRepository toggleRepository, Strategy... strategies) {
-        this(unleashConfig, toggleRepository, unleashScheduledExecutor, strategies);
-    }
-
-    public DefaultUnleash(UnleashConfig unleashConfig, ToggleRepository toggleRepository, UnleashScheduledExecutor unleashScheduledExecutor, Strategy... strategies) {
         this.toggleRepository = toggleRepository;
         this.strategyMap = buildStrategyMap(strategies);
         this.contextProvider = unleashConfig.getContextProvider();
