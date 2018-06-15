@@ -1,6 +1,10 @@
 # Changelog
 
-## 3.0.0 (unreleased)
+## 3.1.0
+- Expose list of feature names
+- Introduced UNAVAILABLE as possible status in FeatureToggleResponse
+
+## 3.0.0
 - This version requires `unleash-server` v3 or higher. 
 - Switch hashing to MurmurHash (https://github.com/Unleash/unleash/issues/247)
 - Update API endoint paths for Unleash 3.x (https://github.com/Unleash/unleash-client-java/issues/40)
