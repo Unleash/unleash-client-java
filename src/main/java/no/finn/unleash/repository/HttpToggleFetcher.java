@@ -39,8 +39,10 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             int responseCode = connection.getResponseCode();
             if(responseCode < 300) {
                 return getToggleResponse(connection);
-            } else {
+            } else if (responseCode == 304) {
                 return new FeatureToggleResponse(FeatureToggleResponse.Status.NOT_CHANGED);
+            } else{
+                return new FeatureToggleResponse(FeatureToggleResponse.Status.UNAVAILABLE);
             }
         } catch (IOException e) {
             throw new UnleashException("Could not fetch toggles", e);
