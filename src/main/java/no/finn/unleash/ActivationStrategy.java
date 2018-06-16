@@ -19,9 +19,9 @@ public final class ActivationStrategy {
         this.group = null;
     }
 
-    public ActivationStrategy(String name, Map<String, String> parameters, String operator, List<ActivationStrategy> group) {
+    public ActivationStrategy(String name, String operator, List<ActivationStrategy> group) {
         this.name = name;
-        this.parameters = parameters;
+        this.parameters = null;
         this.operator = operator;
         this.group = group;
     }

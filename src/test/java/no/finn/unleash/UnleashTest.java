@@ -103,6 +103,49 @@ public class UnleashTest {
     }
 
     @Test
+    public void should_support_grouped_strategies() {
+        ActivationStrategy strategy1 = new ActivationStrategy("default", null);
+        ActivationStrategy strategy2 = new ActivationStrategy("default", null);
+        ActivationStrategy group = new ActivationStrategy("__internal-strategy-group", "AND", Arrays.asList(strategy1, strategy2));
+
+
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Arrays.asList(group));
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(unleash.isEnabled("test"), is(true));
+    }
+
+    @Test
+    public void should_support_grouped_strategies_resolving_to_false() {
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
+        ActivationStrategy strategy2 = new ActivationStrategy("default", null);
+        ActivationStrategy group = new ActivationStrategy("__internal-strategy-group", "AND", Arrays.asList(strategy1, strategy2));
+
+
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Arrays.asList(group));
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(unleash.isEnabled("test"), is(false));
+    }
+
+    @Test
+    public void should_support_grouped_strategies_resolving_to_false_and_outer_to_true() {
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
+        ActivationStrategy strategy2 = new ActivationStrategy("default", null);
+        ActivationStrategy strategy3 = new ActivationStrategy("default", null);
+        ActivationStrategy group = new ActivationStrategy("__internal-strategy-group", "AND", Arrays.asList(strategy1, strategy2));
+
+
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Arrays.asList(group, strategy3));
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(unleash.isEnabled("test"), is(true));
+    }
+
+    @Test
     public void should_support_context_provider() {
         UnleashContext context = UnleashContext.builder().userId("111").build();
         when(contextProvider.getContext()).thenReturn(context);

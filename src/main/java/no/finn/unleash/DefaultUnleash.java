@@ -85,14 +85,29 @@ public final class DefaultUnleash implements Unleash {
         } else if(featureToggle.getStrategies().size() == 0) {
             return true;
         } else {
-            enabled = featureToggle.getStrategies().stream()
-                    .filter(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), context))
-                    .findFirst()
-                    .isPresent();
+            enabled = resolveStrategies("OR", featureToggle.getStrategies(), context);
         }
 
         count(toggleName, enabled);
         return enabled;
+    }
+
+    private boolean resolveStrategies(String operator, List<ActivationStrategy> strategies, UnleashContext context) {
+        switch (operator) {
+            case "AND":
+                return strategies.stream().allMatch(as -> resolveStrategy(as, context));
+            case "OR":
+            default:
+                return strategies.stream().anyMatch(as -> resolveStrategy(as, context));
+        }
+    }
+
+    private boolean resolveStrategy(ActivationStrategy as, UnleashContext context) {
+        if(as.getName().equals("__internal-strategy-group")) {
+            return resolveStrategies(as.getOperator(), as.getGroup(), context);
+        } else {
+            return getStrategy(as.getName()).isEnabled(as.getParameters(), context);
+        }
     }
 
     public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
