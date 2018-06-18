@@ -107,7 +107,7 @@ public class UnleashTest {
         UnleashContext context = UnleashContext.builder().userId("111").build();
         when(contextProvider.getContext()).thenReturn(context);
 
-        //Set up a toggle using UserWithIdStrategy
+        //Set up a toggleName using UserWithIdStrategy
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
@@ -122,7 +122,7 @@ public class UnleashTest {
     public void should_support_context_as_part_of_is_enabled_call() {
         UnleashContext context = UnleashContext.builder().userId("13").build();
 
-        //Set up a toggle using UserWithIdStrategy
+        //Set up a toggleName using UserWithIdStrategy
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
@@ -168,7 +168,7 @@ public class UnleashTest {
         FeatureToggle featureToggle = new FeatureToggle("test", false, Arrays.asList(strategy1));
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(((DefaultUnleash)unleash).getFeatureToggleDefinition("another toggle"), is(Optional.empty()));
+        assertThat(((DefaultUnleash)unleash).getFeatureToggleDefinition("another toggleName"), is(Optional.empty()));
     }
 
     @Test
