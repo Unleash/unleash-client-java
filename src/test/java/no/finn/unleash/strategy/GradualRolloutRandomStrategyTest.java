@@ -4,19 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public final class GradualRolloutRandomStrategyTest {
 
     private static GradualRolloutRandomStrategy gradualRolloutRandomStrategy;
 
-    @Before
-    public void setUp() {
+    @BeforeAll
+    public static void setUp() {
         long seed = new Random().nextLong();
         System.out.println("GradualRolloutRandomStrategyTest running with seed: " + seed);
         gradualRolloutRandomStrategy = new GradualRolloutRandomStrategy(seed);
@@ -74,7 +74,7 @@ public final class GradualRolloutRandomStrategyTest {
 
         for (int i = 0; i <= 100; i++) {
             final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
-            assertTrue("Should be enabled for p=" + i, enabled);
+            assertTrue(enabled, "Should be enabled for p=" + i);
         }
     }
 

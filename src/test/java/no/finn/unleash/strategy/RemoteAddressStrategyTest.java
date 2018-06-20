@@ -4,53 +4,41 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import no.finn.unleash.UnleashContext;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@RunWith(Parameterized.class)
 public class RemoteAddressStrategyTest {
     private static final String FIRST_IP = "127.0.0.1";
     private static final String SECOND_IP = "10.0.0.1";
     private static final String THIRD_IP = "196.0.0.1";
     private static final List<String> ALL = Arrays.asList(FIRST_IP, SECOND_IP, THIRD_IP);
 
-    @Parameter(value=0)
-    public String actualIp;
-
-    @Parameter(value=1)
-    public String parameterString;
-
-    @Parameter(value=2)
-    public boolean expected;
-
     private RemoteAddressStrategy strategy;
 
-    @Parameters(name="{index}: actualIp: {0}, parameter: {1}, expected: {2}")
-    public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                {FIRST_IP, FIRST_IP, true},
-                {FIRST_IP, String.join(",", ALL), true},
-                {SECOND_IP, String.join(",", ALL), true},
-                {THIRD_IP, String.join(",", ALL), true},
-                {FIRST_IP, String.join(", ", ALL), true},
-                {SECOND_IP, String.join(", ", ALL), true},
-                {THIRD_IP, String.join(", ", ALL), true},
-                {SECOND_IP, String.join(",  ", ALL), true},
-                {SECOND_IP, String.join(".", ALL), false},
-                {FIRST_IP, SECOND_IP, false},
-        });
+    public static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of(FIRST_IP, FIRST_IP, true),
+                Arguments.of(FIRST_IP, String.join(",", ALL), true),
+                Arguments.of(SECOND_IP, String.join(",", ALL), true),
+                Arguments.of(THIRD_IP, String.join(",", ALL), true),
+                Arguments.of(FIRST_IP, String.join(", ", ALL), true),
+                Arguments.of(SECOND_IP, String.join(", ", ALL), true),
+                Arguments.of(THIRD_IP, String.join(", ", ALL), true),
+                Arguments.of(SECOND_IP, String.join(",  ", ALL), true),
+                Arguments.of(SECOND_IP, String.join(".", ALL), false),
+                Arguments.of(FIRST_IP, SECOND_IP, false));
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         strategy = new RemoteAddressStrategy();
     }
@@ -60,8 +48,9 @@ public class RemoteAddressStrategyTest {
         assertThat(strategy.getName(), is("remoteAddress"));
     }
 
-    @Test
-    public void test() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void test_all_combinations(String actualIp, String parameterString, boolean expected) {
         UnleashContext context = UnleashContext.builder().remoteAddress(actualIp).build();
         Map<String, String> parameters = setupParameterMap(parameterString);
 
