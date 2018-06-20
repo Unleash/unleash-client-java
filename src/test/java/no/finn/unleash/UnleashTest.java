@@ -9,12 +9,12 @@ import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.strategy.UserWithIdStrategy;
 import no.finn.unleash.util.UnleashConfig;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
 import static org.mockito.Mockito.mock;
@@ -28,7 +28,7 @@ public class UnleashTest {
     private UnleashContextProvider contextProvider;
     private Unleash unleash;
 
-    @Before
+    @BeforeEach
     public void setup() {
         toggleRepository = mock(ToggleRepository.class);
         contextProvider = mock(UnleashContextProvider.class);
@@ -132,7 +132,6 @@ public class UnleashTest {
 
         assertThat(unleash.isEnabled("test", context), is(true));
     }
-
 
     @Test
     public void inactive_feature_toggle() {

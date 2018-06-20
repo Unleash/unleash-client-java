@@ -1,14 +1,14 @@
 package no.finn.unleash.repository;
 
 import no.finn.unleash.FeatureToggle;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 import java.io.*;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JsonFeatureToggleParserTest {
 
@@ -67,21 +67,13 @@ public class JsonFeatureToggleParserTest {
     @Test
     public void should_throw() throws IOException {
         Reader content = getFileReader("/empty.json");
-        try {
-            JsonToggleParser.fromJson(content);
-        } catch (IllegalStateException e) {
-            assertTrue("Expected IllegalStateException", e instanceof IllegalStateException);
-        }
+        assertThrows(IllegalStateException.class, () -> JsonToggleParser.fromJson(content));
     }
 
     @Test
     public void should_throw_on_mission_features() throws IOException {
         Reader content = getFileReader("/empty-v1.json");
-        try {
-            JsonToggleParser.fromJson(content);
-        } catch (IllegalStateException e) {
-            assertTrue("Expected IllegalStateException", e instanceof IllegalStateException);
-        }
+        assertThrows(IllegalStateException.class, () -> JsonToggleParser.fromJson(content));
     }
 
     @Test

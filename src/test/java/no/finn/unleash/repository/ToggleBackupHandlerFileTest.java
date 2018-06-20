@@ -6,11 +6,11 @@ import java.io.StringReader;
 import java.net.URISyntaxException;
 
 import no.finn.unleash.util.UnleashConfig;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class ToggleBackupHandlerFileTest {
@@ -24,7 +24,9 @@ public class ToggleBackupHandlerFileTest {
                 .build();
         ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(config);
         ToggleCollection toggleCollection = toggleBackupHandlerFile.read();
-        assertNotNull("presentFeature should be present", toggleCollection.getToggle("presentFeature"));
+
+        assertNotNull(toggleCollection.getToggle("presentFeature"),
+                "presentFeature should be present");
     }
 
     @Test
@@ -50,7 +52,8 @@ public class ToggleBackupHandlerFileTest {
         ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(config);
         ToggleCollection toggleCollection = toggleBackupHandlerFile.read();
 
-        assertNull("presentFeature should not be present", toggleCollection.getToggle("presentFeature"));
+        assertNull(toggleCollection.getToggle("presentFeature"),
+                "presentFeature should not be present");
     }
 
     @Test
@@ -70,7 +73,7 @@ public class ToggleBackupHandlerFileTest {
         toggleBackupHandlerFile.write(toggleCollection);
         toggleBackupHandlerFile = new ToggleBackupHandlerFile(config);
         toggleCollection = toggleBackupHandlerFile.read();
-        assertNotNull("writableFeature should be present", toggleCollection.getToggle("writableFeature"));
+        assertNotNull(toggleCollection.getToggle("writableFeature"), "writableFeature should be present");
     }
 
     @Test
@@ -83,8 +86,8 @@ public class ToggleBackupHandlerFileTest {
 
         ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(config);
         ToggleCollection toggleCollection = toggleBackupHandlerFile.read();
-        assertNotNull("presentFeature should be present", toggleCollection.getToggle("featureCustomStrategy"));
-        assertEquals("should have 1 strategy", toggleCollection.getToggle("featureCustomStrategy").getStrategies().size(), 1);
+        assertNotNull(toggleCollection.getToggle("featureCustomStrategy"), "presentFeature should be present");
+        assertEquals(toggleCollection.getToggle("featureCustomStrategy").getStrategies().size(), 1, "should have 1 strategy");
         assertEquals(toggleCollection.getToggle("featureCustomStrategy").getStrategies().get(0).getParameters().get("customParameter"), "customValue");
     }
 

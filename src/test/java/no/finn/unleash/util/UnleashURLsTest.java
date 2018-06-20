@@ -1,11 +1,12 @@
 package no.finn.unleash.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UnleashURLsTest {
 
@@ -34,8 +35,8 @@ public class UnleashURLsTest {
         assertThat(urls.getFetchTogglesURL().toString(), is("http://unleash.com/api/client/features"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test()
     public void should_throw() {
-        new UnleashURLs(URI.create("unleash.com"));
+        assertThrows(IllegalArgumentException.class, () -> new UnleashURLs(URI.create("unleash.com")));
     }
 }
