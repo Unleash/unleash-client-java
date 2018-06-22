@@ -134,6 +134,17 @@ public class UnleashTest {
     }
 
     @Test
+    public void should_support_context_as_part_of_is_enabled_call_and_use_default() {
+        UnleashContext context = UnleashContext.builder().userId("13").build();
+
+        //Set up a toggle using UserWithIdStrategy
+        Map<String, String> params = new HashMap<>();
+        params.put("userIds", "123, 111, 121, 13");
+
+        assertThat(unleash.isEnabled("test", context, true), is(true));
+    }
+
+    @Test
     public void inactive_feature_toggle() {
         ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
         FeatureToggle featureToggle = new FeatureToggle("test", false, Arrays.asList(strategy1));
