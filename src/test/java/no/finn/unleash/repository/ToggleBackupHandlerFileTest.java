@@ -1,16 +1,17 @@
 package no.finn.unleash.repository;
 
-import java.io.File;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URISyntaxException;
 
 import no.finn.unleash.util.UnleashConfig;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ToggleBackupHandlerFileTest {
@@ -91,4 +92,32 @@ public class ToggleBackupHandlerFileTest {
         assertEquals(toggleCollection.getToggle("featureCustomStrategy").getStrategies().get(0).getParameters().get("customParameter"), "customValue");
     }
 
+    @Test
+    public void test_file_is_directory_should_not_crash() {
+        setLogLevel(Level.ERROR); //Mute warn messages.
+
+        String backupFileIsDir = System.getProperty("java.io.tmpdir");
+        UnleashConfig config = UnleashConfig.builder()
+                .appName("test")
+                .unleashAPI("http://unleash.org")
+                .backupFile(backupFileIsDir)
+                .build();
+
+        String staticData = "{\"features\": [{\"name\": \"writableFeature\",\"enabled\": false,\"strategy\": \"default\"}]}";
+        Reader staticReader = new StringReader(staticData);
+        ToggleCollection toggleCollection = JsonToggleParser.fromJson(staticReader);
+
+        ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(config);
+
+        toggleBackupHandlerFile.write(toggleCollection);
+        assertTrue(true, "Did not crash even if backup-writer yields IOException");
+    }
+
+    private void setLogLevel(Level level) {
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+        loggerConfig.setLevel(level);
+        ctx.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
+    }
 }
