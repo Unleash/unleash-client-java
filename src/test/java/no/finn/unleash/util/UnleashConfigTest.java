@@ -5,28 +5,33 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import static no.finn.unleash.util.UnleashConfig.UNLEASH_APP_NAME_HEADER;
 import static no.finn.unleash.util.UnleashConfig.UNLEASH_INSTANCE_ID_HEADER;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UnleashConfigTest {
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void should_require_unleasAPI_url() {
-        UnleashConfig.builder().appName("test").build();
+        Executable ex = () -> UnleashConfig.builder().appName("test").build();
+        assertThrows(IllegalStateException.class, ex);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void should_require_app_name() {
-        UnleashConfig.builder().unleashAPI("http://unleash.com").build();
+        Executable ex = () -> UnleashConfig.builder().unleashAPI("http://unleash.com").build();
+        assertThrows(IllegalStateException.class, ex);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void should_require_valid_uri() {
-        UnleashConfig.builder().unleashAPI("this is not a uri").build();
+        Executable ex = () -> UnleashConfig.builder().unleashAPI("this is not a uri").build();
+        assertThrows(IllegalArgumentException.class, ex);
     }
 
     @Test

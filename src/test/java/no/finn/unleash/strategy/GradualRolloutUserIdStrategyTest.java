@@ -7,13 +7,15 @@ import java.util.Random;
 
 import com.google.common.collect.ImmutableList;
 import no.finn.unleash.UnleashContext;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GradualRolloutUserIdStrategyTest {
     private static final long SEED = 89235015401L;
@@ -23,7 +25,7 @@ public class GradualRolloutUserIdStrategyTest {
     Random rand = new Random(SEED);
     List<Integer> percentages;
 
-    @Before
+    @BeforeEach
     public void init() {
         percentages = ImmutableList.<Integer>builder()
                 .add(1)
@@ -96,7 +98,7 @@ public class GradualRolloutUserIdStrategyTest {
         Map<String, String> params = buildParams(0, "innfinn");
         boolean actual = gradualRolloutStrategy.isEnabled(params, context);
 
-        assertFalse("should not be enabled when 0% rollout", actual);
+        assertFalse(actual, "should not be enabled when 0% rollout");
     }
 
     @Test
@@ -112,7 +114,7 @@ public class GradualRolloutUserIdStrategyTest {
         for(int p = minimumPercentage ; p <=100 ; p++) {
             Map<String, String> params = buildParams(p, groupId);
             boolean actual = gradualRolloutStrategy.isEnabled(params, context);
-            assertTrue("should be enabled when " + p + "% rollout", actual);
+            assertTrue(actual, "should be enabled when " + p + "% rollout");
         }
     }
 
@@ -138,15 +140,15 @@ public class GradualRolloutUserIdStrategyTest {
 
         double actualPercentage = ((double) enabledCount / (double) rounds) * 100.0;
 
-        assertTrue("Expected " + percentage + "%, but was "+ actualPercentage + "%" ,
-                (percentage-1) < actualPercentage);
+        assertTrue((percentage-1) < actualPercentage,
+                "Expected " + percentage + "%, but was "+ actualPercentage + "%");
 
-        assertTrue("Expected " + percentage + "%, but was "+ actualPercentage + "%" ,
-                (percentage+1) > actualPercentage);
+        assertTrue((percentage+1) > actualPercentage,
+                "Expected " + percentage + "%, but was "+ actualPercentage + "%");
     }
 
 
-    @Ignore // Intended for manual execution
+    @Disabled // Intended for manual execution
     @Test
     public void generateReportForListOfLoginIDs() {
         final int numberOfIDs = 200000;

@@ -4,7 +4,7 @@ import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.net.URISyntaxException;
@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 
@@ -28,7 +28,7 @@ public class FeatureToggleRepositoryTest {
         ToggleBackupHandler toggleBackupHandler = new ToggleBackupHandlerFile(config);
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         ToggleRepository toggleRepository = new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
-        assertNull("should be null", toggleRepository.getToggle("unknownFeature"));
+        assertNull(toggleRepository.getToggle("unknownFeature"), "should be null");
     }
 
     @Test

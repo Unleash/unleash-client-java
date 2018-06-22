@@ -3,9 +3,9 @@ package no.finn.unleash.example;
 import no.finn.unleash.DefaultUnleash;
 import no.finn.unleash.Unleash;
 import no.finn.unleash.util.UnleashConfig;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class UnleashUsageTest {
 

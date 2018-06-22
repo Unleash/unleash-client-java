@@ -3,18 +3,18 @@ package no.finn.unleash.strategy;
 import java.util.HashMap;
 import java.util.Map;
 import no.finn.unleash.UnleashContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserWithIdStrategyTest {
     private UserWithIdStrategy strategy;
 
-    @Before
+    @BeforeEach
     public void setup() {
         strategy = new UserWithIdStrategy();
     }
