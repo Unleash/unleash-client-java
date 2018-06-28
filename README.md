@@ -18,7 +18,7 @@ You will require unleash on your class path, pop it in to your pom:
 ```
 
 
-### Create a new a Unleash instance
+    ### Create a new Unleash instance
 
 It is easy to get a new instance of Unleash. In your app you typically *just want one instance of Unelash*, and inject that where you need it. You will typically use a dependency injection frameworks such as Spring or Guice to manage this. 
 
