@@ -79,6 +79,10 @@ public class ClientSpecificationTest {
 
                     Unleash unleash = new DefaultUnleash(config);
 
+                    // We must make sure that unleash-client has had the chance to fetch the toggle state from wire-mock
+                    Thread.sleep(50l);
+                    // Would love to replace this with a "ready" event from the client...
+
                     boolean result = unleash.isEnabled(test.getToggleName(), buildContext(test));
 
                     assertEquals(test.getExpectedResult(), result, test.getDescription());
