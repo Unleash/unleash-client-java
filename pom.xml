@@ -16,6 +16,7 @@
         <version.log4j2>2.1</version.log4j2>
         <coberturaFormat>xml</coberturaFormat>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.unleash.specification>0.0.1</version.unleash.specification>
     </properties>
 
     <name>no.finn.unleash:unleash-client-java</name>
@@ -107,7 +108,6 @@
             <version>0.1.2</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
@@ -178,9 +178,78 @@
                     <repoToken>Z9wVezAubEVqnGPYkOUW031cqHPve2jBz</repoToken>
                 </configuration>
             </plugin>
+
+            <!--Download client-specifications-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>wagon-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>download-client-specifications</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>download-single</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com</url>
+                            <fromFile>Unleash/client-specification/archive/v0.0.1.zip</fromFile>
+                            <toDir>${project.build.directory}/client-specification</toDir>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--Unpack client-specification-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>truezip-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>unpack-client-specification</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>process-test-resources</phase>
+                        <configuration>
+                            <verbose>true</verbose>
+                            <fileset>
+                                <directory>${project.build.directory}/client-specification/v${version.unleash.specification}.zip</directory>
+                                <outputDirectory>${project.build.directory}/client-specification/</outputDirectory>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--Move & rename client-specification-->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>move-client-specification</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.testOutputDirectory}/client-specification</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/client-specification/client-specification-${version.unleash.specification}</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
         </plugins>
     </build>
-
     <repositories>
         <repository>
             <id>jitpack.io</id>

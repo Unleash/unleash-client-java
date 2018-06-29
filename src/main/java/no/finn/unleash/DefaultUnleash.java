@@ -82,6 +82,8 @@ public final class DefaultUnleash implements Unleash {
             enabled = defaultSetting;
         } else if(!featureToggle.isEnabled()) {
             enabled = false;
+        } else if(featureToggle.getStrategies().size() == 0) {
+            return true;
         } else {
             enabled = featureToggle.getStrategies().stream()
                     .filter(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), context))

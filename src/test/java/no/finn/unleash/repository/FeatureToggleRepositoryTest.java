@@ -76,7 +76,7 @@ public class FeatureToggleRepositoryTest {
 
         ToggleRepository toggleRepository = new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
 
-        //run the toggle fetcher callback
+        //run the toggleName fetcher callback
         verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
         verify(toggleFetcher, times(0)).fetchToggles();
         runnableArgumentCaptor.getValue().run();
