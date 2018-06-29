@@ -3,6 +3,7 @@ package no.finn.unleash.repository;
 import java.io.*;
 import java.net.URISyntaxException;
 
+import no.finn.unleash.TestUtil;
 import no.finn.unleash.util.UnleashConfig;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -94,7 +95,7 @@ public class ToggleBackupHandlerFileTest {
 
     @Test
     public void test_file_is_directory_should_not_crash() {
-        setLogLevel(Level.ERROR); //Mute warn messages.
+        TestUtil.setLogLevel(Level.ERROR); //Mute warn messages.
 
         String backupFileIsDir = System.getProperty("java.io.tmpdir");
         UnleashConfig config = UnleashConfig.builder()
@@ -111,13 +112,5 @@ public class ToggleBackupHandlerFileTest {
 
         toggleBackupHandlerFile.write(toggleCollection);
         assertTrue(true, "Did not crash even if backup-writer yields IOException");
-    }
-
-    private void setLogLevel(Level level) {
-        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        Configuration config = ctx.getConfiguration();
-        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
-        loggerConfig.setLevel(level);
-        ctx.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
     }
 }
