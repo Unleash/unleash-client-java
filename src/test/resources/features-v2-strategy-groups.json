@@ -5,42 +5,42 @@
       "name": "Feature.A",
       "description": "lorem ipsum",
       "enabled": true,
-      "strategies": [{
-        "name": "__internal-strategy-group",
-        "operator": "AND",
-        "description": "Optional user defined description",
-        "group": [{
-          "name": "Environment",
-          "parameters": {
-            "env": "production"
-          }
-        },
-          {
-            "name": "GradualRolloutRandom",
-            "parameters": {
-              "percentage": "10"
-            }
-          }
-        ]
-      },
+      "strategies": [
         {
           "name": "__internal-strategy-group",
-          "operator": "OR",
-          "description": "Optional user defined description",
-          "group": [{
-            "name": "ActiveForUserWithId",
-            "parameters": {
-              "userIdList": "123"
-            }
-          },
+          "operator": "AND",
+          "group": [
             {
-              "name": "GradualRolloutRandom",
+              "name": "default",
+              "parameters": {}
+            },
+            {
+              "name": "gradualRolloutRandom",
               "parameters": {
-                "percentage": "10"
+                "percentage": "1"
               }
             }
           ]
-        }]
+        },
+        {
+          "name": "__internal-strategy-group",
+          "operator": "OR",
+          "group": [
+            {
+              "name": "userWithId",
+              "parameters": {
+                "userIdList": "123"
+              }
+            },
+            {
+              "name": "gradualRolloutRandom",
+              "parameters": {
+                "percentage": "0"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
