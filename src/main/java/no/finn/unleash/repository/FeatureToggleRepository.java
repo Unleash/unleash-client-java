@@ -1,17 +1,19 @@
 package no.finn.unleash.repository;
 
+import no.finn.unleash.UnleashEvent;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.Observable;
 import java.util.stream.Collectors;
 
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
 
-public final class FeatureToggleRepository implements ToggleRepository {
+public final class FeatureToggleRepository extends Observable implements ToggleRepository {
     private static final Logger LOG = LogManager.getLogger();
 
     private final ToggleBackupHandler toggleBackupHandler;
@@ -40,6 +42,8 @@ public final class FeatureToggleRepository implements ToggleRepository {
                 if (response.getStatus() == FeatureToggleResponse.Status.CHANGED) {
                     toggleCollection = response.getToggleCollection();
                     toggleBackupHandler.write(response.getToggleCollection());
+                    setChanged();
+                    notifyObservers();
                 }
             } catch (UnleashException e) {
                 LOG.warn("Could not refresh feature toggles", e);

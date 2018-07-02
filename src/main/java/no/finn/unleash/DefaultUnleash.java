@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 import java.util.Optional;
 
 import no.finn.unleash.metric.UnleashMetricService;
@@ -25,7 +26,7 @@ import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 import no.finn.unleash.util.UnleashScheduledExecutorImpl;
 
-public final class DefaultUnleash implements Unleash {
+public final class DefaultUnleash extends Observable implements Unleash {
     private static final List<Strategy> BUILTIN_STRATEGIES = Arrays.asList(new DefaultStrategy(),
             new ApplicationHostnameStrategy(),
             new GradualRolloutRandomStrategy(),
@@ -41,7 +42,7 @@ public final class DefaultUnleash implements Unleash {
     private final ToggleRepository toggleRepository;
     private final Map<String, Strategy> strategyMap;
     private final UnleashContextProvider contextProvider;
-
+    private boolean ready = false;
 
     private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
         return new FeatureToggleRepository(
@@ -61,6 +62,17 @@ public final class DefaultUnleash implements Unleash {
         this.contextProvider = unleashConfig.getContextProvider();
         this.metricService = new UnleashMetricServiceImpl(unleashConfig, unleashScheduledExecutor);
         metricService.register(strategyMap.keySet());
+        this.toggleRepository.addObserver((o, arg) -> {
+            this.setChanged();
+            if(ready) {
+                System.out.println("Unleash repo has changed!");
+                notifyObservers(UnleashEvent.CHANGED);
+            } else {
+                ready = true;
+                System.out.println("Unleash is ready");
+                notifyObservers(UnleashEvent.READY);
+            }
+        });
     }
 
     @Override
