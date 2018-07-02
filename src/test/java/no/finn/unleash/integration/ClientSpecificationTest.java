@@ -1,6 +1,8 @@
 package no.finn.unleash.integration;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,7 +11,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,36 +59,43 @@ public class ClientSpecificationTest {
     }
 
     private List<DynamicTest> createTests(String fileName) throws IOException, URISyntaxException {
-        Reader content = getFileReader("/client-specification/specifications/"+ fileName);
-        TestDefinition definition =  new Gson().fromJson(content, TestDefinition.class);
+        TestDefinition testDefinition = getTestDefinition(fileName);
 
-        return definition.getTests().stream()
+        mockUnleashAPI(testDefinition);
+
+        // Required because the client is available before it may have had the chance to talk with the API
+        String backupFile = writeUnleashBackup(testDefinition);
+
+        // Set-up a unleash instance, using mocked API and backup-file
+        UnleashConfig config = UnleashConfig.builder()
+                .appName(testDefinition.getName())
+                .unleashAPI(new URI("http://localhost:"+ serverMock.port() + "/api/"))
+                .backupFile(backupFile)
+                .build();
+
+        Unleash unleash = new DefaultUnleash(config);
+
+        //Create all test cases in testDefinition.
+        return testDefinition.getTests().stream()
                 .map(test -> DynamicTest.dynamicTest(fileName + "/" + test.getDescription(), () -> {
-                    stubFor(get(urlEqualTo("/api/client/features"))
-                            .withHeader("Accept", equalTo("application/json"))
-                            .willReturn(aResponse()
-                                    .withStatus(200)
-                                    .withHeader("Content-Type", "application/json")
-                                    .withBody(definition.getState().toString())));
-
-                    URI unleashURI = new URI("http://localhost:"+ serverMock.port() + "/api/");
-                    UnleashConfig config = UnleashConfig.builder()
-                            .appName(definition.getName())
-                            .unleashAPI(unleashURI)
-                            .fetchTogglesInterval(1)
-                            .build();
-
-                    Unleash unleash = new DefaultUnleash(config);
-
-                    // We must make sure that unleash-client has had the chance to fetch the toggle state from wire-mock
-                    Thread.sleep(50l);
-                    // Would love to replace this with a "ready" event from the client...
-
                     boolean result = unleash.isEnabled(test.getToggleName(), buildContext(test));
-
                     assertEquals(test.getExpectedResult(), result, test.getDescription());
                 }))
                 .collect(Collectors.toList());
+    }
+
+    private void mockUnleashAPI(TestDefinition definition) {
+        stubFor(get(urlEqualTo("/api/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(definition.getState().toString())));
+    }
+
+    private TestDefinition getTestDefinition(String fileName) throws IOException {
+        Reader content = getFileReader("/client-specification/specifications/"+ fileName);
+        return new Gson().fromJson(content, TestDefinition.class);
     }
 
     private UnleashContext buildContext(TestCase test) {
@@ -106,5 +114,21 @@ public class ClientSpecificationTest {
                 "You must first run 'mvn test' to download the specifications files");
         InputStreamReader reader = new InputStreamReader(in);
         return new BufferedReader(reader);
+    }
+
+    private String writeUnleashBackup(TestDefinition definition) {
+        String backupFile = System.getProperty("java.io.tmpdir") +
+                File.separatorChar +
+                "unleash-test-" +
+                definition.getName() +
+                ".json";
+
+        try (FileWriter writer = new FileWriter(backupFile)) {
+            writer.write(definition.getState().toString());
+        } catch (IOException e) {
+            System.out.println("Unable to write toggles to file");
+        }
+
+        return backupFile;
     }
 }
