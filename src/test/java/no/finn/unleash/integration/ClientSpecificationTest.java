@@ -70,6 +70,7 @@ public class ClientSpecificationTest {
         UnleashConfig config = UnleashConfig.builder()
                 .appName(testDefinition.getName())
                 .unleashAPI(new URI("http://localhost:"+ serverMock.port() + "/api/"))
+                .synchronousFetchOnInitialisation(true)
                 .backupFile(backupFile)
                 .build();
 
@@ -123,6 +124,7 @@ public class ClientSpecificationTest {
                 definition.getName() +
                 ".json";
 
+        // TODO: we can probably drop this after introduction of `synchronousFetchOnInitialisation`.
         try (FileWriter writer = new FileWriter(backupFile)) {
             writer.write(definition.getState().toString());
         } catch (IOException e) {
