@@ -119,6 +119,8 @@ UnleashConfig config = new UnleashConfig.Builder()
             .unleashContextProvider(contextProvider)
             .build();
 
+Unleash unleash = new DefaultUnleash(config);
+
 // Anywhere in the code unleash will get the unleash context from your registered provider. 
 unleash.isEnabled("someToggle");
 ``` 
@@ -138,7 +140,9 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
 
 ### Options 
 
+- **appName** - Required. Should be a unique name identifying the client application using Unleash. 
 - **synchronousFetchOnInitialisation** - Allows the user to specify that the unleash-client should do one synchronous fetch to the `unleash-api` at initialisation. This will slow down the initialisation (the client must wait for a http response). If the `unleash-api` is unavailable the client will silently move on and assume the api will be available later. 
+
 
 ## Local backup
 By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the 
