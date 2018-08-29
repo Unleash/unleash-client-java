@@ -30,6 +30,10 @@ public final class FeatureToggleRepository implements ToggleRepository {
 
         toggleCollection = toggleBackupHandler.read();
 
+        if(unleashConfig.isSynchronousFetchOnInitialisation()){
+            updateToggles().run();
+        }
+
         executor.setInterval(updateToggles(), 0, unleashConfig.getFetchTogglesInterval());
     }
 
