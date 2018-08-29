@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.1.1
+- Add option `synchronousFetchOnInitialisation` to force an inital api-update on init.
+
 ## 3.1.0
 - Expose list of feature names
 - Introduced UNAVAILABLE as possible status in FeatureToggleResponse
