@@ -136,6 +136,9 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
                 .build();
 ```
 
+### Options 
+
+- **synchronousFetchOnInitialisation** - Allows the user to specify that the unleash-client should do one synchronous fetch to the `unleash-api` at initialisation. This will slow down the initialisation (the client must wait for a http response). If the `unleash-api` is unavailable the client will silently move on and assume the api will be available later. 
 
 ## Local backup
 By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the 

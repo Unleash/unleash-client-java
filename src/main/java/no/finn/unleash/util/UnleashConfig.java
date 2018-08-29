@@ -26,6 +26,7 @@ public class UnleashConfig {
     private final long sendMetricsInterval;
     private final boolean disableMetrics;
     private final UnleashContextProvider contextProvider;
+    private final boolean synchronousFetchOnInitialisation;
 
     public UnleashConfig(
             URI unleashAPI,
@@ -37,7 +38,8 @@ public class UnleashConfig {
             long fetchTogglesInterval,
             long sendMetricsInterval,
             boolean disableMetrics,
-            UnleashContextProvider contextProvider) {
+            UnleashContextProvider contextProvider,
+            boolean synchronousFetchOnInitialisation) {
 
 
         if(appName == null) {
@@ -59,6 +61,7 @@ public class UnleashConfig {
         this.sendMetricsInterval = sendMetricsInterval;
         this.disableMetrics = disableMetrics;
         this.contextProvider = contextProvider;
+        this.synchronousFetchOnInitialisation = synchronousFetchOnInitialisation;
     }
 
     public URI getUnleashAPI() {
@@ -105,6 +108,10 @@ public class UnleashConfig {
         return this.backupFile;
     }
 
+    public boolean isSynchronousFetchOnInitialisation() {
+        return synchronousFetchOnInitialisation;
+    }
+
     public UnleashContextProvider getContextProvider() {
         return contextProvider;
     }
@@ -127,6 +134,7 @@ public class UnleashConfig {
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
         private UnleashContextProvider contextProvider = UnleashContextProvider.getDefaultProvider();
+        private boolean synchronousFetchOnInitialisation = false;
 
         static String getDefaultInstanceId() {
             String hostName = "";
@@ -188,6 +196,11 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder synchronousFetchOnInitialisation(boolean enable) {
+            this.synchronousFetchOnInitialisation = enable;
+            return this;
+        }
+
         private String getBackupFile() {
             if(backupFile != null) {
                 return backupFile;
@@ -208,7 +221,8 @@ public class UnleashConfig {
                     fetchTogglesInterval,
                     sendMetricsInterval,
                     disableMetrics,
-                    contextProvider);
+                    contextProvider,
+                    synchronousFetchOnInitialisation);
         }
 
         public String getDefaultSdkVersion() {

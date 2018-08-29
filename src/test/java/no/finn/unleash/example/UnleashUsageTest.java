@@ -17,6 +17,7 @@ public class UnleashUsageTest {
         UnleashConfig config = new UnleashConfig.Builder()
                 .appName("test")
                 .instanceId("my-hostname:6517")
+                .synchronousFetchOnInitialisation(true)
                 .unleashAPI("http://localhost:4242/api")
                 .build();
 

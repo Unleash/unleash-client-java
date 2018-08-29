@@ -104,6 +104,48 @@ public class FeatureToggleRepositoryTest {
         assertTrue("toggleFeatureName2".equals(toggleRepository.getFeatureNames().get(1)));
     }
 
+    @Test
+    public void should_perform_synchronous_fetch_on_initialisation() {
+        UnleashConfig config = UnleashConfig.builder()
+                .synchronousFetchOnInitialisation(true)
+                .appName("test-sync-update")
+                .unleashAPI("http://localhost:8080")
+                .build();
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
+        ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+
+        //setup fetcher
+        ToggleCollection toggleCollection = populatedToggleCollection();
+        FeatureToggleResponse response = new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggleCollection);
+        when(toggleFetcher.fetchToggles()).thenReturn(response);
+
+        new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+
+        verify(toggleFetcher, times(1)).fetchToggles();
+    }
+
+    @Test
+    public void should_not_perform_synchronous_fetch_on_initialisation() {
+        UnleashConfig config = UnleashConfig.builder()
+                .synchronousFetchOnInitialisation(false)
+                .appName("test-sync-update")
+                .unleashAPI("http://localhost:8080")
+                .build();
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
+        ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+
+        //setup fetcher
+        ToggleCollection toggleCollection = populatedToggleCollection();
+        FeatureToggleResponse response = new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggleCollection);
+        when(toggleFetcher.fetchToggles()).thenReturn(response);
+
+        new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+
+        verify(toggleFetcher, times(0)).fetchToggles();
+    }
+
     private ToggleCollection populatedToggleCollection(FeatureToggle... featureToggles) {
         List<FeatureToggle> list = new ArrayList();
         list.addAll(Arrays.asList(featureToggles));
