@@ -18,7 +18,7 @@ import java.time.ZoneOffset;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 
 public class UnleashMetricsSender {
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(UnleashMetricsSender.class);
     private static final int CONNECT_TIMEOUT = 1000;
 
     private final Gson gson;
