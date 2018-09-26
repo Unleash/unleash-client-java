@@ -1,4 +1,6 @@
 # Changelog
+## 3.1.2
+- LogManager.getLogger() not supported on jdk11
 
 ## 3.1.1
 - Add option `synchronousFetchOnInitialisation` to force an inital api-update on init.
