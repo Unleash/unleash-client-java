@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.concurrent.*;
 
 public class UnleashScheduledExecutorImpl implements UnleashScheduledExecutor {
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(UnleashScheduledExecutorImpl.class);
 
     private final ScheduledThreadPoolExecutor timer;
 

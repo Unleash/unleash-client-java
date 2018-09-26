@@ -11,7 +11,7 @@ import java.util.List;
 import com.google.gson.JsonParseException;
 
 public class ToggleBackupHandlerFile implements ToggleBackupHandler {
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(ToggleBackupHandlerFile.class);
     private final String backupFile;
 
     public ToggleBackupHandlerFile(UnleashConfig config){
