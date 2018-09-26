@@ -12,7 +12,7 @@ import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
 
 public final class FeatureToggleRepository implements ToggleRepository {
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(FeatureToggleRepository.class);
 
     private final ToggleBackupHandler toggleBackupHandler;
     private final ToggleFetcher toggleFetcher;
