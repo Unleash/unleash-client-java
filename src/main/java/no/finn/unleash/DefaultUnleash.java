@@ -126,7 +126,10 @@ public final class DefaultUnleash implements Unleash {
 
         final int sum = featureToggle.getVariants().stream().mapToInt(VariantDefinition::getWeight).sum();
         final int score = 1 + StrategyUtils.getNormalizedNumber(
-            context.getUserId().orElse(""),
+            context.getUserId()
+                .orElse(context.getSessionId()
+                    .orElse(context.getRemoteAddress()
+                        .orElse(""))),
             featureToggle.getName(),
             sum);
 
