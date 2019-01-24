@@ -19,6 +19,7 @@ import no.finn.unleash.strategy.GradualRolloutSessionIdStrategy;
 import no.finn.unleash.strategy.GradualRolloutUserIdStrategy;
 import no.finn.unleash.strategy.RemoteAddressStrategy;
 import no.finn.unleash.strategy.Strategy;
+import no.finn.unleash.strategy.StrategyUtils;
 import no.finn.unleash.strategy.UnknownStrategy;
 import no.finn.unleash.strategy.UserWithIdStrategy;
 import no.finn.unleash.util.UnleashConfig;
@@ -76,9 +77,12 @@ public final class DefaultUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(final String toggleName, final UnleashContext context ,final boolean defaultSetting) {
-        final boolean enabled;
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
+        return isEnabled(toggleName, context, defaultSetting, featureToggle);
+    }
 
+    private boolean isEnabled(String toggleName, UnleashContext context, boolean defaultSetting, FeatureToggle featureToggle) {
+        boolean enabled;
         if (featureToggle == null) {
             enabled = defaultSetting;
         } else if(!featureToggle.isEnabled()) {
@@ -98,12 +102,44 @@ public final class DefaultUnleash implements Unleash {
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context) {
-        throw new IllegalStateException("Not implemented");
+        return getVariant(toggleName, context, "");
     }
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, String defaultPayload) {
-        throw new IllegalStateException("Not implemented");
+        final  FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
+        final boolean isEnabled = isEnabled(toggleName, context, false, featureToggle);
+
+        if(isEnabled) {
+            return selectVariant(featureToggle, context)
+                .map(variantDefinition -> new Variant(variantDefinition.getName(), variantDefinition.getPayload(), isEnabled))
+                .orElseGet(() -> new Variant("default", defaultPayload, isEnabled));
+        } else {
+            return new Variant("default", defaultPayload, isEnabled);
+        }
+    }
+
+    private Optional<VariantDefinition> selectVariant(final FeatureToggle featureToggle, UnleashContext context) {
+        if(featureToggle.getVariants() == null || featureToggle.getVariants().isEmpty()){
+            return Optional.empty();
+        }
+
+        final int sum = featureToggle.getVariants().stream().mapToInt(VariantDefinition::getWeight).sum();
+        final int score = 1 + StrategyUtils.getNormalizedNumber(
+            context.getUserId().orElse(""),
+            featureToggle.getName(),
+            sum);
+
+        int num = 0;
+        for (VariantDefinition definition: featureToggle.getVariants()){
+            if(score + num >= definition.getWeight()){
+                return Optional.of(definition);
+            }
+            num += definition.getWeight();
+        }
+
+        //Should not happen
+        return Optional.of(featureToggle.getVariants().get(featureToggle.getVariants().size() - 1));
     }
 
     public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {

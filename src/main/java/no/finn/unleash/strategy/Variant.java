@@ -23,4 +23,13 @@ public class Variant {
     public boolean isEnabled() {
         return enabled;
     }
+
+    @Override
+    public String toString() {
+        return "Variant{" +
+            "name='" + name + '\'' +
+            ", payload='" + payload + '\'' +
+            ", enabled=" + enabled +
+            '}';
+    }
 }
