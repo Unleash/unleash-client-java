@@ -24,6 +24,7 @@ import no.finn.unleash.strategy.UserWithIdStrategy;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 import no.finn.unleash.util.UnleashScheduledExecutorImpl;
+import no.finn.unleash.strategy.Variant;
 
 public final class DefaultUnleash implements Unleash {
     private static final List<Strategy> BUILTIN_STRATEGIES = Arrays.asList(new DefaultStrategy(),
@@ -93,6 +94,16 @@ public final class DefaultUnleash implements Unleash {
 
         count(toggleName, enabled);
         return enabled;
+    }
+
+    @Override
+    public Variant getVariant(String toggleName, UnleashContext context) {
+        throw new IllegalStateException("Not implemented");
+    }
+
+    @Override
+    public Variant getVariant(String toggleName, UnleashContext context, String defaultPayload) {
+        throw new IllegalStateException("Not implemented");
     }
 
     public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {

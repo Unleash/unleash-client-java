@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "features": [
+    {
+      "name": "Test.old",
+      "description": "No variants here!",
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "default"
+        }
+      ],
+      "variants": null,
+      "createdAt": "2019-01-24T10:38:10.370Z"
+    },
+    {
+      "name": "Test.variants",
+      "description": null,
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "default"
+        }
+      ],
+      "variants": [
+        {
+          "name": "variant1",
+          "weight": 50
+        },
+        {
+          "name": "variant2",
+          "weight": 50
+        }
+      ],
+      "createdAt": "2019-01-24T10:41:45.236Z"
+    }
+  ]
+}
