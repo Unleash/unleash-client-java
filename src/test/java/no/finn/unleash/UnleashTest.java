@@ -1,6 +1,7 @@
 package no.finn.unleash;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,12 +196,12 @@ public class UnleashTest {
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        final Variant result = unleash.getVariant("test", context, "TEST");
+        final Variant result = unleash.getVariant("test", context, new Variant("Chuck", "Norris", true));
 
         assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("disabled"));
-        assertThat(result.getPayload(), is("TEST"));
-        assertThat(result.isEnabled(), is(false));
+        assertThat(result.getName(), is("Chuck"));
+        assertThat(result.getPayload(), is("Norris"));
+        assertThat(result.isEnabled(), is(true));
     }
 
     @Test
@@ -211,7 +212,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-        FeatureToggle featureToggle = new FeatureToggle("test", true, Arrays.asList(strategy));
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Collections.singletonList(strategy));
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
@@ -231,7 +232,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-        FeatureToggle featureToggle = new FeatureToggle("test", true, Arrays.asList(strategy), getTestVariants());
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Collections.singletonList(strategy), getTestVariants());
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
@@ -251,7 +252,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-        FeatureToggle featureToggle = new FeatureToggle("test", true, Arrays.asList(strategy), getTestVariants());
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Collections.singletonList(strategy), getTestVariants());
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 

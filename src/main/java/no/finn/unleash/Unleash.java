@@ -18,7 +18,12 @@ public interface Unleash {
     }
 
     Variant getVariant(final String toggleName, final UnleashContext context);
-    Variant getVariant(final String toggleName, final UnleashContext context, final String defaultPayload);
+
+    Variant getVariant(final String toggleName, final UnleashContext context, final Variant defaultValue);
+
+    Variant getVariant(final String toggleName);
+
+    Variant getVariant(final String toggleName, final Variant defaultValue);
 
     List<String> getFeatureToggleNames();
 }

@@ -27,6 +27,8 @@ import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 import no.finn.unleash.util.UnleashScheduledExecutorImpl;
 
+import static java.util.Optional.ofNullable;
+
 public final class DefaultUnleash implements Unleash {
     private static final List<Strategy> BUILTIN_STRATEGIES = Arrays.asList(new DefaultStrategy(),
             new ApplicationHostnameStrategy(),
@@ -43,6 +45,7 @@ public final class DefaultUnleash implements Unleash {
     private final ToggleRepository toggleRepository;
     private final Map<String, Strategy> strategyMap;
     private final UnleashContextProvider contextProvider;
+    private static final Variant defaultVariant = new Variant("disabled", null, false);
 
 
     private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
@@ -108,24 +111,29 @@ public final class DefaultUnleash implements Unleash {
     }
 
     @Override
-    public Variant getVariant(String toggleName, UnleashContext context, String defaultPayload) {
+    public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         final FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
         return Optional.of(isEnabled(toggleName, context, false, featureToggle, false))
             .filter(aBoolean -> aBoolean)
             .flatMap(isEnabled ->
                 selectVariant(featureToggle, context)
                     .map(variantDefinition -> getVariant(isEnabled, variantDefinition, toggleName))
-            ).orElseGet(() -> getDefaultVariant(defaultPayload, toggleName));
+            ).orElseGet(() -> ofNullable(defaultValue).orElse(defaultVariant));
+    }
+
+    @Override
+    public Variant getVariant(String toggleName) {
+        return getVariant(toggleName, contextProvider.getContext());
+    }
+
+    @Override
+    public Variant getVariant(String toggleName, Variant defaultValue) {
+        return getVariant(toggleName, contextProvider.getContext(), defaultValue);
     }
 
     private Variant getVariant(boolean isEnabled, VariantDefinition variantDefinition, final String toggleName) {
         metricService.countVariant(toggleName, variantDefinition.getName());
         return new Variant(variantDefinition.getName(), variantDefinition.getPayload(), isEnabled);
-    }
-
-    private Variant getDefaultVariant(String defaultPayload, String toggleName) {
-        metricService.countVariant(toggleName, "disabled");
-        return new Variant("disabled", defaultPayload, false);
     }
 
     private Optional<VariantDefinition> selectVariant(final FeatureToggle featureToggle, UnleashContext context) {
@@ -157,7 +165,7 @@ public final class DefaultUnleash implements Unleash {
     }
 
     public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
-        return Optional.ofNullable(toggleRepository.getToggle(toggleName));
+        return ofNullable(toggleRepository.getToggle(toggleName));
     }
 
     public List<String> getFeatureToggleNames() {

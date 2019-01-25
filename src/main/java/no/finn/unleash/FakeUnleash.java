@@ -29,12 +29,22 @@ public final class FakeUnleash implements Unleash {
     }
 
     @Override
-    public Variant getVariant(final String toggleName, final UnleashContext context) {
+    public Variant getVariant(String toggleName, UnleashContext context) {
         throw new IllegalStateException("Not implemented");
     }
 
     @Override
-    public Variant getVariant(final String toggleName, final UnleashContext context, final String defaultPayload) {
+    public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
+        throw new IllegalStateException("Not implemented");
+    }
+
+    @Override
+    public Variant getVariant(String toggleName) {
+        throw new IllegalStateException("Not implemented");
+    }
+
+    @Override
+    public Variant getVariant(String toggleName, Variant defaultValue) {
         throw new IllegalStateException("Not implemented");
     }
 
