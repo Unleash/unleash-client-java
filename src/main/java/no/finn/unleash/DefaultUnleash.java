@@ -45,7 +45,7 @@ public final class DefaultUnleash implements Unleash {
     private final ToggleRepository toggleRepository;
     private final Map<String, Strategy> strategyMap;
     private final UnleashContextProvider contextProvider;
-    private static final Variant defaultVariant = new Variant("disabled", null, false);
+    private static final Variant disabledVariant = new Variant("disabled", null, false);
 
 
     private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
@@ -118,7 +118,7 @@ public final class DefaultUnleash implements Unleash {
             .flatMap(isEnabled ->
                 selectVariant(featureToggle, context)
                     .map(variantDefinition -> getVariant(isEnabled, variantDefinition, toggleName))
-            ).orElseGet(() -> ofNullable(defaultValue).orElse(defaultVariant));
+            ).orElseGet(() -> ofNullable(defaultValue).orElse(disabledVariant));
     }
 
     @Override

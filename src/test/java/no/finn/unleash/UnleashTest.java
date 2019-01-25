@@ -264,6 +264,84 @@ public class UnleashTest {
         assertThat(result.isEnabled(), is(true));
     }
 
+    @Test
+    public void get_disabled_variant_without_context() {
+
+        //Set up a toggleName using UserWithIdStrategy
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Collections.singletonList(strategy1), getTestVariants());
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        final Variant result = unleash.getVariant("test");
+
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getName(), is("disabled"));
+        assertThat(result.getPayload(), is(nullValue()));
+        assertThat(result.isEnabled(), is(false));
+    }
+
+    @Test
+    public void get_default_variant_without_context() {
+        //Set up a toggleName using UserWithIdStrategy
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Collections.singletonList(strategy1), getTestVariants());
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        final Variant result = unleash.getVariant("test", new Variant("Chuck", "Norris", true));
+
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getName(), is("Chuck"));
+        assertThat(result.getPayload(), is("Norris"));
+        assertThat(result.isEnabled(), is(true));
+    }
+
+    @Test
+    public void get_first_variant_without_context() {
+
+        UnleashContext context = UnleashContext.builder().userId("111").build();
+        when(contextProvider.getContext()).thenReturn(context);
+
+        //Set up a toggleName using UserWithIdStrategy
+        Map<String, String> params = new HashMap<>();
+        params.put("userIds", "123, 111, 121");
+        ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Arrays.asList(strategy), getTestVariants());
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        final Variant result = unleash.getVariant("test");
+
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getName(), is("en"));
+        assertThat(result.getPayload(), is("en"));
+        assertThat(result.isEnabled(), is(true));
+    }
+
+    @Test
+    public void get_second_variant_without_context() {
+
+        UnleashContext context = UnleashContext.builder().userId("123").build();
+        when(contextProvider.getContext()).thenReturn(context);
+
+        //Set up a toggleName using UserWithIdStrategy
+        Map<String, String> params = new HashMap<>();
+        params.put("userIds", "123, 111, 121");
+        ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
+        FeatureToggle featureToggle = new FeatureToggle("test", true, Arrays.asList(strategy), getTestVariants());
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        final Variant result = unleash.getVariant("test");
+
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getName(), is("to"));
+        assertThat(result.getPayload(), is("to"));
+        assertThat(result.isEnabled(), is(true));
+
+    }
+
     private List<VariantDefinition> getTestVariants() {
         return Arrays.asList(
             new VariantDefinition("en", 50, "en"),
