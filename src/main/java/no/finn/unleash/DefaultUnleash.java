@@ -27,6 +27,7 @@ import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 import no.finn.unleash.util.UnleashScheduledExecutorImpl;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 public final class DefaultUnleash implements Unleash {
@@ -113,12 +114,13 @@ public final class DefaultUnleash implements Unleash {
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         final FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
-        return Optional.of(isEnabled(toggleName, context, false, featureToggle, false))
-            .filter(aBoolean -> aBoolean)
-            .flatMap(isEnabled ->
-                selectVariant(featureToggle, context)
-                    .map(variantDefinition -> getVariant(isEnabled, variantDefinition, toggleName))
-            ).orElseGet(() -> ofNullable(defaultValue).orElse(disabledVariant));
+        return count(of(isEnabled(toggleName, context, false, featureToggle, false))
+                .filter(enabled -> enabled)
+                .flatMap(isEnabled ->
+                    selectVariant(featureToggle, context)
+                        .map(variantDefinition -> new Variant(variantDefinition.getName(), variantDefinition.getPayload(), true))
+                ).orElseGet(() -> ofNullable(defaultValue).orElse(disabledVariant)),
+            toggleName);
     }
 
     @Override
@@ -131,9 +133,10 @@ public final class DefaultUnleash implements Unleash {
         return getVariant(toggleName, contextProvider.getContext(), defaultValue);
     }
 
-    private Variant getVariant(boolean isEnabled, VariantDefinition variantDefinition, final String toggleName) {
-        metricService.countVariant(toggleName, variantDefinition.getName());
-        return new Variant(variantDefinition.getName(), variantDefinition.getPayload(), isEnabled);
+
+    private Variant count(Variant variant, final String toggleName){
+        metricService.countVariant(toggleName, variant.getName());
+        return variant;
     }
 
     private Optional<VariantDefinition> selectVariant(final FeatureToggle featureToggle, UnleashContext context) {
@@ -154,7 +157,7 @@ public final class DefaultUnleash implements Unleash {
         for (final VariantDefinition definition : featureToggle.getVariants()) {
             if (definition.getWeight() != 0) {
                 if (score + num >= definition.getWeight()) {
-                    return Optional.of(definition);
+                    return of(definition);
                 }
                 num += definition.getWeight();
             }
