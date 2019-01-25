@@ -9,8 +9,8 @@ import java.util.Optional;
 import no.finn.unleash.metric.UnleashMetricService;
 import no.finn.unleash.metric.UnleashMetricServiceImpl;
 import no.finn.unleash.repository.FeatureToggleRepository;
-import no.finn.unleash.repository.ToggleBackupHandlerFile;
 import no.finn.unleash.repository.HttpToggleFetcher;
+import no.finn.unleash.repository.ToggleBackupHandlerFile;
 import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.ApplicationHostnameStrategy;
 import no.finn.unleash.strategy.DefaultStrategy;
@@ -22,10 +22,10 @@ import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.strategy.StrategyUtils;
 import no.finn.unleash.strategy.UnknownStrategy;
 import no.finn.unleash.strategy.UserWithIdStrategy;
+import no.finn.unleash.strategy.Variant;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 import no.finn.unleash.util.UnleashScheduledExecutorImpl;
-import no.finn.unleash.strategy.Variant;
 
 public final class DefaultUnleash implements Unleash {
     private static final List<Strategy> BUILTIN_STRATEGIES = Arrays.asList(new DefaultStrategy(),
@@ -78,10 +78,10 @@ public final class DefaultUnleash implements Unleash {
     @Override
     public boolean isEnabled(final String toggleName, final UnleashContext context ,final boolean defaultSetting) {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
-        return isEnabled(toggleName, context, defaultSetting, featureToggle);
+        return isEnabled(toggleName, context, defaultSetting, featureToggle, true);
     }
 
-    private boolean isEnabled(String toggleName, UnleashContext context, boolean defaultSetting, FeatureToggle featureToggle) {
+    private boolean isEnabled(String toggleName, UnleashContext context, boolean defaultSetting, FeatureToggle featureToggle, boolean count) {
         boolean enabled;
         if (featureToggle == null) {
             enabled = defaultSetting;
@@ -96,31 +96,40 @@ public final class DefaultUnleash implements Unleash {
                     .isPresent();
         }
 
-        count(toggleName, enabled);
+        if(count) {
+            count(toggleName, enabled);
+        }
         return enabled;
     }
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context) {
-        return getVariant(toggleName, context, "");
+        return getVariant(toggleName, context, null);
     }
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, String defaultPayload) {
-        final  FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
-        final boolean isEnabled = isEnabled(toggleName, context, false, featureToggle);
+        final FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
+        return Optional.of(isEnabled(toggleName, context, false, featureToggle, false))
+            .filter(aBoolean -> aBoolean)
+            .flatMap(isEnabled ->
+                selectVariant(featureToggle, context)
+                    .map(variantDefinition -> getVariant(isEnabled, variantDefinition, toggleName))
+            ).orElseGet(() -> getDefaultVariant(defaultPayload, toggleName));
+    }
 
-        if(isEnabled) {
-            return selectVariant(featureToggle, context)
-                .map(variantDefinition -> new Variant(variantDefinition.getName(), variantDefinition.getPayload(), isEnabled))
-                .orElseGet(() -> new Variant("default", defaultPayload, isEnabled));
-        } else {
-            return new Variant("default", defaultPayload, isEnabled);
-        }
+    private Variant getVariant(boolean isEnabled, VariantDefinition variantDefinition, final String toggleName) {
+        metricService.countVariant(toggleName, variantDefinition.getName());
+        return new Variant(variantDefinition.getName(), variantDefinition.getPayload(), isEnabled);
+    }
+
+    private Variant getDefaultVariant(String defaultPayload, String toggleName) {
+        metricService.countVariant(toggleName, "disabled");
+        return new Variant("disabled", defaultPayload, false);
     }
 
     private Optional<VariantDefinition> selectVariant(final FeatureToggle featureToggle, UnleashContext context) {
-        if(featureToggle.getVariants() == null || featureToggle.getVariants().isEmpty()){
+        if (featureToggle.getVariants() == null || featureToggle.getVariants().isEmpty()) {
             return Optional.empty();
         }
 
@@ -129,20 +138,22 @@ public final class DefaultUnleash implements Unleash {
             context.getUserId()
                 .orElse(context.getSessionId()
                     .orElse(context.getRemoteAddress()
-                        .orElse(""))),
+                        .orElse(Double.toString(Math.random())))),
             featureToggle.getName(),
             sum);
 
         int num = 0;
-        for (VariantDefinition definition: featureToggle.getVariants()){
-            if(score + num >= definition.getWeight()){
-                return Optional.of(definition);
+        for (final VariantDefinition definition : featureToggle.getVariants()) {
+            if (definition.getWeight() != 0) {
+                if (score + num >= definition.getWeight()) {
+                    return Optional.of(definition);
+                }
+                num += definition.getWeight();
             }
-            num += definition.getWeight();
         }
 
         //Should not happen
-        return Optional.of(featureToggle.getVariants().get(featureToggle.getVariants().size() - 1));
+        return Optional.empty();
     }
 
     public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {

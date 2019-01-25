@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -197,7 +198,7 @@ public class UnleashTest {
         final Variant result = unleash.getVariant("test", context, "TEST");
 
         assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("default"));
+        assertThat(result.getName(), is("disabled"));
         assertThat(result.getPayload(), is("TEST"));
         assertThat(result.isEnabled(), is(false));
     }
@@ -217,8 +218,8 @@ public class UnleashTest {
         final Variant result = unleash.getVariant("test", context);
 
         assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("default"));
-        assertThat(result.getPayload(), is(""));
+        assertThat(result.getName(), is("disabled"));
+        assertThat(result.getPayload(), is(nullValue()));
         assertThat(result.isEnabled(), is(false));
     }
 
