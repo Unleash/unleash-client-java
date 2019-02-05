@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import no.finn.unleash.strategy.Variant;
+
 public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;
@@ -24,6 +26,26 @@ public final class FakeUnleash implements Unleash {
         } else {
             return features.getOrDefault(toggleName, defaultSetting);
         }
+    }
+
+    @Override
+    public Variant getVariant(String toggleName, UnleashContext context) {
+        throw new IllegalStateException("Not implemented");
+    }
+
+    @Override
+    public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
+        throw new IllegalStateException("Not implemented");
+    }
+
+    @Override
+    public Variant getVariant(String toggleName) {
+        throw new IllegalStateException("Not implemented");
+    }
+
+    @Override
+    public Variant getVariant(String toggleName, Variant defaultValue) {
+        throw new IllegalStateException("Not implemented");
     }
 
     @Override
