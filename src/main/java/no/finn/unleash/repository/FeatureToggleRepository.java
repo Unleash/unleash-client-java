@@ -44,6 +44,8 @@ public final class FeatureToggleRepository implements ToggleRepository {
                 if (response.getStatus() == FeatureToggleResponse.Status.CHANGED) {
                     toggleCollection = response.getToggleCollection();
                     toggleBackupHandler.write(response.getToggleCollection());
+                } else {
+                    LOG.warn("Error fetching toggles from Unleash API (StatusCode: {})", response.getHttpStatusCode());
                 }
             } catch (UnleashException e) {
                 LOG.warn("Could not refresh feature toggles", e);
