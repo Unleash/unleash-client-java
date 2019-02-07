@@ -46,6 +46,11 @@ public class UnleashConfig {
             throw new IllegalStateException("You are required to specify the unleash appName");
         }
 
+        if(instanceId == null) {
+            throw new IllegalStateException("You are required to specify the unleash instanceId");
+        }
+
+
         if(unleashAPI == null) {
             throw new IllegalStateException("You are required to specify the unleashAPI url");
         }

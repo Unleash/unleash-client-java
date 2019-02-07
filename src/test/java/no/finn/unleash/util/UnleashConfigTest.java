@@ -120,4 +120,15 @@ public class UnleashConfigTest {
         UnleashConfig.setRequestProperties(connection, unleashConfig);
         assertThat(connection.getRequestProperty(headerName), is(headerValue));
     }
+
+    @Test
+    public void should_require_instanceId() {
+        Executable ex = () ->  UnleashConfig.builder()
+                .appName("my-app")
+                .instanceId(null)
+                .unleashAPI("http://unleash.org")
+                .build();
+
+        assertThrows(IllegalStateException.class, ex);
+    }
 }
