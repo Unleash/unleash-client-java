@@ -16,6 +16,8 @@ import java.net.URISyntaxException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -90,6 +92,29 @@ public class HttpToggleFetcherTest {
         verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
     }
+
+    @Test
+    public void happy_path_test_version_with_variants() throws URISyntaxException {
+        stubFor(get(urlEqualTo("/api/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("features-v1-with-variants.json")));
+
+        URI uri = new URI("http://localhost:"+serverMock.port() + "/api/");
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
+        FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
+        FeatureToggle featureX = response.getToggleCollection().getToggle("Test.variants");
+
+        assertTrue(featureX.isEnabled());
+        assertThat(featureX.getVariants().get(0).getName(), is("variant1"));
+
+        verify(getRequestedFor(urlMatching("/api/client/features"))
+                .withHeader("Content-Type", matching("application/json")));
+    }
+
 
     @Test
     @ExtendWith(UnleashExceptionExtension.class)

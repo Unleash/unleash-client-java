@@ -45,7 +45,7 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
 
     @Override
     public void countVariant(String toggleName, String variantName) {
-        //TODO Implement this
+        currentMetricsBucket.registerCount(toggleName, variantName);
     }
 
     private Runnable sendMetrics() {
