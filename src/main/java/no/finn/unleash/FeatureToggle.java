@@ -2,6 +2,8 @@ package no.finn.unleash;
 
 import java.util.List;
 
+import no.finn.unleash.variant.VariantDefinition;
+
 import static java.util.Collections.emptyList;
 
 public final class FeatureToggle {

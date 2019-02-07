@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.strategy.Variant;
-
 public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;

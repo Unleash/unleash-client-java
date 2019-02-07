@@ -2,8 +2,6 @@ package no.finn.unleash;
 
 import java.util.List;
 
-import no.finn.unleash.strategy.Variant;
-
 public interface Unleash {
     boolean isEnabled(String toggleName);
 

@@ -1,6 +1,9 @@
-package no.finn.unleash.strategy;
+package no.finn.unleash;
+
+import java.util.Optional;
 
 public class Variant {
+    public static final Variant DISABLED_VARIANT = new Variant("disabled", null, false);
 
     private final String name;
     private final String payload;
@@ -16,8 +19,8 @@ public class Variant {
         return name;
     }
 
-    public String getPayload() {
-        return payload;
+    public Optional<String> getPayload() {
+        return Optional.ofNullable(payload);
     }
 
     public boolean isEnabled() {
