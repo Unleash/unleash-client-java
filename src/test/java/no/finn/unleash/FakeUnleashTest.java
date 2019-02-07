@@ -96,4 +96,22 @@ public class FakeUnleashTest {
         assertTrue(fakeUnleash.getFeatureToggleNames().containsAll(expected));
     }
 
+    @Test
+    public void should_get_variant() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.enable("t1", "t2");
+        fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
+
+        assertThat(fakeUnleash.getVariant("t1").getName(), is("a"));
+    }
+
+    @Test
+    public void should_get_disabled_variant_when_toggle_is_disabled() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.disable("t1", "t2");
+        fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
+
+        assertThat(fakeUnleash.getVariant("t1").getName(), is("disabled"));
+    }
+
 }

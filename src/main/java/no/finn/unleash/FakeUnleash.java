@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;
     private Map<String, Boolean> features = new HashMap<>();
+    private Map<String, Variant> variants = new HashMap<>();
 
     @Override
     public boolean isEnabled(String toggleName) {
@@ -29,22 +29,26 @@ public final class FakeUnleash implements Unleash {
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context) {
-        throw new IllegalStateException("Not implemented");
+        return getVariant(toggleName, Variant.DISABLED_VARIANT);
     }
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
-        throw new IllegalStateException("Not implemented");
+        return getVariant(toggleName, defaultValue);
     }
 
     @Override
     public Variant getVariant(String toggleName) {
-        throw new IllegalStateException("Not implemented");
+        return getVariant(toggleName, Variant.DISABLED_VARIANT);
     }
 
     @Override
     public Variant getVariant(String toggleName, Variant defaultValue) {
-        throw new IllegalStateException("Not implemented");
+        if(isEnabled(toggleName) && variants.containsKey(toggleName)) {
+            return variants.get(toggleName);
+        } else {
+            return defaultValue;
+        }
     }
 
     @Override
@@ -86,5 +90,9 @@ public final class FakeUnleash implements Unleash {
         for(String name: features) {
             this.features.remove(name);
         }
+    }
+
+    public void setVariant(String t1, Variant a) {
+        variants.put(t1, a);
     }
 }
