@@ -165,6 +165,8 @@ public class HttpToggleFetcherTest {
             FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
             assertEquals(response.getStatus(), FeatureToggleResponse.Status.UNAVAILABLE,
                     "Should return status UNAVAILABLE");
+            assertEquals(response.getHttpStatusCode(), httpCode,
+                    "Should return correct status code");
 
             verify(getRequestedFor(urlMatching("/api/client/features"))
                     .withHeader("Content-Type", matching("application/json")));
