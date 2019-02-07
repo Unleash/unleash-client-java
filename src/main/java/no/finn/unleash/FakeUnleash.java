@@ -1,5 +1,6 @@
 package no.finn.unleash;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,7 @@ public final class FakeUnleash implements Unleash {
 
     @Override
     public List<String> getFeatureToggleNames() {
-        return features.keySet().stream().collect(Collectors.toList());
+        return new ArrayList<>(features.keySet());
     }
 
     public void enableAll() {

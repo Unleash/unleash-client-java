@@ -12,6 +12,7 @@ import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.strategy.UserWithIdStrategy;
 import no.finn.unleash.util.UnleashConfig;
 
+import no.finn.unleash.variant.Payload;
 import no.finn.unleash.variant.VariantDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -200,7 +201,7 @@ public class UnleashTest {
 
         assertThat(result, is(notNullValue()));
         assertThat(result.getName(), is("Chuck"));
-        assertThat(result.getPayload().get(), is("Norris"));
+        assertThat(result.getPayload().map(Payload::getValue).get(), is("Norris"));
         assertThat(result.isEnabled(), is(true));
     }
 
@@ -220,7 +221,7 @@ public class UnleashTest {
 
         assertThat(result, is(notNullValue()));
         assertThat(result.getName(), is("disabled"));
-        assertThat(result.getPayload(), is(Optional.empty()));
+        assertThat(result.getPayload().map(Payload::getValue), is(Optional.empty()));
         assertThat(result.isEnabled(), is(false));
     }
 
@@ -240,7 +241,7 @@ public class UnleashTest {
 
         assertThat(result, is(notNullValue()));
         assertThat(result.getName(), is("en"));
-        assertThat(result.getPayload().get(), is("en"));
+        assertThat(result.getPayload().map(Payload::getValue).get(), is("en"));
         assertThat(result.isEnabled(), is(true));
     }
 
@@ -260,7 +261,7 @@ public class UnleashTest {
 
         assertThat(result, is(notNullValue()));
         assertThat(result.getName(), is("to"));
-        assertThat(result.getPayload().get(), is("to"));
+        assertThat(result.getPayload().map(Payload::getValue).get(), is("to"));
         assertThat(result.isEnabled(), is(true));
     }
 
@@ -277,7 +278,7 @@ public class UnleashTest {
 
         assertThat(result, is(notNullValue()));
         assertThat(result.getName(), is("disabled"));
-        assertThat(result.getPayload(), is(Optional.empty()));
+        assertThat(result.getPayload().map(Payload::getValue), is(Optional.empty()));
         assertThat(result.isEnabled(), is(false));
     }
 
@@ -293,7 +294,7 @@ public class UnleashTest {
 
         assertThat(result, is(notNullValue()));
         assertThat(result.getName(), is("Chuck"));
-        assertThat(result.getPayload().get(), is("Norris"));
+        assertThat(result.getPayload().map(Payload::getValue).get(), is("Norris"));
         assertThat(result.isEnabled(), is(true));
     }
 
@@ -315,7 +316,7 @@ public class UnleashTest {
 
         assertThat(result, is(notNullValue()));
         assertThat(result.getName(), is("en"));
-        assertThat(result.getPayload().get(), is("en"));
+        assertThat(result.getPayload().map(Payload::getValue).get(), is("en"));
         assertThat(result.isEnabled(), is(true));
     }
 
@@ -337,15 +338,14 @@ public class UnleashTest {
 
         assertThat(result, is(notNullValue()));
         assertThat(result.getName(), is("to"));
-        assertThat(result.getPayload().get(), is("to"));
+        assertThat(result.getPayload().map(Payload::getValue).get(), is("to"));
         assertThat(result.isEnabled(), is(true));
-
     }
 
     private List<VariantDefinition> getTestVariants() {
         return asList(
-            new VariantDefinition("en", 50, "en", Collections.emptyList()),
-            new VariantDefinition("to", 50, "to", Collections.emptyList())
+            new VariantDefinition("en", 50, new Payload("string", "en"), Collections.emptyList()),
+            new VariantDefinition("to", 50, new Payload("string", "to"), Collections.emptyList())
         );
     }
 }

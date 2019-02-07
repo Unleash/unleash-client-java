@@ -31,7 +31,7 @@ public class VariantUtilTest {
 
     @Test
     public void should_return_variant1() {
-        VariantDefinition v1 = new VariantDefinition("a", 33, "asd", Collections.emptyList());
+        VariantDefinition v1 = new VariantDefinition("a", 33, new Payload("string", "asd"), Collections.emptyList());
         VariantDefinition v2 = new VariantDefinition("b", 33);
         VariantDefinition v3 = new VariantDefinition("c", 34);
 
@@ -51,7 +51,7 @@ public class VariantUtilTest {
 
     @Test
     public void should_return_variant2() {
-        VariantDefinition v1 = new VariantDefinition("a", 33, "asd", Collections.emptyList());
+        VariantDefinition v1 = new VariantDefinition("a", 33, new Payload("string", "asd"), Collections.emptyList());
         VariantDefinition v2 = new VariantDefinition("b", 33);
         VariantDefinition v3 = new VariantDefinition("c", 34);
 
@@ -69,7 +69,7 @@ public class VariantUtilTest {
 
     @Test
     public void should_return_variant3() {
-        VariantDefinition v1 = new VariantDefinition("a", 33, "asd", Collections.emptyList());
+        VariantDefinition v1 = new VariantDefinition("a", 33);
         VariantDefinition v2 = new VariantDefinition("b", 33);
         VariantDefinition v3 = new VariantDefinition("c", 34);
 
@@ -87,7 +87,7 @@ public class VariantUtilTest {
 
     @Test
     public void should_return_variant_override() {
-        VariantDefinition v1 = new VariantDefinition("a", 33, "asd", Collections.emptyList());
+        VariantDefinition v1 = new VariantDefinition("a", 33);
         VariantOverride override = new VariantOverride("userId", asList("11", "12", "123", "44"));
         VariantDefinition v2 = new VariantDefinition("b", 33, null, asList(override));
         VariantDefinition v3 = new VariantDefinition("c", 34);
@@ -106,10 +106,10 @@ public class VariantUtilTest {
 
     @Test
     public void should_return_variant_override_on_remote_adr() {
-        VariantDefinition v1 = new VariantDefinition("a", 33, "asd", Collections.emptyList());
+        VariantDefinition v1 = new VariantDefinition("a", 33, new Payload("string", "asd"), Collections.emptyList());
         VariantDefinition v2 = new VariantDefinition("b", 33, null, Collections.emptyList());
         VariantOverride override = new VariantOverride("remoteAddress", asList("11.11.11.11"));
-        VariantDefinition v3 = new VariantDefinition("c", 34, "blob", asList(override));
+        VariantDefinition v3 = new VariantDefinition("c", 34, new Payload("string", "blob"), asList(override));
 
         FeatureToggle toggle = new FeatureToggle(
                 "test.variants",
@@ -127,7 +127,7 @@ public class VariantUtilTest {
 
     @Test
     public void should_return_variant_override_on_custom_prop() {
-        VariantDefinition v1 = new VariantDefinition("a", 33, "asd", Collections.emptyList());
+        VariantDefinition v1 = new VariantDefinition("a", 33);
         VariantOverride override = new VariantOverride("env", asList("ci", "local", "dev"));
         VariantDefinition v2 = new VariantDefinition("b", 33, null, asList(override));
         VariantDefinition v3 = new VariantDefinition("c", 34);
@@ -151,7 +151,7 @@ public class VariantUtilTest {
     public void should_return_variant_override_on_sessionId() {
         String sessionId = "122221";
 
-        VariantDefinition v1 = new VariantDefinition("a", 33, "asd", Collections.emptyList());
+        VariantDefinition v1 = new VariantDefinition("a", 33);
         VariantOverride override_env = new VariantOverride("env", asList("dev"));
         VariantOverride override_session = new VariantOverride("sessionId", asList(sessionId));
         VariantDefinition v2 = new VariantDefinition("b", 33, null, asList(override_env, override_session));

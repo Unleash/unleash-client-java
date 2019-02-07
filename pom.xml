@@ -16,7 +16,7 @@
         <version.log4j2>2.1</version.log4j2>
         <coberturaFormat>xml</coberturaFormat>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.unleash.specification>0.0.1</version.unleash.specification>
+        <version.unleash.specification>0.1.0</version.unleash.specification>
     </properties>
 
     <name>no.finn.unleash:unleash-client-java</name>
@@ -198,7 +198,7 @@
                         </goals>
                         <configuration>
                             <url>https://github.com</url>
-                            <fromFile>Unleash/client-specification/archive/v0.0.1.zip</fromFile>
+                            <fromFile>Unleash/client-specification/archive/v${version.unleash.specification}.zip</fromFile>
                             <toDir>${project.build.directory}/client-specification</toDir>
                         </configuration>
                     </execution>
