@@ -1,4 +1,8 @@
 # Changelog
+
+## next
+- fix: instanceId cannot be null.
+
 ## 3.1.2
 - LogManager.getLogger() not supported on jdk11
 
