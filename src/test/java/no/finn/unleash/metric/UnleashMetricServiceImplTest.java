@@ -128,4 +128,47 @@ public class UnleashMetricServiceImplTest {
         assertThat(bucket.getToggles().get("someToggle").getNo(), is(1l));
     }
 
+    @Test
+    public void should_record_and_send_variant_metrics() {
+        UnleashConfig config = UnleashConfig
+                .builder()
+                .appName("test")
+                .sendMetricsInterval(10)
+                .unleashAPI("http://unleash.com")
+                .build();
+
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        UnleashMetricsSender sender = mock(UnleashMetricsSender.class);
+
+        UnleashMetricService unleashMetricService = new UnleashMetricServiceImpl(config, sender, executor);
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v2");
+        unleashMetricService.countVariant("someToggle", "disabled");
+
+        //Call the sendMetricsCallback
+        ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
+        verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
+        sendMetricsCallback.getValue().run();
+
+        ArgumentCaptor<ClientMetrics> clientMetricsArgumentCaptor = ArgumentCaptor.forClass(ClientMetrics.class);
+        verify(sender).sendMetrics(clientMetricsArgumentCaptor.capture());
+
+
+        ClientMetrics clientMetrics = clientMetricsArgumentCaptor.getValue();
+        MetricsBucket bucket = clientMetricsArgumentCaptor.getValue().getBucket();
+
+        assertThat(clientMetrics.getAppName(), is(config.getAppName()));
+        assertThat(clientMetrics.getInstanceId(), is(config.getInstanceId()));
+        assertNotNull(bucket.getStart());
+        assertNotNull(bucket.getStop());
+        assertThat(bucket.getToggles().size(), is(1));
+        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v1"), is(3l));
+        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v2"), is(1l));
+        assertThat(bucket.getToggles().get("someToggle").getVariants().get("disabled"), is(1l));
+        assertThat(bucket.getToggles().get("someToggle").getYes(), is(0l));
+        assertThat(bucket.getToggles().get("someToggle").getNo(), is(0l));
+    }
+
 }

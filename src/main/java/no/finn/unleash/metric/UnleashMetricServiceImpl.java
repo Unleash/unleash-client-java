@@ -43,6 +43,11 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
         currentMetricsBucket.registerCount(toggleName, active);
     }
 
+    @Override
+    public void countVariant(String toggleName, String variantName) {
+        currentMetricsBucket.registerCount(toggleName, variantName);
+    }
+
     private Runnable sendMetrics() {
         return () -> {
             MetricsBucket metricsBucket = this.currentMetricsBucket;

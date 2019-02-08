@@ -16,13 +16,19 @@ class MetricsBucket {
     }
 
     void registerCount(String toggleName, boolean active) {
-        if(toggles.containsKey(toggleName)) {
-            toggles.get(toggleName).register(active);
-        } else {
+        getOrCreate(toggleName).register(active);
+    }
+
+    void registerCount(String toggleName, String variantName) {
+        getOrCreate(toggleName).register(variantName);
+    }
+
+    private ToggleCount getOrCreate(String toggleName) {
+        if(!toggles.containsKey(toggleName)) {
             ToggleCount counter = new ToggleCount();
-            counter.register(active);
             toggles.put(toggleName, counter);
         }
+        return toggles.get(toggleName);
     }
 
     void end() {
