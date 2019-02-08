@@ -25,6 +25,7 @@ import com.google.gson.reflect.TypeToken;
 import no.finn.unleash.DefaultUnleash;
 import no.finn.unleash.Unleash;
 import no.finn.unleash.UnleashContext;
+import no.finn.unleash.Variant;
 import no.finn.unleash.util.UnleashConfig;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -54,6 +55,7 @@ public class ClientSpecificationTest {
         List<DynamicTest> tests = new ArrayList<>();
         for(String name : testDefinitions) {
             tests.addAll(createTests(name));
+            tests.addAll(createVariantTests(name));
         }
         return tests.stream();
     }
@@ -61,6 +63,34 @@ public class ClientSpecificationTest {
     private List<DynamicTest> createTests(String fileName) throws IOException, URISyntaxException {
         TestDefinition testDefinition = getTestDefinition(fileName);
 
+        Unleash unleash = setupUnleash(testDefinition);
+
+        //Create all test cases in testDefinition.
+        return testDefinition.getTests().stream()
+                .map(test -> DynamicTest.dynamicTest(fileName + "/" + test.getDescription(), () -> {
+                    boolean result = unleash.isEnabled(test.getToggleName(), buildContext(test.getContext()));
+                    assertEquals(test.getExpectedResult(), result, test.getDescription());
+                }))
+                .collect(Collectors.toList());
+    }
+
+    private List<DynamicTest> createVariantTests(String fileName) throws IOException, URISyntaxException {
+        TestDefinition testDefinition = getTestDefinition(fileName);
+
+        Unleash unleash = setupUnleash(testDefinition);
+
+        //Create all test cases in testDefinition.
+        return testDefinition.getVariantTests().stream()
+                .map(test -> DynamicTest.dynamicTest(fileName + "/" + test.getDescription(), () -> {
+                    Variant result = unleash.getVariant(test.getToggleName(), buildContext(test.getContext()));
+                    assertEquals(test.getExpectedResult().getName(), result.getName(), test.getDescription());
+                    assertEquals(test.getExpectedResult().isEnabled(), result.isEnabled(), test.getDescription());
+                    assertEquals(test.getExpectedResult().getPayload(), result.getPayload(), test.getDescription());
+                }))
+                .collect(Collectors.toList());
+    }
+
+    private Unleash setupUnleash(TestDefinition testDefinition) throws URISyntaxException {
         mockUnleashAPI(testDefinition);
 
         // Required because the client is available before it may have had the chance to talk with the API
@@ -69,20 +99,12 @@ public class ClientSpecificationTest {
         // Set-up a unleash instance, using mocked API and backup-file
         UnleashConfig config = UnleashConfig.builder()
                 .appName(testDefinition.getName())
-                .unleashAPI(new URI("http://localhost:"+ serverMock.port() + "/api/"))
+                .unleashAPI(new URI("http://localhost:" + serverMock.port() + "/api/"))
                 .synchronousFetchOnInitialisation(true)
                 .backupFile(backupFile)
                 .build();
 
-        Unleash unleash = new DefaultUnleash(config);
-
-        //Create all test cases in testDefinition.
-        return testDefinition.getTests().stream()
-                .map(test -> DynamicTest.dynamicTest(fileName + "/" + test.getDescription(), () -> {
-                    boolean result = unleash.isEnabled(test.getToggleName(), buildContext(test));
-                    assertEquals(test.getExpectedResult(), result, test.getDescription());
-                }))
-                .collect(Collectors.toList());
+        return new DefaultUnleash(config);
     }
 
     private void mockUnleashAPI(TestDefinition definition) {
@@ -99,9 +121,8 @@ public class ClientSpecificationTest {
         return new Gson().fromJson(content, TestDefinition.class);
     }
 
-    private UnleashContext buildContext(TestCase test) {
+    private UnleashContext buildContext(UnleashContextDefinition context) {
         //TODO: All other properties!
-        UnleashContextDefinition context = test.getContext();
         return UnleashContext.builder()
                 .userId(context.getUserId())
                 .sessionId(context.getSessionId())

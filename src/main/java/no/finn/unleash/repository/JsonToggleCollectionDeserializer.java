@@ -8,6 +8,9 @@ import no.finn.unleash.FeatureToggle;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
 public class JsonToggleCollectionDeserializer implements JsonDeserializer<ToggleCollection> {
     private static final Type PARAMS_TYPE = new TypeToken<Map<String, String>>() {}.getType();
     private  static final Type FEATURE_COLLECTION_TYPE = new TypeToken<Collection<FeatureToggle>>() {}.getType();
@@ -47,7 +50,7 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
             Map<String, String> strategyParams = context.deserialize(featureObj.get("parameters"), PARAMS_TYPE);
 
             ActivationStrategy strategy = new ActivationStrategy(strategyName, strategyParams);
-            featureToggles.add(new FeatureToggle(name, enabled, Arrays.asList(strategy)));
+            featureToggles.add(new FeatureToggle(name, enabled, singletonList(strategy), emptyList()));
         });
 
         return new ToggleCollection(featureToggles);

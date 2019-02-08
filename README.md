@@ -163,20 +163,27 @@ Some examples on how to use it below:
 
 
 ```java
-\\example 1
+// example 1: everything on
 FakeUnleash fakeUnleash = new FakeUnleash();
 fakeUnleash.enableAll();
 
 assertThat(fakeUnleash.isEnabled("unknown"), is(true));
 assertThat(fakeUnleash.isEnabled("unknown2"), is(true));
 
-\\example 2
+// example 2
 FakeUnleash fakeUnleash = new FakeUnleash();
 fakeUnleash.enable("t1", "t2");
 
 assertThat(fakeUnleash.isEnabled("t1"), is(true));
 assertThat(fakeUnleash.isEnabled("t2"), is(true));
 assertThat(fakeUnleash.isEnabled("unknown"), is(false));
+
+// example 3: variants
+FakeUnleash fakeUnleash = new FakeUnleash();
+fakeUnleash.enable("t1", "t2");
+fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
+
+assertThat(fakeUnleash.getVariant("t1").getName(), is("a"));
 ```
 
 Se more in [FakeUnleashTest.java](https://github.com/Unleash/unleash-client-java/blob/master/src/test/java/no/finn/unleash/FakeUnleashTest.java)
