@@ -11,7 +11,7 @@ import no.finn.unleash.UnleashException;
 import no.finn.unleash.util.UnleashConfig;
 
 public final class HttpToggleFetcher implements ToggleFetcher {
-    public static final int CONNECT_TIMEOUT = 10000;
+    private static final int CONNECT_TIMEOUT = 10000;
     private String etag = "";
 
     private final URL toggleUrl;
@@ -37,11 +37,11 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             connection.connect();
 
             int responseCode = connection.getResponseCode();
-            if(responseCode < 300) {
+            if (responseCode < 300) {
                 return getToggleResponse(connection);
             } else if (responseCode == 304) {
                 return new FeatureToggleResponse(FeatureToggleResponse.Status.NOT_CHANGED, responseCode);
-            } else{
+            } else {
                 return new FeatureToggleResponse(FeatureToggleResponse.Status.UNAVAILABLE, responseCode);
             }
         } catch (IOException e) {
