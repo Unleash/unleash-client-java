@@ -41,10 +41,13 @@ public final class FeatureToggleRepository implements ToggleRepository {
         return () -> {
             try {
                 FeatureToggleResponse response = toggleFetcher.fetchToggles();
+
                 if (response.getStatus() == FeatureToggleResponse.Status.CHANGED) {
                     toggleCollection = response.getToggleCollection();
                     toggleBackupHandler.write(response.getToggleCollection());
-                } else {
+                }
+
+                if (response.getStatus() == FeatureToggleResponse.Status.UNAVAILABLE) {
                     LOG.warn("Error fetching toggles from Unleash API (StatusCode: {})", response.getHttpStatusCode());
                 }
             } catch (UnleashException e) {
