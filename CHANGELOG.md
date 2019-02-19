@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.1
+- fix: Stop logging 304-response as warn
+
 ## 3.2.0
 - feat: Implement support for variants
 - fix: instanceId cannot be null.
