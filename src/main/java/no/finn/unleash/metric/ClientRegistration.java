@@ -1,11 +1,13 @@
  package no.finn.unleash.metric;
 
+ import no.finn.unleash.event.UnleashEvent;
+ import no.finn.unleash.event.UnleashSubscriber;
  import no.finn.unleash.util.UnleashConfig;
 
  import java.time.LocalDateTime;
  import java.util.Set;
 
-class ClientRegistration {
+public class ClientRegistration implements UnleashEvent {
     private final String appName;
     private final String instanceId;
     private final String sdkVersion;
@@ -44,5 +46,22 @@ class ClientRegistration {
 
     public long getInterval() {
         return interval;
+    }
+
+    @Override
+    public void publishTo(UnleashSubscriber unleashSubscriber) {
+        unleashSubscriber.clientRegistered(this);
+    }
+
+    @Override
+    public String toString() {
+        return "client registration:"
+                + " appName=" + appName
+                + " instanceId=" + instanceId
+                + " sdkVersion=" + sdkVersion
+                + " started=" + sdkVersion
+                + " interval=" + sdkVersion
+                + " strategies=" + strategies
+                ;
     }
 }
