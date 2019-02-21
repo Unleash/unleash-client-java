@@ -1,5 +1,7 @@
 package no.finn.unleash.repository;
 
+import no.finn.unleash.event.EventDispatcher;
+import no.finn.unleash.event.UnleashReady;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 import org.apache.logging.log4j.LogManager;
@@ -12,13 +14,27 @@ import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
 
 public final class FeatureToggleRepository implements ToggleRepository {
-    private static final Logger LOG = LogManager.getLogger(FeatureToggleRepository.class);
-
     private final ToggleBackupHandler toggleBackupHandler;
     private final ToggleFetcher toggleFetcher;
+    private final EventDispatcher eventDispatcher;
 
     private ToggleCollection toggleCollection;
+    private boolean ready;
 
+    public FeatureToggleRepository(
+            UnleashConfig unleashConfig,
+            ToggleFetcher toggleFetcher,
+            ToggleBackupHandler toggleBackupHandler) {
+        this(
+                unleashConfig,
+                unleashConfig.getScheduledExecutor(),
+                toggleFetcher,
+                toggleBackupHandler
+        );
+    }
+
+
+    @Deprecated
     public FeatureToggleRepository(
             UnleashConfig unleashConfig,
             UnleashScheduledExecutor executor,
@@ -27,6 +43,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
 
         this.toggleBackupHandler = toggleBackupHandler;
         this.toggleFetcher = toggleFetcher;
+        this.eventDispatcher = new EventDispatcher(unleashConfig);
 
         toggleCollection = toggleBackupHandler.read();
 
@@ -41,17 +58,18 @@ public final class FeatureToggleRepository implements ToggleRepository {
         return () -> {
             try {
                 FeatureToggleResponse response = toggleFetcher.fetchToggles();
-
+                eventDispatcher.dispatch(response);
                 if (response.getStatus() == FeatureToggleResponse.Status.CHANGED) {
                     toggleCollection = response.getToggleCollection();
                     toggleBackupHandler.write(response.getToggleCollection());
                 }
 
-                if (response.getStatus() == FeatureToggleResponse.Status.UNAVAILABLE) {
-                    LOG.warn("Error fetching toggles from Unleash API (StatusCode: {})", response.getHttpStatusCode());
+                if (!ready) {
+                    eventDispatcher.dispatch(new UnleashReady());
+                    ready = true;
                 }
             } catch (UnleashException e) {
-                LOG.warn("Could not refresh feature toggles", e);
+                eventDispatcher.dispatch(e);
             }
         };
     }

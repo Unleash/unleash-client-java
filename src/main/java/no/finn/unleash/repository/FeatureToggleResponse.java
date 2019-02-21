@@ -1,11 +1,15 @@
 package no.finn.unleash.repository;
 
 import no.finn.unleash.FeatureToggle;
+import no.finn.unleash.UnleashException;
+import no.finn.unleash.event.UnleashEvent;
+import no.finn.unleash.event.UnleashSubscriber;
 
 import java.util.Collections;
 import java.util.List;
 
-public final class FeatureToggleResponse {
+public final class FeatureToggleResponse implements UnleashEvent {
+
     public enum Status {NOT_CHANGED, CHANGED, UNAVAILABLE}
 
     private final Status status;
@@ -36,4 +40,22 @@ public final class FeatureToggleResponse {
     public int getHttpStatusCode() {
         return httpStatusCode;
     }
+
+    @Override
+    public String toString() {
+        return "FeatureToggleResponse:"
+                + " status=" + status
+                + " httpStatus=" + httpStatusCode
+                ;
+    }
+
+    @Override
+    public void publishTo(UnleashSubscriber unleashSubscriber) {
+        if (status == FeatureToggleResponse.Status.UNAVAILABLE){
+            unleashSubscriber.onError(new UnleashException("Error fetching toggles from Unleash API - StatusCode: " + getHttpStatusCode(), null));
+        }
+
+        unleashSubscriber.togglesFetched(this);
+    }
+
 }

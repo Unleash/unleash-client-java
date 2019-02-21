@@ -1,8 +1,10 @@
 package no.finn.unleash.metric;
 
+import no.finn.unleash.event.UnleashEvent;
+import no.finn.unleash.event.UnleashSubscriber;
 import no.finn.unleash.util.UnleashConfig;
 
-class ClientMetrics {
+public class ClientMetrics implements UnleashEvent {
 
     private final String appName;
     private final String instanceId;
@@ -25,4 +27,18 @@ class ClientMetrics {
     public MetricsBucket getBucket() {
         return bucket;
     }
+
+    @Override
+    public void publishTo(UnleashSubscriber unleashSubscriber) {
+        unleashSubscriber.clientMetrics(this);
+    }
+
+    @Override
+    public String toString() {
+        return "metrics:"
+                + " appName=" + appName
+                + " instanceId=" + instanceId
+                ;
+    }
+
 }

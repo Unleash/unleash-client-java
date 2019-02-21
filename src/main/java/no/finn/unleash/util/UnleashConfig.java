@@ -9,7 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import no.finn.unleash.DefaultUnleash;
 import no.finn.unleash.UnleashContextProvider;
+import no.finn.unleash.event.Log4JSubscriber;
+import no.finn.unleash.event.NoOpSubscriber;
+import no.finn.unleash.event.UnleashSubscriber;
 
 public class UnleashConfig {
     static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
@@ -27,6 +31,8 @@ public class UnleashConfig {
     private final boolean disableMetrics;
     private final UnleashContextProvider contextProvider;
     private final boolean synchronousFetchOnInitialisation;
+    private final UnleashScheduledExecutor unleashScheduledExecutor;
+    private final UnleashSubscriber unleashSubscriber;
 
     public UnleashConfig(
             URI unleashAPI,
@@ -39,7 +45,10 @@ public class UnleashConfig {
             long sendMetricsInterval,
             boolean disableMetrics,
             UnleashContextProvider contextProvider,
-            boolean synchronousFetchOnInitialisation) {
+            boolean synchronousFetchOnInitialisation,
+            UnleashScheduledExecutor unleashScheduledExecutor,
+            UnleashSubscriber unleashSubscriber
+    ) {
 
 
         if(appName == null) {
@@ -50,9 +59,16 @@ public class UnleashConfig {
             throw new IllegalStateException("You are required to specify the unleash instanceId");
         }
 
-
         if(unleashAPI == null) {
             throw new IllegalStateException("You are required to specify the unleashAPI url");
+        }
+
+        if(unleashScheduledExecutor == null) {
+            throw new IllegalStateException("You are required to specify a scheduler");
+        }
+
+        if(unleashSubscriber == null) {
+            throw new IllegalStateException("You are required to specify a subscriber");
         }
 
         this.unleashAPI = unleashAPI;
@@ -67,6 +83,8 @@ public class UnleashConfig {
         this.disableMetrics = disableMetrics;
         this.contextProvider = contextProvider;
         this.synchronousFetchOnInitialisation = synchronousFetchOnInitialisation;
+        this.unleashScheduledExecutor = unleashScheduledExecutor;
+        this.unleashSubscriber = unleashSubscriber;
     }
 
     public URI getUnleashAPI() {
@@ -121,6 +139,14 @@ public class UnleashConfig {
         return contextProvider;
     }
 
+    public UnleashScheduledExecutor getScheduledExecutor() {
+        return unleashScheduledExecutor;
+    }
+
+    public UnleashSubscriber getSubscriber() {
+        return unleashSubscriber;
+    }
+
     public static void setRequestProperties(HttpURLConnection connection, UnleashConfig config) {
         connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
         connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
@@ -140,6 +166,8 @@ public class UnleashConfig {
         private boolean disableMetrics = false;
         private UnleashContextProvider contextProvider = UnleashContextProvider.getDefaultProvider();
         private boolean synchronousFetchOnInitialisation = false;
+        private UnleashScheduledExecutor scheduledExecutor;
+        private UnleashSubscriber unleashSubscriber;
 
         static String getDefaultInstanceId() {
             String hostName = "";
@@ -206,6 +234,16 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder scheduledExecutor(UnleashScheduledExecutor scheduledExecutor) {
+            this.scheduledExecutor = scheduledExecutor;
+            return this;
+        }
+
+        public Builder subscriber(UnleashSubscriber unleashSubscriber) {
+            this.unleashSubscriber = unleashSubscriber;
+            return this;
+        }
+
         private String getBackupFile() {
             if(backupFile != null) {
                 return backupFile;
@@ -227,7 +265,10 @@ public class UnleashConfig {
                     sendMetricsInterval,
                     disableMetrics,
                     contextProvider,
-                    synchronousFetchOnInitialisation);
+                    synchronousFetchOnInitialisation,
+                    Optional.ofNullable(scheduledExecutor).orElseGet(UnleashScheduledExecutorImpl::getInstance),
+                    Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new)
+            );
         }
 
         public String getDefaultSdkVersion() {
