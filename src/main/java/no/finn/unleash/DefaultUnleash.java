@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import no.finn.unleash.event.EventDispatcher;
+import no.finn.unleash.event.ToggleEvaluated;
 import no.finn.unleash.metric.UnleashMetricService;
 import no.finn.unleash.metric.UnleashMetricServiceImpl;
 import no.finn.unleash.repository.FeatureToggleRepository;
@@ -22,8 +24,6 @@ import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.strategy.UnknownStrategy;
 import no.finn.unleash.strategy.UserWithIdStrategy;
 import no.finn.unleash.util.UnleashConfig;
-import no.finn.unleash.util.UnleashScheduledExecutor;
-import no.finn.unleash.util.UnleashScheduledExecutorImpl;
 
 import static java.util.Optional.ofNullable;
 import static no.finn.unleash.Variant.DISABLED_VARIANT;
@@ -39,20 +39,20 @@ public final class DefaultUnleash implements Unleash {
             new UserWithIdStrategy());
 
     private static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
-    private static final UnleashScheduledExecutor unleashScheduledExecutor = new UnleashScheduledExecutorImpl();
 
     private final UnleashMetricService metricService;
     private final ToggleRepository toggleRepository;
     private final Map<String, Strategy> strategyMap;
     private final UnleashContextProvider contextProvider;
+    private final EventDispatcher eventDispatcher;
 
 
     private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
         return new FeatureToggleRepository(
                 unleashConfig,
-                unleashScheduledExecutor,
                 new HttpToggleFetcher(unleashConfig),
-                new ToggleBackupHandlerFile(unleashConfig));
+                new ToggleBackupHandlerFile(unleashConfig)
+        );
     }
 
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {
@@ -63,7 +63,8 @@ public final class DefaultUnleash implements Unleash {
         this.toggleRepository = toggleRepository;
         this.strategyMap = buildStrategyMap(strategies);
         this.contextProvider = unleashConfig.getContextProvider();
-        this.metricService = new UnleashMetricServiceImpl(unleashConfig, unleashScheduledExecutor);
+        this.eventDispatcher = new EventDispatcher(unleashConfig);
+        this.metricService = new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor());
         metricService.register(strategyMap.keySet());
     }
 
@@ -82,6 +83,7 @@ public final class DefaultUnleash implements Unleash {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
         boolean enabled = isEnabled(featureToggle, context, defaultSetting);
         count(toggleName, enabled);
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName,enabled));
         return enabled;
     }
 

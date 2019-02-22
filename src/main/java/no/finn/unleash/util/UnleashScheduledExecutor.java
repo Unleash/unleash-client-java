@@ -5,4 +5,7 @@ import java.util.concurrent.*;
 public interface UnleashScheduledExecutor {
        ScheduledFuture setInterval(
                Runnable command, long initialDelaySec, long periodSec) throws RejectedExecutionException;
+
+       Future<Void> scheduleOnce(Runnable runnable);
+
 }
