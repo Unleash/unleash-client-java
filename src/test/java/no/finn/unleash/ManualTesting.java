@@ -28,7 +28,7 @@ public class ManualTesting {
         UnleashConfig unleashConfig = new UnleashConfig.Builder()
                 .appName("java-test")
                 .instanceId("instance y")
-                .unleashAPI("https://unleash.herokuapp.com/api/2")
+                .unleashAPI("https://unleash.herokuapp.com/api/")
                 .subscriber(new UnleashSubscriber() {
                     @Override
                     public void onReady(UnleashReady ready) {
