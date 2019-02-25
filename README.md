@@ -138,6 +138,36 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
                 .build();
 ```
 
+### Subscriber API
+*(Introduced in 3.2.2)*
+
+Sometimes you want to know when Unleash updates internally. This can be achieved by registering a subscriber. An example on how to configure a custom subscriber is shown below. Have a look at [UnleashSubscriber.java](https://github.com/Unleash/unleash-client-java/blob/master/src/main/java/no/finn/unleash/event/UnleashSubscriber.java) to get a complete overview of all methods you can override.
+
+
+```java
+UnleashConfig unleashConfig = UnleashConfig.builder()
+    .appName("my-app")
+    .instanceId("my-instance-1")
+    .unleashAPI(unleashAPI)
+    .subscriber(new UnleashSubscriber() {
+        @Override
+        public void onReady(UnleashReady ready) {
+            System.out.println("Unleash is ready");
+        }
+        @Override
+        public void togglesFetched(FeatureToggleResponse toggleResponse) {
+            System.out.println("Fetch toggles with status: " + toggleResponse.getStatus());
+        }
+
+        @Override
+        public void togglesBackedUp(ToggleCollection toggleCollection) {
+            System.out.println("Backup stored.");
+        }
+
+    })
+    .build();
+```
+
 ### Options 
 
 - **appName** - Required. Should be a unique name identifying the client application using Unleash. 

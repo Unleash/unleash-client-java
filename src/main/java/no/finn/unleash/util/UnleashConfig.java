@@ -9,9 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import no.finn.unleash.DefaultUnleash;
 import no.finn.unleash.UnleashContextProvider;
-import no.finn.unleash.event.Log4JSubscriber;
 import no.finn.unleash.event.NoOpSubscriber;
 import no.finn.unleash.event.UnleashSubscriber;
 
