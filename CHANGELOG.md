@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.2
+- feat: Added subscriber API
+
 ## 3.2.1
 - fix: Stop logging 304-response as warn
 

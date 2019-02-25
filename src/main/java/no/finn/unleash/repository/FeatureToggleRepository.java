@@ -4,8 +4,6 @@ import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.UnleashReady;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.stream.Collectors;

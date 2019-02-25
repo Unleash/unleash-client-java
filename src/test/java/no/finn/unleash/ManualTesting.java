@@ -3,6 +3,11 @@ package no.finn.unleash;
 import java.util.Map;
 import java.util.Random;
 
+import no.finn.unleash.event.UnleashEvent;
+import no.finn.unleash.event.UnleashReady;
+import no.finn.unleash.event.UnleashSubscriber;
+import no.finn.unleash.repository.FeatureToggleResponse;
+import no.finn.unleash.repository.ToggleCollection;
 import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.util.UnleashConfig;
 
@@ -23,7 +28,29 @@ public class ManualTesting {
         UnleashConfig unleashConfig = new UnleashConfig.Builder()
                 .appName("java-test")
                 .instanceId("instance y")
-                .unleashAPI("https://unleash.herokuapp.com/api/")
+                .unleashAPI("https://unleash.herokuapp.com/api/2")
+                .subscriber(new UnleashSubscriber() {
+                    @Override
+                    public void onReady(UnleashReady ready) {
+                        System.out.println("Unleash is ready");
+                    }
+
+                    @Override
+                    public void togglesFetched(FeatureToggleResponse toggleResponse) {
+                        System.out.println("Fetch toggles with status: " + toggleResponse.getStatus());
+                    }
+
+                    @Override
+                    public void togglesBackedUp(ToggleCollection toggleCollection) {
+                        System.out.println("Backup stored.");
+                    }
+
+                    @Override
+                    public void toggleBackupRestored(ToggleCollection toggleCollection) {
+                        System.out.println("Backup read.");
+                    }
+
+                })
                 .fetchTogglesInterval(1)
                 .sendMetricsInterval(2)
                 .unleashContextProvider(() -> UnleashContext.builder()
