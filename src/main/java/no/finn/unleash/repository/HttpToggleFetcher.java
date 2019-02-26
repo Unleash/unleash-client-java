@@ -32,7 +32,11 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("Content-Type", "application/json");
             UnleashConfig.setRequestProperties(connection, this.unleashConfig);
-            connection.setRequestProperty("If-None-Match", etag);
+
+            if(!etag.isEmpty()) {
+                connection.setRequestProperty("If-None-Match", etag);
+            }
+
             connection.setUseCaches(true);
             connection.connect();
 

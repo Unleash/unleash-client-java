@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.3
+- fix: Only set etag if it is not empty. Sending empty `if-none-match` seem to cause issues with AWS load balancer.
+
 ## 3.2.2
 - feat: Added subscriber API
 
