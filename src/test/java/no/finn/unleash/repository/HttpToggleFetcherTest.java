@@ -199,4 +199,23 @@ public class HttpToggleFetcherTest {
 
     }
 
+    @Test
+    public void should_not_set_empty_ifNoneMatchHeader() throws URISyntaxException {
+        stubFor(get(urlEqualTo("/api/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("features-v1.json")));
+
+        URI uri = new URI("http://localhost:"+serverMock.port() + "/api/");
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
+        FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
+
+        verify(getRequestedFor(urlMatching("/api/client/features"))
+                .withoutHeader("If-None-Match"));
+
+    }
+
 }
