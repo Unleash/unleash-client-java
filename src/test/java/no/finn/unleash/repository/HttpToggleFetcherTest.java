@@ -115,6 +115,35 @@ public class HttpToggleFetcherTest {
                 .withHeader("Content-Type", matching("application/json")));
     }
 
+    @Test
+    public void should_include_etag_in_second_request() throws URISyntaxException {
+        // First fetch
+        stubFor(get(urlEqualTo("/api/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withHeader("ETag", "AZ12")
+                        .withBodyFile("features-v1-with-variants.json")));
+
+        // Second fetch
+        stubFor(get(urlEqualTo("/api/client/features"))
+                .withHeader("If-None-Match", equalTo("AZ12"))
+                .willReturn(aResponse()
+                        .withStatus(304)
+                        .withHeader("Content-Type", "application/json")));
+
+        URI uri = new URI("http://localhost:"+serverMock.port() + "/api/");
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
+
+
+        FeatureToggleResponse response1 = httpToggleFetcher.fetchToggles();
+        FeatureToggleResponse response2 = httpToggleFetcher.fetchToggles();
+
+        assertEquals(response1.getStatus(), FeatureToggleResponse.Status.CHANGED);
+        assertEquals(response2.getStatus(), FeatureToggleResponse.Status.NOT_CHANGED);
+    }
 
     @Test
     @ExtendWith(UnleashExceptionExtension.class)

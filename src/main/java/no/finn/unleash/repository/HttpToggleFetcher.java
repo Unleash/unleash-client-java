@@ -7,12 +7,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
 import no.finn.unleash.UnleashException;
 import no.finn.unleash.util.UnleashConfig;
 
 public final class HttpToggleFetcher implements ToggleFetcher {
     private static final int CONNECT_TIMEOUT = 10000;
-    private String etag = "";
+    private Optional<String> etag = Optional.empty();
 
     private final URL toggleUrl;
     private UnleashConfig unleashConfig;
@@ -33,8 +35,8 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             connection.setRequestProperty("Content-Type", "application/json");
             UnleashConfig.setRequestProperties(connection, this.unleashConfig);
 
-            if(!etag.isEmpty()) {
-                connection.setRequestProperty("If-None-Match", etag);
+            if(etag.isPresent()) {
+                connection.setRequestProperty("If-None-Match", etag.get());
             }
 
             connection.setUseCaches(true);
@@ -60,7 +62,7 @@ public final class HttpToggleFetcher implements ToggleFetcher {
     }
 
     private FeatureToggleResponse getToggleResponse(HttpURLConnection request) throws IOException {
-        etag = request.getHeaderField("ETag");
+        etag = Optional.ofNullable(request.getHeaderField("ETag"));
 
         try(BufferedReader reader = new BufferedReader(
                 new InputStreamReader((InputStream) request.getContent(), StandardCharsets.UTF_8))) {
