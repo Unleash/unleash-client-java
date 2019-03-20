@@ -1,6 +1,7 @@
 # Changelog
 
-## next
+## 3.2.4
+- fix: MetricsBucket MUST be threadsafe.
 - fix: Make sure that etag field is never null
 
 ## 3.2.3

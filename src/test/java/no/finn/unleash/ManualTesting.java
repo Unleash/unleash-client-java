@@ -50,9 +50,14 @@ public class ManualTesting {
                         System.out.println("Backup read.");
                     }
 
+                    @Override
+                    public void onError(UnleashException unleashException) {
+                        System.err.println(unleashException);
+                    }
+
                 })
-                .fetchTogglesInterval(1)
-                .sendMetricsInterval(2)
+                .fetchTogglesInterval(100)
+                .sendMetricsInterval(1)
                 .unleashContextProvider(() -> UnleashContext.builder()
                         .sessionId(new Random().nextInt(10000) + "")
                         .userId(new Random().nextInt(10000) + "")
@@ -62,7 +67,7 @@ public class ManualTesting {
 
         Unleash unleash = new DefaultUnleash(unleashConfig, strategy);
 
-        for(int i=0;i<100;i++) {
+        for(int i=0;i<1000;i++) {
             (new Thread(new UnleashThread(unleash, "thread-"+i, 100))).start();
         }
     }
@@ -85,7 +90,7 @@ public class ManualTesting {
                 currentRound++;
                 long startTime = System.nanoTime();
 
-                boolean enabled = unleash.isEnabled("Demo");
+                boolean enabled = unleash.isEnabled("Demo"+ new Random().nextInt());
                 long timeUsed = System.nanoTime() - startTime;
 
                 System.out.println(name + "\t" +"Demo" +":"  + enabled + "\t " + timeUsed + "ns");

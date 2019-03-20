@@ -2,19 +2,19 @@ package no.finn.unleash.repository;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import no.finn.unleash.FeatureToggle;
 
 public final class ToggleCollection {
     private final Collection<FeatureToggle> features;
-    private final int version = 1;
+    private final int version = 1; // required for serialization
     private final transient Map<String, FeatureToggle> cache;
 
     ToggleCollection(final Collection<FeatureToggle> features) {
         this.features = ensureNotNull(features);
-        this.cache = new HashMap<>();
+        this.cache = new ConcurrentHashMap<>();
         for(FeatureToggle featureToggle : this.features) {
             cache.put(featureToggle.getName(), featureToggle);
         }
@@ -26,7 +26,7 @@ public final class ToggleCollection {
     }
 
     Collection<FeatureToggle> getFeatures() {
-        return features;
+        return Collections.unmodifiableCollection(features);
     }
 
     FeatureToggle getToggle(final String name) {
