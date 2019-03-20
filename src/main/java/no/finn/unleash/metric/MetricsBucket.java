@@ -2,8 +2,8 @@ package no.finn.unleash.metric;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 class MetricsBucket {
     private final Map<String, ToggleCount> toggles;
@@ -12,7 +12,7 @@ class MetricsBucket {
 
     MetricsBucket() {
         this.start = LocalDateTime.now(ZoneId.of("UTC"));
-        this.toggles = new HashMap<>();
+        this.toggles = new ConcurrentHashMap<>();
     }
 
     void registerCount(String toggleName, boolean active) {
