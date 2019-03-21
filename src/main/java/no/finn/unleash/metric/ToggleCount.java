@@ -1,41 +1,43 @@
 package no.finn.unleash.metric;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 class ToggleCount {
-    private long yes;
-    private long no;
-    private Map<String, Long> variants;
+    private final AtomicLong yes;
+    private final AtomicLong no;
+    private final ConcurrentMap<String, AtomicLong> variants;
 
     public ToggleCount() {
-        this.yes = 0;
-        this.no = 0;
-        this.variants = new HashMap<>();
+        this.yes = new AtomicLong(0);
+        this.no = new AtomicLong(0);
+        this.variants = new ConcurrentHashMap<>();
     }
 
     public void register(boolean active) {
-        if(active) {
-            yes++;
+        if (active) {
+            yes.incrementAndGet();
         } else {
-            no++;
+            no.incrementAndGet();
         }
     }
 
     public void register(String variantName) {
-        Long current = variants.getOrDefault(variantName, 0L);
-        variants.put(variantName, ++current);
+        AtomicLong current = variants.computeIfAbsent(variantName, s -> new AtomicLong());
+        current.incrementAndGet();
     }
 
     public long getYes() {
-        return yes;
+        return yes.get();
     }
 
     public long getNo() {
-        return no;
+        return no.get();
     }
 
-    public Map<String, Long> getVariants() {
+    public Map<String, ? extends Number> getVariants() {
         return variants;
     }
 }

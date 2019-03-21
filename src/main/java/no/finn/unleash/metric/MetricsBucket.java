@@ -4,11 +4,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 class MetricsBucket {
-    private final Map<String, ToggleCount> toggles;
+    private final ConcurrentMap<String, ToggleCount> toggles;
     private final LocalDateTime start;
-    private LocalDateTime stop;
+    private volatile LocalDateTime stop;
 
     MetricsBucket() {
         this.start = LocalDateTime.now(ZoneId.of("UTC"));
@@ -24,11 +25,7 @@ class MetricsBucket {
     }
 
     private ToggleCount getOrCreate(String toggleName) {
-        if(!toggles.containsKey(toggleName)) {
-            ToggleCount counter = new ToggleCount();
-            toggles.put(toggleName, counter);
-        }
-        return toggles.get(toggleName);
+        return toggles.computeIfAbsent(toggleName, s -> new ToggleCount());
     }
 
     void end() {

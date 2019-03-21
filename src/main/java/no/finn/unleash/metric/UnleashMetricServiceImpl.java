@@ -14,7 +14,7 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
     private final UnleashMetricsSender unleashMetricsSender;
 
     //mutable
-    private MetricsBucket currentMetricsBucket;
+    private volatile MetricsBucket currentMetricsBucket;
 
     public UnleashMetricServiceImpl(UnleashConfig unleashConfig, UnleashScheduledExecutor executor) {
         this(unleashConfig, new UnleashMetricsSender(unleashConfig), executor);
