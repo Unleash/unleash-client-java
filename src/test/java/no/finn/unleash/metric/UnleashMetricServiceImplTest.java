@@ -164,9 +164,9 @@ public class UnleashMetricServiceImplTest {
         assertNotNull(bucket.getStart());
         assertNotNull(bucket.getStop());
         assertThat(bucket.getToggles().size(), is(1));
-        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v1"), is(3l));
-        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v2"), is(1l));
-        assertThat(bucket.getToggles().get("someToggle").getVariants().get("disabled"), is(1l));
+        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v1").longValue(), is(3l));
+        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v2").longValue(), is(1l));
+        assertThat(bucket.getToggles().get("someToggle").getVariants().get("disabled").longValue(), is(1l));
         assertThat(bucket.getToggles().get("someToggle").getYes(), is(0l));
         assertThat(bucket.getToggles().get("someToggle").getNo(), is(0l));
     }
