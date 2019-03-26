@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.5
+- fix: Make metric counting fully thread-safe
+
 ## 3.2.4
 - fix: MetricsBucket MUST be threadsafe.
 - fix: Make sure that etag field is never null
