@@ -15,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 
@@ -36,6 +37,7 @@ public class UnleashMetricsSender {
 
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new DateTimeSerializer())
+                .registerTypeAdapter(AtomicLong.class, new AtomicLongSerializer())
                 .create();
     }
 
@@ -45,6 +47,14 @@ public class UnleashMetricsSender {
                 LocalDateTime localDateTime, Type type, JsonSerializationContext jsonSerializationContext) {
             return new JsonPrimitive(ISO_INSTANT.format(localDateTime.toInstant(ZoneOffset.UTC)));
         };
+    }
+
+    static class AtomicLongSerializer implements JsonSerializer<AtomicLong> {
+
+        @Override
+        public JsonElement serialize(AtomicLong src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.get());
+        }
     }
 
     public void registerClient(ClientRegistration registration) {
