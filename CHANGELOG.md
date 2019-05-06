@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.6
+- fix: Add TypeAdapter for AtomicLong to not break metrics for users with old gson on classpath
+
 ## 3.2.5
 - fix: Make metric counting fully thread-safe
 
