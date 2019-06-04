@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.7
+- fix: Bump log4j to version 2.11.2.
+
 ## 3.2.6
 - fix: Add TypeAdapter for AtomicLong to not break metrics for users with old gson on classpath
 
