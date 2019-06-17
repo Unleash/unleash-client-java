@@ -1,13 +1,13 @@
 package no.finn.unleash.util;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
 public class UnleashScheduledExecutorImpl implements UnleashScheduledExecutor {
 
-    private static final Logger LOG = LogManager.getLogger(UnleashScheduledExecutorImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UnleashScheduledExecutorImpl.class);
 
     private static UnleashScheduledExecutorImpl INSTANCE;
 

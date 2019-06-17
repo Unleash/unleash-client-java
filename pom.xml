@@ -14,6 +14,7 @@
 
     <properties>
         <version.log4j2>2.11.2</version.log4j2>
+        <version.slf4j>1.7.26</version.slf4j>
         <coberturaFormat>xml</coberturaFormat>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.unleash.specification>3.2.0</version.unleash.specification>
@@ -50,6 +51,13 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>${version.log4j2}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${version.slf4j}</version>
         </dependency>
 
         <dependency>
@@ -116,7 +124,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
+            <artifactId>log4j-slf4j-impl</artifactId>
             <version>${version.log4j2}</version>
             <scope>test</scope>
         </dependency>

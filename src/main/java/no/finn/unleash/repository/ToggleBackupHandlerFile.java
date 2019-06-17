@@ -6,16 +6,16 @@ import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.UnleashEvent;
 import no.finn.unleash.event.UnleashSubscriber;
 import no.finn.unleash.util.UnleashConfig;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.Collections;
 import java.util.List;
 import com.google.gson.JsonParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ToggleBackupHandlerFile implements ToggleBackupHandler {
-    private static final Logger LOG = LogManager.getLogger(ToggleBackupHandlerFile.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ToggleBackupHandlerFile.class);
 
     private final String backupFile;
     private final EventDispatcher eventDispatcher;
