@@ -3,7 +3,7 @@ jdk:
 - openjdk8
 - openjdk11
 script:
-- mvn verify
+- ./mvnw verify
 notifications:
   hipchat:
     rooms:
@@ -11,4 +11,4 @@ notifications:
   slack:
     secure: TKZfAB5V7KEuCz/ruHowtsnuIMxCf0BSYbK1x3g2qiB+OFxEbIoy+7jp/ANAgmEepDEKdnil6qaiGwTJq13V2qMTWoLdzpvxWnRkbuzd/lWPXc6S/51733CncYsAQ+mW+KU2nZxkHvXNN4nHsskFHi9aDktMpgXc5krhFK2eZrI=
 after_success:
-  - mvn clean test jacoco:report coveralls:report
+  - ./mvnw clean test jacoco:report coveralls:report
