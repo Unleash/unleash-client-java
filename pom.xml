@@ -189,6 +189,13 @@
                 <configuration>
                     <repoToken>Z9wVezAubEVqnGPYkOUW031cqHPve2jBz</repoToken>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                        <version>2.3.1</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!--Download client-specifications-->
