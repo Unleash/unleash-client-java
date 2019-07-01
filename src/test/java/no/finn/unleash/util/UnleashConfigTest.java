@@ -81,6 +81,28 @@ public class UnleashConfigTest {
     }
 
     @Test
+    public void should_set_environment_to_default() {
+        UnleashConfig config = UnleashConfig.builder()
+                .appName("my-app")
+                .unleashAPI("http://unleash.org")
+                .build();
+
+        assertThat(config.getEnvironment(), is("default"));
+    }
+
+    @Test
+    public void should_set_environment() {
+        String env = "prod";
+        UnleashConfig config = UnleashConfig.builder()
+                .appName("my-app")
+                .environment(env)
+                .unleashAPI("http://unleash.org")
+                .build();
+
+        assertThat(config.getEnvironment(), is(env));
+    }
+
+    @Test
     public void should_add_app_name_and_instance_id_and_user_agent_to_connection() throws IOException {
         String appName = "my-app";
         String instanceId = "my-instance-1";
