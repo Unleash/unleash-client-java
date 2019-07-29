@@ -45,6 +45,7 @@ public final class DefaultUnleash implements Unleash {
     private final Map<String, Strategy> strategyMap;
     private final UnleashContextProvider contextProvider;
     private final EventDispatcher eventDispatcher;
+    private final UnleashConfig config;
 
 
     private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
@@ -60,6 +61,7 @@ public final class DefaultUnleash implements Unleash {
     }
 
     public DefaultUnleash(UnleashConfig unleashConfig, ToggleRepository toggleRepository, Strategy... strategies) {
+        this.config = unleashConfig;
         this.toggleRepository = toggleRepository;
         this.strategyMap = buildStrategyMap(strategies);
         this.contextProvider = unleashConfig.getContextProvider();
@@ -96,8 +98,9 @@ public final class DefaultUnleash implements Unleash {
         } else if(featureToggle.getStrategies().size() == 0) {
             return true;
         } else {
+            UnleashContext enhancedContext = context.applyStaticFields(config);
             enabled = featureToggle.getStrategies().stream()
-                    .anyMatch(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), context));
+                    .anyMatch(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), enhancedContext));
         }
         return enabled;
     }

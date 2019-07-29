@@ -21,6 +21,7 @@ public class UnleashConfig {
     private final UnleashURLs unleashURLs;
     private final Map<String, String> customHttpHeaders;
     private final String appName;
+    private final String environment;
     private final String instanceId;
     private final String sdkVersion;
     private final String backupFile;
@@ -36,6 +37,7 @@ public class UnleashConfig {
             URI unleashAPI,
             Map<String, String> customHttpHeaders,
             String appName,
+            String environment,
             String instanceId,
             String sdkVersion,
             String backupFile,
@@ -73,6 +75,7 @@ public class UnleashConfig {
         this.customHttpHeaders = customHttpHeaders;
         this.unleashURLs = new UnleashURLs(unleashAPI);
         this.appName = appName;
+        this.environment = environment;
         this.instanceId = instanceId;
         this.sdkVersion = sdkVersion;
         this.backupFile = backupFile;
@@ -95,6 +98,10 @@ public class UnleashConfig {
 
     public String getAppName() {
         return appName;
+    }
+
+    public String getEnvironment() {
+        return environment;
     }
 
     public String getInstanceId() {
@@ -156,6 +163,7 @@ public class UnleashConfig {
         private URI unleashAPI;
         private Map<String, String> customHttpHeaders = new HashMap<>();
         private String appName;
+        private String environment = "default";
         private String instanceId = getDefaultInstanceId();
         private String sdkVersion = getDefaultSdkVersion();
         private String backupFile;
@@ -194,6 +202,11 @@ public class UnleashConfig {
 
         public Builder appName(String appName) {
             this.appName = appName;
+            return this;
+        }
+
+        public Builder environment(String environment) {
+            this.environment = environment;
             return this;
         }
 
@@ -256,6 +269,7 @@ public class UnleashConfig {
                     unleashAPI,
                     customHttpHeaders,
                     appName,
+                    environment,
                     instanceId,
                     sdkVersion,
                     getBackupFile(),
