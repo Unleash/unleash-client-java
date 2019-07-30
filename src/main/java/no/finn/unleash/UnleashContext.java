@@ -52,6 +52,17 @@ public class UnleashContext {
         return environment;
     }
 
+    public Optional<String> getByName(String contextName) {
+        switch (contextName) {
+            case "environment": return environment;
+            case "appName": return appName;
+            case "userId": return userId;
+            case "sessionId": return sessionId;
+            case "remoteAddress": return remoteAddress;
+            default: return Optional.ofNullable(properties.get(contextName));
+        }
+    }
+
     public UnleashContext applyStaticFields(UnleashConfig config) {
         Builder builder = new Builder(this);
         if(!this.environment.isPresent()) {

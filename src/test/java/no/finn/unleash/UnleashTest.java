@@ -1,5 +1,6 @@
 package no.finn.unleash;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ public class UnleashTest {
         UnleashConfig config = new UnleashConfig.Builder()
                 .appName("test")
                 .unleashAPI("http://localhost:4242/api/")
+                .environment("test")
                 .unleashContextProvider(contextProvider)
                 .build();
 
@@ -95,7 +97,7 @@ public class UnleashTest {
 
         unleash.isEnabled("test");
 
-        verify(customStrategy, times(1)).isEnabled(isNull(), any(UnleashContext.class));
+        verify(customStrategy, times(1)).isEnabled(isNull(), any(UnleashContext.class), any(List.class));
     }
 
     @Test
@@ -342,6 +344,33 @@ public class UnleashTest {
         assertThat(result.getPayload().map(Payload::getValue).get(), is("to"));
         assertThat(result.isEnabled(), is(true));
     }
+
+    @Test
+    public void should_be_enabled_with_strategy_constraints() {
+        List<Constraint> constraints = new ArrayList<>();
+        constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test")));
+        ActivationStrategy activeStrategy = new ActivationStrategy("default", null, constraints);
+
+        FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(unleash.isEnabled("test"), is(true));
+    }
+
+    @Test
+    public void should_be_disabled_with_strategy_constraints() {
+        List<Constraint> constraints = new ArrayList<>();
+        constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("dev", "prod")));
+        ActivationStrategy activeStrategy = new ActivationStrategy("default", null, constraints);
+
+        FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(unleash.isEnabled("test"), is(false));
+    }
+
 
     private List<VariantDefinition> getTestVariants() {
         return asList(
