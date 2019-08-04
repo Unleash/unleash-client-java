@@ -14,15 +14,7 @@ import no.finn.unleash.repository.FeatureToggleRepository;
 import no.finn.unleash.repository.HttpToggleFetcher;
 import no.finn.unleash.repository.ToggleBackupHandlerFile;
 import no.finn.unleash.repository.ToggleRepository;
-import no.finn.unleash.strategy.ApplicationHostnameStrategy;
-import no.finn.unleash.strategy.DefaultStrategy;
-import no.finn.unleash.strategy.GradualRolloutRandomStrategy;
-import no.finn.unleash.strategy.GradualRolloutSessionIdStrategy;
-import no.finn.unleash.strategy.GradualRolloutUserIdStrategy;
-import no.finn.unleash.strategy.RemoteAddressStrategy;
-import no.finn.unleash.strategy.Strategy;
-import no.finn.unleash.strategy.UnknownStrategy;
-import no.finn.unleash.strategy.UserWithIdStrategy;
+import no.finn.unleash.strategy.*;
 import no.finn.unleash.util.UnleashConfig;
 
 import static java.util.Optional.ofNullable;
@@ -36,7 +28,8 @@ public final class DefaultUnleash implements Unleash {
             new GradualRolloutSessionIdStrategy(),
             new GradualRolloutUserIdStrategy(),
             new RemoteAddressStrategy(),
-            new UserWithIdStrategy());
+            new UserWithIdStrategy(),
+            new FlexibleRolloutStrategy());
 
     private static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
@@ -100,7 +93,7 @@ public final class DefaultUnleash implements Unleash {
         } else {
             UnleashContext enhancedContext = context.applyStaticFields(config);
             enabled = featureToggle.getStrategies().stream()
-                    .anyMatch(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), enhancedContext));
+                    .anyMatch(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), enhancedContext, as.getConstraints()));
         }
         return enabled;
     }
