@@ -2,6 +2,7 @@
 
 ## 3.2.8
 - feat: Add support for static context fields (#82)
+- feat: add constraint support (#83)
 
 ## 3.2.7
 - fix: Bump log4j to version 2.11.2.
