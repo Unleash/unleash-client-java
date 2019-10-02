@@ -247,4 +247,20 @@ public class HttpToggleFetcherTest {
 
     }
 
+    @Test
+    public void should_notifiy_location_on_redirect() throws URISyntaxException {
+        stubFor(get(urlEqualTo("/api/client/features"))
+            .withHeader("Accept", equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(308)
+                .withHeader("Location", "https://unleash.com")));
+
+        URI uri = new URI("http://localhost:"+serverMock.port() + "/api/");
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
+        FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
+        assertThat(response.getLocation(), is("https://unleash.com"));
+
+    }
+
 }

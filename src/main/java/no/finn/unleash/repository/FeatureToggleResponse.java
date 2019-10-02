@@ -15,6 +15,7 @@ public final class FeatureToggleResponse implements UnleashEvent {
     private final Status status;
     private final int httpStatusCode;
     private final ToggleCollection toggleCollection;
+    private String location;
 
     public FeatureToggleResponse(Status status, ToggleCollection toggleCollection) {
         this.status = status;
@@ -29,6 +30,11 @@ public final class FeatureToggleResponse implements UnleashEvent {
         this.toggleCollection = new ToggleCollection(emptyList);
     }
 
+    public FeatureToggleResponse(Status status, int httpStatusCode, String location) {
+        this(status, httpStatusCode);
+        this.location = location;
+    }
+
     public Status getStatus() {
         return status;
     }
@@ -41,18 +47,27 @@ public final class FeatureToggleResponse implements UnleashEvent {
         return httpStatusCode;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
     @Override
     public String toString() {
         return "FeatureToggleResponse:"
                 + " status=" + status
                 + " httpStatus=" + httpStatusCode
+                + " location=" + location
                 ;
     }
 
     @Override
     public void publishTo(UnleashSubscriber unleashSubscriber) {
         if (status == FeatureToggleResponse.Status.UNAVAILABLE){
-            unleashSubscriber.onError(new UnleashException("Error fetching toggles from Unleash API - StatusCode: " + getHttpStatusCode(), null));
+            String msg = "Error fetching toggles from Unleash API - StatusCode: " + getHttpStatusCode();
+            if(location != null) {
+                msg += ", Location: " + location;
+            }
+            unleashSubscriber.onError(new UnleashException(msg, null));
         }
 
         unleashSubscriber.togglesFetched(this);

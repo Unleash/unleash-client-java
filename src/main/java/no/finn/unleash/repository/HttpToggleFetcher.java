@@ -48,7 +48,7 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             } else if (responseCode == 304) {
                 return new FeatureToggleResponse(FeatureToggleResponse.Status.NOT_CHANGED, responseCode);
             } else {
-                return new FeatureToggleResponse(FeatureToggleResponse.Status.UNAVAILABLE, responseCode);
+                return new FeatureToggleResponse(FeatureToggleResponse.Status.UNAVAILABLE, responseCode, getLocationHeader(connection));
             }
         } catch (IOException e) {
             throw new UnleashException("Could not fetch toggles", e);
@@ -70,5 +70,9 @@ public final class HttpToggleFetcher implements ToggleFetcher {
             ToggleCollection toggles = JsonToggleParser.fromJson(reader);
             return new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggles);
         }
+    }
+
+    private String getLocationHeader(HttpURLConnection connection) {
+        return connection.getHeaderField("Location");
     }
 }
