@@ -25,11 +25,11 @@ public final class ToggleCollection {
         return features;
     }
 
-    Collection<FeatureToggle> getFeatures() {
+    public Collection<FeatureToggle> getFeatures() {
         return Collections.unmodifiableCollection(features);
     }
 
-    FeatureToggle getToggle(final String name) {
+    public FeatureToggle getToggle(final String name) {
         return cache.get(name);
     }
 }
