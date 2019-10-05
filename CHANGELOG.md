@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.9
+- fix: Make `getFeatures` and `getToggle` public in ToggleCollection
+- fix: add logs for redirect location response
+
 ## 3.2.8
 - feat: Add support for static context fields (#82)
 - feat: add constraint support (#83)
