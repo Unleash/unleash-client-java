@@ -123,11 +123,17 @@ public class ClientSpecificationTest {
 
     private UnleashContext buildContext(UnleashContextDefinition context) {
         //TODO: All other properties!
-        return UnleashContext.builder()
+        UnleashContext.Builder builder = UnleashContext.builder()
                 .userId(context.getUserId())
                 .sessionId(context.getSessionId())
                 .remoteAddress(context.getRemoteAddress())
-                .build();
+                .environment(context.getEnvironment())
+                .appName(context.getAppName());
+        if(context.getCountry() != null) {
+            builder.addProperty("country", context.getCountry());
+        }
+        
+        return builder.build();
     }
 
     private Reader getFileReader(String filename) throws IOException {

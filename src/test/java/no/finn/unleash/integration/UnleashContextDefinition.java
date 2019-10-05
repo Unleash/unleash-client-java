@@ -6,13 +6,25 @@ public class UnleashContextDefinition {
     private final String userId;
     private final String sessionId;
     private final String remoteAddress;
-    private final Map<String, String> properties;
+    private final String environment;
+    private final String appName;
 
-    public UnleashContextDefinition(String userId, String sessionId, String remoteAddress, Map<String, String> properties) {
+    // Custom context fields used in tests
+    private final String country;
+
+    public UnleashContextDefinition(
+            String userId,
+            String sessionId,
+            String remoteAddress,
+            String environment,
+            String appName,
+            String country) {
         this.userId = userId;
         this.sessionId = sessionId;
         this.remoteAddress = remoteAddress;
-        this.properties = properties;
+        this.environment = environment;
+        this.appName = appName;
+        this.country = country;
     }
 
     public String getUserId() {
@@ -27,7 +39,15 @@ public class UnleashContextDefinition {
         return remoteAddress;
     }
 
-    public Map<String, String> getProperties() {
-        return properties;
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public String getCountry() {
+        return country;
     }
 }
