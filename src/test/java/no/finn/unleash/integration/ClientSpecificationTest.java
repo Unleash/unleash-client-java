@@ -129,8 +129,9 @@ public class ClientSpecificationTest {
                 .remoteAddress(context.getRemoteAddress())
                 .environment(context.getEnvironment())
                 .appName(context.getAppName());
-        if(context.getCountry() != null) {
-            builder.addProperty("country", context.getCountry());
+
+        if(context.getProperties() != null) {
+            context.getProperties().forEach(builder::addProperty);
         }
         
         return builder.build();
