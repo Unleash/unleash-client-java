@@ -50,27 +50,27 @@ public class UnleashConfig {
             UnleashSubscriber unleashSubscriber
     ) {
 
-        if (appName == null) {
+        if(appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
         }
 
-        if (instanceId == null) {
+        if(instanceId == null) {
             throw new IllegalStateException("You are required to specify the unleash instanceId");
         }
 
-        if (unleashAPI == null) {
+        if(unleashAPI == null) {
             throw new IllegalStateException("You are required to specify the unleashAPI url");
         }
 
-        if (unleashScheduledExecutor == null) {
+        if(unleashScheduledExecutor == null) {
             throw new IllegalStateException("You are required to specify a scheduler");
         }
 
-        if (unleashSubscriber == null) {
+        if(unleashSubscriber == null) {
             throw new IllegalStateException("You are required to specify a subscriber");
         }
 
-        if (isProxyAuthenticationByJvmProperties) {
+        if(isProxyAuthenticationByJvmProperties) {
             enableProxyAuthentication();
         }
 
@@ -176,7 +176,7 @@ public class UnleashConfig {
 
         @Override
         protected PasswordAuthentication getPasswordAuthentication() {
-            if (getRequestorType() == RequestorType.PROXY) {
+            if(getRequestorType() == RequestorType.PROXY) {
                 final String proto = getRequestingProtocol().toLowerCase();
                 final String proxyHost = System.getProperty(proto + ".proxyHost", "");
                 final String proxyPort = System.getProperty(proto + ".proxyPort", "");
@@ -184,7 +184,7 @@ public class UnleashConfig {
                 final String proxyPassword = System.getProperty(proto + ".proxyPassword", "");
 
                 // Only apply PasswordAuthentication to requests to the proxy itself - if not set just ignore
-                if (getRequestingHost().equalsIgnoreCase(proxyHost) && Integer.parseInt(proxyPort) == getRequestingPort()) {
+                if(getRequestingHost().equalsIgnoreCase(proxyHost) && Integer.parseInt(proxyPort) == getRequestingPort()) {
                     return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
                 }
             }
@@ -296,7 +296,7 @@ public class UnleashConfig {
         }
 
         private String getBackupFile() {
-            if (backupFile != null) {
+            if(backupFile != null) {
                 return backupFile;
             } else {
                 String fileName = "unleash-" + appName + "-repo.json";
