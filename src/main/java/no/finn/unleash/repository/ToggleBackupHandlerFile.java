@@ -34,7 +34,7 @@ public class ToggleBackupHandlerFile implements ToggleBackupHandler {
             eventDispatcher.dispatch(new ToggleBackupRead(toggleCollection));
             return toggleCollection;
         } catch (FileNotFoundException e) {
-            LOG.warn(" Unleash could not find the backup-file '" + backupFile + "'. \n" +
+            LOG.info(" Unleash could not find the backup-file '" + backupFile + "'. \n" +
                     "This is expected behavior the first time unleash runs in a new environment.");
         } catch (IOException | IllegalStateException | JsonParseException e) {
             eventDispatcher.dispatch(new UnleashException("Failed to read backup file: " + backupFile, e));
