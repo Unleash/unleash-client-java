@@ -173,6 +173,19 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
 - **appName** - Required. Should be a unique name identifying the client application using Unleash. 
 - **synchronousFetchOnInitialisation** - Allows the user to specify that the unleash-client should do one synchronous fetch to the `unleash-api` at initialisation. This will slow down the initialisation (the client must wait for a http response). If the `unleash-api` is unavailable the client will silently move on and assume the api will be available later. 
 
+### HTTP Proxy with Authentication
+The Unleash Java client uses `HttpURLConnection` as HTTP Client which already recognizes the common JVM proxy settings such as `http.proxyHost` and
+`http.proxyPort`. So if you are using a Proxy without authentication, everything works out of the box. However, if you have to use Basic Auth
+authentication with your proxy, the related settings such as `http.proxyUser` and `http.proxyPassword` do not get recognized by default. In order
+to enable support for basic auth against a http proxy, you can simply enable the following option on the configuration builder:
+
+```java
+UnleashConfig config = UnleashConfig.builder()
+    .appName("my-app")
+    .unleashAPI("http://unleash.org")
+    .enableProxyAuthenticationByJvmProperties()
+    .build();
+```
 
 ## Local backup
 By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the 

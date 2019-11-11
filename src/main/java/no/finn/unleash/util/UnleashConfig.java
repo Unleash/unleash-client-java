@@ -1,19 +1,17 @@
 package no.finn.unleash.util;
 
-import java.io.File;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import no.finn.unleash.UnleashContextProvider;
 import no.finn.unleash.event.NoOpSubscriber;
 import no.finn.unleash.event.UnleashSubscriber;
 
+import java.io.File;
+import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 public class UnleashConfig {
+
     static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
     static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
 
@@ -28,6 +26,7 @@ public class UnleashConfig {
     private final long fetchTogglesInterval;
     private final long sendMetricsInterval;
     private final boolean disableMetrics;
+    private final boolean isProxyAuthenticationByJvmProperties;
     private final UnleashContextProvider contextProvider;
     private final boolean synchronousFetchOnInitialisation;
     private final UnleashScheduledExecutor unleashScheduledExecutor;
@@ -45,11 +44,11 @@ public class UnleashConfig {
             long sendMetricsInterval,
             boolean disableMetrics,
             UnleashContextProvider contextProvider,
+            boolean isProxyAuthenticationByJvmProperties,
             boolean synchronousFetchOnInitialisation,
             UnleashScheduledExecutor unleashScheduledExecutor,
             UnleashSubscriber unleashSubscriber
     ) {
-
 
         if(appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -71,6 +70,10 @@ public class UnleashConfig {
             throw new IllegalStateException("You are required to specify a subscriber");
         }
 
+        if(isProxyAuthenticationByJvmProperties) {
+            enableProxyAuthentication();
+        }
+
         this.unleashAPI = unleashAPI;
         this.customHttpHeaders = customHttpHeaders;
         this.unleashURLs = new UnleashURLs(unleashAPI);
@@ -83,9 +86,26 @@ public class UnleashConfig {
         this.sendMetricsInterval = sendMetricsInterval;
         this.disableMetrics = disableMetrics;
         this.contextProvider = contextProvider;
+        this.isProxyAuthenticationByJvmProperties = isProxyAuthenticationByJvmProperties;
         this.synchronousFetchOnInitialisation = synchronousFetchOnInitialisation;
         this.unleashScheduledExecutor = unleashScheduledExecutor;
         this.unleashSubscriber = unleashSubscriber;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static void setRequestProperties(HttpURLConnection connection, UnleashConfig config) {
+        connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
+        connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
+        connection.setRequestProperty("User-Agent", config.getAppName());
+        config.getCustomHttpHeaders().forEach(connection::setRequestProperty);
+    }
+
+    private void enableProxyAuthentication() {
+        // http.proxyUser http.proxyPassword is only consumed by Apache HTTP Client, for HttpUrlConnection we have to define an Authenticator
+        Authenticator.setDefault(new ProxyAuthenticator());
     }
 
     public URI getUnleashAPI() {
@@ -124,10 +144,6 @@ public class UnleashConfig {
         return unleashURLs;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public boolean isDisableMetrics() {
         return disableMetrics;
     }
@@ -152,14 +168,32 @@ public class UnleashConfig {
         return unleashSubscriber;
     }
 
-    public static void setRequestProperties(HttpURLConnection connection, UnleashConfig config) {
-        connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
-        connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
-        connection.setRequestProperty("User-Agent", config.getAppName());
-        config.getCustomHttpHeaders().forEach(connection::setRequestProperty);
+    public boolean isProxyAuthenticationByJvmProperties() {
+        return isProxyAuthenticationByJvmProperties;
+    }
+
+    static class ProxyAuthenticator extends Authenticator {
+
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+            if(getRequestorType() == RequestorType.PROXY) {
+                final String proto = getRequestingProtocol().toLowerCase();
+                final String proxyHost = System.getProperty(proto + ".proxyHost", "");
+                final String proxyPort = System.getProperty(proto + ".proxyPort", "");
+                final String proxyUser = System.getProperty(proto + ".proxyUser", "");
+                final String proxyPassword = System.getProperty(proto + ".proxyPassword", "");
+
+                // Only apply PasswordAuthentication to requests to the proxy itself - if not set just ignore
+                if(getRequestingHost().equalsIgnoreCase(proxyHost) && Integer.parseInt(proxyPort) == getRequestingPort()) {
+                    return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
+                }
+            }
+            return null;
+        }
     }
 
     public static class Builder {
+
         private URI unleashAPI;
         private Map<String, String> customHttpHeaders = new HashMap<>();
         private String appName;
@@ -174,6 +208,7 @@ public class UnleashConfig {
         private boolean synchronousFetchOnInitialisation = false;
         private UnleashScheduledExecutor scheduledExecutor;
         private UnleashSubscriber unleashSubscriber;
+        private boolean isProxyAuthenticationByJvmProperties;
 
         static String getDefaultInstanceId() {
             String hostName = "";
@@ -235,6 +270,11 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder enableProxyAuthenticationByJvmProperties() {
+            this.isProxyAuthenticationByJvmProperties = true;
+            return this;
+        }
+
         public Builder unleashContextProvider(UnleashContextProvider contextProvider) {
             this.contextProvider = contextProvider;
             return this;
@@ -277,6 +317,7 @@ public class UnleashConfig {
                     sendMetricsInterval,
                     disableMetrics,
                     contextProvider,
+                    isProxyAuthenticationByJvmProperties,
                     synchronousFetchOnInitialisation,
                     Optional.ofNullable(scheduledExecutor).orElseGet(UnleashScheduledExecutorImpl::getInstance),
                     Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new)
