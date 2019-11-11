@@ -1,17 +1,19 @@
 package no.finn.unleash.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
+import no.finn.unleash.util.UnleashConfig.ProxyAuthenticator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.*;
+import java.net.Authenticator.RequestorType;
+
 import static no.finn.unleash.util.UnleashConfig.UNLEASH_APP_NAME_HEADER;
 import static no.finn.unleash.util.UnleashConfig.UNLEASH_INSTANCE_ID_HEADER;
-import static org.hamcrest.core.Is.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UnleashConfigTest {
@@ -145,12 +147,59 @@ public class UnleashConfigTest {
 
     @Test
     public void should_require_instanceId() {
-        Executable ex = () ->  UnleashConfig.builder()
+        Executable ex = () -> UnleashConfig.builder()
                 .appName("my-app")
                 .instanceId(null)
                 .unleashAPI("http://unleash.org")
                 .build();
 
         assertThrows(IllegalStateException.class, ex);
+    }
+
+    @Test
+    public void should_enable_proxy_based_on_jvm_settings()
+            throws IllegalAccessException, NoSuchFieldException {
+
+        String proxyHost = "proxy-host";
+        String proxyPort = "8080";
+        String proxyUser = "my-proxy-user";
+        String proxyPassword = "my-secret";
+
+        System.setProperty("http.proxyHost", proxyHost);
+        System.setProperty("http.proxyPort", proxyPort);
+        System.setProperty("http.proxyUser", proxyUser);
+        System.setProperty("http.proxyPassword", proxyPassword);
+
+        UnleashConfig config = UnleashConfig.builder()
+                .appName("my-app")
+                .unleashAPI("http://unleash.org")
+                .enableProxyAuthenticationByJvmProperties()
+                .build();
+
+        Field authenticator = Authenticator.class.getDeclaredField("theAuthenticator");
+        authenticator.setAccessible(true);
+        ProxyAuthenticator proxyAuthenticator = (ProxyAuthenticator) authenticator.get(null);
+
+        Field requestingAuthType = proxyAuthenticator.getClass().getSuperclass().getDeclaredField("requestingAuthType");
+        requestingAuthType.setAccessible(true);
+        requestingAuthType.set(proxyAuthenticator, RequestorType.PROXY);
+
+        Field requestingProtocol = proxyAuthenticator.getClass().getSuperclass().getDeclaredField("requestingProtocol");
+        requestingProtocol.setAccessible(true);
+        requestingProtocol.set(proxyAuthenticator, "http");
+
+        Field requestingHost = proxyAuthenticator.getClass().getSuperclass().getDeclaredField("requestingHost");
+        requestingHost.setAccessible(true);
+        requestingHost.set(proxyAuthenticator, proxyHost);
+
+        Field requestingPort = proxyAuthenticator.getClass().getSuperclass().getDeclaredField("requestingPort");
+        requestingPort.setAccessible(true);
+        requestingPort.set(proxyAuthenticator, 8080);
+
+        PasswordAuthentication passwordAuthentication = proxyAuthenticator.getPasswordAuthentication();
+
+        assertThat(passwordAuthentication.getUserName(), is(proxyUser));
+        assertThat(new String(passwordAuthentication.getPassword()), is(proxyPassword));
+        assertThat(config.isProxyAuthenticationByJvmProperties(), is(true));
     }
 }
