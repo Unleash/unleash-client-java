@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.2.10
+- fix: Change log-level to info for missing local backup
+- feat: Add support for http proxies with basic authentication (#91)
+- fix: support integration tests for strategy constraints
+- fix: Support custom context fields in spec-tests
+
 ## 3.2.9
 - fix: Make `getFeatures` and `getToggle` public in ToggleCollection
 - fix: add logs for redirect location response
