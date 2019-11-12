@@ -28,6 +28,35 @@ public final class FakeUnleash implements Unleash {
     }
 
     @Override
+    public boolean isEnabled(String toggleName, boolean defaultSetting, FallbackAction fallbackAction) {
+        if(enableAll) {
+            return true;
+        } else if(disableAll) {
+
+            return false;
+        } else {
+            if(!features.containsKey(toggleName)) {
+                fallbackAction.apply(toggleName, UnleashContext.builder().build());
+            }
+            return features.getOrDefault(toggleName, defaultSetting);
+        }
+    }
+
+    @Override
+    public boolean isEnabled(String toggleName, FallbackAction fallbackAction) {
+        if(enableAll) {
+            return true;
+        } else if(disableAll) {
+            return false;
+        } else {
+            if(!features.containsKey(toggleName)) {
+                fallbackAction.apply(toggleName, UnleashContext.builder().build());
+            }
+            return features.getOrDefault(toggleName, false);
+        }
+    }
+
+    @Override
     public Variant getVariant(String toggleName, UnleashContext context) {
         return getVariant(toggleName, Variant.DISABLED_VARIANT);
     }

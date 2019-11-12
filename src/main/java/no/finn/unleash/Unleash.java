@@ -15,6 +15,10 @@ public interface Unleash {
         return isEnabled(toggleName, defaultSetting);
     }
 
+    boolean isEnabled(final String toggleName, boolean defaultSetting, final FallbackAction fallbackAction);
+
+    boolean isEnabled(final String toggleName, final FallbackAction fallbackAction);
+
     Variant getVariant(final String toggleName, final UnleashContext context);
 
     Variant getVariant(final String toggleName, final UnleashContext context, final Variant defaultValue);

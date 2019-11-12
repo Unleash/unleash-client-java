@@ -1,11 +1,5 @@
 package no.finn.unleash;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.ToggleEvaluated;
 import no.finn.unleash.metric.UnleashMetricService;
@@ -16,6 +10,8 @@ import no.finn.unleash.repository.ToggleBackupHandlerFile;
 import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.*;
 import no.finn.unleash.util.UnleashConfig;
+
+import java.util.*;
 
 import static java.util.Optional.ofNullable;
 import static no.finn.unleash.Variant.DISABLED_VARIANT;
@@ -63,6 +59,14 @@ public final class DefaultUnleash implements Unleash {
         metricService.register(strategyMap.keySet());
     }
 
+    private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
+        return new FeatureToggleRepository(
+                unleashConfig,
+                new HttpToggleFetcher(unleashConfig),
+                new ToggleBackupHandlerFile(unleashConfig)
+        );
+    }
+
     @Override
     public boolean isEnabled(final String toggleName) {
         return isEnabled(toggleName, false);
@@ -73,12 +77,33 @@ public final class DefaultUnleash implements Unleash {
         return isEnabled(toggleName, contextProvider.getContext(), defaultSetting);
     }
 
+    public boolean isEnabled(final String toggleName, final FallbackAction fallbackAction) {
+        FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
+        boolean enabled = isEnabled(featureToggle, contextProvider.getContext(), false);
+
+        if(!enabled && fallbackAction != null) {
+            fallbackAction.apply(toggleName, contextProvider.getContext());
+        }
+
+        return enabled;
+    }
+
+    public boolean isEnabled(final String toggleName, boolean defaultSetting, final FallbackAction fallbackAction) {
+        FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
+
+        if(featureToggle == null && fallbackAction != null) {
+            fallbackAction.apply(toggleName, contextProvider.getContext());
+        }
+
+        return isEnabled(featureToggle, contextProvider.getContext(), defaultSetting);
+    }
+
     @Override
-    public boolean isEnabled(final String toggleName, final UnleashContext context ,final boolean defaultSetting) {
+    public boolean isEnabled(final String toggleName, final UnleashContext context, final boolean defaultSetting) {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
         boolean enabled = isEnabled(featureToggle, context, defaultSetting);
         count(toggleName, enabled);
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName,enabled));
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
         return enabled;
     }
 
