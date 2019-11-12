@@ -99,7 +99,7 @@ public class UnleashTest {
 	void fallback_function_should_not_be_called_when_toggle_is_defined() {
 		when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, asList(new ActivationStrategy("default", null))));
 
-		assertThat(unleash.isEnabled("test", false, (name, unleashContext) -> true), is(true));
+		assertThat(unleash.isEnabled("test", false, (name, unleashContext) -> false), is(true));
 	}
 
     @Test
