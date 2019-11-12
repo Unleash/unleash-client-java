@@ -1,6 +1,7 @@
 package no.finn.unleash;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
 public interface Unleash {
     boolean isEnabled(String toggleName);
@@ -15,9 +16,11 @@ public interface Unleash {
         return isEnabled(toggleName, defaultSetting);
     }
 
-    boolean isEnabled(final String toggleName, boolean defaultSetting, final FallbackAction fallbackAction);
+    boolean isEnabled(final String toggleName, final BiFunction<String, UnleashContext, Boolean> fallbackAction);
 
-    boolean isEnabled(final String toggleName, final FallbackAction fallbackAction);
+    boolean isEnabled(final String toggleName, boolean defaultSetting, final BiFunction<String, UnleashContext, Boolean> fallbackAction);
+
+    boolean isEnabled(final String toggleName, UnleashContext context, boolean defaultSetting, final BiFunction<String, UnleashContext, Boolean> fallbackAction);
 
     Variant getVariant(final String toggleName, final UnleashContext context);
 

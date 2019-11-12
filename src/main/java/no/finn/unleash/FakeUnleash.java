@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
@@ -28,7 +29,7 @@ public final class FakeUnleash implements Unleash {
     }
 
     @Override
-    public boolean isEnabled(String toggleName, boolean defaultSetting, FallbackAction fallbackAction) {
+    public boolean isEnabled(String toggleName, boolean defaultSetting, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         if(enableAll) {
             return true;
         } else if(disableAll) {
@@ -36,21 +37,26 @@ public final class FakeUnleash implements Unleash {
             return false;
         } else {
             if(!features.containsKey(toggleName)) {
-                fallbackAction.apply(toggleName, UnleashContext.builder().build());
+                return fallbackAction.apply(toggleName, UnleashContext.builder().build());
             }
             return features.getOrDefault(toggleName, defaultSetting);
         }
     }
 
     @Override
-    public boolean isEnabled(String toggleName, FallbackAction fallbackAction) {
+    public boolean isEnabled(String toggleName, UnleashContext context, boolean defaultSetting, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        return isEnabled(toggleName, defaultSetting, fallbackAction);
+    }
+
+    @Override
+    public boolean isEnabled(String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         if(enableAll) {
             return true;
         } else if(disableAll) {
             return false;
         } else {
             if(!features.containsKey(toggleName)) {
-                fallbackAction.apply(toggleName, UnleashContext.builder().build());
+                return fallbackAction.apply(toggleName, UnleashContext.builder().build());
             }
             return features.getOrDefault(toggleName, false);
         }
