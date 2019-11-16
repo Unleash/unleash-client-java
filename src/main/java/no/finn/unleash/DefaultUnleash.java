@@ -85,33 +85,21 @@ public final class DefaultUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(final String toggleName, final UnleashContext context, final boolean defaultSetting) {
-        return isEnabled(toggleName, context, defaultSetting, (name, unleashContext) -> defaultSetting);
+        return isEnabled(toggleName, context, (n, c) -> defaultSetting);
     }
 
+    @Override
     public boolean isEnabled(final String toggleName, final BiFunction<String, UnleashContext, Boolean> fallbackAction) {
-        return isEnabled(toggleName, false, fallbackAction);
+        return isEnabled(toggleName, contextProvider.getContext(), fallbackAction);
     }
 
-    public boolean isEnabled(final String toggleName, boolean defaultSetting, final BiFunction<String, UnleashContext, Boolean> fallbackAction) {
-        return isEnabled(toggleName, contextProvider.getContext(), defaultSetting, fallbackAction);
-    }
-
-    public boolean isEnabled(final String toggleName, UnleashContext context, boolean defaultSetting, final BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+    public boolean isEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
-
-        return isEnabled(toggleName, featureToggle, context, defaultSetting, fallbackAction);
-    }
-
-    private boolean isEnabled(String toggleName, FeatureToggle featureToggle, UnleashContext context, boolean defaultSetting, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         boolean enabled;
         UnleashContext enhancedContext = context.applyStaticFields(config);
 
         if (featureToggle == null) {
-            enabled = defaultSetting;
-
-            if(fallbackAction != null) {
-                enabled = fallbackAction.apply(toggleName, enhancedContext);
-            }
+            enabled = fallbackAction.apply(toggleName, enhancedContext);
         } else if(!featureToggle.isEnabled()) {
             enabled = false;
         } else if(featureToggle.getStrategies().size() == 0) {
@@ -133,7 +121,7 @@ public final class DefaultUnleash implements Unleash {
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
-        boolean enabled = isEnabled(toggleName, context, false);
+        boolean enabled = isEnabled(toggleName, context, (n, c) -> false);
         Variant variant = enabled ? selectVariant(featureToggle, context, defaultValue) : defaultValue;
         metricService.countVariant(toggleName, variant.getName());
         return variant;

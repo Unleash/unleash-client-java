@@ -29,23 +29,8 @@ public final class FakeUnleash implements Unleash {
     }
 
     @Override
-    public boolean isEnabled(String toggleName, boolean defaultSetting, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
-        if(enableAll) {
-            return true;
-        } else if(disableAll) {
-
-            return false;
-        } else {
-            if(!features.containsKey(toggleName)) {
-                return fallbackAction.apply(toggleName, UnleashContext.builder().build());
-            }
-            return features.getOrDefault(toggleName, defaultSetting);
-        }
-    }
-
-    @Override
-    public boolean isEnabled(String toggleName, UnleashContext context, boolean defaultSetting, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
-        return isEnabled(toggleName, defaultSetting, fallbackAction);
+    public boolean isEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        return isEnabled(toggleName, fallbackAction);
     }
 
     @Override
