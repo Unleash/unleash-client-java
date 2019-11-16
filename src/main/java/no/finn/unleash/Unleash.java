@@ -16,7 +16,7 @@ public interface Unleash {
         return isEnabled(toggleName, defaultSetting);
     }
 
-    default boolean isEnabled(final String toggleName, final BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+    default boolean isEnabled(String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         return isEnabled(toggleName, false);
     }
 
