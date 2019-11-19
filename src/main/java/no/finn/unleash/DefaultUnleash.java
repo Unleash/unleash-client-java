@@ -15,16 +15,7 @@ import no.finn.unleash.repository.FeatureToggleRepository;
 import no.finn.unleash.repository.HttpToggleFetcher;
 import no.finn.unleash.repository.ToggleBackupHandlerFile;
 import no.finn.unleash.repository.ToggleRepository;
-import no.finn.unleash.strategy.ApplicationHostnameStrategy;
-import no.finn.unleash.strategy.DefaultStrategy;
-import no.finn.unleash.strategy.FlexibleRolloutStrategy;
-import no.finn.unleash.strategy.GradualRolloutRandomStrategy;
-import no.finn.unleash.strategy.GradualRolloutSessionIdStrategy;
-import no.finn.unleash.strategy.GradualRolloutUserIdStrategy;
-import no.finn.unleash.strategy.RemoteAddressStrategy;
-import no.finn.unleash.strategy.Strategy;
-import no.finn.unleash.strategy.UnknownStrategy;
-import no.finn.unleash.strategy.UserWithIdStrategy;
+import no.finn.unleash.strategy.*;
 import no.finn.unleash.util.UnleashConfig;
 
 import static java.util.Optional.ofNullable;
@@ -50,6 +41,14 @@ public final class DefaultUnleash implements Unleash {
     private final EventDispatcher eventDispatcher;
     private final UnleashConfig config;
 
+    private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
+        return new FeatureToggleRepository(
+                unleashConfig,
+                new HttpToggleFetcher(unleashConfig),
+                new ToggleBackupHandlerFile(unleashConfig)
+        );
+    }
+
 
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {
         this(unleashConfig, defaultToggleRepository(unleashConfig), strategies);
@@ -65,13 +64,6 @@ public final class DefaultUnleash implements Unleash {
         metricService.register(strategyMap.keySet());
     }
 
-    private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
-        return new FeatureToggleRepository(
-                unleashConfig,
-                new HttpToggleFetcher(unleashConfig),
-                new ToggleBackupHandlerFile(unleashConfig)
-        );
-    }
 
     @Override
     public boolean isEnabled(final String toggleName) {
