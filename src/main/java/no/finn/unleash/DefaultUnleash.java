@@ -83,7 +83,15 @@ public final class DefaultUnleash implements Unleash {
         return isEnabled(toggleName, contextProvider.getContext(), fallbackAction);
     }
 
+    @Override
     public boolean isEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        boolean enabled = checkEnabled(toggleName, context, fallbackAction);
+        count(toggleName, enabled);
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
+        return enabled;
+    }
+
+    private boolean checkEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
         boolean enabled;
         UnleashContext enhancedContext = context.applyStaticFields(config);
@@ -98,8 +106,6 @@ public final class DefaultUnleash implements Unleash {
             enabled = featureToggle.getStrategies().stream()
                     .anyMatch(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), enhancedContext, as.getConstraints()));
         }
-        count(toggleName, enabled);
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
         return enabled;
     }
 
@@ -111,7 +117,7 @@ public final class DefaultUnleash implements Unleash {
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
-        boolean enabled = isEnabled(toggleName, context, (n, c) -> false);
+        boolean enabled = checkEnabled(toggleName, context, (n, c) -> false);
         Variant variant = enabled ? selectVariant(featureToggle, context, defaultValue) : defaultValue;
         metricService.countVariant(toggleName, variant.getName());
         return variant;
