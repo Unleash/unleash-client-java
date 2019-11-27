@@ -1,10 +1,9 @@
-# The Unleash Client 4 Java
+# Unleash Client SDK for Java
 
 [![Build Status](https://travis-ci.org/Unleash/unleash-client-java.svg?branch=master)](https://travis-ci.org/Unleash/unleash-client-java)
 [![Coverage Status](https://coveralls.io/repos/github/Unleash/unleash-client-java/badge.svg?branch=master)](https://coveralls.io/github/Unleash/unleash-client-java?branch=master)
 
-This is the java client for Unleash. Read more about the [Unleash project](https://github.com/finn-no/unleash)
-**Version 3.x of the client requires `unleash-server` >= v3.x**
+This is the Unleash Client SDK for Java. It is compatible with the [Unlesah-hosted.com SaaS](https://www.unleash-hosted.com/) offering and [Unleash Open-Soruce](https://github.com/unleash/unleash).
 
 ## Getting started
 You will require unleash on your class path, pop it in to your pom:
