@@ -1,5 +1,6 @@
 package no.finn.unleash;
 
+import java.util.Collections;
 import java.util.List;
 
 import no.finn.unleash.variant.VariantDefinition;
@@ -36,7 +37,11 @@ public final class FeatureToggle {
     }
 
     public List<VariantDefinition> getVariants() {
-        return variants;
+        if(variants == null) {
+            return Collections.emptyList();
+        } else {
+            return variants;
+        }
     }
 
     @Override
