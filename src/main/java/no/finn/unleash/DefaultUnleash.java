@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.ToggleEvaluated;
@@ -40,7 +41,6 @@ public final class DefaultUnleash implements Unleash {
     private final EventDispatcher eventDispatcher;
     private final UnleashConfig config;
 
-
     private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
         return new FeatureToggleRepository(
                 unleashConfig,
@@ -74,24 +74,35 @@ public final class DefaultUnleash implements Unleash {
     }
 
     @Override
-    public boolean isEnabled(final String toggleName, final UnleashContext context ,final boolean defaultSetting) {
-        FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
-        boolean enabled = isEnabled(featureToggle, context, defaultSetting);
+    public boolean isEnabled(final String toggleName, final UnleashContext context, final boolean defaultSetting) {
+        return isEnabled(toggleName, context, (n, c) -> defaultSetting);
+    }
+
+    @Override
+    public boolean isEnabled(final String toggleName, final BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        return isEnabled(toggleName, contextProvider.getContext(), fallbackAction);
+    }
+
+    @Override
+    public boolean isEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        boolean enabled = checkEnabled(toggleName, context, fallbackAction);
         count(toggleName, enabled);
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName,enabled));
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
         return enabled;
     }
 
-    private boolean isEnabled(FeatureToggle featureToggle, UnleashContext context, boolean defaultSetting) {
+    private boolean checkEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
         boolean enabled;
+        UnleashContext enhancedContext = context.applyStaticFields(config);
+
         if (featureToggle == null) {
-            enabled = defaultSetting;
+            enabled = fallbackAction.apply(toggleName, enhancedContext);
         } else if(!featureToggle.isEnabled()) {
             enabled = false;
         } else if(featureToggle.getStrategies().size() == 0) {
             return true;
         } else {
-            UnleashContext enhancedContext = context.applyStaticFields(config);
             enabled = featureToggle.getStrategies().stream()
                     .anyMatch(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), enhancedContext, as.getConstraints()));
         }
@@ -106,7 +117,7 @@ public final class DefaultUnleash implements Unleash {
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
-        boolean enabled = isEnabled(featureToggle, context, false);
+        boolean enabled = checkEnabled(toggleName, context, (n, c) -> false);
         Variant variant = enabled ? selectVariant(featureToggle, context, defaultValue) : defaultValue;
         metricService.countVariant(toggleName, variant.getName());
         return variant;

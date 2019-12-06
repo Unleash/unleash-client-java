@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.Strategy;
@@ -15,21 +17,18 @@ import no.finn.unleash.util.UnleashConfig;
 
 import no.finn.unleash.variant.Payload;
 import no.finn.unleash.variant.VariantDefinition;
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyMap;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 public class UnleashTest {
 
@@ -80,6 +79,49 @@ public class UnleashTest {
 
         assertThat(unleash.isEnabled("test", true), is(true));
     }
+
+    @Test
+    public void fallback_function_should_be_invoked_and_return_true() {
+        when(toggleRepository.getToggle("test")).thenReturn(null);
+        BiFunction<String, UnleashContext, Boolean>  fallbackAction = mock(BiFunction.class);
+        when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(true);
+
+        assertThat(unleash.isEnabled("test", fallbackAction), is(true));
+        verify(fallbackAction, times(1)).apply(anyString(), any(UnleashContext.class));
+    }
+
+    @Test
+    public void fallback_function_should_be_invoked_also_with_context() {
+        when(toggleRepository.getToggle("test")).thenReturn(null);
+        BiFunction<String, UnleashContext, Boolean>  fallbackAction = mock(BiFunction.class);
+        when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(true);
+
+        UnleashContext context = UnleashContext.builder().userId("123").build();
+
+        assertThat(unleash.isEnabled("test", context, fallbackAction), is(true));
+        verify(fallbackAction, times(1)).apply(anyString(), any(UnleashContext.class));
+    }
+
+    @Test
+    void fallback_function_should_be_invoked_and_return_false() {
+        when(toggleRepository.getToggle("test")).thenReturn(null);
+        BiFunction<String, UnleashContext, Boolean>  fallbackAction = mock(BiFunction.class);
+        when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(false);
+
+        assertThat(unleash.isEnabled("test", fallbackAction), is(false));
+        verify(fallbackAction, times(1)).apply(anyString(), any(UnleashContext.class));
+    }
+
+	@Test
+	void fallback_function_should_not_be_called_when_toggle_is_defined() {
+		when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, asList(new ActivationStrategy("default", null))));
+
+        BiFunction<String, UnleashContext, Boolean>  fallbackAction = mock(BiFunction.class);
+        when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(false);
+
+		assertThat(unleash.isEnabled("test", fallbackAction), is(true));
+        verify(fallbackAction, never()).apply(anyString(), any(UnleashContext.class));
+	}
 
     @Test
     public void should_register_custom_strategies() {
