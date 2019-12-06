@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
@@ -25,6 +26,19 @@ public final class FakeUnleash implements Unleash {
         } else {
             return features.getOrDefault(toggleName, defaultSetting);
         }
+    }
+
+    @Override
+    public boolean isEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        return isEnabled(toggleName, fallbackAction);
+    }
+
+    @Override
+    public boolean isEnabled(String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        if(!features.containsKey(toggleName)) {
+            return fallbackAction.apply(toggleName, UnleashContext.builder().build());
+        }
+        return isEnabled(toggleName);
     }
 
     @Override
