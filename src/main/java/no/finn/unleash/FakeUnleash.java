@@ -86,6 +86,7 @@ public final class FakeUnleash implements Unleash {
         disableAll = false;
         enableAll = false;
         features.clear();
+        variants.clear();
     }
 
     public void enable(String... features) {
