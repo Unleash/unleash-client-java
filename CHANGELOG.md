@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.0
+- feat: Add support for fallback-action
+- fix: NullPointerException when no variants defined 
+- fix: FakeUnleash resetAll should also reset variants
+
 ## 3.2.10
 - fix: Change log-level to info for missing local backup
 - feat: Add support for http proxies with basic authentication (#91)
