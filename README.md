@@ -1,5 +1,5 @@
 # Unleash Client SDK for Java
-This is the Unleash Client SDK for Java. It is compatible with the [Unlesah-hosted.com SaaS](https://www.unleash-hosted.com/) offering and [Unleash Open-Soruce](https://github.com/unleash/unleash).
+This is the Unleash Client SDK for Java. It is compatible with the [Unlesah-hosted.com SaaS](https://www.unleash-hosted.com/) offering and [Unleash Open-Source](https://github.com/unleash/unleash).
 
 
 [![Build Status](https://travis-ci.org/Unleash/unleash-client-java.svg?branch=master)](https://travis-ci.org/Unleash/unleash-client-java)
