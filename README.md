@@ -96,7 +96,7 @@ You just add it as an argument to the `isEnabled` call.
 UnleashContext context = UnleashContext.builder()
   .userId("user@mail.com").build();
 
-unleash.isEnabled("someToggle", unleashContext);
+unleash.isEnabled("someToggle", context);
 ``` 
 
 
