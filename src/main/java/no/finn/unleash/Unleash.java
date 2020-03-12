@@ -33,4 +33,6 @@ public interface Unleash {
     Variant getVariant(final String toggleName, final Variant defaultValue);
 
     List<String> getFeatureToggleNames();
+
+    default void shutdown() {}
 }

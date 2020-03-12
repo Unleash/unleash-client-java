@@ -53,4 +53,8 @@ public class UnleashScheduledExecutorImpl implements UnleashScheduledExecutor {
         return (Future<Void>) executorService.submit(runnable);
     }
 
+    @Override
+    public void shutdown() {
+        this.scheduledThreadPoolExecutor.shutdown();
+    }
 }
