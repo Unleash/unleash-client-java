@@ -1,5 +1,7 @@
 package no.finn.unleash.util;
 
+import no.finn.unleash.CustomHttpHeadersProvider;
+import no.finn.unleash.DefaultCustomHttpHeadersProviderImpl;
 import no.finn.unleash.UnleashContextProvider;
 import no.finn.unleash.event.NoOpSubscriber;
 import no.finn.unleash.event.UnleashSubscriber;
@@ -18,6 +20,7 @@ public class UnleashConfig {
     private final URI unleashAPI;
     private final UnleashURLs unleashURLs;
     private final Map<String, String> customHttpHeaders;
+    private final CustomHttpHeadersProvider customHttpHeadersProvider;
     private final String appName;
     private final String environment;
     private final String instanceId;
@@ -35,6 +38,7 @@ public class UnleashConfig {
     public UnleashConfig(
             URI unleashAPI,
             Map<String, String> customHttpHeaders,
+            CustomHttpHeadersProvider customHttpHeadersProvider,
             String appName,
             String environment,
             String instanceId,
@@ -76,6 +80,7 @@ public class UnleashConfig {
 
         this.unleashAPI = unleashAPI;
         this.customHttpHeaders = customHttpHeaders;
+        this.customHttpHeadersProvider = customHttpHeadersProvider;
         this.unleashURLs = new UnleashURLs(unleashAPI);
         this.appName = appName;
         this.environment = environment;
@@ -101,6 +106,7 @@ public class UnleashConfig {
         connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
         connection.setRequestProperty("User-Agent", config.getAppName());
         config.getCustomHttpHeaders().forEach(connection::setRequestProperty);
+        config.customHttpHeadersProvider.getCustomHeaders().forEach(connection::setRequestProperty);
     }
 
     private void enableProxyAuthentication() {
@@ -115,6 +121,8 @@ public class UnleashConfig {
     public Map<String, String> getCustomHttpHeaders() {
         return customHttpHeaders;
     }
+
+    public CustomHttpHeadersProvider getCustomHttpHeadersProvider() { return customHttpHeadersProvider; }
 
     public String getAppName() {
         return appName;
@@ -196,6 +204,7 @@ public class UnleashConfig {
 
         private URI unleashAPI;
         private Map<String, String> customHttpHeaders = new HashMap<>();
+        private CustomHttpHeadersProvider customHttpHeadersProvider = new DefaultCustomHttpHeadersProviderImpl();
         private String appName;
         private String environment = "default";
         private String instanceId = getDefaultInstanceId();
@@ -232,6 +241,11 @@ public class UnleashConfig {
 
         public Builder customHttpHeader(String name, String value) {
             this.customHttpHeaders.put(name, value);
+            return this;
+        }
+
+        public Builder customHttpHeadersProvider(CustomHttpHeadersProvider provider) {
+            this.customHttpHeadersProvider = provider;
             return this;
         }
 
@@ -308,6 +322,7 @@ public class UnleashConfig {
             return new UnleashConfig(
                     unleashAPI,
                     customHttpHeaders,
+                    customHttpHeadersProvider,
                     appName,
                     environment,
                     instanceId,

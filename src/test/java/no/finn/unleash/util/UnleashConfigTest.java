@@ -1,5 +1,7 @@
 package no.finn.unleash.util;
 
+import no.finn.unleash.CustomHttpHeadersProvider;
+import no.finn.unleash.DefaultCustomHttpHeadersProviderImpl;
 import no.finn.unleash.util.UnleashConfig.ProxyAuthenticator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -9,12 +11,18 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.*;
 import java.net.Authenticator.RequestorType;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import org.mockito.Mockito;
 
 import static no.finn.unleash.util.UnleashConfig.UNLEASH_APP_NAME_HEADER;
 import static no.finn.unleash.util.UnleashConfig.UNLEASH_INSTANCE_ID_HEADER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 public class UnleashConfigTest {
 
@@ -143,6 +151,31 @@ public class UnleashConfigTest {
 
         UnleashConfig.setRequestProperties(connection, unleashConfig);
         assertThat(connection.getRequestProperty(headerName), is(headerValue));
+    }
+
+    @Test
+    public void should_add_custom_headers_from_provider_to_connection_if_present() throws IOException {
+        String unleashAPI = "http://unleash.org";
+        Map<String,String> result = new HashMap() {{ put("PROVIDER-HEADER","Provider Value"); }};
+
+        CustomHttpHeadersProvider provider = Mockito.mock(DefaultCustomHttpHeadersProviderImpl.class);
+        when(provider.getCustomHeaders()).thenReturn(result);
+
+        UnleashConfig unleashConfig = UnleashConfig.builder()
+                .appName("my-app")
+                .instanceId("my-instance-1")
+                .unleashAPI(unleashAPI)
+                .customHttpHeadersProvider(provider)
+                .build();
+
+        URL someUrl = new URL(unleashAPI + "/some/arbitrary/path");
+        HttpURLConnection connection = (HttpURLConnection) someUrl.openConnection();
+
+        UnleashConfig.setRequestProperties(connection, unleashConfig);
+
+        for (String key: result.keySet()) {
+            assertThat(connection.getRequestProperty(key), is(result.get(key)));
+        }
     }
 
     @Test

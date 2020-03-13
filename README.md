@@ -139,6 +139,29 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
                 .build();
 ```
 
+###Dynamic custom HTTP headers
+If you need custom http headers that change during the lifetime of the client, a provider can be defined via the `UnleashConfig`.
+```java
+public class CustomHttpHeadersProviderImpl implements CustomHttpHeadersProvider {
+    @Override
+    public Map<String, String> getCustomHeaders() {
+        String token = "Acquire or refresh token";
+        return new HashMap() {{ put("Authorization", "Bearer "+token); }};
+    }
+}
+```
+```java
+CustomHttpHeadersProvider provider = new CustomHttpHeadersProviderImpl();
+
+UnleashConfig unleashConfig = UnleashConfig.builder()
+                .appName("my-app")
+                .instanceId("my-instance-1")
+                .unleashAPI(unleashAPI)
+                .customHttpHeadersProvider(provider)
+                .build();
+```
+
+
 ### Subscriber API
 *(Introduced in 3.2.2)*
 
