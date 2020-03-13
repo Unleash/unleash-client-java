@@ -162,4 +162,9 @@ public final class DefaultUnleash implements Unleash {
     private Strategy getStrategy(String strategy) {
         return strategyMap.containsKey(strategy) ? strategyMap.get(strategy) : UNKNOWN_STRATEGY;
     }
+
+    @Override
+    public void shutdown() {
+        config.getScheduledExecutor().shutdown();
+    }
 }

@@ -1,5 +1,6 @@
 package no.finn.unleash.util;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,6 +9,11 @@ public class UnleashScheduledExecutorImplTest {
 
     private UnleashScheduledExecutorImpl unleashScheduledExecutor = new UnleashScheduledExecutorImpl();
     private int periodicalTaskCounter;
+
+    @BeforeEach
+    public void setup() {
+        this.periodicalTaskCounter = 0;
+    }
 
     @Test
     public void scheduleOnce_doNotInterfereWithPeriodicalTasks() {
@@ -29,4 +35,11 @@ public class UnleashScheduledExecutorImplTest {
         this.periodicalTaskCounter++;
     }
 
+    @Test
+    public void shutdown_stopsRunningScheduledTasks() {
+        unleashScheduledExecutor.setInterval(this::periodicalTask, 5, 1);
+        unleashScheduledExecutor.shutdown();
+        sleep5seconds();
+        assertThat(periodicalTaskCounter).isEqualTo(0);
+    }
 }
