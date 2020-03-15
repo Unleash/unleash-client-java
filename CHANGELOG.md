@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.1
+- fix: add shutdown method to enable graceful termination of Unleash
+
 ## 3.3.0
 - feat: Add support for fallback-action
 - fix: NullPointerException when no variants defined 
