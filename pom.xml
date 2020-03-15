@@ -10,7 +10,7 @@
 
     <groupId>no.finn.unleash</groupId>
     <artifactId>unleash-client-java</artifactId>
-    <version>3.3.1</version>
+    <version>3.3.2-SNAPSHOT</version>
 
     <properties>
         <version.log4j2>2.11.2</version.log4j2>
