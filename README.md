@@ -139,7 +139,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
                 .build();
 ```
 
-###Dynamic custom HTTP headers
+### Dynamic custom HTTP headers
 If you need custom http headers that change during the lifetime of the client, a provider can be defined via the `UnleashConfig`.
 ```java
 public class CustomHttpHeadersProviderImpl implements CustomHttpHeadersProvider {
