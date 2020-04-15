@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.3
+- fix: Make ToggleCollection constructor public
+
 ## 3.3.2
 - fix: add a custom http headers provider for unleash config
 
