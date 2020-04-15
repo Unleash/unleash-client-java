@@ -12,7 +12,7 @@ public final class ToggleCollection {
     private final int version = 1; // required for serialization
     private final transient Map<String, FeatureToggle> cache;
 
-    ToggleCollection(final Collection<FeatureToggle> features) {
+    public ToggleCollection(final Collection<FeatureToggle> features) {
         this.features = ensureNotNull(features);
         this.cache = new ConcurrentHashMap<>();
         for(FeatureToggle featureToggle : this.features) {
