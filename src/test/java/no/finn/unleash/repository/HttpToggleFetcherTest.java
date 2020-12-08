@@ -233,28 +233,26 @@ public class HttpToggleFetcherTest {
                 .withHeader("Content-Type", matching("application/json")));
     }
 
-    @Test
-    public void should_handle_errors() throws URISyntaxException {
-        int httpCodes[] = {400,401,403,404,500,503};
-        for(int httpCode:httpCodes) {
-            stubFor(get(urlEqualTo("/api/client/features"))
-                    .withHeader("Accept", equalTo("application/json"))
-                    .willReturn(aResponse()
-                            .withStatus(httpCode)
-                            .withHeader("Content-Type", "application/json")));
+    @ParameterizedTest
+    @ValueSource(ints = {400, 401, 403, 404, 500, 503})
+    public void should_handle_errors(int httpCode) throws URISyntaxException {
+        stubFor(get(urlEqualTo("/api/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(httpCode)
+                        .withHeader("Content-Type", "application/json")));
 
-            URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-            UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-            HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
-            FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-            assertEquals(response.getStatus(), FeatureToggleResponse.Status.UNAVAILABLE,
-                    "Should return status UNAVAILABLE");
-            assertEquals(response.getHttpStatusCode(), httpCode,
-                    "Should return correct status code");
+        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
+        FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
+        assertEquals(response.getStatus(), FeatureToggleResponse.Status.UNAVAILABLE,
+                "Should return status UNAVAILABLE");
+        assertEquals(response.getHttpStatusCode(), httpCode,
+                "Should return correct status code");
 
-            verify(getRequestedFor(urlMatching("/api/client/features"))
-                    .withHeader("Content-Type", matching("application/json")));
-        }
+        verify(getRequestedFor(urlMatching("/api/client/features"))
+                .withHeader("Content-Type", matching("application/json")));
 
     }
 
