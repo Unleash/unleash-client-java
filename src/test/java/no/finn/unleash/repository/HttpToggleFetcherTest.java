@@ -10,7 +10,10 @@ import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.util.UnleashConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -202,17 +205,18 @@ public class HttpToggleFetcherTest {
                 .withHeader("Content-Type", matching("application/json")));
     }
 
-    @Test
-    public void should_handle_redirect() throws URISyntaxException {
+    @ParameterizedTest
+    @ValueSource(ints = {HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_SEE_OTHER})
+    public void should_handle_redirect(int responseCode) throws URISyntaxException {
         stubFor(get(urlEqualTo("/api/client/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
-                        .withStatus(302)
+                        .withStatus(responseCode)
                         .withHeader("Location", "http://localhost:" + serverMock.port() + "/api/v2/client/features")));
         stubFor(get(urlEqualTo("/api/v2/client/features"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
-                        .withStatus(200)
+                        .withStatus(HttpURLConnection.HTTP_OK)
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("features-v1.json")));
 
