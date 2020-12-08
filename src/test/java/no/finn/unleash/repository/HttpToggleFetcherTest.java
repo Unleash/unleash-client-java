@@ -200,7 +200,33 @@ public class HttpToggleFetcherTest {
 
         verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
+    }
 
+    @Test
+    public void should_handle_redirect() throws URISyntaxException {
+        stubFor(get(urlEqualTo("/api/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(302)
+                        .withHeader("Location", "http://localhost:" + serverMock.port() + "/api/v2/client/features")));
+        stubFor(get(urlEqualTo("/api/v2/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("features-v1.json")));
+
+        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
+        FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
+        assertEquals(response.getStatus(), FeatureToggleResponse.Status.CHANGED,
+                "Should return status CHANGED");
+
+        verify(getRequestedFor(urlMatching("/api/client/features"))
+                .withHeader("Content-Type", matching("application/json")));
+        verify(getRequestedFor(urlMatching("/api/v2/client/features"))
+                .withHeader("Content-Type", matching("application/json")));
     }
 
     @Test
@@ -248,7 +274,7 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void should_notifiy_location_on_redirect() throws URISyntaxException {
+    public void should_notify_location_on_error() throws URISyntaxException {
         stubFor(get(urlEqualTo("/api/client/features"))
             .withHeader("Accept", equalTo("application/json"))
             .willReturn(aResponse()

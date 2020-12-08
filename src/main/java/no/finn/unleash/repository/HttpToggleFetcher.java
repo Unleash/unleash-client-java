@@ -28,28 +28,10 @@ public final class HttpToggleFetcher implements ToggleFetcher {
     public FeatureToggleResponse fetchToggles() throws UnleashException {
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) toggleUrl.openConnection();
-            connection.setConnectTimeout(CONNECT_TIMEOUT);
-            connection.setReadTimeout(CONNECT_TIMEOUT);
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setRequestProperty("Content-Type", "application/json");
-            UnleashConfig.setRequestProperties(connection, this.unleashConfig);
-
-            if(etag.isPresent()) {
-                connection.setRequestProperty("If-None-Match", etag.get());
-            }
-
-            connection.setUseCaches(true);
+            connection = openConnection(toggleUrl);
             connection.connect();
 
-            int responseCode = connection.getResponseCode();
-            if (responseCode < 300) {
-                return getToggleResponse(connection);
-            } else if (responseCode == 304) {
-                return new FeatureToggleResponse(FeatureToggleResponse.Status.NOT_CHANGED, responseCode);
-            } else {
-                return new FeatureToggleResponse(FeatureToggleResponse.Status.UNAVAILABLE, responseCode, getLocationHeader(connection));
-            }
+            return getToggleResponse(connection, true);
         } catch (IOException e) {
             throw new UnleashException("Could not fetch toggles", e);
         } catch (IllegalStateException e) {
@@ -61,18 +43,54 @@ public final class HttpToggleFetcher implements ToggleFetcher {
         }
     }
 
-    private FeatureToggleResponse getToggleResponse(HttpURLConnection request) throws IOException {
-        etag = Optional.ofNullable(request.getHeaderField("ETag"));
+    private FeatureToggleResponse getToggleResponse(HttpURLConnection request, boolean followRedirect) throws IOException {
+        int responseCode = request.getResponseCode();
+        if (responseCode < 300) {
+            etag = Optional.ofNullable(request.getHeaderField("ETag"));
 
-        try(BufferedReader reader = new BufferedReader(
-                new InputStreamReader((InputStream) request.getContent(), StandardCharsets.UTF_8))) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader((InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
-            ToggleCollection toggles = JsonToggleParser.fromJson(reader);
-            return new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggles);
+                ToggleCollection toggles = JsonToggleParser.fromJson(reader);
+                return new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggles);
+            }
+        } else if (followRedirect && (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
+                || responseCode == HttpURLConnection.HTTP_MOVED_PERM
+                || responseCode == HttpURLConnection.HTTP_SEE_OTHER)) {
+            return followRedirect(request);
+        } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
+            return new FeatureToggleResponse(FeatureToggleResponse.Status.NOT_CHANGED, responseCode);
+        } else {
+            return new FeatureToggleResponse(FeatureToggleResponse.Status.UNAVAILABLE, responseCode, getLocationHeader(request));
         }
     }
 
+    private FeatureToggleResponse followRedirect(HttpURLConnection request) throws IOException {
+        String newUrl = getLocationHeader(request);
+
+        request = openConnection(new URL(newUrl));
+        request.connect();
+
+        return getToggleResponse(request, false);
+    }
+
+
     private String getLocationHeader(HttpURLConnection connection) {
         return connection.getHeaderField("Location");
+    }
+
+    private HttpURLConnection openConnection(URL url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setConnectTimeout(CONNECT_TIMEOUT);
+        connection.setReadTimeout(CONNECT_TIMEOUT);
+        connection.setRequestProperty("Accept", "application/json");
+        connection.setRequestProperty("Content-Type", "application/json");
+        UnleashConfig.setRequestProperties(connection, this.unleashConfig);
+
+        etag.ifPresent(val -> connection.setRequestProperty("If-None-Match", val));
+
+        connection.setUseCaches(true);
+
+        return connection;
     }
 }
