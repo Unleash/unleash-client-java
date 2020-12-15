@@ -11,8 +11,12 @@ import java.util.Optional;
 
 import no.finn.unleash.UnleashException;
 import no.finn.unleash.util.UnleashConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class HttpToggleFetcher implements ToggleFetcher {
+    private static final Logger LOG = LogManager.getLogger(HttpToggleFetcher.class);
+
     private static final int CONNECT_TIMEOUT = 10000;
     private Optional<String> etag = Optional.empty();
 
@@ -70,6 +74,7 @@ public final class HttpToggleFetcher implements ToggleFetcher {
 
         request = openConnection(new URL(newUrl));
         request.connect();
+        LOG.info("Redirecting from {} to {}. Please consider to update your config.", toggleUrl, newUrl);
 
         return getToggleResponse(request, false);
     }
