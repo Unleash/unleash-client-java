@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.4
+- fix: follow redirect once (#115)
+- chore(deps): bump version.log4j2 from 2.11.2 to 2.13.3 (#109)
+- Correct README typo (#112)
+- fix: license year and company
+
 ## 3.3.3
 - fix: Make ToggleCollection constructor public
 
