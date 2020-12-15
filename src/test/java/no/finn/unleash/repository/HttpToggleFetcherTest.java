@@ -10,7 +10,10 @@ import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.util.UnleashConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -200,31 +203,56 @@ public class HttpToggleFetcherTest {
 
         verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
-
     }
 
-    @Test
-    public void should_handle_errors() throws URISyntaxException {
-        int httpCodes[] = {400,401,403,404,500,503};
-        for(int httpCode:httpCodes) {
-            stubFor(get(urlEqualTo("/api/client/features"))
-                    .withHeader("Accept", equalTo("application/json"))
-                    .willReturn(aResponse()
-                            .withStatus(httpCode)
-                            .withHeader("Content-Type", "application/json")));
+    @ParameterizedTest
+    @ValueSource(ints = {HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_SEE_OTHER})
+    public void should_handle_redirect(int responseCode) throws URISyntaxException {
+        stubFor(get(urlEqualTo("/api/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(responseCode)
+                        .withHeader("Location", "http://localhost:" + serverMock.port() + "/api/v2/client/features")));
+        stubFor(get(urlEqualTo("/api/v2/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("features-v1.json")));
 
-            URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-            UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-            HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
-            FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-            assertEquals(response.getStatus(), FeatureToggleResponse.Status.UNAVAILABLE,
-                    "Should return status UNAVAILABLE");
-            assertEquals(response.getHttpStatusCode(), httpCode,
-                    "Should return correct status code");
+        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
+        FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
+        assertEquals(response.getStatus(), FeatureToggleResponse.Status.CHANGED,
+                "Should return status CHANGED");
 
-            verify(getRequestedFor(urlMatching("/api/client/features"))
-                    .withHeader("Content-Type", matching("application/json")));
-        }
+        verify(getRequestedFor(urlMatching("/api/client/features"))
+                .withHeader("Content-Type", matching("application/json")));
+        verify(getRequestedFor(urlMatching("/api/v2/client/features"))
+                .withHeader("Content-Type", matching("application/json")));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {400, 401, 403, 404, 500, 503})
+    public void should_handle_errors(int httpCode) throws URISyntaxException {
+        stubFor(get(urlEqualTo("/api/client/features"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(httpCode)
+                        .withHeader("Content-Type", "application/json")));
+
+        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
+        FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
+        assertEquals(response.getStatus(), FeatureToggleResponse.Status.UNAVAILABLE,
+                "Should return status UNAVAILABLE");
+        assertEquals(response.getHttpStatusCode(), httpCode,
+                "Should return correct status code");
+
+        verify(getRequestedFor(urlMatching("/api/client/features"))
+                .withHeader("Content-Type", matching("application/json")));
 
     }
 
@@ -248,7 +276,7 @@ public class HttpToggleFetcherTest {
     }
 
     @Test
-    public void should_notifiy_location_on_redirect() throws URISyntaxException {
+    public void should_notify_location_on_error() throws URISyntaxException {
         stubFor(get(urlEqualTo("/api/client/features"))
             .withHeader("Accept", equalTo("application/json"))
             .willReturn(aResponse()
