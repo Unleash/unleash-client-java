@@ -5,8 +5,6 @@ import no.finn.unleash.UnleashException;
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashURLs;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

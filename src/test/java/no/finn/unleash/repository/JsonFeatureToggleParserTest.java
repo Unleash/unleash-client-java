@@ -3,15 +3,10 @@ package no.finn.unleash.repository;
 import no.finn.unleash.FeatureToggle;
 import org.junit.jupiter.api.Test;
 
-
 import java.io.*;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.AdditionalMatchers.not;
 
 public class JsonFeatureToggleParserTest {
 
@@ -20,8 +15,8 @@ public class JsonFeatureToggleParserTest {
         Reader content = getFileReader("/features-v1.json");
         ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
 
-        assertThat(toggleCollection.getFeatures().size(), is(3));
-        assertThat(toggleCollection.getToggle("featureX").isEnabled(), is(true));
+        assertThat(toggleCollection.getFeatures()).hasSize(3);
+        assertThat(toggleCollection.getToggle("featureX").isEnabled()).isTrue();
     }
 
     @Test
@@ -29,8 +24,8 @@ public class JsonFeatureToggleParserTest {
         Reader content = getFileReader("/features-v0.json");
         ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
 
-        assertThat(toggleCollection.getFeatures().size(), is(3));
-        assertThat(toggleCollection.getToggle("featureX").isEnabled(), is(true));
+        assertThat(toggleCollection.getFeatures()).hasSize(3);
+        assertThat(toggleCollection.getToggle("featureX").isEnabled()).isTrue();
     }
 
     @Test
@@ -39,9 +34,9 @@ public class JsonFeatureToggleParserTest {
         ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
         FeatureToggle featureY = toggleCollection.getToggle("featureY");
 
-        assertThat(featureY.getStrategies().size(), is(1));
-        assertThat(featureY.getStrategies().get(0).getName(), is("baz"));
-        assertThat(featureY.getStrategies().get(0).getParameters().get("foo"), is("bar"));
+        assertThat(featureY.getStrategies()).hasSize(1);
+        assertThat(featureY.getStrategies().get(0).getName()).isEqualTo("baz");
+        assertThat(featureY.getStrategies().get(0).getParameters().get("foo")).isEqualTo("bar");
     }
 
     @Test
@@ -50,10 +45,10 @@ public class JsonFeatureToggleParserTest {
         ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
         FeatureToggle featureY = toggleCollection.getToggle("featureY");
 
-        assertThat(featureY.isEnabled(), is(false));
-        assertThat(featureY.getStrategies().size(), is(1));
-        assertThat(featureY.getStrategies().get(0).getName(), is("baz"));
-        assertThat(featureY.getStrategies().get(0).getParameters().get("foo"), is("bar"));
+        assertThat(featureY.isEnabled()).isFalse();
+        assertThat(featureY.getStrategies()).hasSize(1);
+        assertThat(featureY.getStrategies().get(0).getName()).isEqualTo("baz");
+        assertThat(featureY.getStrategies().get(0).getParameters().get("foo")).isEqualTo("bar");
     }
 
     @Test
@@ -62,9 +57,9 @@ public class JsonFeatureToggleParserTest {
         ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
         FeatureToggle feature = toggleCollection.getToggle("featureZ");
 
-        assertThat(feature.getStrategies().size(), is(2));
-        assertThat(feature.getStrategies().get(1).getName(), is("hola"));
-        assertThat(feature.getStrategies().get(1).getParameters().get("name"), is("val"));
+        assertThat(feature.getStrategies()).hasSize(2);
+        assertThat(feature.getStrategies().get(1).getName()).isEqualTo("hola");
+        assertThat(feature.getStrategies().get(1).getParameters().get("name")).isEqualTo("val");
     }
 
     @Test
@@ -84,7 +79,7 @@ public class JsonFeatureToggleParserTest {
         Reader content = getFileReader("/features-v1-empty.json");
         ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
 
-        assertThat(toggleCollection.getFeatures().size(), is(0));
+        assertThat(toggleCollection.getFeatures()).hasSize(0);
     }
 
     @Test
@@ -93,10 +88,10 @@ public class JsonFeatureToggleParserTest {
         ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
         FeatureToggle featureY = toggleCollection.getToggle("featureY");
 
-        assertThat(toggleCollection.getFeatures().size(), is(3));
-        assertThat(featureY.getStrategies().size(), is(1));
-        assertThat(featureY.getStrategies().get(0).getName(), is("baz"));
-        assertThat(featureY.getStrategies().get(0).getParameters().get("foo"), is("bar"));
+        assertThat(toggleCollection.getFeatures()).hasSize(3);
+        assertThat(featureY.getStrategies()).hasSize(1);
+        assertThat(featureY.getStrategies().get(0).getName()).isEqualTo("baz");
+        assertThat(featureY.getStrategies().get(0).getParameters().get("foo")).isEqualTo("bar");
     }
 
     @Test
@@ -104,17 +99,17 @@ public class JsonFeatureToggleParserTest {
         Reader content = getFileReader("/features-v1-with-variants.json");
         ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
 
-        assertThat(toggleCollection.getFeatures().size(), is(2));
-        assertThat(toggleCollection.getToggle("Test.old").isEnabled(), is(true));
-        assertThat(toggleCollection.getToggle("Test.variants").isEnabled(), is(true));
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants(), is(notNullValue()));
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().size(), is(2));
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getName(), is("variant1"));
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getName(), is("variant2"));
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getWeight(), is(50));
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getWeight(), is(50));
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getPayload(), is(nullValue()));
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getPayload(), is(nullValue()));
+        assertThat(toggleCollection.getFeatures()).hasSize(2);
+        assertThat(toggleCollection.getToggle("Test.old").isEnabled()).isTrue();
+        assertThat(toggleCollection.getToggle("Test.variants").isEnabled()).isTrue();
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants()).isNotNull();
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants()).hasSize(2);
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getName()).isEqualTo("variant1");
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getName()).isEqualTo("variant2");
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getWeight()).isEqualTo(50);
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getWeight()).isEqualTo(50);
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getPayload()).isNull();
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getPayload()).isNull();
     }
 
     private Reader getFileReader(String filename) throws IOException {

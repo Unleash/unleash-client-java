@@ -5,12 +5,12 @@ import no.finn.unleash.metric.ClientMetrics;
 import no.finn.unleash.metric.ClientRegistration;
 import no.finn.unleash.repository.FeatureToggleResponse;
 import no.finn.unleash.repository.ToggleCollection;
-import org.apache.logging.log4j.LogManager;
+import org.slf4j.LoggerFactory;
 
 public interface UnleashSubscriber {
 
     default void onError(UnleashException unleashException) {
-        LogManager.getLogger(UnleashSubscriber.class).warn(unleashException.getMessage(), unleashException);
+        LoggerFactory.getLogger(UnleashSubscriber.class).warn(unleashException.getMessage(), unleashException);
     }
 
     default void on(UnleashEvent unleashEvent) { }

@@ -11,9 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,13 +41,13 @@ public class GradualRolloutSessionIdStrategyTest {
     @Test
     public void should_have_a_name() {
         GradualRolloutSessionIdStrategy gradualRolloutStrategy = new GradualRolloutSessionIdStrategy();
-        assertThat(gradualRolloutStrategy.getName(), is("gradualRolloutSessionId"));
+        assertThat(gradualRolloutStrategy.getName()).isEqualTo("gradualRolloutSessionId");
     }
 
     @Test
     public void should_require_context() {
         GradualRolloutSessionIdStrategy gradualRolloutStrategy = new GradualRolloutSessionIdStrategy();
-        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>()), is(false));
+        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>())).isFalse();
     }
 
     @Test
@@ -57,7 +55,7 @@ public class GradualRolloutSessionIdStrategyTest {
         UnleashContext context = UnleashContext.builder().build();
         GradualRolloutSessionIdStrategy gradualRolloutStrategy = new GradualRolloutSessionIdStrategy();
 
-        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>(), context), is(false));
+        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>(), context)).isFalse();
     }
 
     @Test
@@ -70,11 +68,7 @@ public class GradualRolloutSessionIdStrategyTest {
 
         for (int i = 0; i < 10; i++) {
             boolean subsequentRunResult = gradualRolloutStrategy.isEnabled(params, context);
-            assertThat(
-                    "loginId will return same result when unchanged parameters",
-                    firstRunResult,
-                    is(equalTo(subsequentRunResult))
-            );
+            assertThat(firstRunResult).isEqualTo(subsequentRunResult).withFailMessage("loginId should return same result when unchanged parameters");
         }
     }
 
@@ -86,7 +80,7 @@ public class GradualRolloutSessionIdStrategyTest {
         Map<String, String> params = buildParams(100, "innfinn");
         boolean result = gradualRolloutStrategy.isEnabled(params, context);
 
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
 

@@ -7,13 +7,12 @@ import java.util.Random;
 
 import com.google.common.collect.ImmutableList;
 import no.finn.unleash.UnleashContext;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,13 +42,13 @@ public class GradualRolloutUserIdStrategyTest {
     @Test
     public void should_have_a_name() {
         GradualRolloutUserIdStrategy gradualRolloutStrategy = new GradualRolloutUserIdStrategy();
-        assertThat(gradualRolloutStrategy.getName(), is("gradualRolloutUserId"));
+        assertThat(gradualRolloutStrategy.getName()).isEqualTo("gradualRolloutUserId");
     }
 
     @Test
     public void should_require_context() {
         GradualRolloutUserIdStrategy gradualRolloutStrategy = new GradualRolloutUserIdStrategy();
-        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>()), is(false));
+        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>())).isFalse();
     }
 
     @Test
@@ -57,7 +56,7 @@ public class GradualRolloutUserIdStrategyTest {
         UnleashContext context = UnleashContext.builder().build();
         GradualRolloutUserIdStrategy gradualRolloutStrategy = new GradualRolloutUserIdStrategy();
 
-        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>(), context), is(false));
+        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>(), context)).isFalse();
     }
 
     @Test
@@ -70,11 +69,7 @@ public class GradualRolloutUserIdStrategyTest {
 
         for (int i = 0; i < 10; i++) {
             boolean subsequentRunResult = gradualRolloutStrategy.isEnabled(params, context);
-            assertThat(
-                    "loginId will return same result when unchanged parameters",
-                    firstRunResult,
-                    is(equalTo(subsequentRunResult))
-            );
+            assertThat(firstRunResult).isEqualTo(subsequentRunResult);
         }
     }
 
@@ -86,7 +81,7 @@ public class GradualRolloutUserIdStrategyTest {
         Map<String, String> params = buildParams(100, "innfinn");
         boolean result = gradualRolloutStrategy.isEnabled(params, context);
 
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
 
@@ -97,7 +92,6 @@ public class GradualRolloutUserIdStrategyTest {
 
         Map<String, String> params = buildParams(0, "innfinn");
         boolean actual = gradualRolloutStrategy.isEnabled(params, context);
-
         assertFalse(actual, "should not be enabled when 0% rollout");
     }
 
@@ -140,11 +134,7 @@ public class GradualRolloutUserIdStrategyTest {
 
         double actualPercentage = ((double) enabledCount / (double) rounds) * 100.0;
 
-        assertTrue((percentage-1) < actualPercentage,
-                "Expected " + percentage + "%, but was "+ actualPercentage + "%");
-
-        assertTrue((percentage+1) > actualPercentage,
-                "Expected " + percentage + "%, but was "+ actualPercentage + "%");
+        assertThat(actualPercentage).isEqualTo(percentage, Offset.strictOffset(1.0d));
     }
 
 

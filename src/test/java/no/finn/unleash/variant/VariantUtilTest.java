@@ -1,18 +1,16 @@
 package no.finn.unleash.variant;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashContext;
 import no.finn.unleash.Variant;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
 
 import static java.util.Arrays.asList;
 import static no.finn.unleash.Variant.DISABLED_VARIANT;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class VariantUtilTest {
@@ -26,7 +24,7 @@ public class VariantUtilTest {
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
 
-        assertThat(variant, is(DISABLED_VARIANT));
+        assertThat(variant).isEqualTo(DISABLED_VARIANT);
     }
 
     @Test
@@ -44,9 +42,9 @@ public class VariantUtilTest {
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
-        assertThat(variant.getName(), is(v1.getName()));
-        assertThat(variant.getPayload().get(), is(v1.getPayload()));
-        assertThat(variant.isEnabled(), is(true));
+        assertThat(variant.getName()).isEqualTo(v1.getName());
+        assertThat(variant.getPayload()).hasValue(v1.getPayload());
+        assertThat(variant.isEnabled()).isTrue();
     }
 
     @Test
@@ -64,7 +62,7 @@ public class VariantUtilTest {
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
-        assertThat(variant.getName(), is(v2.getName()));
+        assertThat(variant.getName()).isEqualTo(v2.getName());
     }
 
     @Test
@@ -82,7 +80,7 @@ public class VariantUtilTest {
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
-        assertThat(variant.getName(), is(v3.getName()));
+        assertThat(variant.getName()).isEqualTo(v3.getName());
     }
 
     @Test
@@ -101,7 +99,7 @@ public class VariantUtilTest {
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
-        assertThat(variant.getName(), is(v2.getName()));
+        assertThat(variant.getName()).isEqualTo(v2.getName());
     }
 
     @Test
@@ -120,9 +118,9 @@ public class VariantUtilTest {
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
-        assertThat(variant.getName(), is(v3.getName()));
-        assertThat(variant.getPayload().get(), is(v3.getPayload()));
-        assertThat(variant.isEnabled(), is(true));
+        assertThat(variant.getName()).isEqualTo(v3.getName());
+        assertThat(variant.getPayload()).hasValue(v3.getPayload());
+        assertThat(variant.isEnabled()).isTrue();
     }
 
     @Test
@@ -144,7 +142,7 @@ public class VariantUtilTest {
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
-        assertThat(variant.getName(), is(v2.getName()));
+        assertThat(variant.getName()).isEqualTo(v2.getName());
     }
 
     @Test
@@ -170,6 +168,6 @@ public class VariantUtilTest {
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
-        assertThat(variant.getName(), is(v2.getName()));
+        assertThat(variant.getName()).isEqualTo(v2.getName());
     }
 }

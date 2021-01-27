@@ -5,6 +5,7 @@ import no.finn.unleash.DefaultCustomHttpHeadersProviderImpl;
 import no.finn.unleash.util.UnleashConfig.ProxyAuthenticator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,14 +14,10 @@ import java.net.*;
 import java.net.Authenticator.RequestorType;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-
-import org.mockito.Mockito;
 
 import static no.finn.unleash.util.UnleashConfig.UNLEASH_APP_NAME_HEADER;
 import static no.finn.unleash.util.UnleashConfig.UNLEASH_INSTANCE_ID_HEADER;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -52,9 +49,9 @@ public class UnleashConfigTest {
                 .unleashAPI("http://unleash.org")
                 .build();
 
-        assertThat(config.getAppName(), is("my-app"));
-        assertThat(config.getInstanceId(), is("my-instance-1"));
-        assertThat(config.getUnleashAPI(), is(URI.create("http://unleash.org")));
+        assertThat(config.getAppName()).isEqualTo("my-app");
+        assertThat(config.getInstanceId()).isEqualTo("my-instance-1");
+        assertThat(config.getUnleashAPI()).isEqualTo(URI.create("http://unleash.org"));
     }
 
     @Test
@@ -64,8 +61,8 @@ public class UnleashConfigTest {
                 .unleashAPI("http://unleash.org")
                 .build();
 
-        assertThat(config.getAppName(), is("my-app"));
-        assertThat(config.getBackupFile(), is(System.getProperty("java.io.tmpdir") + File.separatorChar + "unleash-my-app-repo.json"));
+        assertThat(config.getAppName()).isEqualTo("my-app");
+        assertThat(config.getBackupFile()).isEqualTo(System.getProperty("java.io.tmpdir") + File.separatorChar + "unleash-my-app-repo.json");
     }
 
     @Test
@@ -76,8 +73,8 @@ public class UnleashConfigTest {
                 .unleashAPI("http://unleash.org")
                 .build();
 
-        assertThat(config.getAppName(), is("my-app"));
-        assertThat(config.getBackupFile(), is("/test/unleash-backup.json"));
+        assertThat(config.getAppName()).isEqualTo("my-app");
+        assertThat(config.getBackupFile()).isEqualTo("/test/unleash-backup.json");
     }
 
     @Test
@@ -87,7 +84,7 @@ public class UnleashConfigTest {
                 .unleashAPI("http://unleash.org")
                 .build();
 
-        assertThat(config.getSdkVersion(), is("unleash-client-java:development"));
+        assertThat(config.getSdkVersion()).isEqualTo("unleash-client-java:development");
     }
 
     @Test
@@ -97,7 +94,7 @@ public class UnleashConfigTest {
                 .unleashAPI("http://unleash.org")
                 .build();
 
-        assertThat(config.getEnvironment(), is("default"));
+        assertThat(config.getEnvironment()).isEqualTo("default");
     }
 
     @Test
@@ -109,7 +106,7 @@ public class UnleashConfigTest {
                 .unleashAPI("http://unleash.org")
                 .build();
 
-        assertThat(config.getEnvironment(), is(env));
+        assertThat(config.getEnvironment()).isEqualTo(env);
     }
 
     @Test
@@ -128,9 +125,9 @@ public class UnleashConfigTest {
         HttpURLConnection connection = (HttpURLConnection) someUrl.openConnection();
 
         UnleashConfig.setRequestProperties(connection, unleashConfig);
-        assertThat(connection.getRequestProperty(UNLEASH_APP_NAME_HEADER), is(appName));
-        assertThat(connection.getRequestProperty(UNLEASH_INSTANCE_ID_HEADER), is(instanceId));
-        assertThat(connection.getRequestProperty("User-Agent"), is(appName));
+        assertThat(connection.getRequestProperty(UNLEASH_APP_NAME_HEADER)).isEqualTo(appName);
+        assertThat(connection.getRequestProperty(UNLEASH_INSTANCE_ID_HEADER)).isEqualTo(instanceId);
+        assertThat(connection.getRequestProperty("User-Agent")).isEqualTo(appName);
     }
 
     @Test
@@ -150,7 +147,7 @@ public class UnleashConfigTest {
         HttpURLConnection connection = (HttpURLConnection) someUrl.openConnection();
 
         UnleashConfig.setRequestProperties(connection, unleashConfig);
-        assertThat(connection.getRequestProperty(headerName), is(headerValue));
+        assertThat(connection.getRequestProperty(headerName)).isEqualTo(headerValue);
     }
 
     @Test
@@ -174,7 +171,7 @@ public class UnleashConfigTest {
         UnleashConfig.setRequestProperties(connection, unleashConfig);
 
         for (String key: result.keySet()) {
-            assertThat(connection.getRequestProperty(key), is(result.get(key)));
+            assertThat(connection.getRequestProperty(key)).isEqualTo(result.get(key));
         }
     }
 
@@ -231,8 +228,8 @@ public class UnleashConfigTest {
 
         PasswordAuthentication passwordAuthentication = proxyAuthenticator.getPasswordAuthentication();
 
-        assertThat(passwordAuthentication.getUserName(), is(proxyUser));
-        assertThat(new String(passwordAuthentication.getPassword()), is(proxyPassword));
-        assertThat(config.isProxyAuthenticationByJvmProperties(), is(true));
+        assertThat(passwordAuthentication.getUserName()).isEqualTo(proxyUser);
+        assertThat(new String(passwordAuthentication.getPassword())).isEqualTo(proxyPassword);
+        assertThat(config.isProxyAuthenticationByJvmProperties()).isEqualTo(true);
     }
 }

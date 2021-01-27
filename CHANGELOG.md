@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.0.0
+- feat: Switched to slf4j-api logging
+- feat: add support for filtering on project or tags
 ## 3.3.4
 - fix: follow redirect once (#115)
 - chore(deps): bump version.log4j2 from 2.11.2 to 2.13.3 (#109)
