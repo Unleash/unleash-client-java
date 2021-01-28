@@ -4,7 +4,8 @@
 - feat: Switched to slf4j-api logging
 - feat: add support for filtering on project or tags
 - fix: BREAKING CHANGE UnleashConfig constructor is now private. 
-  Use UnleashConfig.Builder to get instance of UnleashConfig 
+  Use UnleashConfig.Builder to get instance of UnleashConfig
+  
 ## 3.3.4
 - fix: follow redirect once (#115)
 - chore(deps): bump version.log4j2 from 2.11.2 to 2.13.3 (#109)
