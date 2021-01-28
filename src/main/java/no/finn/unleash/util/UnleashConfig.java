@@ -26,6 +26,7 @@ public class UnleashConfig {
     private final String instanceId;
     private final String sdkVersion;
     private final String backupFile;
+    private final String projectName;
     private final long fetchTogglesInterval;
     private final long sendMetricsInterval;
     private final boolean disableMetrics;
@@ -35,7 +36,7 @@ public class UnleashConfig {
     private final UnleashScheduledExecutor unleashScheduledExecutor;
     private final UnleashSubscriber unleashSubscriber;
 
-    public UnleashConfig(
+    private UnleashConfig(
             URI unleashAPI,
             Map<String, String> customHttpHeaders,
             CustomHttpHeadersProvider customHttpHeadersProvider,
@@ -44,6 +45,7 @@ public class UnleashConfig {
             String instanceId,
             String sdkVersion,
             String backupFile,
+            String projectName,
             long fetchTogglesInterval,
             long sendMetricsInterval,
             boolean disableMetrics,
@@ -87,6 +89,7 @@ public class UnleashConfig {
         this.instanceId = instanceId;
         this.sdkVersion = sdkVersion;
         this.backupFile = backupFile;
+        this.projectName = projectName;
         this.fetchTogglesInterval = fetchTogglesInterval;
         this.sendMetricsInterval = sendMetricsInterval;
         this.disableMetrics = disableMetrics;
@@ -139,6 +142,8 @@ public class UnleashConfig {
     public String getSdkVersion() {
         return sdkVersion;
     }
+
+    public String getProjectName() { return projectName; }
 
     public long getFetchTogglesInterval() {
         return fetchTogglesInterval;
@@ -210,6 +215,7 @@ public class UnleashConfig {
         private String instanceId = getDefaultInstanceId();
         private String sdkVersion = getDefaultSdkVersion();
         private String backupFile;
+        private String projectName;
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
@@ -261,6 +267,11 @@ public class UnleashConfig {
 
         public Builder instanceId(String instanceId) {
             this.instanceId = instanceId;
+            return this;
+        }
+
+        public Builder projectName(String projectName) {
+            this.projectName = projectName;
             return this;
         }
 
@@ -328,6 +339,7 @@ public class UnleashConfig {
                     instanceId,
                     sdkVersion,
                     getBackupFile(),
+                    projectName,
                     fetchTogglesInterval,
                     sendMetricsInterval,
                     disableMetrics,
