@@ -9,8 +9,10 @@ public class ClientMetrics implements UnleashEvent {
     private final String appName;
     private final String instanceId;
     private final MetricsBucket bucket;
+    private final String environment;
 
     ClientMetrics(UnleashConfig config, MetricsBucket bucket) {
+        this.environment = config.getEnvironment();
         this.appName = config.getAppName();
         this.instanceId = config.getInstanceId();
         this.bucket = bucket;
@@ -26,6 +28,10 @@ public class ClientMetrics implements UnleashEvent {
 
     public MetricsBucket getBucket() {
         return bucket;
+    }
+
+    public String getEnvironment() {
+        return environment;
     }
 
     @Override

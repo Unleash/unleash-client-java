@@ -57,6 +57,32 @@ public class UnleashMetricServiceImplTest {
         assertThat(argument.getValue().getStrategies()).contains("default", "custom");
     }
 
+    @Test
+    public void should_register_client_with_env() {
+        long interval = 10;
+        UnleashConfig config = UnleashConfig
+                .builder()
+                .appName("test")
+                .environment("dev")
+                .sendMetricsInterval(interval)
+                .unleashAPI("http://unleash.com")
+                .build();
+
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        UnleashMetricsSender sender = mock(UnleashMetricsSender.class);
+
+        UnleashMetricService unleashMetricService = new UnleashMetricServiceImpl(config, sender, executor);
+        Set<String> strategies = new HashSet<>();
+        strategies.add("default");
+        strategies.add("custom");
+        unleashMetricService.register(strategies);
+
+        ArgumentCaptor<ClientRegistration> argument = ArgumentCaptor.forClass(ClientRegistration.class);
+
+        verify(sender).registerClient(argument.capture());
+        assertThat(argument.getValue().getEnvironment()).isEqualTo(config.getEnvironment());
+    }
+
 
     @Test
     public void should_send_metrics() {
@@ -85,6 +111,7 @@ public class UnleashMetricServiceImplTest {
         UnleashConfig config = UnleashConfig
                 .builder()
                 .appName("test")
+                .environment("prod")
                 .sendMetricsInterval(10)
                 .unleashAPI("http://unleash.com")
                 .build();
@@ -111,6 +138,7 @@ public class UnleashMetricServiceImplTest {
         MetricsBucket bucket = clientMetricsArgumentCaptor.getValue().getBucket();
 
         assertThat(clientMetrics.getAppName()).isEqualTo(config.getAppName());
+        assertThat(clientMetrics.getEnvironment()).isEqualTo(config.getEnvironment());
         assertThat(clientMetrics.getInstanceId()).isEqualTo(config.getInstanceId());
         assertThat(bucket.getStart()).isNotNull();
         assertThat(bucket.getStop()).isNotNull();

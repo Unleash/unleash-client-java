@@ -14,8 +14,10 @@ public class ClientRegistration implements UnleashEvent {
     private final Set<String> strategies;
     private final LocalDateTime started;
     private final long interval;
+    private final String environment;
 
     ClientRegistration(UnleashConfig config, LocalDateTime started, Set<String> strategies) {
+        this.environment = config.getEnvironment();
         this.appName = config.getAppName();
         this.instanceId = config.getInstanceId();
         this.sdkVersion = config.getSdkVersion();
@@ -46,6 +48,10 @@ public class ClientRegistration implements UnleashEvent {
 
     public long getInterval() {
         return interval;
+    }
+
+    public String getEnvironment() {
+        return environment;
     }
 
     @Override
