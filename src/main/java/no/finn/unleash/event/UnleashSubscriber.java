@@ -21,5 +21,6 @@ public interface UnleashSubscriber {
     default void clientRegistered(ClientRegistration clientRegistration) { }
     default void togglesBackedUp(ToggleCollection toggleCollection) { }
     default void toggleBackupRestored(ToggleCollection toggleCollection) { }
+    default void onConfigured(UnleashConfigured config) {}
 
 }

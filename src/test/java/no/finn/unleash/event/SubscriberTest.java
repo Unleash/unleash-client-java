@@ -34,7 +34,7 @@ public class SubscriberTest {
     @InjectServer
     WireMockServer serverMock;
 
-    private TestSubscriber testSubscriber = new TestSubscriber();
+    private final TestSubscriber testSubscriber = new TestSubscriber();
     private UnleashConfig unleashConfig;
 
     @BeforeEach
@@ -43,7 +43,7 @@ public class SubscriberTest {
                 .appName(SubscriberTest.class.getSimpleName())
                 .instanceId(SubscriberTest.class.getSimpleName())
                 .synchronousFetchOnInitialisation(true)
-                .unleashAPI("http://localhost:" + serverMock.port())
+                .unleashAPI(serverMock.baseUrl())
                 .subscriber(testSubscriber)
                 .scheduledExecutor(new SynchronousTestExecutor())
                 .build();
@@ -64,7 +64,8 @@ public class SubscriberTest {
         assertThat(testSubscriber.toggleEnabled).isFalse();
         assertThat(testSubscriber.errors).hasSize(2);
 
-        assertThat(testSubscriber.events).hasSize(3 // feature evaluations
+        assertThat(testSubscriber.events).hasSize(1 // UnleashConfigured event
+                + 3 // feature evaluations
                 + 2 // toggle fetches
                 + 1 // unleash ready
                 + 1 // client registration

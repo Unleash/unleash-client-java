@@ -9,6 +9,7 @@ import java.util.function.BiFunction;
 
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.ToggleEvaluated;
+import no.finn.unleash.event.UnleashConfigured;
 import no.finn.unleash.metric.UnleashMetricService;
 import no.finn.unleash.metric.UnleashMetricServiceImpl;
 import no.finn.unleash.repository.FeatureToggleRepository;
@@ -61,6 +62,7 @@ public final class DefaultUnleash implements Unleash {
         this.eventDispatcher = new EventDispatcher(unleashConfig);
         this.metricService = new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor());
         metricService.register(strategyMap.keySet());
+        this.eventDispatcher.dispatch(new UnleashConfigured(unleashConfig));
     }
 
     @Override

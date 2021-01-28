@@ -1,6 +1,7 @@
 package no.finn.unleash.repository;
 
 import no.finn.unleash.event.EventDispatcher;
+import no.finn.unleash.event.UnleashConfigured;
 import no.finn.unleash.event.UnleashReady;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
@@ -42,7 +43,6 @@ public final class FeatureToggleRepository implements ToggleRepository {
         this.toggleBackupHandler = toggleBackupHandler;
         this.toggleFetcher = toggleFetcher;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-
         toggleCollection = toggleBackupHandler.read();
 
         if(unleashConfig.isSynchronousFetchOnInitialisation()){
