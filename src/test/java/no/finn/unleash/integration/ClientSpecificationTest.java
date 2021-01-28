@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.jenspiegsa.mockitoextension.ConfigureWireMock;
-import com.github.jenspiegsa.mockitoextension.InjectServer;
-import com.github.jenspiegsa.mockitoextension.WireMockExtension;
-import com.github.jenspiegsa.mockitoextension.WireMockSettings;
+import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
+import com.github.jenspiegsa.wiremockextension.InjectServer;
+import com.github.jenspiegsa.wiremockextension.WireMockExtension;
+import com.github.jenspiegsa.wiremockextension.WireMockSettings;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.google.gson.Gson;

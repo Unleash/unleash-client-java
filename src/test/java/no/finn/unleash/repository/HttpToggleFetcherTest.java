@@ -1,9 +1,9 @@
 package no.finn.unleash.repository;
 
-import com.github.jenspiegsa.mockitoextension.ConfigureWireMock;
-import com.github.jenspiegsa.mockitoextension.InjectServer;
-import com.github.jenspiegsa.mockitoextension.WireMockExtension;
-import com.github.jenspiegsa.mockitoextension.WireMockSettings;
+import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
+import com.github.jenspiegsa.wiremockextension.InjectServer;
+import com.github.jenspiegsa.wiremockextension.WireMockExtension;
+import com.github.jenspiegsa.wiremockextension.WireMockSettings;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
 import no.finn.unleash.FeatureToggle;
@@ -19,10 +19,7 @@ import java.net.URISyntaxException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(WireMockExtension.class)
 @WireMockSettings(failOnUnmatchedRequests = false)
@@ -69,7 +66,7 @@ public class HttpToggleFetcherTest {
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
         FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
-        assertTrue(featureX.isEnabled());
+        assertThat(featureX.isEnabled()).isTrue();
 
         verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
@@ -90,7 +87,7 @@ public class HttpToggleFetcherTest {
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
         FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
-        assertTrue(featureX.isEnabled());
+        assertThat(featureX.isEnabled()).isTrue();
 
         verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
@@ -111,8 +108,8 @@ public class HttpToggleFetcherTest {
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
         FeatureToggle featureX = response.getToggleCollection().getToggle("Test.variants");
 
-        assertTrue(featureX.isEnabled());
-        assertThat(featureX.getVariants().get(0).getName(), is("variant1"));
+        assertThat(featureX.isEnabled()).isTrue();
+        assertThat(featureX.getVariants().get(0).getName()).isEqualTo("variant1");
 
         verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
@@ -144,8 +141,8 @@ public class HttpToggleFetcherTest {
         FeatureToggleResponse response1 = httpToggleFetcher.fetchToggles();
         FeatureToggleResponse response2 = httpToggleFetcher.fetchToggles();
 
-        assertEquals(response1.getStatus(), FeatureToggleResponse.Status.CHANGED);
-        assertEquals(response2.getStatus(), FeatureToggleResponse.Status.NOT_CHANGED);
+        assertThat(response1.getStatus()).isEqualTo(FeatureToggleResponse.Status.CHANGED);
+        assertThat(response2.getStatus()).isEqualTo(FeatureToggleResponse.Status.NOT_CHANGED);
     }
 
     @Test
@@ -198,8 +195,7 @@ public class HttpToggleFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-        assertEquals(response.getStatus(), FeatureToggleResponse.Status.NOT_CHANGED,
-                "Should return status NOT_CHANGED");
+        assertThat(response.getStatus()).isEqualTo(FeatureToggleResponse.Status.NOT_CHANGED);
 
         verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
@@ -224,8 +220,7 @@ public class HttpToggleFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-        assertEquals(response.getStatus(), FeatureToggleResponse.Status.CHANGED,
-                "Should return status CHANGED");
+        assertThat(response.getStatus()).isEqualTo(FeatureToggleResponse.Status.CHANGED);
 
         verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
@@ -246,10 +241,8 @@ public class HttpToggleFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-        assertEquals(response.getStatus(), FeatureToggleResponse.Status.UNAVAILABLE,
-                "Should return status UNAVAILABLE");
-        assertEquals(response.getHttpStatusCode(), httpCode,
-                "Should return correct status code");
+        assertThat(response.getStatus()).isEqualTo(FeatureToggleResponse.Status.UNAVAILABLE);
+        assertThat(response.getHttpStatusCode()).isEqualTo(httpCode);
 
         verify(getRequestedFor(urlMatching("/api/client/features"))
                 .withHeader("Content-Type", matching("application/json")));
@@ -287,7 +280,7 @@ public class HttpToggleFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-        assertThat(response.getLocation(), is("https://unleash.com"));
+        assertThat(response.getLocation()).isEqualTo("https://unleash.com");
 
     }
 

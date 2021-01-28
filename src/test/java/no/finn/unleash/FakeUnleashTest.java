@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FakeUnleashTest {
 
@@ -16,8 +14,8 @@ public class FakeUnleashTest {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.enableAll();
 
-        assertThat(fakeUnleash.isEnabled("unknown"), is(true));
-        assertThat(fakeUnleash.isEnabled("unknown2"), is(true));
+        assertThat(fakeUnleash.isEnabled("unknown")).isTrue();
+        assertThat(fakeUnleash.isEnabled("unknown2")).isTrue();
     }
 
     @Test
@@ -25,9 +23,9 @@ public class FakeUnleashTest {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.enable("t1", "t2");
 
-        assertThat(fakeUnleash.isEnabled("t1"), is(true));
-        assertThat(fakeUnleash.isEnabled("t2"), is(true));
-        assertThat(fakeUnleash.isEnabled("unknown"), is(false));
+        assertThat(fakeUnleash.isEnabled("t1")).isTrue();
+        assertThat(fakeUnleash.isEnabled("t2")).isTrue();
+        assertThat(fakeUnleash.isEnabled("unknown")).isFalse();
     }
 
     @Test
@@ -36,7 +34,7 @@ public class FakeUnleashTest {
         fakeUnleash.enable("t1", "t2");
         fakeUnleash.disableAll();
 
-        assertThat(fakeUnleash.isEnabled("t1"), is(false));
+        assertThat(fakeUnleash.isEnabled("t1")).isFalse();
     }
 
     @Test
@@ -45,8 +43,8 @@ public class FakeUnleashTest {
         fakeUnleash.enable("t1", "t2");
         fakeUnleash.disable("t2");
 
-        assertThat(fakeUnleash.isEnabled("t1"), is(true));
-        assertThat(fakeUnleash.isEnabled("t2"), is(false));
+        assertThat(fakeUnleash.isEnabled("t1")).isTrue();
+        assertThat(fakeUnleash.isEnabled("t2")).isFalse();
     }
 
     @Test
@@ -54,7 +52,7 @@ public class FakeUnleashTest {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.disable("t1");
 
-        assertThat(fakeUnleash.isEnabled("t1", true), is(false));
+        assertThat(fakeUnleash.isEnabled("t1", true)).isFalse();
     }
 
     @Test
@@ -62,7 +60,7 @@ public class FakeUnleashTest {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.disableAll();
 
-        assertThat(fakeUnleash.isEnabled("t1", true), is(false));
+        assertThat(fakeUnleash.isEnabled("t1", true)).isFalse();
     }
 
     @Test
@@ -70,7 +68,7 @@ public class FakeUnleashTest {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.disable("t1");
         fakeUnleash.resetAll();
-        assertThat(fakeUnleash.isEnabled("t1", true), is(true));
+        assertThat(fakeUnleash.isEnabled("t1", true)).isTrue();
 
     }
 
@@ -81,8 +79,8 @@ public class FakeUnleashTest {
         fakeUnleash.disable("t2");
         fakeUnleash.reset("t1");
 
-        assertThat(fakeUnleash.isEnabled("t1", true), is(true));
-        assertThat(fakeUnleash.isEnabled("t2", true), is(false));
+        assertThat(fakeUnleash.isEnabled("t1", true)).isTrue();
+        assertThat(fakeUnleash.isEnabled("t2", true)).isFalse();
 
     }
 
@@ -93,7 +91,7 @@ public class FakeUnleashTest {
         fakeUnleash.disable("t2");
 
         List<String> expected = Arrays.asList(new String[]{"t1", "t2"});
-        assertTrue(fakeUnleash.getFeatureToggleNames().containsAll(expected));
+        assertThat(fakeUnleash.getFeatureToggleNames()).containsAll(expected);
     }
 
     @Test
@@ -102,7 +100,7 @@ public class FakeUnleashTest {
         fakeUnleash.enable("t1", "t2");
         fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
 
-        assertThat(fakeUnleash.getVariant("t1").getName(), is("a"));
+        assertThat(fakeUnleash.getVariant("t1").getName()).isEqualTo("a");
     }
 
     @Test
@@ -111,7 +109,7 @@ public class FakeUnleashTest {
         fakeUnleash.disable("t1", "t2");
         fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
 
-        assertThat(fakeUnleash.getVariant("t1").getName(), is("disabled"));
+        assertThat(fakeUnleash.getVariant("t1").getName()).isEqualTo("disabled");
     }
 
 }

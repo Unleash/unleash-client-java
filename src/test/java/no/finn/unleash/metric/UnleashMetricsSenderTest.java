@@ -1,9 +1,9 @@
 package no.finn.unleash.metric;
 
-import com.github.jenspiegsa.mockitoextension.ConfigureWireMock;
-import com.github.jenspiegsa.mockitoextension.InjectServer;
-import com.github.jenspiegsa.mockitoextension.WireMockExtension;
-import com.github.jenspiegsa.mockitoextension.WireMockSettings;
+import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
+import com.github.jenspiegsa.wiremockextension.InjectServer;
+import com.github.jenspiegsa.wiremockextension.WireMockExtension;
+import com.github.jenspiegsa.wiremockextension.WireMockSettings;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
 import no.finn.unleash.util.UnleashConfig;

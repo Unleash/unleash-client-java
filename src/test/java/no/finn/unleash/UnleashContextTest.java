@@ -4,18 +4,18 @@ package no.finn.unleash;
 import no.finn.unleash.util.UnleashConfig;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class UnleashContextTest {
 
     @Test
     public void should_generate_default_context() {
         UnleashContext context = UnleashContext.builder().build();
-        assertThat(context.getUserId().isPresent(), is(false));
-        assertThat(context.getSessionId().isPresent(), is(false));
-        assertThat(context.getRemoteAddress().isPresent(), is(false));
-        assertThat(context.getProperties().size(), is(0));
+        assertThat(context.getUserId()).isEmpty();
+        assertThat(context.getSessionId()).isEmpty();
+        assertThat(context.getRemoteAddress()).isEmpty();
+        assertThat(context.getProperties()).isEmpty();
     }
 
     @Test
@@ -23,7 +23,7 @@ public class UnleashContextTest {
         UnleashContext context = UnleashContext.builder()
                 .userId("test@mail.com")
                 .build();
-        assertThat(context.getUserId().get(), is("test@mail.com"));
+        assertThat(context.getUserId()).hasValue("test@mail.com");
     }
 
     @Test
@@ -37,12 +37,12 @@ public class UnleashContextTest {
                 .addProperty("test", "me")
                 .build();
 
-        assertThat(context.getUserId().get(), is("test@mail.com"));
-        assertThat(context.getSessionId().get(), is("123"));
-        assertThat(context.getRemoteAddress().get(), is("127.0.0.1"));
-        assertThat(context.getEnvironment().get(), is("prod"));
-        assertThat(context.getAppName().get(), is("myapp"));
-        assertThat(context.getProperties().get("test"), is("me"));
+        assertThat(context.getUserId()).hasValue("test@mail.com");
+        assertThat(context.getSessionId()).hasValue("123");
+        assertThat(context.getRemoteAddress()).hasValue("127.0.0.1");
+        assertThat(context.getEnvironment()).hasValue("prod");
+        assertThat(context.getAppName()).hasValue("myapp");
+        assertThat(context.getProperties().get("test")).isEqualTo("me");
     }
 
     @Test
@@ -62,12 +62,12 @@ public class UnleashContextTest {
 
         UnleashContext enhanced = context.applyStaticFields(config);
 
-        assertThat(enhanced.getUserId().get(), is("test@mail.com"));
-        assertThat(enhanced.getSessionId().get(), is("123"));
-        assertThat(enhanced.getRemoteAddress().get(), is("127.0.0.1"));
+        assertThat(enhanced.getUserId()).hasValue("test@mail.com");
+        assertThat(enhanced.getSessionId()).hasValue("123");
+        assertThat(enhanced.getRemoteAddress()).hasValue("127.0.0.1");
 
-        assertThat(enhanced.getEnvironment().get(), is("stage"));
-        assertThat(enhanced.getAppName().get(), is("someApp"));
+        assertThat(enhanced.getEnvironment()).hasValue("stage");
+        assertThat(enhanced.getAppName()).hasValue("someApp");
     }
 
     @Test
@@ -90,11 +90,11 @@ public class UnleashContextTest {
 
         UnleashContext enhanced = context.applyStaticFields(config);
 
-        assertThat(enhanced.getUserId().get(), is("test@mail.com"));
-        assertThat(enhanced.getSessionId().get(), is("123"));
-        assertThat(enhanced.getRemoteAddress().get(), is("127.0.0.1"));
-        assertThat(enhanced.getEnvironment().get(), is("env"));
-        assertThat(enhanced.getAppName().get(), is("myApp"));
+        assertThat(enhanced.getUserId()).hasValue("test@mail.com");
+        assertThat(enhanced.getSessionId()).hasValue("123");
+        assertThat(enhanced.getRemoteAddress()).hasValue("127.0.0.1");
+        assertThat(enhanced.getEnvironment()).hasValue("env");
+        assertThat(enhanced.getAppName()).hasValue("myApp");
     }
 
 }

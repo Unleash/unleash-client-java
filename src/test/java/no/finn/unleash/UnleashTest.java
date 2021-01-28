@@ -1,32 +1,19 @@
 package no.finn.unleash;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-
 import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.strategy.UserWithIdStrategy;
 import no.finn.unleash.util.UnleashConfig;
-
 import no.finn.unleash.variant.Payload;
 import no.finn.unleash.variant.VariantDefinition;
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import java.util.*;
+import java.util.function.BiFunction;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -56,28 +43,28 @@ public class UnleashTest {
     public void known_toogle_and_strategy_should_be_active() {
         when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, asList(new ActivationStrategy("default", null))));
 
-        assertThat(unleash.isEnabled("test"), is(true));
+        assertThat(unleash.isEnabled("test")).isTrue();
     }
 
     @Test
     public void unknown_strategy_should_be_considered_inactive() {
         when(toggleRepository.getToggle("test")).thenReturn(new FeatureToggle("test", true, asList(new ActivationStrategy("whoot_strat", null))));
 
-        assertThat(unleash.isEnabled("test"), is(false));
+        assertThat(unleash.isEnabled("test")).isFalse();
     }
 
     @Test
     public void unknown_feature_should_be_considered_inactive() {
         when(toggleRepository.getToggle("test")).thenReturn(null);
 
-        assertThat(unleash.isEnabled("test"), is(false));
+        assertThat(unleash.isEnabled("test")).isFalse();
     }
 
     @Test
     public void unknown_feature_should_use_default_setting() {
         when(toggleRepository.getToggle("test")).thenReturn(null);
 
-        assertThat(unleash.isEnabled("test", true), is(true));
+        assertThat(unleash.isEnabled("test", true)).isTrue();
     }
 
     @Test
@@ -86,7 +73,7 @@ public class UnleashTest {
         BiFunction<String, UnleashContext, Boolean>  fallbackAction = mock(BiFunction.class);
         when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(true);
 
-        assertThat(unleash.isEnabled("test", fallbackAction), is(true));
+        assertThat(unleash.isEnabled("test", fallbackAction)).isTrue();
         verify(fallbackAction, times(1)).apply(anyString(), any(UnleashContext.class));
     }
 
@@ -98,7 +85,7 @@ public class UnleashTest {
 
         UnleashContext context = UnleashContext.builder().userId("123").build();
 
-        assertThat(unleash.isEnabled("test", context, fallbackAction), is(true));
+        assertThat(unleash.isEnabled("test", context, fallbackAction)).isTrue();
         verify(fallbackAction, times(1)).apply(anyString(), any(UnleashContext.class));
     }
 
@@ -108,7 +95,7 @@ public class UnleashTest {
         BiFunction<String, UnleashContext, Boolean>  fallbackAction = mock(BiFunction.class);
         when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(false);
 
-        assertThat(unleash.isEnabled("test", fallbackAction), is(false));
+        assertThat(unleash.isEnabled("test", fallbackAction)).isFalse();
         verify(fallbackAction, times(1)).apply(anyString(), any(UnleashContext.class));
     }
 
@@ -119,7 +106,7 @@ public class UnleashTest {
         BiFunction<String, UnleashContext, Boolean>  fallbackAction = mock(BiFunction.class);
         when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(false);
 
-		assertThat(unleash.isEnabled("test", fallbackAction), is(true));
+		assertThat(unleash.isEnabled("test", fallbackAction)).isTrue();
         verify(fallbackAction, never()).apply(anyString(), any(UnleashContext.class));
 	}
 
@@ -151,7 +138,7 @@ public class UnleashTest {
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(unleash.isEnabled("test"), is(true));
+        assertThat(unleash.isEnabled("test")).isTrue();
     }
 
     @Test
@@ -167,7 +154,7 @@ public class UnleashTest {
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(unleash.isEnabled("test"), is(true));
+        assertThat(unleash.isEnabled("test")).isTrue();
     }
     
     @Test
@@ -182,7 +169,7 @@ public class UnleashTest {
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(unleash.isEnabled("test", context), is(true));
+        assertThat(unleash.isEnabled("test", context)).isTrue();
     }
 
     @Test
@@ -193,7 +180,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
 
-        assertThat(unleash.isEnabled("test", context, true), is(true));
+        assertThat(unleash.isEnabled("test", context, true)).isTrue();
     }
 
     @Test
@@ -202,7 +189,7 @@ public class UnleashTest {
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy1));
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(unleash.isEnabled("test"), is(false));
+        assertThat(unleash.isEnabled("test")).isFalse();
     }
 
     @Test
@@ -211,7 +198,7 @@ public class UnleashTest {
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy1));
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(((DefaultUnleash)unleash).getFeatureToggleDefinition("test"), is(Optional.of(featureToggle)));
+        assertThat(((DefaultUnleash)unleash).getFeatureToggleDefinition("test")).hasValue(featureToggle);
     }
 
     @Test
@@ -220,14 +207,14 @@ public class UnleashTest {
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy1));
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(((DefaultUnleash)unleash).getFeatureToggleDefinition("another toggleName"), is(Optional.empty()));
+        assertThat(((DefaultUnleash)unleash).getFeatureToggleDefinition("another toggleName")).isEmpty();
     }
 
     @Test
     public void get_feature_names_should_return_list_of_feature_names() {
         when(toggleRepository.getFeatureNames()).thenReturn(asList("toggleFeatureName1", "toggleFeatureName2"));
-        assertTrue(2 == unleash.getFeatureToggleNames().size());
-        assertTrue("toggleFeatureName2".equals(unleash.getFeatureToggleNames().get(1)));
+        assertThat(unleash.getFeatureToggleNames()).hasSize(2);
+        assertThat(unleash.getFeatureToggleNames().get(1)).isEqualTo("toggleFeatureName2");
     }
 
     @Test
@@ -244,10 +231,10 @@ public class UnleashTest {
 
         final Variant result = unleash.getVariant("test", context, new Variant("Chuck", "Norris", true));
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("Chuck"));
-        assertThat(result.getPayload().map(Payload::getValue).get(), is("Norris"));
-        assertThat(result.isEnabled(), is(true));
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("Chuck");
+        assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("Norris");
+        assertThat(result.isEnabled()).isTrue();
     }
 
     @Test
@@ -264,10 +251,10 @@ public class UnleashTest {
 
         final Variant result = unleash.getVariant("test", context);
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("disabled"));
-        assertThat(result.getPayload().map(Payload::getValue), is(Optional.empty()));
-        assertThat(result.isEnabled(), is(false));
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("disabled");
+        assertThat(result.getPayload().map(Payload::getValue)).isEmpty();
+        assertThat(result.isEnabled()).isFalse();
     }
 
     @Test
@@ -284,10 +271,10 @@ public class UnleashTest {
 
         final Variant result = unleash.getVariant("test", context);
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("en"));
-        assertThat(result.getPayload().map(Payload::getValue).get(), is("en"));
-        assertThat(result.isEnabled(), is(true));
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("en");
+        assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("en");
+        assertThat(result.isEnabled()).isTrue();
     }
 
     @Test
@@ -304,10 +291,10 @@ public class UnleashTest {
 
         final Variant result = unleash.getVariant("test", context);
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("to"));
-        assertThat(result.getPayload().map(Payload::getValue).get(), is("to"));
-        assertThat(result.isEnabled(), is(true));
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("to");
+        assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("to");
+        assertThat(result.isEnabled()).isTrue();
     }
 
     @Test
@@ -321,10 +308,10 @@ public class UnleashTest {
 
         final Variant result = unleash.getVariant("test");
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("disabled"));
-        assertThat(result.getPayload().map(Payload::getValue), is(Optional.empty()));
-        assertThat(result.isEnabled(), is(false));
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("disabled");
+        assertThat(result.getPayload().map(Payload::getValue)).isEmpty();
+        assertThat(result.isEnabled()).isFalse();
     }
 
     @Test
@@ -337,10 +324,10 @@ public class UnleashTest {
 
         final Variant result = unleash.getVariant("test", new Variant("Chuck", "Norris", true));
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("Chuck"));
-        assertThat(result.getPayload().map(Payload::getValue).get(), is("Norris"));
-        assertThat(result.isEnabled(), is(true));
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("Chuck");
+        assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("Norris");
+        assertThat(result.isEnabled()).isTrue();
     }
 
     @Test
@@ -359,10 +346,10 @@ public class UnleashTest {
 
         final Variant result = unleash.getVariant("test");
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("en"));
-        assertThat(result.getPayload().map(Payload::getValue).get(), is("en"));
-        assertThat(result.isEnabled(), is(true));
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("en");
+        assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("en");
+        assertThat(result.isEnabled()).isTrue();
     }
 
     @Test
@@ -381,10 +368,10 @@ public class UnleashTest {
 
         final Variant result = unleash.getVariant("test");
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result.getName(), is("to"));
-        assertThat(result.getPayload().map(Payload::getValue).get(), is("to"));
-        assertThat(result.isEnabled(), is(true));
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("to");
+        assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("to");
+        assertThat(result.isEnabled()).isTrue();
     }
 
     @Test
@@ -397,7 +384,7 @@ public class UnleashTest {
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(unleash.isEnabled("test"), is(true));
+        assertThat(unleash.isEnabled("test")).isTrue();
     }
 
     @Test
@@ -410,7 +397,7 @@ public class UnleashTest {
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(unleash.isEnabled("test"), is(false));
+        assertThat(unleash.isEnabled("test")).isFalse();
     }
 
 

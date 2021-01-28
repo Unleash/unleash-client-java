@@ -2,22 +2,14 @@ package no.finn.unleash.metric;
 
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
-import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 public class UnleashMetricServiceImplTest {
 
@@ -58,12 +50,11 @@ public class UnleashMetricServiceImplTest {
         ArgumentCaptor<ClientRegistration> argument = ArgumentCaptor.forClass(ClientRegistration.class);
 
         verify(sender).registerClient(argument.capture());
-        assertThat(argument.getValue().getAppName(), is(config.getAppName()));
-        assertThat(argument.getValue().getInstanceId(), is(config.getInstanceId()));
-        assertThat(argument.getValue().getStarted(), is(not(IsNull.nullValue())));
-        assertThat(argument.getValue().getStrategies().size(), is(2));
-        assertTrue(argument.getValue().getStrategies().contains("default"));
-        assertTrue(argument.getValue().getStrategies().contains("custom"));
+        assertThat(argument.getValue().getAppName()).isEqualTo(config.getAppName());
+        assertThat(argument.getValue().getInstanceId()).isEqualTo(config.getInstanceId());
+        assertThat(argument.getValue().getStarted()).isNotNull();
+        assertThat(argument.getValue().getStrategies()).hasSize(2);
+        assertThat(argument.getValue().getStrategies()).contains("default", "custom");
     }
 
 
@@ -119,13 +110,13 @@ public class UnleashMetricServiceImplTest {
         ClientMetrics clientMetrics = clientMetricsArgumentCaptor.getValue();
         MetricsBucket bucket = clientMetricsArgumentCaptor.getValue().getBucket();
 
-        assertThat(clientMetrics.getAppName(), is(config.getAppName()));
-        assertThat(clientMetrics.getInstanceId(), is(config.getInstanceId()));
-        assertNotNull(bucket.getStart());
-        assertNotNull(bucket.getStop());
-        assertThat(bucket.getToggles().size(), is(2));
-        assertThat(bucket.getToggles().get("someToggle").getYes(), is(2l));
-        assertThat(bucket.getToggles().get("someToggle").getNo(), is(1l));
+        assertThat(clientMetrics.getAppName()).isEqualTo(config.getAppName());
+        assertThat(clientMetrics.getInstanceId()).isEqualTo(config.getInstanceId());
+        assertThat(bucket.getStart()).isNotNull();
+        assertThat(bucket.getStop()).isNotNull();
+        assertThat(bucket.getToggles()).hasSize(2);
+        assertThat(bucket.getToggles().get("someToggle").getYes()).isEqualTo(2l);
+        assertThat(bucket.getToggles().get("someToggle").getNo()).isEqualTo(1l);
     }
 
     @Test
@@ -159,16 +150,16 @@ public class UnleashMetricServiceImplTest {
         ClientMetrics clientMetrics = clientMetricsArgumentCaptor.getValue();
         MetricsBucket bucket = clientMetricsArgumentCaptor.getValue().getBucket();
 
-        assertThat(clientMetrics.getAppName(), is(config.getAppName()));
-        assertThat(clientMetrics.getInstanceId(), is(config.getInstanceId()));
-        assertNotNull(bucket.getStart());
-        assertNotNull(bucket.getStop());
-        assertThat(bucket.getToggles().size(), is(1));
-        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v1").longValue(), is(3l));
-        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v2").longValue(), is(1l));
-        assertThat(bucket.getToggles().get("someToggle").getVariants().get("disabled").longValue(), is(1l));
-        assertThat(bucket.getToggles().get("someToggle").getYes(), is(0l));
-        assertThat(bucket.getToggles().get("someToggle").getNo(), is(0l));
+        assertThat(clientMetrics.getAppName()).isEqualTo(config.getAppName());
+        assertThat(clientMetrics.getInstanceId()).isEqualTo(config.getInstanceId());
+        assertThat(bucket.getStart()).isNotNull();
+        assertThat(bucket.getStop()).isNotNull();
+        assertThat(bucket.getToggles()).hasSize(1);
+        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v1").longValue()).isEqualTo(3l);
+        assertThat(bucket.getToggles().get("someToggle").getVariants().get("v2").longValue()).isEqualTo(1l);
+        assertThat(bucket.getToggles().get("someToggle").getVariants().get("disabled").longValue()).isEqualTo(1l);
+        assertThat(bucket.getToggles().get("someToggle").getYes()).isEqualTo(0l);
+        assertThat(bucket.getToggles().get("someToggle").getNo()).isEqualTo(0l);
     }
 
 }

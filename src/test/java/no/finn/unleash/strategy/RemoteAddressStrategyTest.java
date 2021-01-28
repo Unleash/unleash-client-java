@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class RemoteAddressStrategyTest {
     private static final String FIRST_IPV4 = "127.0.0.1";
@@ -83,7 +82,7 @@ class RemoteAddressStrategyTest {
 
     @Test
     void should_have_a_name() {
-        assertThat(strategy.getName(), is("remoteAddress"));
+        assertThat(strategy.getName()).isEqualTo("remoteAddress");
     }
 
     @ParameterizedTest
@@ -92,7 +91,7 @@ class RemoteAddressStrategyTest {
         UnleashContext context = UnleashContext.builder().remoteAddress(actualIp).build();
         Map<String, String> parameters = setupParameterMap(parameterString);
 
-        assertThat(strategy.isEnabled(parameters, context), is(expected));
+        assertThat(strategy.isEnabled(parameters, context)).isEqualTo(expected);
     }
 
     private Map<String, String> setupParameterMap(String ipString) {

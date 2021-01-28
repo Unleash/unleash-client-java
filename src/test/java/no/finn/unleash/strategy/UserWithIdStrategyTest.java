@@ -6,9 +6,8 @@ import no.finn.unleash.UnleashContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserWithIdStrategyTest {
@@ -21,7 +20,7 @@ public class UserWithIdStrategyTest {
 
     @Test
     public void should_have_expected_strategy_name() {
-        assertThat(strategy.getName(), is("userWithId"));
+        assertThat(strategy.getName()).isEqualTo("userWithId");
 
     }
 
