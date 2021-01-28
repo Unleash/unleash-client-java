@@ -284,4 +284,29 @@ public class HttpToggleFetcherTest {
 
     }
 
+    @Test
+    public void should_add_project_filter_to_toggles_url_if_config_has_it_set() throws URISyntaxException {
+        stubFor(get(urlEqualTo("/api/client/features?project=name"))
+        .withHeader("Accept", equalTo("application/json"))
+        .willReturn(aResponse()
+            .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBodyFile("features-v1.json")
+        ));
+        URI uri = new URI(serverMock.baseUrl() +"/api/");
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).projectName("name").build();
+        HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
+        FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
+        verify(getRequestedFor(urlMatching("/api/client/features\\?project=name")));
+    }
+
+    @Test
+    public void should_throw_an_exception_if_project_name_is_not_url_friendly() throws URISyntaxException {
+        URI uri = new URI(serverMock.baseUrl() + "/api/");
+        String name = "^!#$!$?";
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).projectName(name).build();
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> new HttpToggleFetcher(config))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Project name [" +name  +"] was not URL friendly.");
+    }
 }

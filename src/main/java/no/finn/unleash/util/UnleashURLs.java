@@ -25,6 +25,14 @@ public class UnleashURLs {
         return fetchTogglesURL;
     }
 
+    public URL getFetchTogglesURL(String projectName) {
+        try {
+            return URI.create(fetchTogglesURL.toString() + "?project=" + projectName).normalize().toURL();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Project name [" +projectName + "] was not URL friendly.", e);
+        }
+    }
+
     public URL getClientMetricsURL() {
         return clientMetricsURL;
     }
