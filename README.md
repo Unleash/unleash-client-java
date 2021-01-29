@@ -262,8 +262,8 @@ Build:
 mvn clean install
 ```
 
-Cobertura coverage reports:
+Jacoco coverage reports:
 ```bash
-mvn cobertura:cobertura -DcoberturaFormat=html
+mvn jacoco:report
 ```
-The generated report will be available at ```target/site/cobertura/index.html```
+The generated report will be available at ```target/site/jacoco/index.html```
