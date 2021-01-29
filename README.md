@@ -267,3 +267,53 @@ Jacoco coverage reports:
 mvn jacoco:report
 ```
 The generated report will be available at ```target/site/jacoco/index.html```
+
+# Releasing
+
+## Deployment
+ - You'll need an account with Sonatype's JIRA - https://issues.sonatype.org
+ - In addition your account needs access to publish under no.finn (for now, we'll be moving to our own groupId soon)
+## GPG signing
+ - You'll need gpg installed and a configured gpg key for signing the artifacts
+### Example settings.xml
+ - In ~/.m2/settings.xml put
+```xml
+<settings>
+    ...
+    <profiles>
+        ...
+        <profile>
+            <id>ossrh</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <gpg.executable>gpg</gpg.executable> <!-- Where to find gpg -->
+                <gpg.passphrase>[PASSPHRASE FOR YOUR GPG KEY]</gpg.passphrase>
+            </properties>
+        </profile>
+    </profiles>
+    ...
+    <servers>
+        ...
+        <server>
+            <id>sonatype-nexus-snapshots</id>
+            <username>[YOUR_SONATYPE_JIRA_USERNAME]</username>
+            <password>[YOUR_SONATYPE_JIRA_PASSWORD]</password>
+        </server>
+        <server>
+            <id>ossrh</id>
+            <username>[YOUR_SONATYPE_JIRA_USERNAME]</username>
+            <password>[YOUR_SONATYPE_JIRA_PASSWORD]</password>
+        </server>
+        <server>
+            <id>sonatype-nexus-staging</id>
+            <username>[YOUR_SONATYPE_JIRA_USERNAME]</username>
+            <password>[YOUR_SONATYPE_JIRA_PASSWORD]</password>
+        </server>
+    </servers>
+</settings>
+```
+
+### More information
+- https://central.sonatype.org/pages/ossrh-guide.html
