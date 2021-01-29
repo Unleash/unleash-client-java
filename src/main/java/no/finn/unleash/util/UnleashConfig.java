@@ -225,14 +225,17 @@ public class UnleashConfig {
         private UnleashSubscriber unleashSubscriber;
         private boolean isProxyAuthenticationByJvmProperties;
 
-        static String getDefaultInstanceId() {
-            String hostName = "";
-            try {
-                hostName = InetAddress.getLocalHost().getHostName() + "-";
-            } catch (UnknownHostException e) {
-
+        private static String getHostname() {
+            String hostName = System.getProperty("hostname");
+            if (hostName == null || hostName.length() == 0) {
+                try {
+                    hostName = InetAddress.getLocalHost().getHostName();
+                } catch (UnknownHostException e) {}
             }
-            return hostName + "generated-" + Math.round(Math.random() * 1000000.0D);
+            return hostName + "-";
+        }
+        static String getDefaultInstanceId() {
+            return getHostname() + "generated-" + Math.round(Math.random() * 1000000.0D);
         }
 
         public Builder unleashAPI(URI unleashAPI) {

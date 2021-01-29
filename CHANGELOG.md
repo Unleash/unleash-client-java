@@ -2,7 +2,7 @@
 
 ## 4.0.0
 - feat: Switched to slf4j-api logging
-- feat: add support for filtering on project or tags
+- feat: add support for filtering on project (Enterprise only)
 - fix: BREAKING CHANGE UnleashConfig constructor is now private. 
   Use UnleashConfig.Builder to get instance of UnleashConfig
   
