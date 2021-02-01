@@ -26,6 +26,24 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    <developers>
+        <developer>
+            <id>chriswk</id>
+            <email>chriswk@getunleash.ai</email>
+            <name>Christopher Kolstad</name>
+            <url>https://github.com/chriswk</url>
+            <organization>Unleash</organization>
+            <organizationUrl>https://getunleash.ai</organizationUrl>
+        </developer>
+        <developer>
+            <id>ivarconr</id>
+            <email>ivar@getunleash.ai</email>
+            <name>Ivar Conradi Østhus</name>
+            <url>https://github.com/ivarconr</url>
+            <organizationUrl>https://getunleash.ai</organizationUrl>
+            <organization>Unleash</organization>
+        </developer>
+    </developers>
 
     <scm>
         <url>https://github.com/Unleash/unleash-client-java</url>
@@ -350,4 +368,5 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
+
 </project>
