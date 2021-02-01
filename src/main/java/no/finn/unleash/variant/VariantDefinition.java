@@ -1,9 +1,7 @@
 package no.finn.unleash.variant;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import no.finn.unleash.Variant;
 
 public class VariantDefinition {
@@ -13,7 +11,8 @@ public class VariantDefinition {
     private final Payload payload;
     private final List<VariantOverride> overrides;
 
-    public VariantDefinition(String name, int weight, Payload payload, List<VariantOverride> overrides) {
+    public VariantDefinition(
+            String name, int weight, Payload payload, List<VariantOverride> overrides) {
         this.name = name;
         this.weight = weight;
         this.payload = payload;
@@ -37,7 +36,7 @@ public class VariantDefinition {
     }
 
     List<VariantOverride> getOverrides() {
-        if(overrides == null) {
+        if (overrides == null) {
             return Collections.emptyList();
         } else {
             return overrides;

@@ -1,11 +1,9 @@
 package no.finn.unleash;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
 import no.finn.unleash.util.UnleashConfig;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class UnleashContextTest {
 
@@ -20,22 +18,21 @@ public class UnleashContextTest {
 
     @Test
     public void should_get_context_with_userId() {
-        UnleashContext context = UnleashContext.builder()
-                .userId("test@mail.com")
-                .build();
+        UnleashContext context = UnleashContext.builder().userId("test@mail.com").build();
         assertThat(context.getUserId()).hasValue("test@mail.com");
     }
 
     @Test
     public void should_get_context_with_fields_set() {
-        UnleashContext context = UnleashContext.builder()
-                .userId("test@mail.com")
-                .sessionId("123")
-                .remoteAddress("127.0.0.1")
-                .environment("prod")
-                .appName("myapp")
-                .addProperty("test", "me")
-                .build();
+        UnleashContext context =
+                UnleashContext.builder()
+                        .userId("test@mail.com")
+                        .sessionId("123")
+                        .remoteAddress("127.0.0.1")
+                        .environment("prod")
+                        .appName("myapp")
+                        .addProperty("test", "me")
+                        .build();
 
         assertThat(context.getUserId()).hasValue("test@mail.com");
         assertThat(context.getSessionId()).hasValue("123");
@@ -47,18 +44,20 @@ public class UnleashContextTest {
 
     @Test
     public void should_apply_context_fields() {
-        UnleashContext context = UnleashContext.builder()
-                .userId("test@mail.com")
-                .sessionId("123")
-                .remoteAddress("127.0.0.1")
-                .addProperty("test", "me")
-                .build();
+        UnleashContext context =
+                UnleashContext.builder()
+                        .userId("test@mail.com")
+                        .sessionId("123")
+                        .remoteAddress("127.0.0.1")
+                        .addProperty("test", "me")
+                        .build();
 
-        UnleashConfig config = UnleashConfig.builder()
-                .unleashAPI("http://test.com")
-                .appName("someApp")
-                .environment("stage")
-                .build();
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://test.com")
+                        .appName("someApp")
+                        .environment("stage")
+                        .build();
 
         UnleashContext enhanced = context.applyStaticFields(config);
 
@@ -72,21 +71,22 @@ public class UnleashContextTest {
 
     @Test
     public void should_not_ovveride_static_context_fields() {
-        UnleashContext context = UnleashContext.builder()
-                .userId("test@mail.com")
-                .sessionId("123")
-                .remoteAddress("127.0.0.1")
-                .environment("env")
-                .appName("myApp")
-                .addProperty("test", "me")
-                .build();
+        UnleashContext context =
+                UnleashContext.builder()
+                        .userId("test@mail.com")
+                        .sessionId("123")
+                        .remoteAddress("127.0.0.1")
+                        .environment("env")
+                        .appName("myApp")
+                        .addProperty("test", "me")
+                        .build();
 
-        UnleashConfig config = UnleashConfig.builder()
-                .unleashAPI("http://test.com")
-                .appName("someApp")
-                .environment("stage")
-                .build();
-
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://test.com")
+                        .appName("someApp")
+                        .environment("stage")
+                        .build();
 
         UnleashContext enhanced = context.applyStaticFields(config);
 
@@ -96,5 +96,4 @@ public class UnleashContextTest {
         assertThat(enhanced.getEnvironment()).hasValue("env");
         assertThat(enhanced.getAppName()).hasValue("myApp");
     }
-
 }

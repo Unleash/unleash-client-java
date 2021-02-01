@@ -21,7 +21,7 @@ You will require unleash on your class path, pop it in to your pom:
 
 ### Create a new Unleash instance
 
-It is easy to get a new instance of Unleash. In your app you typically *just want one instance of Unleash*, and inject that where you need it. You will typically use a dependency injection frameworks such as Spring or Guice to manage this. 
+It is easy to get a new instance of Unleash. In your app you typically *just want one instance of Unleash*, and inject that where you need it. You will typically use a dependency injection frameworks such as Spring or Guice to manage this.
 
 To create a new instance of Unleash you need to pass in a config object:
 ```java
@@ -47,8 +47,8 @@ if(unleash.isEnabled("AwesomeFeature")) {
 }
 ```
 
-Calling `unleash.isEnabled("AwesomeFeature")` is the equvivalent of calling `unleash.isEnabled("AwesomeFeature", false)`. 
-Which means that it will return `false` if it cannot find the named toggle. 
+Calling `unleash.isEnabled("AwesomeFeature")` is the equvivalent of calling `unleash.isEnabled("AwesomeFeature", false)`.
+Which means that it will return `false` if it cannot find the named toggle.
 
 If you want it to default to `true` instead, you can pass `true` as the second argument:
 
@@ -58,8 +58,8 @@ unleash.isEnabled("AwesomeFeature", true)
 
 ### Activation strategies
 
-The Java client comes with implementations for the built-in activation strategies 
-provided by unleash. 
+The Java client comes with implementations for the built-in activation strategies
+provided by unleash.
 
 - DefaultStrategy
 - UserWithIdStrategy
@@ -72,8 +72,8 @@ provided by unleash.
 Read more about the strategies in [activation-strategy.md](https://github.com/Unleash/unleash/blob/master/docs/activation-strategies.md).
 
 #### Custom strategies
-You may also specify and implement your own strategy. The specification must be registered in the Unleash UI and 
-you must register the strategy implementation when you wire up unleash. 
+You may also specify and implement your own strategy. The specification must be registered in the Unleash UI and
+you must register the strategy implementation when you wire up unleash.
 
 ```java
 Strategy s1 = new MyAwesomeStrategy();
@@ -88,8 +88,8 @@ In order to use some of the common activation strategies you must provide a [unl
 This client SDK provides two ways of provide the unleash-context:
 
 #### 1. As part of isEnabled call
-This is the simplest and most explicit way of providing the unleash context. 
-You just add it as an argument to the `isEnabled` call. 
+This is the simplest and most explicit way of providing the unleash context.
+You just add it as an argument to the `isEnabled` call.
 
 
 ```java
@@ -97,17 +97,17 @@ UnleashContext context = UnleashContext.builder()
   .userId("user@mail.com").build();
 
 unleash.isEnabled("someToggle", context);
-``` 
+```
 
 
 #### 2. Via a UnleashContextProvider
-This is a bit more advanced approach, where you configure a unleash-context provider. 
-By doing this you do not have rebuild or pass the unleash-context object to every 
-place you are calling `unleash.isEnabled`. 
+This is a bit more advanced approach, where you configure a unleash-context provider.
+By doing this you do not have rebuild or pass the unleash-context object to every
+place you are calling `unleash.isEnabled`.
 
-The provider typically binds the context to the same thread as the request. 
-If you are using Spring the `UnleashContextProvider` will typically be a 
-'request scoped' bean. 
+The provider typically binds the context to the same thread as the request.
+If you are using Spring the `UnleashContextProvider` will typically be a
+'request scoped' bean.
 
 
 ```java
@@ -122,13 +122,13 @@ UnleashConfig config = new UnleashConfig.Builder()
 
 Unleash unleash = new DefaultUnleash(config);
 
-// Anywhere in the code unleash will get the unleash context from your registered provider. 
+// Anywhere in the code unleash will get the unleash context from your registered provider.
 unleash.isEnabled("someToggle");
-``` 
+```
 
 ### Custom HTTP headers
-If you want the client to send custom HTTP Headers with all requests to the Unleash API 
-you can define that by setting them via the `UnleashConfig`. 
+If you want the client to send custom HTTP Headers with all requests to the Unleash API
+you can define that by setting them via the `UnleashConfig`.
 
 ```java
 UnleashConfig unleashConfig = UnleashConfig.builder()
@@ -192,10 +192,10 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
     .build();
 ```
 
-### Options 
+### Options
 
-- **appName** - Required. Should be a unique name identifying the client application using Unleash. 
-- **synchronousFetchOnInitialisation** - Allows the user to specify that the unleash-client should do one synchronous fetch to the `unleash-api` at initialisation. This will slow down the initialisation (the client must wait for a http response). If the `unleash-api` is unavailable the client will silently move on and assume the api will be available later. 
+- **appName** - Required. Should be a unique name identifying the client application using Unleash.
+- **synchronousFetchOnInitialisation** - Allows the user to specify that the unleash-client should do one synchronous fetch to the `unleash-api` at initialisation. This will slow down the initialisation (the client must wait for a http response). If the `unleash-api` is unavailable the client will silently move on and assume the api will be available later.
 
 ### HTTP Proxy with Authentication
 The Unleash Java client uses `HttpURLConnection` as HTTP Client which already recognizes the common JVM proxy settings such as `http.proxyHost` and
@@ -212,10 +212,10 @@ UnleashConfig config = UnleashConfig.builder()
 ```
 
 ## Local backup
-By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the 
-result in `unleash-repo.json` which is located in the `java.io.tmpdir` directory. This means that if 
-the unleash-server becomes unavailable, the unleash-client will still be able to toggle the features 
-based on the values stored in `unleash-repo.json`. As a result of this, the second argument of 
+By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the
+result in `unleash-repo.json` which is located in the `java.io.tmpdir` directory. This means that if
+the unleash-server becomes unavailable, the unleash-client will still be able to toggle the features
+based on the values stored in `unleash-repo.json`. As a result of this, the second argument of
 `isEnabled` will be returned in two cases:
 
 * When `unleash-repo.json` does not exists
@@ -224,7 +224,7 @@ based on the values stored in `unleash-repo.json`. As a result of this, the seco
 
 ## Unit testing
 You might want to control the state of the toggles during unit-testing.
-Unleash do come with a ```FakeUnleash``` implementation for doing this. 
+Unleash do come with a ```FakeUnleash``` implementation for doing this.
 
 Some examples on how to use it below:
 
@@ -267,6 +267,15 @@ Jacoco coverage reports:
 mvn jacoco:report
 ```
 The generated report will be available at ```target/site/jacoco/index.html```
+
+## Formatting
+
+* We're using AOSP Java code style, enforced by [spotless](https://github.com/diffplug/spotless).
+  For formatting, use `mvn spotless:apply` and spotless will do the job for you
+* It should apply spotless automatically upon compilation for you, but only on code that is changed since origin/master
+* For Intelij you can use https://plugins.jetbrains.com/plugin/8527-google-java-format
+* For VSCode you can use https://marketplace.visualstudio.com/items?itemName=wx-chevalier.google-java-format
+* For VIM there's https://github.com/google/vim-codefmt
 
 # Releasing
 

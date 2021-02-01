@@ -21,11 +21,10 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 /**
- * Matches a request based on IP Address or subnet mask matching against the remote
- * address.
- * <p>
- * Both IPv6 and IPv4 addresses are supported, but a matcher which is configured with an
- * IPv4 address will never match a request which returns an IPv6 address, and vice-versa.
+ * Matches a request based on IP Address or subnet mask matching against the remote address.
+ *
+ * <p>Both IPv6 and IPv4 addresses are supported, but a matcher which is configured with an IPv4
+ * address will never match a request which returns an IPv6 address, and vice-versa.
  *
  * @author Luke Taylor
  */
@@ -35,11 +34,10 @@ public final class IpAddressMatcher {
     private final InetAddress requiredAddress;
 
     /**
-     * Takes a specific IP address or a range specified using the IP/Netmask (e.g.
-     * 192.168.1.0/24 or 202.24.0.0/14).
+     * Takes a specific IP address or a range specified using the IP/Netmask (e.g. 192.168.1.0/24 or
+     * 202.24.0.0/14).
      *
-     * @param ipAddress the address or range of addresses from which the request must
-     *                  come.
+     * @param ipAddress the address or range of addresses from which the request must come.
      */
     public IpAddressMatcher(String ipAddress) {
         final String trimmedIpAddress = ipAddress == null ? "" : ipAddress.trim();

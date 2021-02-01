@@ -1,16 +1,15 @@
 package no.finn.unleash.repository;
 
+import com.google.gson.JsonParseException;
+import java.io.*;
+import java.util.Collections;
+import java.util.List;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.UnleashEvent;
 import no.finn.unleash.event.UnleashSubscriber;
 import no.finn.unleash.util.UnleashConfig;
-
-import java.io.*;
-import java.util.Collections;
-import java.util.List;
-import com.google.gson.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,7 @@ public class ToggleBackupHandlerFile implements ToggleBackupHandler {
     private final String backupFile;
     private final EventDispatcher eventDispatcher;
 
-    public ToggleBackupHandlerFile(UnleashConfig config){
+    public ToggleBackupHandlerFile(UnleashConfig config) {
         this.backupFile = config.getBackupFile();
         this.eventDispatcher = new EventDispatcher(config);
     }
@@ -34,10 +33,14 @@ public class ToggleBackupHandlerFile implements ToggleBackupHandler {
             eventDispatcher.dispatch(new ToggleBackupRead(toggleCollection));
             return toggleCollection;
         } catch (FileNotFoundException e) {
-            LOG.info(" Unleash could not find the backup-file '" + backupFile + "'. \n" +
-                    "This is expected behavior the first time unleash runs in a new environment.");
+            LOG.info(
+                    " Unleash could not find the backup-file '"
+                            + backupFile
+                            + "'. \n"
+                            + "This is expected behavior the first time unleash runs in a new environment.");
         } catch (IOException | IllegalStateException | JsonParseException e) {
-            eventDispatcher.dispatch(new UnleashException("Failed to read backup file: " + backupFile, e));
+            eventDispatcher.dispatch(
+                    new UnleashException("Failed to read backup file: " + backupFile, e));
         }
         List<FeatureToggle> emptyList = Collections.emptyList();
         return new ToggleCollection(emptyList);
@@ -49,7 +52,10 @@ public class ToggleBackupHandlerFile implements ToggleBackupHandler {
             writer.write(JsonToggleParser.toJsonString(toggleCollection));
             eventDispatcher.dispatch(new ToggleBackupWritten(toggleCollection));
         } catch (IOException e) {
-            eventDispatcher.dispatch(new UnleashException("Unleash was unable to backup feature toggles to file: " + backupFile, e));
+            eventDispatcher.dispatch(
+                    new UnleashException(
+                            "Unleash was unable to backup feature toggles to file: " + backupFile,
+                            e));
         }
     }
 
@@ -80,5 +86,4 @@ public class ToggleBackupHandlerFile implements ToggleBackupHandler {
             unleashSubscriber.togglesBackedUp(toggleCollection);
         }
     }
-
 }

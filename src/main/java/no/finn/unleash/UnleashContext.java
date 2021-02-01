@@ -3,7 +3,6 @@ package no.finn.unleash;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import no.finn.unleash.util.UnleashConfig;
 
 public class UnleashContext {
@@ -15,11 +14,18 @@ public class UnleashContext {
 
     private final Map<String, String> properties;
 
-    public UnleashContext(String userId, String sessionId, String remoteAddress, Map<String, String> properties) {
+    public UnleashContext(
+            String userId, String sessionId, String remoteAddress, Map<String, String> properties) {
         this(null, null, userId, sessionId, remoteAddress, properties);
     }
 
-    public UnleashContext(String appName, String environment, String userId, String sessionId, String remoteAddress, Map<String, String> properties) {
+    public UnleashContext(
+            String appName,
+            String environment,
+            String userId,
+            String sessionId,
+            String remoteAddress,
+            Map<String, String> properties) {
         this.appName = Optional.ofNullable(appName);
         this.environment = Optional.ofNullable(environment);
         this.userId = Optional.ofNullable(userId);
@@ -54,21 +60,27 @@ public class UnleashContext {
 
     public Optional<String> getByName(String contextName) {
         switch (contextName) {
-            case "environment": return environment;
-            case "appName": return appName;
-            case "userId": return userId;
-            case "sessionId": return sessionId;
-            case "remoteAddress": return remoteAddress;
-            default: return Optional.ofNullable(properties.get(contextName));
+            case "environment":
+                return environment;
+            case "appName":
+                return appName;
+            case "userId":
+                return userId;
+            case "sessionId":
+                return sessionId;
+            case "remoteAddress":
+                return remoteAddress;
+            default:
+                return Optional.ofNullable(properties.get(contextName));
         }
     }
 
     public UnleashContext applyStaticFields(UnleashConfig config) {
         Builder builder = new Builder(this);
-        if(!this.environment.isPresent()) {
+        if (!this.environment.isPresent()) {
             builder.environment(config.getEnvironment());
         }
-        if(!this.appName.isPresent()) {
+        if (!this.appName.isPresent()) {
             builder.appName(config.getAppName());
         }
         return builder.build();
@@ -87,7 +99,7 @@ public class UnleashContext {
 
         private final Map<String, String> properties = new HashMap<>();
 
-        public Builder() { }
+        public Builder() {}
 
         public Builder(UnleashContext context) {
             context.appName.ifPresent(val -> this.appName = val);
@@ -129,9 +141,8 @@ public class UnleashContext {
         }
 
         public UnleashContext build() {
-            return new UnleashContext(appName, environment, userId, sessionId, remoteAddress, properties);
+            return new UnleashContext(
+                    appName, environment, userId, sessionId, remoteAddress, properties);
         }
     }
-
-
 }

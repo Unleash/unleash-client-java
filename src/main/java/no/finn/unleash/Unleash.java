@@ -16,17 +16,22 @@ public interface Unleash {
         return isEnabled(toggleName, defaultSetting);
     }
 
-    default boolean isEnabled(String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+    default boolean isEnabled(
+            String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         return isEnabled(toggleName, false);
     }
 
-    default boolean isEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+    default boolean isEnabled(
+            String toggleName,
+            UnleashContext context,
+            BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         return isEnabled(toggleName, context, false);
     }
 
     Variant getVariant(final String toggleName, final UnleashContext context);
 
-    Variant getVariant(final String toggleName, final UnleashContext context, final Variant defaultValue);
+    Variant getVariant(
+            final String toggleName, final UnleashContext context, final Variant defaultValue);
 
     Variant getVariant(final String toggleName);
 

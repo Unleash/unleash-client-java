@@ -1,17 +1,16 @@
 package no.finn.unleash.strategy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import no.finn.unleash.Constraint;
 import no.finn.unleash.Operator;
 import no.finn.unleash.UnleashContext;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class StrategyTest {
 
@@ -89,11 +88,12 @@ class StrategyTest {
     public void should_be_enabled_when_all_constraints_are_satisfied() {
         Strategy s = new AlwaysEnabled();
         Map parameters = new HashMap<String, String>();
-        UnleashContext context = UnleashContext.builder()
-                .environment("test")
-                .userId("123")
-                .addProperty("customerId", "blue")
-                .build();
+        UnleashContext context =
+                UnleashContext.builder()
+                        .environment("test")
+                        .userId("123")
+                        .addProperty("customerId", "blue")
+                        .build();
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test", "prod")));
         constraints.add(new Constraint("userId", Operator.IN, Arrays.asList("123")));
@@ -107,11 +107,12 @@ class StrategyTest {
     public void should_be_disabled_when_not_all_constraints_are_satisfied() {
         Strategy s = new AlwaysEnabled();
         Map parameters = new HashMap<String, String>();
-        UnleashContext context = UnleashContext.builder()
-                .environment("test")
-                .userId("123")
-                .addProperty("customerId", "orange")
-                .build();
+        UnleashContext context =
+                UnleashContext.builder()
+                        .environment("test")
+                        .userId("123")
+                        .addProperty("customerId", "orange")
+                        .build();
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test", "prod")));
         constraints.add(new Constraint("userId", Operator.IN, Arrays.asList("123")));

@@ -1,13 +1,14 @@
 package no.finn.unleash.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class UnleashScheduledExecutorImplTest {
 
-    private UnleashScheduledExecutorImpl unleashScheduledExecutor = new UnleashScheduledExecutorImpl();
+    private UnleashScheduledExecutorImpl unleashScheduledExecutor =
+            new UnleashScheduledExecutorImpl();
     private int periodicalTaskCounter;
 
     @BeforeEach

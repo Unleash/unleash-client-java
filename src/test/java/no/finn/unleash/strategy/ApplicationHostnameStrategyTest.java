@@ -1,15 +1,14 @@
 package no.finn.unleash.strategy;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationHostnameStrategyTest {
 
@@ -38,8 +37,8 @@ public class ApplicationHostnameStrategyTest {
     }
 
     @Test
-    public void should_be_enabled_for_hostName(){
-        String hostName  = "my-super-host";
+    public void should_be_enabled_for_hostName() {
+        String hostName = "my-super-host";
         System.setProperty("hostname", hostName);
 
         Strategy strategy = new ApplicationHostnameStrategy();
@@ -50,8 +49,8 @@ public class ApplicationHostnameStrategyTest {
     }
 
     @Test
-    public void should_handle_weird_casing(){
-        String hostName  = "my-super-host";
+    public void should_handle_weird_casing() {
+        String hostName = "my-super-host";
         System.setProperty("hostname", hostName);
 
         Strategy strategy = new ApplicationHostnameStrategy();
@@ -63,8 +62,8 @@ public class ApplicationHostnameStrategyTest {
     }
 
     @Test
-    public void so_close_but_no_cigar(){
-        String hostName  = "my-super-host";
+    public void so_close_but_no_cigar() {
+        String hostName = "my-super-host";
         System.setProperty("hostname", hostName);
 
         Strategy strategy = new ApplicationHostnameStrategy();
@@ -77,7 +76,7 @@ public class ApplicationHostnameStrategyTest {
 
     @Test
     public void should_be_enabled_for_InetAddress() throws UnknownHostException {
-        String hostName  = InetAddress.getLocalHost().getHostName();
+        String hostName = InetAddress.getLocalHost().getHostName();
         System.setProperty("hostname", hostName);
 
         Strategy strategy = new ApplicationHostnameStrategy();
@@ -89,7 +88,7 @@ public class ApplicationHostnameStrategyTest {
 
     @Test
     public void should_be_enabled_for_dashed_host() throws UnknownHostException {
-        String hostName  = "super-wiEred-host";
+        String hostName = "super-wiEred-host";
         System.setProperty("hostname", hostName);
 
         Strategy strategy = new ApplicationHostnameStrategy();
@@ -100,9 +99,8 @@ public class ApplicationHostnameStrategyTest {
     }
 
     @Test
-    public void null_test(){
+    public void null_test() {
         Strategy strategy = new ApplicationHostnameStrategy();
         assertFalse(strategy.isEnabled(new HashMap<>()));
     }
-
 }

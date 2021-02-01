@@ -1,11 +1,10 @@
- package no.finn.unleash.metric;
+package no.finn.unleash.metric;
 
- import no.finn.unleash.event.UnleashEvent;
- import no.finn.unleash.event.UnleashSubscriber;
- import no.finn.unleash.util.UnleashConfig;
-
- import java.time.LocalDateTime;
- import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.Set;
+import no.finn.unleash.event.UnleashEvent;
+import no.finn.unleash.event.UnleashSubscriber;
+import no.finn.unleash.util.UnleashConfig;
 
 public class ClientRegistration implements UnleashEvent {
     private final String appName;
@@ -62,12 +61,17 @@ public class ClientRegistration implements UnleashEvent {
     @Override
     public String toString() {
         return "client registration:"
-                + " appName=" + appName
-                + " instanceId=" + instanceId
-                + " sdkVersion=" + sdkVersion
-                + " started=" + sdkVersion
-                + " interval=" + sdkVersion
-                + " strategies=" + strategies
-                ;
+                + " appName="
+                + appName
+                + " instanceId="
+                + instanceId
+                + " sdkVersion="
+                + sdkVersion
+                + " started="
+                + sdkVersion
+                + " interval="
+                + sdkVersion
+                + " strategies="
+                + strategies;
     }
 }

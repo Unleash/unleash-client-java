@@ -1,11 +1,10 @@
 package no.finn.unleash.metric;
 
-import no.finn.unleash.util.UnleashConfig;
-import no.finn.unleash.util.UnleashScheduledExecutor;
-
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Set;
+import no.finn.unleash.util.UnleashConfig;
+import no.finn.unleash.util.UnleashScheduledExecutor;
 
 public class UnleashMetricServiceImpl implements UnleashMetricService {
     private final LocalDateTime started;
@@ -13,16 +12,18 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
     private final long metricsInterval;
     private final UnleashMetricsSender unleashMetricsSender;
 
-    //mutable
+    // mutable
     private volatile MetricsBucket currentMetricsBucket;
 
-    public UnleashMetricServiceImpl(UnleashConfig unleashConfig, UnleashScheduledExecutor executor) {
+    public UnleashMetricServiceImpl(
+            UnleashConfig unleashConfig, UnleashScheduledExecutor executor) {
         this(unleashConfig, new UnleashMetricsSender(unleashConfig), executor);
     }
 
-    public UnleashMetricServiceImpl(UnleashConfig unleashConfig,
-                                    UnleashMetricsSender unleashMetricsSender,
-                                    UnleashScheduledExecutor executor) {
+    public UnleashMetricServiceImpl(
+            UnleashConfig unleashConfig,
+            UnleashMetricsSender unleashMetricsSender,
+            UnleashScheduledExecutor executor) {
         this.currentMetricsBucket = new MetricsBucket();
         this.started = LocalDateTime.now(ZoneId.of("UTC"));
         this.unleashConfig = unleashConfig;
@@ -34,7 +35,8 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
 
     @Override
     public void register(Set<String> strategies) {
-        ClientRegistration registration = new ClientRegistration(unleashConfig, started, strategies);
+        ClientRegistration registration =
+                new ClientRegistration(unleashConfig, started, strategies);
         unleashMetricsSender.registerClient(registration);
     }
 

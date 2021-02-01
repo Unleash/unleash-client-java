@@ -1,13 +1,13 @@
 package no.finn.unleash.strategy;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.HashMap;
 import java.util.Map;
 import no.finn.unleash.UnleashContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StrategyWithContextTest {
     private StrategyUsingContext strategy;
@@ -19,11 +19,11 @@ public class StrategyWithContextTest {
 
     @Test
     public void should_be_enabled_for_known_user() {
-        //Params
+        // Params
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123");
 
-        //Context
+        // Context
         UnleashContext context = UnleashContext.builder().userId("123").build();
 
         assertTrue(strategy.isEnabled(params, context));
@@ -31,14 +31,13 @@ public class StrategyWithContextTest {
 
     @Test
     public void should_not_enabled_for_unknown_user() {
-        //Params
+        // Params
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123");
 
-        //Context
+        // Context
         UnleashContext context = UnleashContext.builder().userId("other").build();
 
         assertFalse(strategy.isEnabled(params, context));
     }
-
 }

@@ -1,15 +1,13 @@
 package no.finn.unleash.repository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import no.finn.unleash.FeatureToggle;
+import no.finn.unleash.UnleashException;
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.UnleashReady;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import no.finn.unleash.FeatureToggle;
-import no.finn.unleash.UnleashException;
 
 public final class FeatureToggleRepository implements ToggleRepository {
     private final ToggleBackupHandler toggleBackupHandler;
@@ -27,10 +25,8 @@ public final class FeatureToggleRepository implements ToggleRepository {
                 unleashConfig,
                 unleashConfig.getScheduledExecutor(),
                 toggleFetcher,
-                toggleBackupHandler
-        );
+                toggleBackupHandler);
     }
-
 
     @Deprecated
     public FeatureToggleRepository(
@@ -45,7 +41,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
 
         toggleCollection = toggleBackupHandler.read();
 
-        if(unleashConfig.isSynchronousFetchOnInitialisation()){
+        if (unleashConfig.isSynchronousFetchOnInitialisation()) {
             updateToggles().run();
         }
 
@@ -79,6 +75,8 @@ public final class FeatureToggleRepository implements ToggleRepository {
 
     @Override
     public List<String> getFeatureNames() {
-        return toggleCollection.getFeatures().stream().map(toggle -> toggle.getName()).collect(Collectors.toList());
+        return toggleCollection.getFeatures().stream()
+                .map(toggle -> toggle.getName())
+                .collect(Collectors.toList());
     }
 }

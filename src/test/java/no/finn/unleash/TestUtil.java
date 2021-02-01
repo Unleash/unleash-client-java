@@ -12,6 +12,7 @@ public class TestUtil {
         Configuration config = ctx.getConfiguration();
         LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
         loggerConfig.setLevel(level);
-        ctx.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
+        ctx.updateLoggers(); // This causes all Loggers to refetch information from their
+        // LoggerConfig.
     }
 }

@@ -1,12 +1,11 @@
 package no.finn.unleash.repository;
 
-import no.finn.unleash.FeatureToggle;
-import org.junit.jupiter.api.Test;
-
-import java.io.*;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.*;
+import no.finn.unleash.FeatureToggle;
+import org.junit.jupiter.api.Test;
 
 public class JsonFeatureToggleParserTest {
 
@@ -104,12 +103,18 @@ public class JsonFeatureToggleParserTest {
         assertThat(toggleCollection.getToggle("Test.variants").isEnabled()).isTrue();
         assertThat(toggleCollection.getToggle("Test.variants").getVariants()).isNotNull();
         assertThat(toggleCollection.getToggle("Test.variants").getVariants()).hasSize(2);
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getName()).isEqualTo("variant1");
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getName()).isEqualTo("variant2");
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getWeight()).isEqualTo(50);
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getWeight()).isEqualTo(50);
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getPayload()).isNull();
-        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getPayload()).isNull();
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getName())
+                .isEqualTo("variant1");
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getName())
+                .isEqualTo("variant2");
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getWeight())
+                .isEqualTo(50);
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getWeight())
+                .isEqualTo(50);
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(0).getPayload())
+                .isNull();
+        assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getPayload())
+                .isNull();
     }
 
     private Reader getFileReader(String filename) throws IOException {

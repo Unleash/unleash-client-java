@@ -1,11 +1,10 @@
 package no.finn.unleash;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 public class FakeUnleashTest {
 
@@ -69,7 +68,6 @@ public class FakeUnleashTest {
         fakeUnleash.disable("t1");
         fakeUnleash.resetAll();
         assertThat(fakeUnleash.isEnabled("t1", true)).isTrue();
-
     }
 
     @Test
@@ -81,7 +79,6 @@ public class FakeUnleashTest {
 
         assertThat(fakeUnleash.isEnabled("t1", true)).isTrue();
         assertThat(fakeUnleash.isEnabled("t2", true)).isFalse();
-
     }
 
     @Test
@@ -90,7 +87,7 @@ public class FakeUnleashTest {
         fakeUnleash.enable("t1", "t2");
         fakeUnleash.disable("t2");
 
-        List<String> expected = Arrays.asList(new String[]{"t1", "t2"});
+        List<String> expected = Arrays.asList(new String[] {"t1", "t2"});
         assertThat(fakeUnleash.getFeatureToggleNames()).containsAll(expected);
     }
 
@@ -111,5 +108,4 @@ public class FakeUnleashTest {
 
         assertThat(fakeUnleash.getVariant("t1").getName()).isEqualTo("disabled");
     }
-
 }

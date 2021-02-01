@@ -24,8 +24,7 @@ public class Payload {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Payload payload = (Payload) o;
-        return Objects.equals(type, payload.type) &&
-                Objects.equals(value, payload.value);
+        return Objects.equals(type, payload.type) && Objects.equals(value, payload.value);
     }
 
     @Override

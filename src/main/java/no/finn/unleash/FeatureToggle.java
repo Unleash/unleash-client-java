@@ -1,11 +1,10 @@
 package no.finn.unleash;
 
+import static java.util.Collections.emptyList;
+
 import java.util.Collections;
 import java.util.List;
-
 import no.finn.unleash.variant.VariantDefinition;
-
-import static java.util.Collections.emptyList;
 
 public final class FeatureToggle {
     private final String name;
@@ -17,7 +16,11 @@ public final class FeatureToggle {
         this(name, enabled, strategies, emptyList());
     }
 
-    public FeatureToggle(String name, boolean enabled, List<ActivationStrategy> strategies, List<VariantDefinition> variants) {
+    public FeatureToggle(
+            String name,
+            boolean enabled,
+            List<ActivationStrategy> strategies,
+            List<VariantDefinition> variants) {
         this.name = name;
         this.enabled = enabled;
         this.strategies = strategies;
@@ -37,7 +40,7 @@ public final class FeatureToggle {
     }
 
     public List<VariantDefinition> getVariants() {
-        if(variants == null) {
+        if (variants == null) {
             return Collections.emptyList();
         } else {
             return variants;
@@ -46,11 +49,18 @@ public final class FeatureToggle {
 
     @Override
     public String toString() {
-        return "FeatureToggle{" +
-                "name='" + name + '\'' +
-                ", enabled=" + enabled +
-                ", strategies='" + strategies + '\'' +
-                ", variants='" + variants + '\'' +
-                '}';
+        return "FeatureToggle{"
+                + "name='"
+                + name
+                + '\''
+                + ", enabled="
+                + enabled
+                + ", strategies='"
+                + strategies
+                + '\''
+                + ", variants='"
+                + variants
+                + '\''
+                + '}';
     }
 }

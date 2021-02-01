@@ -2,7 +2,6 @@ package no.finn.unleash;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import no.finn.unleash.variant.Payload;
 
 public class Variant {
@@ -38,11 +37,16 @@ public class Variant {
 
     @Override
     public String toString() {
-        return "Variant{" +
-            "name='" + name + '\'' +
-            ", payload='" + payload + '\'' +
-            ", enabled=" + enabled +
-            '}';
+        return "Variant{"
+                + "name='"
+                + name
+                + '\''
+                + ", payload='"
+                + payload
+                + '\''
+                + ", enabled="
+                + enabled
+                + '}';
     }
 
     @Override
@@ -50,9 +54,9 @@ public class Variant {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Variant variant = (Variant) o;
-        return enabled == variant.enabled &&
-                Objects.equals(name, variant.name) &&
-                Objects.equals(payload, variant.payload);
+        return enabled == variant.enabled
+                && Objects.equals(name, variant.name)
+                && Objects.equals(payload, variant.payload);
     }
 
     @Override

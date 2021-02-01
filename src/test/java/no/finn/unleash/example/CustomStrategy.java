@@ -1,8 +1,7 @@
 package no.finn.unleash.example;
 
-import no.finn.unleash.strategy.Strategy;
-
 import java.util.Map;
+import no.finn.unleash.strategy.Strategy;
 
 final class CustomStrategy implements Strategy {
     @Override

@@ -1,16 +1,15 @@
 package no.finn.unleash.util;
 
-import no.finn.unleash.CustomHttpHeadersProvider;
-import no.finn.unleash.DefaultCustomHttpHeadersProviderImpl;
-import no.finn.unleash.UnleashContextProvider;
-import no.finn.unleash.event.NoOpSubscriber;
-import no.finn.unleash.event.UnleashSubscriber;
-
 import java.io.File;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import no.finn.unleash.CustomHttpHeadersProvider;
+import no.finn.unleash.DefaultCustomHttpHeadersProviderImpl;
+import no.finn.unleash.UnleashContextProvider;
+import no.finn.unleash.event.NoOpSubscriber;
+import no.finn.unleash.event.UnleashSubscriber;
 
 public class UnleashConfig {
 
@@ -53,30 +52,29 @@ public class UnleashConfig {
             boolean isProxyAuthenticationByJvmProperties,
             boolean synchronousFetchOnInitialisation,
             UnleashScheduledExecutor unleashScheduledExecutor,
-            UnleashSubscriber unleashSubscriber
-    ) {
+            UnleashSubscriber unleashSubscriber) {
 
-        if(appName == null) {
+        if (appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
         }
 
-        if(instanceId == null) {
+        if (instanceId == null) {
             throw new IllegalStateException("You are required to specify the unleash instanceId");
         }
 
-        if(unleashAPI == null) {
+        if (unleashAPI == null) {
             throw new IllegalStateException("You are required to specify the unleashAPI url");
         }
 
-        if(unleashScheduledExecutor == null) {
+        if (unleashScheduledExecutor == null) {
             throw new IllegalStateException("You are required to specify a scheduler");
         }
 
-        if(unleashSubscriber == null) {
+        if (unleashSubscriber == null) {
             throw new IllegalStateException("You are required to specify a subscriber");
         }
 
-        if(isProxyAuthenticationByJvmProperties) {
+        if (isProxyAuthenticationByJvmProperties) {
             enableProxyAuthentication();
         }
 
@@ -113,7 +111,8 @@ public class UnleashConfig {
     }
 
     private void enableProxyAuthentication() {
-        // http.proxyUser http.proxyPassword is only consumed by Apache HTTP Client, for HttpUrlConnection we have to define an Authenticator
+        // http.proxyUser http.proxyPassword is only consumed by Apache HTTP Client, for
+        // HttpUrlConnection we have to define an Authenticator
         Authenticator.setDefault(new ProxyAuthenticator());
     }
 
@@ -125,7 +124,9 @@ public class UnleashConfig {
         return customHttpHeaders;
     }
 
-    public CustomHttpHeadersProvider getCustomHttpHeadersProvider() { return customHttpHeadersProvider; }
+    public CustomHttpHeadersProvider getCustomHttpHeadersProvider() {
+        return customHttpHeadersProvider;
+    }
 
     public String getAppName() {
         return appName;
@@ -143,7 +144,9 @@ public class UnleashConfig {
         return sdkVersion;
     }
 
-    public String getProjectName() { return projectName; }
+    public String getProjectName() {
+        return projectName;
+    }
 
     public long getFetchTogglesInterval() {
         return fetchTogglesInterval;
@@ -189,15 +192,17 @@ public class UnleashConfig {
 
         @Override
         protected PasswordAuthentication getPasswordAuthentication() {
-            if(getRequestorType() == RequestorType.PROXY) {
+            if (getRequestorType() == RequestorType.PROXY) {
                 final String proto = getRequestingProtocol().toLowerCase();
                 final String proxyHost = System.getProperty(proto + ".proxyHost", "");
                 final String proxyPort = System.getProperty(proto + ".proxyPort", "");
                 final String proxyUser = System.getProperty(proto + ".proxyUser", "");
                 final String proxyPassword = System.getProperty(proto + ".proxyPassword", "");
 
-                // Only apply PasswordAuthentication to requests to the proxy itself - if not set just ignore
-                if(getRequestingHost().equalsIgnoreCase(proxyHost) && Integer.parseInt(proxyPort) == getRequestingPort()) {
+                // Only apply PasswordAuthentication to requests to the proxy itself - if not set
+                // just ignore
+                if (getRequestingHost().equalsIgnoreCase(proxyHost)
+                        && Integer.parseInt(proxyPort) == getRequestingPort()) {
                     return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
                 }
             }
@@ -209,7 +214,8 @@ public class UnleashConfig {
 
         private URI unleashAPI;
         private Map<String, String> customHttpHeaders = new HashMap<>();
-        private CustomHttpHeadersProvider customHttpHeadersProvider = new DefaultCustomHttpHeadersProviderImpl();
+        private CustomHttpHeadersProvider customHttpHeadersProvider =
+                new DefaultCustomHttpHeadersProviderImpl();
         private String appName;
         private String environment = "default";
         private String instanceId = getDefaultInstanceId();
@@ -219,7 +225,8 @@ public class UnleashConfig {
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
-        private UnleashContextProvider contextProvider = UnleashContextProvider.getDefaultProvider();
+        private UnleashContextProvider contextProvider =
+                UnleashContextProvider.getDefaultProvider();
         private boolean synchronousFetchOnInitialisation = false;
         private UnleashScheduledExecutor scheduledExecutor;
         private UnleashSubscriber unleashSubscriber;
@@ -230,10 +237,12 @@ public class UnleashConfig {
             if (hostName == null || hostName.length() == 0) {
                 try {
                     hostName = InetAddress.getLocalHost().getHostName();
-                } catch (UnknownHostException e) {}
+                } catch (UnknownHostException e) {
+                }
             }
             return hostName + "-";
         }
+
         static String getDefaultInstanceId() {
             return getHostname() + "generated-" + Math.round(Math.random() * 1000000.0D);
         }
@@ -324,7 +333,7 @@ public class UnleashConfig {
         }
 
         private String getBackupFile() {
-            if(backupFile != null) {
+            if (backupFile != null) {
                 return backupFile;
             } else {
                 String fileName = "unleash-" + appName + "-repo.json";
@@ -349,14 +358,15 @@ public class UnleashConfig {
                     contextProvider,
                     isProxyAuthenticationByJvmProperties,
                     synchronousFetchOnInitialisation,
-                    Optional.ofNullable(scheduledExecutor).orElseGet(UnleashScheduledExecutorImpl::getInstance),
-                    Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new)
-            );
+                    Optional.ofNullable(scheduledExecutor)
+                            .orElseGet(UnleashScheduledExecutorImpl::getInstance),
+                    Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new));
         }
 
         public String getDefaultSdkVersion() {
-            String version = Optional.ofNullable(getClass().getPackage().getImplementationVersion())
-                    .orElse("development");
+            String version =
+                    Optional.ofNullable(getClass().getPackage().getImplementationVersion())
+                            .orElse("development");
             return "unleash-client-java:" + version;
         }
     }

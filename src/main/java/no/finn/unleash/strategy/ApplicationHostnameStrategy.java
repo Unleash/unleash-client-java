@@ -16,8 +16,8 @@ public class ApplicationHostnameStrategy implements Strategy {
     }
 
     private String resolveHostname() {
-        String hostname =  System.getProperty("hostname");
-        if(hostname == null) {
+        String hostname = System.getProperty("hostname");
+        if (hostname == null) {
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {

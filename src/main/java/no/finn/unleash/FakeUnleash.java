@@ -19,9 +19,9 @@ public final class FakeUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(String toggleName, boolean defaultSetting) {
-        if(enableAll) {
+        if (enableAll) {
             return true;
-        } else if(disableAll) {
+        } else if (disableAll) {
             return false;
         } else {
             return features.getOrDefault(toggleName, defaultSetting);
@@ -29,13 +29,17 @@ public final class FakeUnleash implements Unleash {
     }
 
     @Override
-    public boolean isEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+    public boolean isEnabled(
+            String toggleName,
+            UnleashContext context,
+            BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         return isEnabled(toggleName, fallbackAction);
     }
 
     @Override
-    public boolean isEnabled(String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
-        if(!features.containsKey(toggleName)) {
+    public boolean isEnabled(
+            String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        if (!features.containsKey(toggleName)) {
             return fallbackAction.apply(toggleName, UnleashContext.builder().build());
         }
         return isEnabled(toggleName);
@@ -58,7 +62,7 @@ public final class FakeUnleash implements Unleash {
 
     @Override
     public Variant getVariant(String toggleName, Variant defaultValue) {
-        if(isEnabled(toggleName) && variants.containsKey(toggleName)) {
+        if (isEnabled(toggleName) && variants.containsKey(toggleName)) {
             return variants.get(toggleName);
         } else {
             return defaultValue;
@@ -90,19 +94,19 @@ public final class FakeUnleash implements Unleash {
     }
 
     public void enable(String... features) {
-        for(String name: features) {
+        for (String name : features) {
             this.features.put(name, true);
         }
     }
 
     public void disable(String... features) {
-        for(String name: features) {
+        for (String name : features) {
             this.features.put(name, false);
         }
     }
 
     public void reset(String... features) {
-        for(String name: features) {
+        for (String name : features) {
             this.features.remove(name);
         }
     }

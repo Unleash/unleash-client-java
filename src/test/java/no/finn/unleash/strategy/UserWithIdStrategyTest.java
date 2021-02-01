@@ -1,14 +1,14 @@
 package no.finn.unleash.strategy;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.HashMap;
 import java.util.Map;
 import no.finn.unleash.UnleashContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserWithIdStrategyTest {
     private UserWithIdStrategy strategy;
@@ -21,7 +21,6 @@ public class UserWithIdStrategyTest {
     @Test
     public void should_have_expected_strategy_name() {
         assertThat(strategy.getName()).isEqualTo("userWithId");
-
     }
 
     @Test
@@ -89,7 +88,8 @@ public class UserWithIdStrategyTest {
         Map<String, String> parameters = new HashMap<>();
 
         UnleashContext context = UnleashContext.builder().userId("298261117").build();
-        parameters.put(strategy.PARAM,
+        parameters.put(
+                strategy.PARAM,
                 "160118738, 1823311338, 1422637466, 2125981185, 298261117, 1829486714, 463568019, 271166598");
 
         assertTrue(strategy.isEnabled(parameters, context));
@@ -100,7 +100,8 @@ public class UserWithIdStrategyTest {
         Map<String, String> parameters = new HashMap<>();
 
         UnleashContext context = UnleashContext.builder().userId("32667774").build();
-        parameters.put(strategy.PARAM,
+        parameters.put(
+                strategy.PARAM,
                 "160118738, 1823311338, 1422637466, 2125981185, 298261117, 1829486714, 463568019, 271166598");
 
         assertFalse(strategy.isEnabled(parameters, context));
@@ -114,5 +115,4 @@ public class UserWithIdStrategyTest {
 
         assertFalse(strategy.isEnabled(parameters));
     }
-
 }

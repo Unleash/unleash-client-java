@@ -27,5 +27,4 @@ public class ToggleEvaluated implements UnleashEvent {
     public String toString() {
         return "ToggleEvaluated: " + toggleName + "=" + enabled;
     }
-
 }

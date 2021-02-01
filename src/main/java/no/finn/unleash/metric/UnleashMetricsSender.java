@@ -1,11 +1,8 @@
 package no.finn.unleash.metric;
 
-import com.google.gson.*;
-import no.finn.unleash.UnleashException;
-import no.finn.unleash.event.EventDispatcher;
-import no.finn.unleash.util.UnleashConfig;
-import no.finn.unleash.util.UnleashURLs;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 
+import com.google.gson.*;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
@@ -14,8 +11,10 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static java.time.format.DateTimeFormatter.ISO_INSTANT;
+import no.finn.unleash.UnleashException;
+import no.finn.unleash.event.EventDispatcher;
+import no.finn.unleash.util.UnleashConfig;
+import no.finn.unleash.util.UnleashURLs;
 
 public class UnleashMetricsSender {
     private static final int CONNECT_TIMEOUT = 1000;
@@ -29,20 +28,23 @@ public class UnleashMetricsSender {
     public UnleashMetricsSender(UnleashConfig unleashConfig) {
         this.unleashConfig = unleashConfig;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-        UnleashURLs urls =  unleashConfig.getUnleashURLs();
+        UnleashURLs urls = unleashConfig.getUnleashURLs();
         this.clientMetricsURL = urls.getClientMetricsURL();
         this.clientRegistrationURL = urls.getClientRegisterURL();
 
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new DateTimeSerializer())
-                .registerTypeAdapter(AtomicLong.class, new AtomicLongSerializer())
-                .create();
+        this.gson =
+                new GsonBuilder()
+                        .registerTypeAdapter(LocalDateTime.class, new DateTimeSerializer())
+                        .registerTypeAdapter(AtomicLong.class, new AtomicLongSerializer())
+                        .create();
     }
 
     static class DateTimeSerializer implements JsonSerializer<LocalDateTime> {
         @Override
         public JsonElement serialize(
-                LocalDateTime localDateTime, Type type, JsonSerializationContext jsonSerializationContext) {
+                LocalDateTime localDateTime,
+                Type type,
+                JsonSerializationContext jsonSerializationContext) {
             return new JsonPrimitive(ISO_INSTANT.format(localDateTime.toInstant(ZoneOffset.UTC)));
         };
     }
@@ -50,28 +52,29 @@ public class UnleashMetricsSender {
     static class AtomicLongSerializer implements JsonSerializer<AtomicLong> {
 
         @Override
-        public JsonElement serialize(AtomicLong src, Type typeOfSrc, JsonSerializationContext context) {
+        public JsonElement serialize(
+                AtomicLong src, Type typeOfSrc, JsonSerializationContext context) {
             return new JsonPrimitive(src.get());
         }
     }
 
     public void registerClient(ClientRegistration registration) {
-        if(!unleashConfig.isDisableMetrics()) {
+        if (!unleashConfig.isDisableMetrics()) {
             try {
                 post(clientRegistrationURL, registration);
                 eventDispatcher.dispatch(registration);
-            } catch(UnleashException ex) {
+            } catch (UnleashException ex) {
                 eventDispatcher.dispatch(ex);
             }
         }
     }
 
     public void sendMetrics(ClientMetrics metrics) {
-        if(!unleashConfig.isDisableMetrics()) {
+        if (!unleashConfig.isDisableMetrics()) {
             try {
                 post(clientMetricsURL, metrics);
                 eventDispatcher.dispatch(metrics);
-            } catch(UnleashException ex) {
+            } catch (UnleashException ex) {
                 eventDispatcher.dispatch(ex);
             }
         }
@@ -88,7 +91,7 @@ public class UnleashMetricsSender {
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("Content-Type", "application/json");
             UnleashConfig.setRequestProperties(connection, this.unleashConfig);
-            connection.setUseCaches (false);
+            connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
 
@@ -106,7 +109,7 @@ public class UnleashMetricsSender {
         } catch (IllegalStateException e) {
             throw new UnleashException(e.getMessage(), e);
         } finally {
-            if(connection != null) {
+            if (connection != null) {
                 connection.disconnect();
             }
         }

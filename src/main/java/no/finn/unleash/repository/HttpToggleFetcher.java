@@ -8,7 +8,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-
 import no.finn.unleash.UnleashException;
 import no.finn.unleash.util.UnleashConfig;
 import org.slf4j.Logger;
@@ -26,7 +25,10 @@ public final class HttpToggleFetcher implements ToggleFetcher {
     public HttpToggleFetcher(UnleashConfig unleashConfig) {
         this.unleashConfig = unleashConfig;
         if (unleashConfig.getProjectName() != null) {
-            this.toggleUrl = unleashConfig.getUnleashURLs().getFetchTogglesURL(unleashConfig.getProjectName());
+            this.toggleUrl =
+                    unleashConfig
+                            .getUnleashURLs()
+                            .getFetchTogglesURL(unleashConfig.getProjectName());
         } else {
             this.toggleUrl = unleashConfig.getUnleashURLs().getFetchTogglesURL();
         }
@@ -45,31 +47,39 @@ public final class HttpToggleFetcher implements ToggleFetcher {
         } catch (IllegalStateException e) {
             throw new UnleashException(e.getMessage(), e);
         } finally {
-            if(connection != null) {
+            if (connection != null) {
                 connection.disconnect();
             }
         }
     }
 
-    private FeatureToggleResponse getToggleResponse(HttpURLConnection request, boolean followRedirect) throws IOException {
+    private FeatureToggleResponse getToggleResponse(
+            HttpURLConnection request, boolean followRedirect) throws IOException {
         int responseCode = request.getResponseCode();
         if (responseCode < 300) {
             etag = Optional.ofNullable(request.getHeaderField("ETag"));
 
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader((InputStream) request.getContent(), StandardCharsets.UTF_8))) {
+            try (BufferedReader reader =
+                    new BufferedReader(
+                            new InputStreamReader(
+                                    (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
                 ToggleCollection toggles = JsonToggleParser.fromJson(reader);
                 return new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggles);
             }
-        } else if (followRedirect && (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
-                || responseCode == HttpURLConnection.HTTP_MOVED_PERM
-                || responseCode == HttpURLConnection.HTTP_SEE_OTHER)) {
+        } else if (followRedirect
+                && (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
+                        || responseCode == HttpURLConnection.HTTP_MOVED_PERM
+                        || responseCode == HttpURLConnection.HTTP_SEE_OTHER)) {
             return followRedirect(request);
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-            return new FeatureToggleResponse(FeatureToggleResponse.Status.NOT_CHANGED, responseCode);
+            return new FeatureToggleResponse(
+                    FeatureToggleResponse.Status.NOT_CHANGED, responseCode);
         } else {
-            return new FeatureToggleResponse(FeatureToggleResponse.Status.UNAVAILABLE, responseCode, getLocationHeader(request));
+            return new FeatureToggleResponse(
+                    FeatureToggleResponse.Status.UNAVAILABLE,
+                    responseCode,
+                    getLocationHeader(request));
         }
     }
 
@@ -78,11 +88,13 @@ public final class HttpToggleFetcher implements ToggleFetcher {
 
         request = openConnection(new URL(newUrl));
         request.connect();
-        LOG.info("Redirecting from {} to {}. Please consider to update your config.", toggleUrl, newUrl);
+        LOG.info(
+                "Redirecting from {} to {}. Please consider to update your config.",
+                toggleUrl,
+                newUrl);
 
         return getToggleResponse(request, false);
     }
-
 
     private String getLocationHeader(HttpURLConnection connection) {
         return connection.getHeaderField("Location");

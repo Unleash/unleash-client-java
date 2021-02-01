@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import no.finn.unleash.FeatureToggle;
 
 public final class ToggleCollection {
@@ -15,13 +14,15 @@ public final class ToggleCollection {
     public ToggleCollection(final Collection<FeatureToggle> features) {
         this.features = ensureNotNull(features);
         this.cache = new ConcurrentHashMap<>();
-        for(FeatureToggle featureToggle : this.features) {
+        for (FeatureToggle featureToggle : this.features) {
             cache.put(featureToggle.getName(), featureToggle);
         }
     }
 
     private Collection<FeatureToggle> ensureNotNull(Collection<FeatureToggle> features) {
-        if (features == null) { return Collections.emptyList(); }
+        if (features == null) {
+            return Collections.emptyList();
+        }
         return features;
     }
 

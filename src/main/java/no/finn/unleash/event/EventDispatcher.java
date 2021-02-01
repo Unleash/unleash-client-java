@@ -14,10 +14,10 @@ public class EventDispatcher {
     }
 
     public void dispatch(UnleashEvent unleashEvent) {
-        unleashScheduledExecutor.scheduleOnce(() -> {
-            unleashSubscriber.on(unleashEvent);
-            unleashEvent.publishTo(unleashSubscriber);
-        });
+        unleashScheduledExecutor.scheduleOnce(
+                () -> {
+                    unleashSubscriber.on(unleashEvent);
+                    unleashEvent.publishTo(unleashSubscriber);
+                });
     }
-
 }

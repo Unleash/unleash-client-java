@@ -1,20 +1,19 @@
 package no.finn.unleash.variant;
 
+import static java.util.Arrays.asList;
+import static no.finn.unleash.Variant.DISABLED_VARIANT;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Collections;
 import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashContext;
 import no.finn.unleash.Variant;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
-import static java.util.Arrays.asList;
-import static no.finn.unleash.Variant.DISABLED_VARIANT;
-import static org.assertj.core.api.Assertions.assertThat;
-
-
 public class VariantUtilTest {
-    private final ActivationStrategy defaultStrategy = new ActivationStrategy("default", Collections.emptyMap());
+    private final ActivationStrategy defaultStrategy =
+            new ActivationStrategy("default", Collections.emptyMap());
 
     @Test
     public void should_return_default_variant_when_toggle_has_no_variants() {
@@ -23,20 +22,20 @@ public class VariantUtilTest {
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
-
         assertThat(variant).isEqualTo(DISABLED_VARIANT);
     }
 
     @Test
     public void should_return_variant1() {
-        VariantDefinition v1 = new VariantDefinition("a", 33, new Payload("string", "asd"), Collections.emptyList());
+        VariantDefinition v1 =
+                new VariantDefinition(
+                        "a", 33, new Payload("string", "asd"), Collections.emptyList());
         VariantDefinition v2 = new VariantDefinition("b", 33);
         VariantDefinition v3 = new VariantDefinition("c", 34);
 
-        FeatureToggle toggle = new FeatureToggle(
-                "test.variants",
-                true,
-                asList(defaultStrategy), asList(v1, v2, v3));
+        FeatureToggle toggle =
+                new FeatureToggle(
+                        "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
         UnleashContext context = UnleashContext.builder().userId("11").build();
 
@@ -49,14 +48,15 @@ public class VariantUtilTest {
 
     @Test
     public void should_return_variant2() {
-        VariantDefinition v1 = new VariantDefinition("a", 33, new Payload("string", "asd"), Collections.emptyList());
+        VariantDefinition v1 =
+                new VariantDefinition(
+                        "a", 33, new Payload("string", "asd"), Collections.emptyList());
         VariantDefinition v2 = new VariantDefinition("b", 33);
         VariantDefinition v3 = new VariantDefinition("c", 34);
 
-        FeatureToggle toggle = new FeatureToggle(
-                "test.variants",
-                true,
-                asList(defaultStrategy), asList(v1, v2, v3));
+        FeatureToggle toggle =
+                new FeatureToggle(
+                        "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
         UnleashContext context = UnleashContext.builder().userId("163").build();
 
@@ -71,10 +71,9 @@ public class VariantUtilTest {
         VariantDefinition v2 = new VariantDefinition("b", 33);
         VariantDefinition v3 = new VariantDefinition("c", 34);
 
-        FeatureToggle toggle = new FeatureToggle(
-                "test.variants",
-                true,
-                asList(defaultStrategy), asList(v1, v2, v3));
+        FeatureToggle toggle =
+                new FeatureToggle(
+                        "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
         UnleashContext context = UnleashContext.builder().userId("40").build();
 
@@ -90,10 +89,9 @@ public class VariantUtilTest {
         VariantDefinition v2 = new VariantDefinition("b", 33, null, asList(override));
         VariantDefinition v3 = new VariantDefinition("c", 34);
 
-        FeatureToggle toggle = new FeatureToggle(
-                "test.variants",
-                true,
-                asList(defaultStrategy), asList(v1, v2, v3));
+        FeatureToggle toggle =
+                new FeatureToggle(
+                        "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
         UnleashContext context = UnleashContext.builder().userId("123").build();
 
@@ -104,15 +102,17 @@ public class VariantUtilTest {
 
     @Test
     public void should_return_variant_override_on_remote_adr() {
-        VariantDefinition v1 = new VariantDefinition("a", 33, new Payload("string", "asd"), Collections.emptyList());
+        VariantDefinition v1 =
+                new VariantDefinition(
+                        "a", 33, new Payload("string", "asd"), Collections.emptyList());
         VariantDefinition v2 = new VariantDefinition("b", 33, null, Collections.emptyList());
         VariantOverride override = new VariantOverride("remoteAddress", asList("11.11.11.11"));
-        VariantDefinition v3 = new VariantDefinition("c", 34, new Payload("string", "blob"), asList(override));
+        VariantDefinition v3 =
+                new VariantDefinition("c", 34, new Payload("string", "blob"), asList(override));
 
-        FeatureToggle toggle = new FeatureToggle(
-                "test.variants",
-                true,
-                asList(defaultStrategy), asList(v1, v2, v3));
+        FeatureToggle toggle =
+                new FeatureToggle(
+                        "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
         UnleashContext context = UnleashContext.builder().remoteAddress("11.11.11.11").build();
 
@@ -130,15 +130,12 @@ public class VariantUtilTest {
         VariantDefinition v2 = new VariantDefinition("b", 33, null, asList(override));
         VariantDefinition v3 = new VariantDefinition("c", 34);
 
-        FeatureToggle toggle = new FeatureToggle(
-                "test.variants",
-                true,
-                asList(defaultStrategy), asList(v1, v2, v3));
+        FeatureToggle toggle =
+                new FeatureToggle(
+                        "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
-        UnleashContext context = UnleashContext.builder()
-                .userId("11")
-                .addProperty("env", "dev")
-                .build();
+        UnleashContext context =
+                UnleashContext.builder().userId("11").addProperty("env", "dev").build();
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
@@ -152,19 +149,20 @@ public class VariantUtilTest {
         VariantDefinition v1 = new VariantDefinition("a", 33);
         VariantOverride override_env = new VariantOverride("env", asList("dev"));
         VariantOverride override_session = new VariantOverride("sessionId", asList(sessionId));
-        VariantDefinition v2 = new VariantDefinition("b", 33, null, asList(override_env, override_session));
+        VariantDefinition v2 =
+                new VariantDefinition("b", 33, null, asList(override_env, override_session));
         VariantDefinition v3 = new VariantDefinition("c", 34);
 
-        FeatureToggle toggle = new FeatureToggle(
-                "test.variants",
-                true,
-                asList(defaultStrategy), asList(v1, v2, v3));
+        FeatureToggle toggle =
+                new FeatureToggle(
+                        "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
-        UnleashContext context = UnleashContext.builder()
-                .userId("11")
-                .addProperty("env", "prod")
-                .sessionId(sessionId)
-                .build();
+        UnleashContext context =
+                UnleashContext.builder()
+                        .userId("11")
+                        .addProperty("env", "prod")
+                        .sessionId(sessionId)
+                        .build();
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 

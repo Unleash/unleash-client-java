@@ -1,9 +1,8 @@
 package no.finn.unleash.util;
 
+import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.*;
 
 public class UnleashScheduledExecutorImpl implements UnleashScheduledExecutor {
 
@@ -15,12 +14,13 @@ public class UnleashScheduledExecutorImpl implements UnleashScheduledExecutor {
     private final ExecutorService executorService;
 
     public UnleashScheduledExecutorImpl() {
-        ThreadFactory threadFactory = runnable -> {
-            Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-            thread.setName("unleash-api-executor");
-            thread.setDaemon(true);
-            return thread;
-        };
+        ThreadFactory threadFactory =
+                runnable -> {
+                    Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                    thread.setName("unleash-api-executor");
+                    thread.setDaemon(true);
+                    return thread;
+                };
 
         this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, threadFactory);
         this.scheduledThreadPoolExecutor.setRemoveOnCancelPolicy(true);
@@ -36,16 +36,14 @@ public class UnleashScheduledExecutorImpl implements UnleashScheduledExecutor {
     }
 
     @Override
-    public ScheduledFuture setInterval(Runnable command,
-                                                      long initialDelaySec,
-                                                      long periodSec) {
+    public ScheduledFuture setInterval(Runnable command, long initialDelaySec, long periodSec) {
         try {
-            return scheduledThreadPoolExecutor.scheduleAtFixedRate(command, initialDelaySec, periodSec, TimeUnit.SECONDS);
+            return scheduledThreadPoolExecutor.scheduleAtFixedRate(
+                    command, initialDelaySec, periodSec, TimeUnit.SECONDS);
         } catch (RejectedExecutionException ex) {
             LOG.error("Unleash background task crashed", ex);
             return null;
         }
-
     }
 
     @Override

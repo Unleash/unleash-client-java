@@ -6,5 +6,4 @@ public class UnleashReady implements UnleashEvent {
     public void publishTo(UnleashSubscriber unleashSubscriber) {
         unleashSubscriber.onReady(this);
     }
-
 }

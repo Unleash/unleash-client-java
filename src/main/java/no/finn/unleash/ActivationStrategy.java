@@ -13,7 +13,8 @@ public final class ActivationStrategy {
         this(name, parameters, Collections.emptyList());
     }
 
-    public ActivationStrategy(String name, Map<String, String> parameters, List<Constraint> constraints) {
+    public ActivationStrategy(
+            String name, Map<String, String> parameters, List<Constraint> constraints) {
         this.name = name;
         this.parameters = parameters;
         this.constraints = constraints;

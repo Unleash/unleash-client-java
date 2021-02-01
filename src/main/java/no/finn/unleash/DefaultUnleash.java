@@ -1,12 +1,15 @@
 package no.finn.unleash;
 
+import static java.util.Optional.ofNullable;
+import static no.finn.unleash.Variant.DISABLED_VARIANT;
+import static no.finn.unleash.variant.VariantUtil.selectVariant;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
-
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.ToggleEvaluated;
 import no.finn.unleash.metric.UnleashMetricService;
@@ -18,19 +21,17 @@ import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.*;
 import no.finn.unleash.util.UnleashConfig;
 
-import static java.util.Optional.ofNullable;
-import static no.finn.unleash.Variant.DISABLED_VARIANT;
-import static no.finn.unleash.variant.VariantUtil.selectVariant;
-
 public final class DefaultUnleash implements Unleash {
-    private static final List<Strategy> BUILTIN_STRATEGIES = Arrays.asList(new DefaultStrategy(),
-            new ApplicationHostnameStrategy(),
-            new GradualRolloutRandomStrategy(),
-            new GradualRolloutSessionIdStrategy(),
-            new GradualRolloutUserIdStrategy(),
-            new RemoteAddressStrategy(),
-            new UserWithIdStrategy(),
-            new FlexibleRolloutStrategy());
+    private static final List<Strategy> BUILTIN_STRATEGIES =
+            Arrays.asList(
+                    new DefaultStrategy(),
+                    new ApplicationHostnameStrategy(),
+                    new GradualRolloutRandomStrategy(),
+                    new GradualRolloutSessionIdStrategy(),
+                    new GradualRolloutUserIdStrategy(),
+                    new RemoteAddressStrategy(),
+                    new UserWithIdStrategy(),
+                    new FlexibleRolloutStrategy());
 
     private static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
@@ -45,21 +46,24 @@ public final class DefaultUnleash implements Unleash {
         return new FeatureToggleRepository(
                 unleashConfig,
                 new HttpToggleFetcher(unleashConfig),
-                new ToggleBackupHandlerFile(unleashConfig)
-        );
+                new ToggleBackupHandlerFile(unleashConfig));
     }
 
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {
         this(unleashConfig, defaultToggleRepository(unleashConfig), strategies);
     }
 
-    public DefaultUnleash(UnleashConfig unleashConfig, ToggleRepository toggleRepository, Strategy... strategies) {
+    public DefaultUnleash(
+            UnleashConfig unleashConfig,
+            ToggleRepository toggleRepository,
+            Strategy... strategies) {
         this.config = unleashConfig;
         this.toggleRepository = toggleRepository;
         this.strategyMap = buildStrategyMap(strategies);
         this.contextProvider = unleashConfig.getContextProvider();
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-        this.metricService = new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor());
+        this.metricService =
+                new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor());
         metricService.register(strategyMap.keySet());
     }
 
@@ -74,37 +78,53 @@ public final class DefaultUnleash implements Unleash {
     }
 
     @Override
-    public boolean isEnabled(final String toggleName, final UnleashContext context, final boolean defaultSetting) {
+    public boolean isEnabled(
+            final String toggleName, final UnleashContext context, final boolean defaultSetting) {
         return isEnabled(toggleName, context, (n, c) -> defaultSetting);
     }
 
     @Override
-    public boolean isEnabled(final String toggleName, final BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+    public boolean isEnabled(
+            final String toggleName,
+            final BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         return isEnabled(toggleName, contextProvider.getContext(), fallbackAction);
     }
 
     @Override
-    public boolean isEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+    public boolean isEnabled(
+            String toggleName,
+            UnleashContext context,
+            BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         boolean enabled = checkEnabled(toggleName, context, fallbackAction);
         count(toggleName, enabled);
         eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
         return enabled;
     }
 
-    private boolean checkEnabled(String toggleName, UnleashContext context, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+    private boolean checkEnabled(
+            String toggleName,
+            UnleashContext context,
+            BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
         boolean enabled;
         UnleashContext enhancedContext = context.applyStaticFields(config);
 
         if (featureToggle == null) {
             enabled = fallbackAction.apply(toggleName, enhancedContext);
-        } else if(!featureToggle.isEnabled()) {
+        } else if (!featureToggle.isEnabled()) {
             enabled = false;
-        } else if(featureToggle.getStrategies().size() == 0) {
+        } else if (featureToggle.getStrategies().size() == 0) {
             return true;
         } else {
-            enabled = featureToggle.getStrategies().stream()
-                    .anyMatch(as -> getStrategy(as.getName()).isEnabled(as.getParameters(), enhancedContext, as.getConstraints()));
+            enabled =
+                    featureToggle.getStrategies().stream()
+                            .anyMatch(
+                                    as ->
+                                            getStrategy(as.getName())
+                                                    .isEnabled(
+                                                            as.getParameters(),
+                                                            enhancedContext,
+                                                            as.getConstraints()));
         }
         return enabled;
     }
@@ -118,7 +138,8 @@ public final class DefaultUnleash implements Unleash {
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
         boolean enabled = checkEnabled(toggleName, context, (n, c) -> false);
-        Variant variant = enabled ? selectVariant(featureToggle, context, defaultValue) : defaultValue;
+        Variant variant =
+                enabled ? selectVariant(featureToggle, context, defaultValue) : defaultValue;
         metricService.countVariant(toggleName, variant.getName());
         return variant;
     }

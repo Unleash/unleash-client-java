@@ -21,7 +21,7 @@ public class TestCaseVariant {
     }
 
     public Variant getExpectedResult() {
-        if(expectedResult.getName().equals("disabled")) {
+        if (expectedResult.getName().equals("disabled")) {
             return Variant.DISABLED_VARIANT;
         }
 

@@ -41,10 +41,6 @@ public class ClientMetrics implements UnleashEvent {
 
     @Override
     public String toString() {
-        return "metrics:"
-                + " appName=" + appName
-                + " instanceId=" + instanceId
-                ;
+        return "metrics:" + " appName=" + appName + " instanceId=" + instanceId;
     }
-
 }

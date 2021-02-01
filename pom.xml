@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.finn.unleash</groupId>
     <artifactId>unleash-client-java</artifactId>
@@ -10,7 +11,8 @@
         <version.log4j2>2.13.3</version.log4j2>
         <version.junit5>5.7.0</version.junit5>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.unleash.specification>3.3.0</version.unleash.specification>        <arguments />
+        <version.unleash.specification>3.3.0</version.unleash.specification>
+        <arguments/>
     </properties>
 
     <name>no.finn.unleash:unleash-client-java</name>
@@ -278,6 +280,53 @@
                     <arguments>${arguments} -Psonatype-release</arguments>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.7.0</version>
+                <configuration>
+                    <formats>
+                        <format>
+                            <includes>
+                                <include>*.md</include>
+                                <include>.gitignore</include>
+                            </includes>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                            <indent>
+                                <spaces>true</spaces>
+                                <tabs>false</tabs>
+                                <spacesPerTab>4</spacesPerTab>
+                            </indent>
+                        </format>
+                    </formats>
+                    <java>
+                        <removeUnusedImports/>
+                        <toggleOffOn />
+                        <googleJavaFormat>
+                            <style>AOSP</style>
+                        </googleJavaFormat>
+                        <indent>
+                            <spaces>true</spaces>
+                        </indent>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>format</id>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -287,7 +336,8 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
-                <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
+                <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/
+                </sonatypeOssDistMgmtSnapshotsUrl>
             </properties>
             <repositories>
                 <repository>

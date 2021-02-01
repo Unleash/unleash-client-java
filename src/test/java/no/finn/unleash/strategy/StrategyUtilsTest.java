@@ -1,8 +1,8 @@
 package no.finn.unleash.strategy;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 
 public class StrategyUtilsTest {
 
@@ -11,5 +11,4 @@ public class StrategyUtilsTest {
         assertEquals(73, StrategyUtils.getNormalizedNumber("123", "gr1"));
         assertEquals(25, StrategyUtils.getNormalizedNumber("999", "groupX"));
     }
-
 }

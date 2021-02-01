@@ -3,7 +3,6 @@ package no.finn.unleash.strategy;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-
 import no.finn.unleash.UnleashContext;
 
 public class FlexibleRolloutStrategy implements Strategy {
@@ -13,7 +12,7 @@ public class FlexibleRolloutStrategy implements Strategy {
     private Supplier<String> randomGenerator;
 
     public FlexibleRolloutStrategy() {
-        this.randomGenerator = () ->  Math.random() * 100 + "";
+        this.randomGenerator = () -> Math.random() * 100 + "";
     }
 
     public FlexibleRolloutStrategy(Supplier<String> randomGenerator) {
@@ -32,13 +31,16 @@ public class FlexibleRolloutStrategy implements Strategy {
 
     private Optional<String> resolveStickiness(String stickiness, UnleashContext context) {
         switch (stickiness) {
-            case "userId": return context.getUserId();
-            case "sessionId": return context.getSessionId();
-            case "random": return Optional.of(randomGenerator.get());
+            case "userId":
+                return context.getUserId();
+            case "sessionId":
+                return context.getSessionId();
+            case "random":
+                return Optional.of(randomGenerator.get());
             default:
-                String value = context.getUserId()
-                        .orElse(context.getSessionId()
-                        .orElse(this.randomGenerator.get()));
+                String value =
+                        context.getUserId()
+                                .orElse(context.getSessionId().orElse(this.randomGenerator.get()));
                 return Optional.of(value);
         }
     }
@@ -50,8 +52,9 @@ public class FlexibleRolloutStrategy implements Strategy {
         final int percentage = StrategyUtils.getPercentage(parameters.get(PERCENTAGE));
         final String groupId = Optional.ofNullable(parameters.get(GROUP_ID)).orElse("");
 
-        if(stickinessId.isPresent()) {
-            final int normalizedUserId = StrategyUtils.getNormalizedNumber(stickinessId.get(), groupId);
+        if (stickinessId.isPresent()) {
+            final int normalizedUserId =
+                    StrategyUtils.getNormalizedNumber(stickinessId.get(), groupId);
             return percentage > 0 && normalizedUserId <= percentage;
         } else {
             return false;

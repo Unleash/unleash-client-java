@@ -1,11 +1,10 @@
 package no.finn.unleash.strategy;
 
+import static java.util.Arrays.asList;
+
 import java.util.Map;
 import java.util.Optional;
-
 import no.finn.unleash.UnleashContext;
-
-import static java.util.Arrays.asList;
 
 public final class UserWithIdStrategy implements Strategy {
 
@@ -24,10 +23,14 @@ public final class UserWithIdStrategy implements Strategy {
 
     @Override
     public boolean isEnabled(Map<String, String> parameters, UnleashContext unleashContext) {
-        return unleashContext.getUserId()
-                           .map(currentUserId -> Optional.ofNullable(parameters.get(PARAM))
-                                                         .map(userIdString -> asList(userIdString.split(",\\s?")))
-                                                         .filter(f -> f.contains(currentUserId)).isPresent())
-                           .orElse(false);
+        return unleashContext
+                .getUserId()
+                .map(
+                        currentUserId ->
+                                Optional.ofNullable(parameters.get(PARAM))
+                                        .map(userIdString -> asList(userIdString.split(",\\s?")))
+                                        .filter(f -> f.contains(currentUserId))
+                                        .isPresent())
+                .orElse(false);
     }
 }

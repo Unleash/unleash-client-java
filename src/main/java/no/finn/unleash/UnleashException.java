@@ -13,5 +13,4 @@ public class UnleashException extends RuntimeException implements UnleashEvent {
     public void publishTo(UnleashSubscriber unleashSubscriber) {
         unleashSubscriber.onError(this);
     }
-
 }

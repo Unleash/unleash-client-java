@@ -1,13 +1,12 @@
 package no.finn.unleash.strategy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-
 import no.finn.unleash.UnleashContext;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class FlexibleRolloutStrategyTest {
 
@@ -87,6 +86,7 @@ class FlexibleRolloutStrategyTest {
         boolean enabled = strategy.isEnabled(params, context);
         assertTrue(enabled);
     }
+
     @Test
     public void should_be_enabled_for_rollout_10_and_randomId_61_and_stickiness_sessionId() {
         FlexibleRolloutStrategy strategy = new FlexibleRolloutStrategy();
@@ -128,8 +128,6 @@ class FlexibleRolloutStrategyTest {
         assertTrue(enabled);
     }
 
-
-
     @Test
     public void should_NOT_be_enabled_for_rollout_10_and_randomId_1() {
         Supplier<String> radnomGenerator = () -> "1";
@@ -143,5 +141,4 @@ class FlexibleRolloutStrategyTest {
         boolean enabled = strategy.isEnabled(params, context);
         assertFalse(enabled);
     }
-
 }

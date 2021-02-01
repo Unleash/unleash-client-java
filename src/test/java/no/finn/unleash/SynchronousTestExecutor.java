@@ -1,21 +1,20 @@
 package no.finn.unleash;
 
-import no.finn.unleash.util.UnleashScheduledExecutor;
-import org.apache.logging.log4j.LogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.Delayed;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import no.finn.unleash.util.UnleashScheduledExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SynchronousTestExecutor implements UnleashScheduledExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(SynchronousTestExecutor.class);
 
     @Override
-    public ScheduledFuture setInterval(Runnable command, long initialDelaySec, long periodSec) throws RejectedExecutionException {
+    public ScheduledFuture setInterval(Runnable command, long initialDelaySec, long periodSec)
+            throws RejectedExecutionException {
         LOG.warn("i will only do this once");
         return scheduleOnce(command);
     }
@@ -62,5 +61,4 @@ public class SynchronousTestExecutor implements UnleashScheduledExecutor {
             return null;
         }
     }
-
 }

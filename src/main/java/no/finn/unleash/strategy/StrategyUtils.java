@@ -27,7 +27,8 @@ public final class StrategyUtils {
     }
 
     /**
-     * Takes to string inputs concat them, produce a hash and return a normalized value between 0 and 100;
+     * Takes to string inputs concat them, produce a hash and return a normalized value between 0
+     * and 100;
      *
      * @param identifier
      * @param groupId
@@ -40,13 +41,13 @@ public final class StrategyUtils {
     public static int getNormalizedNumber(String identifier, String groupId, int normalizer) {
         byte[] value = (groupId + ':' + identifier).getBytes();
         long hash = Murmur3.hash_x86_32(value, value.length, 0);
-        return (int)(hash % normalizer) + 1;
+        return (int) (hash % normalizer) + 1;
     }
 
     /**
      * Takes a numeric string value and converts it to a integer between 0 and 100.
      *
-     * returns 0 if the string is not numeric.
+     * <p>returns 0 if the string is not numeric.
      *
      * @param percentage - A numeric string value
      * @return a integer between 0 and 100

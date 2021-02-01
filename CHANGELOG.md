@@ -3,9 +3,9 @@
 ## 4.0.0
 - feat: Switched to slf4j-api logging
 - feat: add support for filtering on project (Enterprise only)
-- fix: BREAKING CHANGE UnleashConfig constructor is now private. 
+- fix: BREAKING CHANGE UnleashConfig constructor is now private.
   Use UnleashConfig.Builder to get instance of UnleashConfig
-  
+
 ## 3.3.4
 - fix: follow redirect once (#115)
 - chore(deps): bump version.log4j2 from 2.11.2 to 2.13.3 (#109)
@@ -23,7 +23,7 @@
 
 ## 3.3.0
 - feat: Add support for fallback-action
-- fix: NullPointerException when no variants defined 
+- fix: NullPointerException when no variants defined
 - fix: FakeUnleash resetAll should also reset variants
 
 ## 3.2.10
@@ -77,7 +77,7 @@
 - Introduced UNAVAILABLE as possible status in FeatureToggleResponse
 
 ## 3.0.0
-- This version requires `unleash-server` v3 or higher. 
+- This version requires `unleash-server` v3 or higher.
 - Switch hashing to MurmurHash (https://github.com/Unleash/unleash/issues/247)
 - Update API endoint paths for Unleash 3.x (https://github.com/Unleash/unleash-client-java/issues/40)
 
@@ -85,16 +85,16 @@
 - Add sdkVersion in client-register call
 
 ## 2.1.3 Expose Feature Toggle Definition
-- Exposing the Feature Toggle Definition via the `getFeatureToggleDefinition` method on DefaultUnleash to make it easier to extend it with new functionality. 
+- Exposing the Feature Toggle Definition via the `getFeatureToggleDefinition` method on DefaultUnleash to make it easier to extend it with new functionality.
 
-## 2.1.2 
-- Added options for defining custom headers. 
+## 2.1.2
+- Added options for defining custom headers.
 
 ## 2.1.1 (March 2017)
-- Default instanceId should include hostname. 
+- Default instanceId should include hostname.
 
 ## 2.1.0 (Febrary 2017)
-- Includes implementation of pre-defined activation strategies. 
+- Includes implementation of pre-defined activation strategies.
     - applicationHostname
     - gradualRolloutRandom
     - gradualRolloutSessionId
@@ -107,10 +107,9 @@
 
 - Support multiple strategies. This makes it easy to use multiple activation strategies in combination.
 - Client metrics. Gives details about what toggles a specific client application uses, how many times a toggle was evaluated to true / false.
-- Client registration. This gives insight about connected clients, instances, strategies they support. 
+- Client registration. This gives insight about connected clients, instances, strategies they support.
 
 
 
 ## 1.0.0 (January 2014)
 - Initial public release
-

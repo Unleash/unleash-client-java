@@ -1,11 +1,17 @@
 package no.finn.unleash.event;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static no.finn.unleash.repository.FeatureToggleResponse.Status.UNAVAILABLE;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
 import com.github.jenspiegsa.wiremockextension.InjectServer;
 import com.github.jenspiegsa.wiremockextension.WireMockExtension;
 import com.github.jenspiegsa.wiremockextension.WireMockSettings;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
+import java.util.ArrayList;
+import java.util.List;
 import no.finn.unleash.DefaultUnleash;
 import no.finn.unleash.SynchronousTestExecutor;
 import no.finn.unleash.Unleash;
@@ -16,37 +22,28 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static no.finn.unleash.repository.FeatureToggleResponse.Status.UNAVAILABLE;
-import static org.assertj.core.api.Assertions.assertThat;
-
-
 @ExtendWith(WireMockExtension.class)
 @WireMockSettings(failOnUnmatchedRequests = false)
 public class SubscriberTest {
 
-    @ConfigureWireMock
-    Options options = wireMockConfig().dynamicPort();
+    @ConfigureWireMock Options options = wireMockConfig().dynamicPort();
 
-    @InjectServer
-    WireMockServer serverMock;
+    @InjectServer WireMockServer serverMock;
 
     private TestSubscriber testSubscriber = new TestSubscriber();
     private UnleashConfig unleashConfig;
 
     @BeforeEach
     void setup() {
-        unleashConfig = new UnleashConfig.Builder()
-                .appName(SubscriberTest.class.getSimpleName())
-                .instanceId(SubscriberTest.class.getSimpleName())
-                .synchronousFetchOnInitialisation(true)
-                .unleashAPI("http://localhost:" + serverMock.port())
-                .subscriber(testSubscriber)
-                .scheduledExecutor(new SynchronousTestExecutor())
-                .build();
+        unleashConfig =
+                new UnleashConfig.Builder()
+                        .appName(SubscriberTest.class.getSimpleName())
+                        .instanceId(SubscriberTest.class.getSimpleName())
+                        .synchronousFetchOnInitialisation(true)
+                        .unleashAPI("http://localhost:" + serverMock.port())
+                        .subscriber(testSubscriber)
+                        .scheduledExecutor(new SynchronousTestExecutor())
+                        .build();
     }
 
     @Test
@@ -64,12 +61,14 @@ public class SubscriberTest {
         assertThat(testSubscriber.toggleEnabled).isFalse();
         assertThat(testSubscriber.errors).hasSize(2);
 
-        assertThat(testSubscriber.events).hasSize(3 // feature evaluations
-                + 2 // toggle fetches
-                + 1 // unleash ready
-                + 1 // client registration
-                + 1 // client metrics
-        );
+        assertThat(testSubscriber.events)
+                .hasSize(
+                        3 // feature evaluations
+                                + 2 // toggle fetches
+                                + 1 // unleash ready
+                                + 1 // client registration
+                                + 1 // client metrics
+                        );
     }
 
     private class TestSubscriber implements UnleashSubscriber {
@@ -107,5 +106,4 @@ public class SubscriberTest {
             this.status = toggleResponse.getStatus();
         }
     }
-
 }

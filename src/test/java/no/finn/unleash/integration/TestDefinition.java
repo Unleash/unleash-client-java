@@ -1,9 +1,8 @@
 package no.finn.unleash.integration;
 
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.gson.JsonObject;
 
 public class TestDefinition {
     private String name;
@@ -26,5 +25,4 @@ public class TestDefinition {
     public List<TestCaseVariant> getVariantTests() {
         return variantTests;
     }
-
 }
