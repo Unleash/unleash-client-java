@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import no.finn.unleash.FeatureToggle;
+import no.finn.unleash.lang.Nullable;
 
 public final class ToggleCollection {
     private final Collection<FeatureToggle> features;
@@ -19,7 +20,7 @@ public final class ToggleCollection {
         }
     }
 
-    private Collection<FeatureToggle> ensureNotNull(Collection<FeatureToggle> features) {
+    private Collection<FeatureToggle> ensureNotNull(@Nullable Collection<FeatureToggle> features) {
         if (features == null) {
             return Collections.emptyList();
         }

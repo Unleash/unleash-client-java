@@ -1,6 +1,7 @@
 package no.finn.unleash.strategy;
 
 import com.sangupta.murmur.Murmur3;
+import no.finn.unleash.lang.Nullable;
 
 public final class StrategyUtils {
     private static final int ONE_HUNDRED = 100;
@@ -9,7 +10,7 @@ public final class StrategyUtils {
         return !isEmpty(cs);
     }
 
-    public static boolean isEmpty(final CharSequence cs) {
+    public static boolean isEmpty(@Nullable final CharSequence cs) {
         return cs == null || cs.length() == 0;
     }
 

@@ -1,12 +1,14 @@
 package no.finn.unleash.variant;
 
+import no.finn.unleash.lang.Nullable;
+
 import java.util.Objects;
 
 public class Payload {
     private String type;
-    private String value;
+    @Nullable private String value;
 
-    public Payload(String type, String value) {
+    public Payload(String type,@Nullable String value) {
         this.type = type;
         this.value = value;
     }
@@ -15,12 +17,12 @@ public class Payload {
         return type;
     }
 
-    public String getValue() {
+    public @Nullable String getValue() {
         return value;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Payload payload = (Payload) o;

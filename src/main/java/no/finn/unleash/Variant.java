@@ -2,22 +2,24 @@ package no.finn.unleash;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.variant.Payload;
 
 public class Variant {
     public static final Variant DISABLED_VARIANT = new Variant("disabled", (String) null, false);
 
     private final String name;
-    private final Payload payload;
+    @Nullable private final Payload payload;
     private final boolean enabled;
 
-    public Variant(String name, Payload payload, boolean enabled) {
+    public Variant(String name, @Nullable  Payload payload, boolean enabled) {
         this.name = name;
         this.payload = payload;
         this.enabled = enabled;
     }
 
-    public Variant(String name, String payload, boolean enabled) {
+    public Variant(String name, @Nullable String payload, boolean enabled) {
         this.name = name;
         this.payload = new Payload("string", payload);
         this.enabled = enabled;

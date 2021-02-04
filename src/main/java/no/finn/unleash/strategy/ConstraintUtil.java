@@ -5,10 +5,11 @@ import java.util.Optional;
 import no.finn.unleash.Constraint;
 import no.finn.unleash.Operator;
 import no.finn.unleash.UnleashContext;
+import no.finn.unleash.lang.Nullable;
 
 public class ConstraintUtil {
 
-    public static boolean validate(List<Constraint> constraints, UnleashContext context) {
+    public static boolean validate(@Nullable List<Constraint> constraints, UnleashContext context) {
         if (constraints != null && constraints.size() > 0) {
             return constraints.stream().allMatch(c -> validateConstraint(c, context));
         } else {

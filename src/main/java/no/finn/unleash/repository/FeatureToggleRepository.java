@@ -6,6 +6,7 @@ import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.UnleashReady;
+import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 
@@ -69,7 +70,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
     }
 
     @Override
-    public FeatureToggle getToggle(String name) {
+    public @Nullable FeatureToggle getToggle(String name) {
         return toggleCollection.getToggle(name);
     }
 

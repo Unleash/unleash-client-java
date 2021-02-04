@@ -5,6 +5,7 @@
 - feat: add support for filtering on project (Enterprise only)
 - fix: BREAKING CHANGE UnleashConfig constructor is now private.
   Use UnleashConfig.Builder to get instance of UnleashConfig
+- feat: Add annotations to indicate null and nonnull method signatures, also supports Kotlin
 
 ## 3.3.4
 - fix: follow redirect once (#115)
