@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
+import no.finn.unleash.lang.Nullable;
 
 public class JsonToggleCollectionDeserializer implements JsonDeserializer<ToggleCollection> {
     private static final Type PARAMS_TYPE = new TypeToken<Map<String, String>>() {}.getType();
@@ -16,7 +17,7 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
             new TypeToken<Collection<FeatureToggle>>() {}.getType();
 
     @Override
-    public ToggleCollection deserialize(
+    public @Nullable ToggleCollection deserialize(
             JsonElement rootElement, Type type, JsonDeserializationContext context)
             throws JsonParseException {
 
@@ -31,7 +32,8 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
         }
     }
 
-    static ToggleCollection deserializeVersion0(
+    static @Nullable
+    ToggleCollection deserializeVersion0(
             JsonElement rootElement, JsonDeserializationContext context) {
         if (!rootElement.getAsJsonObject().has("features")) {
             return null;
@@ -60,7 +62,7 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
         return new ToggleCollection(featureToggles);
     }
 
-    static ToggleCollection deserializeVersion1(
+    static @Nullable ToggleCollection deserializeVersion1(
             JsonElement rootElement, JsonDeserializationContext context) {
         if (!rootElement.getAsJsonObject().has("features")) {
             return null;

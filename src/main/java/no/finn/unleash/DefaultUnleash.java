@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.ToggleEvaluated;
+import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.metric.UnleashMetricService;
 import no.finn.unleash.metric.UnleashMetricServiceImpl;
 import no.finn.unleash.repository.FeatureToggleRepository;
@@ -166,7 +167,7 @@ public final class DefaultUnleash implements Unleash {
         metricService.count(toggleName, enabled);
     }
 
-    private Map<String, Strategy> buildStrategyMap(Strategy[] strategies) {
+    private Map<String, Strategy> buildStrategyMap(@Nullable Strategy[] strategies) {
         Map<String, Strategy> map = new HashMap<>();
 
         BUILTIN_STRATEGIES.forEach(strategy -> map.put(strategy.getName(), strategy));

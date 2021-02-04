@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashContext;
 import no.finn.unleash.Variant;
+import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.strategy.StrategyUtils;
 
 public final class VariantUtil {
@@ -61,7 +62,10 @@ public final class VariantUtil {
     }
 
     public static Variant selectVariant(
-            FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant) {
+        @Nullable FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant) {
+        if(featureToggle == null) {
+            return defaultVariant;
+        }
         List<VariantDefinition> variants = featureToggle.getVariants();
         int totalWeight = variants.stream().mapToInt(VariantDefinition::getWeight).sum();
         if (totalWeight == 0) {

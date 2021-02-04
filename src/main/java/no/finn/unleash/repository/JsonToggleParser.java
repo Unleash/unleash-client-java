@@ -20,7 +20,7 @@ final class JsonToggleParser {
                                 ToggleCollection.class, new JsonToggleCollectionDeserializer())
                         .create();
         ToggleCollection gsonCollection = gson.fromJson(reader, ToggleCollection.class);
-        if (gsonCollection == null || gsonCollection.getFeatures() == null) {
+        if (gsonCollection == null) {
             throw new IllegalStateException("Could not extract toggles from json");
         }
         return new ToggleCollection(gsonCollection.getFeatures());

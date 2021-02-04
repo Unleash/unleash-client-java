@@ -6,6 +6,7 @@ import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashException;
 import no.finn.unleash.event.UnleashEvent;
 import no.finn.unleash.event.UnleashSubscriber;
+import no.finn.unleash.lang.Nullable;
 
 public final class FeatureToggleResponse implements UnleashEvent {
 
@@ -18,7 +19,7 @@ public final class FeatureToggleResponse implements UnleashEvent {
     private final Status status;
     private final int httpStatusCode;
     private final ToggleCollection toggleCollection;
-    private String location;
+    @Nullable private String location;
 
     public FeatureToggleResponse(Status status, ToggleCollection toggleCollection) {
         this.status = status;
@@ -33,7 +34,7 @@ public final class FeatureToggleResponse implements UnleashEvent {
         this.toggleCollection = new ToggleCollection(emptyList);
     }
 
-    public FeatureToggleResponse(Status status, int httpStatusCode, String location) {
+    public FeatureToggleResponse(Status status, int httpStatusCode, @Nullable String location) {
         this(status, httpStatusCode);
         this.location = location;
     }
@@ -50,7 +51,7 @@ public final class FeatureToggleResponse implements UnleashEvent {
         return httpStatusCode;
     }
 
-    public String getLocation() {
+    public @Nullable String getLocation() {
         return location;
     }
 

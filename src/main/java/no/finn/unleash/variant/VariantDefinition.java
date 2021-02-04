@@ -3,16 +3,17 @@ package no.finn.unleash.variant;
 import java.util.Collections;
 import java.util.List;
 import no.finn.unleash.Variant;
+import no.finn.unleash.lang.Nullable;
 
 public class VariantDefinition {
 
     private final String name;
     private final int weight;
-    private final Payload payload;
-    private final List<VariantOverride> overrides;
+    @Nullable private final Payload payload;
+    @Nullable private final List<VariantOverride> overrides;
 
     public VariantDefinition(
-            String name, int weight, Payload payload, List<VariantOverride> overrides) {
+        String name, int weight, @Nullable Payload payload, @Nullable List<VariantOverride> overrides) {
         this.name = name;
         this.weight = weight;
         this.payload = payload;
@@ -31,7 +32,7 @@ public class VariantDefinition {
         return weight;
     }
 
-    public Payload getPayload() {
+    public @Nullable Payload getPayload() {
         return payload;
     }
 

@@ -3,6 +3,8 @@ package no.finn.unleash;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.util.UnleashConfig;
 
 public class UnleashContext {
@@ -20,11 +22,11 @@ public class UnleashContext {
     }
 
     public UnleashContext(
-            String appName,
-            String environment,
-            String userId,
-            String sessionId,
-            String remoteAddress,
+            @Nullable String appName,
+            @Nullable String environment,
+            @Nullable String userId,
+            @Nullable String sessionId,
+            @Nullable String remoteAddress,
             Map<String, String> properties) {
         this.appName = Optional.ofNullable(appName);
         this.environment = Optional.ofNullable(environment);
@@ -91,11 +93,11 @@ public class UnleashContext {
     }
 
     public static class Builder {
-        private String appName;
-        private String environment;
-        private String userId;
-        private String sessionId;
-        private String remoteAddress;
+        @Nullable private String appName;
+        @Nullable private String environment;
+        @Nullable private String userId;
+        @Nullable private String sessionId;
+        @Nullable private String remoteAddress;
 
         private final Map<String, String> properties = new HashMap<>();
 

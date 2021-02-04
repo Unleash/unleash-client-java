@@ -10,6 +10,7 @@ import no.finn.unleash.DefaultCustomHttpHeadersProviderImpl;
 import no.finn.unleash.UnleashContextProvider;
 import no.finn.unleash.event.NoOpSubscriber;
 import no.finn.unleash.event.UnleashSubscriber;
+import no.finn.unleash.lang.Nullable;
 
 public class UnleashConfig {
 
@@ -25,7 +26,7 @@ public class UnleashConfig {
     private final String instanceId;
     private final String sdkVersion;
     private final String backupFile;
-    private final String projectName;
+    @Nullable private final String projectName;
     private final long fetchTogglesInterval;
     private final long sendMetricsInterval;
     private final boolean disableMetrics;
@@ -36,23 +37,23 @@ public class UnleashConfig {
     private final UnleashSubscriber unleashSubscriber;
 
     private UnleashConfig(
-            URI unleashAPI,
+            @Nullable URI unleashAPI,
             Map<String, String> customHttpHeaders,
             CustomHttpHeadersProvider customHttpHeadersProvider,
-            String appName,
+            @Nullable String appName,
             String environment,
-            String instanceId,
+            @Nullable String instanceId,
             String sdkVersion,
             String backupFile,
-            String projectName,
+            @Nullable String projectName,
             long fetchTogglesInterval,
             long sendMetricsInterval,
             boolean disableMetrics,
             UnleashContextProvider contextProvider,
             boolean isProxyAuthenticationByJvmProperties,
             boolean synchronousFetchOnInitialisation,
-            UnleashScheduledExecutor unleashScheduledExecutor,
-            UnleashSubscriber unleashSubscriber) {
+            @Nullable UnleashScheduledExecutor unleashScheduledExecutor,
+            @Nullable UnleashSubscriber unleashSubscriber) {
 
         if (appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -144,7 +145,7 @@ public class UnleashConfig {
         return sdkVersion;
     }
 
-    public String getProjectName() {
+    public @Nullable String getProjectName() {
         return projectName;
     }
 
@@ -191,7 +192,7 @@ public class UnleashConfig {
     static class ProxyAuthenticator extends Authenticator {
 
         @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
+        protected @Nullable PasswordAuthentication getPasswordAuthentication() {
             if (getRequestorType() == RequestorType.PROXY) {
                 final String proto = getRequestingProtocol().toLowerCase();
                 final String proxyHost = System.getProperty(proto + ".proxyHost", "");
@@ -212,24 +213,24 @@ public class UnleashConfig {
 
     public static class Builder {
 
-        private URI unleashAPI;
+        private @Nullable URI unleashAPI;
         private Map<String, String> customHttpHeaders = new HashMap<>();
         private CustomHttpHeadersProvider customHttpHeadersProvider =
                 new DefaultCustomHttpHeadersProviderImpl();
-        private String appName;
+        private @Nullable String appName;
         private String environment = "default";
         private String instanceId = getDefaultInstanceId();
         private String sdkVersion = getDefaultSdkVersion();
-        private String backupFile;
-        private String projectName;
+        private @Nullable String backupFile;
+        private @Nullable String projectName;
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
         private UnleashContextProvider contextProvider =
                 UnleashContextProvider.getDefaultProvider();
         private boolean synchronousFetchOnInitialisation = false;
-        private UnleashScheduledExecutor scheduledExecutor;
-        private UnleashSubscriber unleashSubscriber;
+        private @Nullable UnleashScheduledExecutor scheduledExecutor;
+        private @Nullable UnleashSubscriber unleashSubscriber;
         private boolean isProxyAuthenticationByJvmProperties;
 
         private static String getHostname() {

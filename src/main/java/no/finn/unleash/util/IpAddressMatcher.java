@@ -15,6 +15,8 @@
  */
 package no.finn.unleash.util;
 
+import no.finn.unleash.lang.Nullable;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -31,7 +33,7 @@ import java.util.regex.Pattern;
 public final class IpAddressMatcher {
     private static final Pattern SPLITTER = Pattern.compile("/");
     private final int nMaskBits;
-    private final InetAddress requiredAddress;
+    @Nullable private final InetAddress requiredAddress;
 
     /**
      * Takes a specific IP address or a range specified using the IP/Netmask (e.g. 192.168.1.0/24 or
@@ -39,7 +41,7 @@ public final class IpAddressMatcher {
      *
      * @param ipAddress the address or range of addresses from which the request must come.
      */
-    public IpAddressMatcher(String ipAddress) {
+    public IpAddressMatcher(@Nullable String ipAddress) {
         final String trimmedIpAddress = ipAddress == null ? "" : ipAddress.trim();
 
         if (trimmedIpAddress.indexOf('/') > 0) {
@@ -52,14 +54,14 @@ public final class IpAddressMatcher {
         }
     }
 
-    public boolean matches(String address) {
+    public boolean matches(@Nullable String address) {
         if (address == null || address.isEmpty() || requiredAddress == null) {
             return false;
         }
 
         InetAddress remoteAddress = parseAddress(address);
 
-        if (!requiredAddress.getClass().equals(remoteAddress.getClass())) {
+        if (remoteAddress == null || !requiredAddress.getClass().equals(remoteAddress.getClass())) {
             return false;
         }
 
@@ -91,7 +93,7 @@ public final class IpAddressMatcher {
         return true;
     }
 
-    private InetAddress parseAddress(String address) {
+    private @Nullable InetAddress parseAddress(@Nullable String address) {
         if (address == null || address.isEmpty()) {
             return null;
         }

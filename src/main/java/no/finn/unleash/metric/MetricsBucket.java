@@ -1,5 +1,7 @@
 package no.finn.unleash.metric;
 
+import no.finn.unleash.lang.Nullable;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
@@ -9,7 +11,7 @@ import java.util.concurrent.ConcurrentMap;
 class MetricsBucket {
     private final ConcurrentMap<String, ToggleCount> toggles;
     private final LocalDateTime start;
-    private volatile LocalDateTime stop;
+    @Nullable private volatile LocalDateTime stop;
 
     MetricsBucket() {
         this.start = LocalDateTime.now(ZoneId.of("UTC"));
@@ -40,7 +42,7 @@ class MetricsBucket {
         return start;
     }
 
-    public LocalDateTime getStop() {
+    public @Nullable LocalDateTime getStop() {
         return stop;
     }
 }
