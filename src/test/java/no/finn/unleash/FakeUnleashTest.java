@@ -92,6 +92,16 @@ public class FakeUnleashTest {
     }
 
     @Test
+    public void should_get_all_feature_names_via_more() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.enable("t1", "t2");
+        fakeUnleash.disable("t2");
+
+        List<String> expected = Arrays.asList(new String[] {"t1", "t2"});
+        assertThat(fakeUnleash.more().getFeatureToggleNames()).containsAll(expected);
+    }
+
+    @Test
     public void should_get_variant() {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.enable("t1", "t2");
@@ -101,11 +111,49 @@ public class FakeUnleashTest {
     }
 
     @Test
+    public void should_evaluate_all_toggle_without_context() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.enable("t1", "t2");
+        fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
+
+        List<EvaluatedToggle> toggles = fakeUnleash.more().evaluateAllToggles();
+        assertThat(toggles).hasSize(2);
+        EvaluatedToggle t1 = toggles.get(0);
+        assertThat(t1.getName()).isEqualTo("t1");
+        assertThat(t1.isEnabled()).isTrue();
+    }
+
+    @Test
+    public void should_evaluate_all_toggle_with_context() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.enable("t1", "t2");
+        fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
+
+        List<EvaluatedToggle> toggles = fakeUnleash.more().evaluateAllToggles(new UnleashContext.Builder().build());
+        assertThat(toggles).hasSize(2);
+        EvaluatedToggle t1 = toggles.get(0);
+        assertThat(t1.getName()).isEqualTo("t1");
+        assertThat(t1.isEnabled()).isTrue();
+    }
+
+    @Test
     public void should_get_disabled_variant_when_toggle_is_disabled() {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.disable("t1", "t2");
         fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
 
         assertThat(fakeUnleash.getVariant("t1").getName()).isEqualTo("disabled");
+    }
+
+    @Test
+    public void should_count_and_not_throw_an_error() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.more().count("anything", true);
+    }
+
+    @Test
+    public void should_countVariant_and_not_throw_an_error() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.more().countVariant("toggleName", "variantName");
     }
 }

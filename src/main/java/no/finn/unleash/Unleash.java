@@ -37,7 +37,14 @@ public interface Unleash {
 
     Variant getVariant(final String toggleName, final Variant defaultValue);
 
+    /**
+     * Use more().getFeatureToggleNames() instead
+     * @return a list of known toggle names
+     */
+    @Deprecated()
     List<String> getFeatureToggleNames();
 
     default void shutdown() {}
+
+    MoreOperations more();
 }

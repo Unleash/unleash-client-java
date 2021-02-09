@@ -32,4 +32,12 @@ public class Payload {
     public int hashCode() {
         return Objects.hash(type, value);
     }
+
+    @Override
+    public String toString() {
+        return "Payload{" +
+            "type='" + type + '\'' +
+            ", value='" + value + '\'' +
+            '}';
+    }
 }
