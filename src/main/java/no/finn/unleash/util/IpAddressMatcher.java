@@ -15,12 +15,11 @@
  */
 package no.finn.unleash.util;
 
-import no.finn.unleash.lang.Nullable;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
+import no.finn.unleash.lang.Nullable;
 
 /**
  * Matches a request based on IP Address or subnet mask matching against the remote address.

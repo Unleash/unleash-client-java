@@ -1,14 +1,13 @@
 package no.finn.unleash.variant;
 
-import no.finn.unleash.lang.Nullable;
-
 import java.util.Objects;
+import no.finn.unleash.lang.Nullable;
 
 public class Payload {
     private String type;
     @Nullable private String value;
 
-    public Payload(String type,@Nullable String value) {
+    public Payload(String type, @Nullable String value) {
         this.type = type;
         this.value = value;
     }

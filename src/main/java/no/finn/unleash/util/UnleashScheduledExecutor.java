@@ -1,10 +1,9 @@
 package no.finn.unleash.util;
 
-import no.finn.unleash.lang.Nullable;
-
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
+import no.finn.unleash.lang.Nullable;
 
 public interface UnleashScheduledExecutor {
     @Nullable

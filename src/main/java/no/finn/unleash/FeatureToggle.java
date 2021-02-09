@@ -4,7 +4,6 @@ import static java.util.Collections.emptyList;
 
 import java.util.Collections;
 import java.util.List;
-
 import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.variant.VariantDefinition;
 

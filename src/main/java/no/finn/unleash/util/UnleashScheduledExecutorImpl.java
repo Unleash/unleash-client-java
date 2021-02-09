@@ -1,7 +1,6 @@
 package no.finn.unleash.util;
 
 import java.util.concurrent.*;
-
 import no.finn.unleash.lang.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +9,7 @@ public class UnleashScheduledExecutorImpl implements UnleashScheduledExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnleashScheduledExecutorImpl.class);
 
-    @Nullable
-    private static UnleashScheduledExecutorImpl INSTANCE;
+    @Nullable private static UnleashScheduledExecutorImpl INSTANCE;
 
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
     private final ExecutorService executorService;
@@ -39,7 +37,8 @@ public class UnleashScheduledExecutorImpl implements UnleashScheduledExecutor {
     }
 
     @Override
-    public @Nullable ScheduledFuture setInterval(Runnable command, long initialDelaySec, long periodSec) {
+    public @Nullable ScheduledFuture setInterval(
+            Runnable command, long initialDelaySec, long periodSec) {
         try {
             return scheduledThreadPoolExecutor.scheduleAtFixedRate(
                     command, initialDelaySec, periodSec, TimeUnit.SECONDS);
