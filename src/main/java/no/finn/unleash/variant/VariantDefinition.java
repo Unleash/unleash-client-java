@@ -13,7 +13,10 @@ public class VariantDefinition {
     @Nullable private final List<VariantOverride> overrides;
 
     public VariantDefinition(
-        String name, int weight, @Nullable Payload payload, @Nullable List<VariantOverride> overrides) {
+            String name,
+            int weight,
+            @Nullable Payload payload,
+            @Nullable List<VariantOverride> overrides) {
         this.name = name;
         this.weight = weight;
         this.payload = payload;

@@ -62,8 +62,8 @@ public final class VariantUtil {
     }
 
     public static Variant selectVariant(
-        @Nullable FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant) {
-        if(featureToggle == null) {
+            @Nullable FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant) {
+        if (featureToggle == null) {
             return defaultVariant;
         }
         List<VariantDefinition> variants = featureToggle.getVariants();

@@ -1,6 +1,5 @@
 @NonNullApi
 @NonNullFields
-
 package no.finn.unleash.repository;
 
 import no.finn.unleash.lang.NonNullApi;

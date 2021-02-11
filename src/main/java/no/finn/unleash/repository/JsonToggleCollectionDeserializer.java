@@ -32,8 +32,7 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
         }
     }
 
-    static @Nullable
-    ToggleCollection deserializeVersion0(
+    static @Nullable ToggleCollection deserializeVersion0(
             JsonElement rootElement, JsonDeserializationContext context) {
         if (!rootElement.getAsJsonObject().has("features")) {
             return null;

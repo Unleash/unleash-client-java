@@ -3,7 +3,6 @@ package no.finn.unleash;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.util.UnleashConfig;
 

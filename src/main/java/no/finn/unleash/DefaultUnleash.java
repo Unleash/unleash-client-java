@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.ToggleEvaluated;
 import no.finn.unleash.lang.Nullable;
@@ -61,13 +63,29 @@ public final class DefaultUnleash implements Unleash {
             UnleashConfig unleashConfig,
             ToggleRepository toggleRepository,
             Strategy... strategies) {
+        this(unleashConfig,
+            toggleRepository,
+            buildStrategyMap(strategies),
+            unleashConfig.getContextProvider(),
+            new EventDispatcher(unleashConfig),
+            new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor())
+            );
+    }
+
+    // Visible for testing
+    public DefaultUnleash(
+        UnleashConfig unleashConfig,
+        ToggleRepository toggleRepository,
+        Map<String, Strategy> strategyMap,
+        UnleashContextProvider contextProvider,
+        EventDispatcher eventDispatcher,
+        UnleashMetricService metricService) {
         this.config = unleashConfig;
         this.toggleRepository = toggleRepository;
-        this.strategyMap = buildStrategyMap(strategies);
-        this.contextProvider = unleashConfig.getContextProvider();
-        this.eventDispatcher = new EventDispatcher(unleashConfig);
-        this.metricService =
-                new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor());
+        this.strategyMap = strategyMap;
+        this.contextProvider = contextProvider;
+        this.eventDispatcher = eventDispatcher;
+        this.metricService = metricService;
         metricService.register(strategyMap.keySet());
     }
 
@@ -170,15 +188,24 @@ public final class DefaultUnleash implements Unleash {
         return ofNullable(toggleRepository.getToggle(toggleName));
     }
 
+    /**
+     * Use more().getFeatureToggleNames() instead
+     * @return a list of known toggle names
+     */
+    @Deprecated()
     public List<String> getFeatureToggleNames() {
         return toggleRepository.getFeatureNames();
     }
 
+    /**
+     * Use more().count() instead
+     */
+    @Deprecated
     public void count(final String toggleName, boolean enabled) {
         metricService.count(toggleName, enabled);
     }
 
-    private Map<String, Strategy> buildStrategyMap(@Nullable Strategy[] strategies) {
+    private static Map<String, Strategy> buildStrategyMap(@Nullable Strategy[] strategies) {
         Map<String, Strategy> map = new HashMap<>();
 
         BUILTIN_STRATEGIES.forEach(strategy -> map.put(strategy.getName(), strategy));
@@ -199,5 +226,44 @@ public final class DefaultUnleash implements Unleash {
     @Override
     public void shutdown() {
         config.getScheduledExecutor().shutdown();
+    }
+
+    @Override
+    public MoreOperations more() { return new DefaultMore(); }
+
+    public class DefaultMore implements MoreOperations {
+
+        @Override
+        public List<String> getFeatureToggleNames() {
+            return toggleRepository.getFeatureNames();
+        }
+
+        @Override
+        public List<EvaluatedToggle> evaluateAllToggles() {
+            return evaluateAllToggles(contextProvider.getContext());
+        }
+
+        @Override
+        public List<EvaluatedToggle> evaluateAllToggles(UnleashContext context) {
+            return getFeatureToggleNames().stream().map(toggleName -> {
+                boolean enabled = checkEnabled(toggleName, context, (n,c) -> false);
+                FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
+                Variant variant = enabled ? selectVariant(featureToggle, context, DISABLED_VARIANT) : DISABLED_VARIANT;
+
+                return new EvaluatedToggle(toggleName, enabled, variant);
+            }).collect(Collectors.toList());
+        }
+
+        @Override
+        public void count(final String toggleName, boolean enabled) {
+            metricService.count(toggleName, enabled);
+        }
+
+        @Override
+        public void countVariant(final String toggleName, String variantName) {
+            metricService.countVariant(toggleName, variantName);
+        }
+
+
     }
 }

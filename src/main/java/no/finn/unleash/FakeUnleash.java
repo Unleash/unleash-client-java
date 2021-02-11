@@ -1,10 +1,13 @@
 package no.finn.unleash;
 
+import no.finn.unleash.lang.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
@@ -71,7 +74,12 @@ public final class FakeUnleash implements Unleash {
 
     @Override
     public List<String> getFeatureToggleNames() {
-        return new ArrayList<>(features.keySet());
+        return more().getFeatureToggleNames();
+    }
+
+    @Override
+    public MoreOperations more() {
+        return new FakeMore();
     }
 
     public void enableAll() {
@@ -114,4 +122,36 @@ public final class FakeUnleash implements Unleash {
     public void setVariant(String t1, Variant a) {
         variants.put(t1, a);
     }
+
+    public class FakeMore implements MoreOperations {
+
+        @Override
+        public List<String> getFeatureToggleNames() {
+            return new ArrayList<>(features.keySet());
+        }
+
+
+        @Override
+        public List<EvaluatedToggle> evaluateAllToggles() {
+            return evaluateAllToggles(null);
+        }
+
+        @Override
+        public List<EvaluatedToggle> evaluateAllToggles(@Nullable UnleashContext context) {
+            return getFeatureToggleNames().stream().map(toggleName -> {
+                return new EvaluatedToggle(toggleName, isEnabled(toggleName), getVariant(toggleName));
+            }).collect(Collectors.toList());
+        }
+
+        @Override
+        public void count(String toggleName, boolean enabled) {
+            //Nothing to count
+        }
+
+        @Override
+        public void countVariant(String toggleName, String variantName) {
+            //Nothing to count
+        }
+    }
+
 }
