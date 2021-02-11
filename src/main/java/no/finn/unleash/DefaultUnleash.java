@@ -23,8 +23,11 @@ import no.finn.unleash.repository.ToggleBackupHandlerFile;
 import no.finn.unleash.repository.ToggleRepository;
 import no.finn.unleash.strategy.*;
 import no.finn.unleash.util.UnleashConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class DefaultUnleash implements Unleash {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
     private static final List<Strategy> BUILTIN_STRATEGIES =
             Arrays.asList(
                     new DefaultStrategy(),
@@ -138,12 +141,20 @@ public final class DefaultUnleash implements Unleash {
             enabled =
                     featureToggle.getStrategies().stream()
                             .anyMatch(
-                                    as ->
-                                            getStrategy(as.getName())
-                                                    .isEnabled(
-                                                            as.getParameters(),
-                                                            enhancedContext,
-                                                            as.getConstraints()));
+                                    strategy -> {
+                                        Strategy configuredStrategy = getStrategy(strategy.getName());
+                                        if (configuredStrategy == UNKNOWN_STRATEGY) {
+                                            LOGGER.warn(
+                                                    "Unable to find matching strategy for toggle:{} strategy:{}",
+                                                    toggleName,
+                                                    strategy.getName());
+                                        }
+
+                                        return configuredStrategy.isEnabled(
+                                                strategy.getParameters(),
+                                                enhancedContext,
+                                                strategy.getConstraints());
+                                    });
         }
         return enabled;
     }
