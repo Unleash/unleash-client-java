@@ -1,10 +1,15 @@
 # Changelog
 
+## 4.1.0
+- feat: Add ability to disable metrics via UnleashContext (#125)
+- fix: Add logging for when a matching strategy is not found (#123)
+- fix: Add Nullable annotations where applicable
+
 ## 4.0.0
 - feat: Switched to slf4j-api logging
 - feat: add support for filtering on project (Enterprise only)
 - fix: BREAKING CHANGE UnleashConfig constructor is now private.
-  Use UnleashConfig.Builder to get instance of UnleashConfig
+- fix: Use UnleashConfig.Builder to get instance of UnleashConfig
 - feat: Add annotations to indicate null and nonnull method signatures, also supports Kotlin
 - feat: Added 'more' method to Unleash API to place advanced usecases like evaluating all toggles at once and manually incrementing usage counts
 - feat: Add warning when a matching strategy for a toggle can't be found
