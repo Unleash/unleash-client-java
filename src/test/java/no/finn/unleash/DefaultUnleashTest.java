@@ -1,5 +1,13 @@
 package no.finn.unleash;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.metric.UnleashMetricService;
 import no.finn.unleash.repository.ToggleRepository;
@@ -7,15 +15,6 @@ import no.finn.unleash.strategy.Strategy;
 import no.finn.unleash.util.UnleashConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class DefaultUnleashTest {
     private DefaultUnleash sut;
@@ -26,14 +25,22 @@ class DefaultUnleashTest {
 
     @BeforeEach
     public void setup() {
-        UnleashConfig unleashConfig = UnleashConfig.builder().unleashAPI("http://fakeAPI").appName("fakeApp").build();
+        UnleashConfig unleashConfig =
+                UnleashConfig.builder().unleashAPI("http://fakeAPI").appName("fakeApp").build();
         toggleRepository = mock(ToggleRepository.class);
         Map<String, Strategy> strategyMap = new HashMap<>();
         contextProvider = mock(UnleashContextProvider.class);
         eventDispatcher = mock(EventDispatcher.class);
         metricService = mock(UnleashMetricService.class);
 
-        sut = new DefaultUnleash(unleashConfig, toggleRepository, strategyMap, contextProvider, eventDispatcher, metricService);
+        sut =
+                new DefaultUnleash(
+                        unleashConfig,
+                        toggleRepository,
+                        strategyMap,
+                        contextProvider,
+                        eventDispatcher,
+                        metricService);
     }
 
     @Test

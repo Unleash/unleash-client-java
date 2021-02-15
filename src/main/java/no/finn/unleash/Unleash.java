@@ -39,6 +39,7 @@ public interface Unleash {
 
     /**
      * Use more().getFeatureToggleNames() instead
+     *
      * @return a list of known toggle names
      */
     @Deprecated()

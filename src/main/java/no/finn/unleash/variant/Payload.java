@@ -35,9 +35,6 @@ public class Payload {
 
     @Override
     public String toString() {
-        return "Payload{" +
-            "type='" + type + '\'' +
-            ", value='" + value + '\'' +
-            '}';
+        return "Payload{" + "type='" + type + '\'' + ", value='" + value + '\'' + '}';
     }
 }
