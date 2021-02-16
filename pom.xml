@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.finn.unleash</groupId>
     <artifactId>unleash-client-java</artifactId>
-    <version>4.0.2-SNAPSHOT</version>
+    <version>4.1.0</version>
 
     <properties>
         <version.slf4j>1.7.30</version.slf4j>
@@ -12,7 +11,7 @@
         <version.junit5>5.7.0</version.junit5>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.unleash.specification>3.3.0</version.unleash.specification>
-        <arguments/>
+        <arguments />
     </properties>
 
     <name>no.finn.unleash:unleash-client-java</name>
@@ -50,7 +49,7 @@
         <url>https://github.com/Unleash/unleash-client-java</url>
         <connection>scm:git:git@github.com:Unleash/unleash-client-java.git</connection>
         <developerConnection>scm:git:git@github.com:Unleash/unleash-client-java.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>unleash-client-java-4.1.0</tag>
     </scm>
 
     <dependencies>
@@ -298,8 +297,8 @@
                                 <include>*.md</include>
                                 <include>.gitignore</include>
                             </includes>
-                            <trimTrailingWhitespace/>
-                            <endWithNewline/>
+                            <trimTrailingWhitespace />
+                            <endWithNewline />
                             <indent>
                                 <spaces>true</spaces>
                                 <tabs>false</tabs>
@@ -308,7 +307,7 @@
                         </format>
                     </formats>
                     <java>
-                        <removeUnusedImports/>
+                        <removeUnusedImports />
                         <toggleOffOn />
                         <googleJavaFormat>
                             <style>AOSP</style>
