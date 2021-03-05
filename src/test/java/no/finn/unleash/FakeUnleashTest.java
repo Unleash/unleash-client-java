@@ -129,7 +129,8 @@ public class FakeUnleashTest {
         fakeUnleash.enable("t1", "t2");
         fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
 
-        List<EvaluatedToggle> toggles = fakeUnleash.more().evaluateAllToggles(new UnleashContext.Builder().build());
+        List<EvaluatedToggle> toggles =
+                fakeUnleash.more().evaluateAllToggles(new UnleashContext.Builder().build());
         assertThat(toggles).hasSize(2);
         EvaluatedToggle t1 = toggles.get(0);
         assertThat(t1.getName()).isEqualTo("t1");

@@ -1,13 +1,12 @@
 package no.finn.unleash;
 
-import no.finn.unleash.lang.Nullable;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import no.finn.unleash.lang.Nullable;
 
 public final class FakeUnleash implements Unleash {
     private boolean enableAll = false;
@@ -130,7 +129,6 @@ public final class FakeUnleash implements Unleash {
             return new ArrayList<>(features.keySet());
         }
 
-
         @Override
         public List<EvaluatedToggle> evaluateAllToggles() {
             return evaluateAllToggles(null);
@@ -138,20 +136,23 @@ public final class FakeUnleash implements Unleash {
 
         @Override
         public List<EvaluatedToggle> evaluateAllToggles(@Nullable UnleashContext context) {
-            return getFeatureToggleNames().stream().map(toggleName -> {
-                return new EvaluatedToggle(toggleName, isEnabled(toggleName), getVariant(toggleName));
-            }).collect(Collectors.toList());
+            return getFeatureToggleNames().stream()
+                    .map(
+                            toggleName -> {
+                                return new EvaluatedToggle(
+                                        toggleName, isEnabled(toggleName), getVariant(toggleName));
+                            })
+                    .collect(Collectors.toList());
         }
 
         @Override
         public void count(String toggleName, boolean enabled) {
-            //Nothing to count
+            // Nothing to count
         }
 
         @Override
         public void countVariant(String toggleName, String variantName) {
-            //Nothing to count
+            // Nothing to count
         }
     }
-
 }

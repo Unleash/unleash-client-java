@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.ToggleEvaluated;
 import no.finn.unleash.lang.Nullable;
@@ -63,23 +62,23 @@ public final class DefaultUnleash implements Unleash {
             UnleashConfig unleashConfig,
             ToggleRepository toggleRepository,
             Strategy... strategies) {
-        this(unleashConfig,
-            toggleRepository,
-            buildStrategyMap(strategies),
-            unleashConfig.getContextProvider(),
-            new EventDispatcher(unleashConfig),
-            new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor())
-            );
+        this(
+                unleashConfig,
+                toggleRepository,
+                buildStrategyMap(strategies),
+                unleashConfig.getContextProvider(),
+                new EventDispatcher(unleashConfig),
+                new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor()));
     }
 
     // Visible for testing
     public DefaultUnleash(
-        UnleashConfig unleashConfig,
-        ToggleRepository toggleRepository,
-        Map<String, Strategy> strategyMap,
-        UnleashContextProvider contextProvider,
-        EventDispatcher eventDispatcher,
-        UnleashMetricService metricService) {
+            UnleashConfig unleashConfig,
+            ToggleRepository toggleRepository,
+            Map<String, Strategy> strategyMap,
+            UnleashContextProvider contextProvider,
+            EventDispatcher eventDispatcher,
+            UnleashMetricService metricService) {
         this.config = unleashConfig;
         this.toggleRepository = toggleRepository;
         this.strategyMap = strategyMap;
@@ -142,7 +141,8 @@ public final class DefaultUnleash implements Unleash {
                     featureToggle.getStrategies().stream()
                             .anyMatch(
                                     strategy -> {
-                                        Strategy configuredStrategy = getStrategy(strategy.getName());
+                                        Strategy configuredStrategy =
+                                                getStrategy(strategy.getName());
                                         if (configuredStrategy == UNKNOWN_STRATEGY) {
                                             LOGGER.warn(
                                                     "Unable to find matching strategy for toggle:{} strategy:{}",
@@ -190,6 +190,7 @@ public final class DefaultUnleash implements Unleash {
 
     /**
      * Use more().getFeatureToggleNames() instead
+     *
      * @return a list of known toggle names
      */
     @Deprecated()
@@ -197,9 +198,7 @@ public final class DefaultUnleash implements Unleash {
         return toggleRepository.getFeatureNames();
     }
 
-    /**
-     * Use more().count() instead
-     */
+    /** Use more().count() instead */
     @Deprecated
     public void count(final String toggleName, boolean enabled) {
         metricService.count(toggleName, enabled);
@@ -229,7 +228,9 @@ public final class DefaultUnleash implements Unleash {
     }
 
     @Override
-    public MoreOperations more() { return new DefaultMore(); }
+    public MoreOperations more() {
+        return new DefaultMore();
+    }
 
     public class DefaultMore implements MoreOperations {
 
@@ -245,13 +246,22 @@ public final class DefaultUnleash implements Unleash {
 
         @Override
         public List<EvaluatedToggle> evaluateAllToggles(UnleashContext context) {
-            return getFeatureToggleNames().stream().map(toggleName -> {
-                boolean enabled = checkEnabled(toggleName, context, (n,c) -> false);
-                FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
-                Variant variant = enabled ? selectVariant(featureToggle, context, DISABLED_VARIANT) : DISABLED_VARIANT;
+            return getFeatureToggleNames().stream()
+                    .map(
+                            toggleName -> {
+                                boolean enabled =
+                                        checkEnabled(toggleName, context, (n, c) -> false);
+                                FeatureToggle featureToggle =
+                                        toggleRepository.getToggle(toggleName);
+                                Variant variant =
+                                        enabled
+                                                ? selectVariant(
+                                                        featureToggle, context, DISABLED_VARIANT)
+                                                : DISABLED_VARIANT;
 
-                return new EvaluatedToggle(toggleName, enabled, variant);
-            }).collect(Collectors.toList());
+                                return new EvaluatedToggle(toggleName, enabled, variant);
+                            })
+                    .collect(Collectors.toList());
         }
 
         @Override
@@ -263,7 +273,5 @@ public final class DefaultUnleash implements Unleash {
         public void countVariant(final String toggleName, String variantName) {
             metricService.countVariant(toggleName, variantName);
         }
-
-
     }
 }
