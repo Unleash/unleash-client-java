@@ -5,12 +5,10 @@ import static no.finn.unleash.strategy.GradualRolloutUserIdStrategy.GROUP_ID;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import no.finn.unleash.UnleashContext;
 import no.finn.unleash.lang.Nullable;
 
 public class GradualContextMatchingStrategy implements Strategy {
-    protected static final String PERCENTAGE = "percentage";
 
     @Override
     public String getName() {
@@ -24,51 +22,55 @@ public class GradualContextMatchingStrategy implements Strategy {
 
     @Override
     public boolean isEnabled(Map<String, String> parameters, UnleashContext unleashContext) {
-        String percentageParam = parameters.getOrDefault(PERCENTAGE, parameters.get("rollout"));
+        String groupId = parameters.getOrDefault(GROUP_ID, "");
 
         Map<String, String> combinedProperties = new HashMap<>(unleashContext.getProperties());
         unleashContext.getUserId().ifPresent(id -> combinedProperties.put("userId", id));
         unleashContext.getAppName().ifPresent(id -> combinedProperties.put("appName", id));
         unleashContext.getEnvironment().ifPresent(id -> combinedProperties.put("environment", id));
 
-        String combinedMatchingParameters =
-                parameters.entrySet().stream()
-                        .map(
-                                entry -> {
-                                    // Ignore percentage/groupId since those control gradual rollout
-                                    if (entry.getKey().equals(PERCENTAGE)
-                                            || entry.getKey().equals("rollout")
-                                            || entry.getKey().equals(GROUP_ID)) {
-                                        return "";
-                                    }
-                                    return parameterEnabledValue(
-                                            parameters, entry.getKey(), entry.getValue());
-                                })
-                        .collect(Collectors.joining());
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            if (entry.getKey().equals(GROUP_ID)) {
+                // Skip parameters that aren't intended for filtering
+                continue;
+            }
 
-        if (combinedMatchingParameters.isEmpty()) {
+            if (entry.getKey().endsWith("::percentage")) {
+                if (!percentageAllowed(
+                        entry.getKey(), entry.getValue(), groupId, combinedProperties)) {
+                    return false;
+                }
+            } else if (!contextMatchesParameter(
+                    entry.getValue(), combinedProperties.get(entry.getKey()))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean percentageAllowed(
+            String keyWithSuffix,
+            String value,
+            String groupId,
+            Map<String, String> combinedProperties) {
+        String key = keyWithSuffix.replaceFirst("::percentage", "");
+        String contextValue = combinedProperties.get(key);
+        if (contextValue == null) {
             return false;
-        } else if (percentageParam == null) {
-            return true;
         }
 
-        final int percentage = StrategyUtils.getPercentage(percentageParam);
-        String groupId = parameters.getOrDefault(GROUP_ID, "");
+        final int percentage = StrategyUtils.getPercentage(value);
 
-        final int normalizedParameters =
-                StrategyUtils.getNormalizedNumber(combinedMatchingParameters, groupId);
+        final int normalizedParameters = StrategyUtils.getNormalizedNumber(contextValue, groupId);
 
         return percentage > 0 && normalizedParameters <= percentage;
     }
 
-    private String parameterEnabledValue(
-            Map<String, String> parameters, String key, @Nullable String contextValue) {
-        String parameterValue = parameters.getOrDefault(key, parameters.get(key + "s"));
-        if (parameterValue != null
-                && contextValue != null
-                && asList(parameterValue.split(",")).contains(contextValue)) {
-            return contextValue;
+    private boolean contextMatchesParameter(
+            @Nullable String parameterValue, @Nullable String contextValue) {
+        if (parameterValue != null && contextValue != null) {
+            return asList(parameterValue.split(",")).contains(contextValue);
         }
-        return "";
+        return false;
     }
 }

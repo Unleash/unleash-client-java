@@ -5,10 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
 import no.finn.unleash.UnleashContext;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,35 +26,35 @@ class GradualContextMatchingStrategyTest {
 
     Random rand = new Random(SEED);
     List<Integer> percentages;
-    private String testUserId = "1574576830";
+    private final String testUserId = "1574576830";
 
     @BeforeEach
     public void init() {
         percentages =
-                ImmutableList.<Integer>builder()
-                        .add(1)
-                        .add(2)
-                        .add(5)
-                        .add(10)
-                        .add(25)
-                        .add(50)
-                        .add(90)
-                        .add(99)
-                        .add(100)
-                        .build();
+            ImmutableList.<Integer>builder()
+                .add(1)
+                .add(2)
+                .add(5)
+                .add(10)
+                .add(25)
+                .add(50)
+                .add(90)
+                .add(99)
+                .add(100)
+                .build();
     }
 
     @Test
     public void should_have_a_name() {
         GradualContextMatchingStrategy gradualRolloutStrategy =
-                new GradualContextMatchingStrategy();
+            new GradualContextMatchingStrategy();
         assertThat(gradualRolloutStrategy.getName()).isEqualTo("gradualContextMatching");
     }
 
     @Test
     public void should_require_context() {
         GradualContextMatchingStrategy gradualRolloutStrategy =
-                new GradualContextMatchingStrategy();
+            new GradualContextMatchingStrategy();
         assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>())).isFalse();
     }
 
@@ -59,16 +62,45 @@ class GradualContextMatchingStrategyTest {
     public void should_be_disabled_when_missing_user_id() {
         UnleashContext context = UnleashContext.builder().build();
         GradualContextMatchingStrategy gradualRolloutStrategy =
-                new GradualContextMatchingStrategy();
+            new GradualContextMatchingStrategy();
 
-        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>(), context)).isFalse();
+        assertThat(gradualRolloutStrategy.isEnabled(
+            ImmutableMap.of("userId::percentage", "100"), context))
+            .isFalse();
     }
+
+    @Test
+    public void should_be_disabled_when_all_parameters_dont_match_context() {
+        UnleashContext context = UnleashContext.builder()
+            .addProperty("role","admin")
+            .addProperty("preferredLang","no").build();
+        GradualContextMatchingStrategy gradualRolloutStrategy = new GradualContextMatchingStrategy();
+
+        assertThat(gradualRolloutStrategy.isEnabled(
+            ImmutableMap.of("role", "admin,superadmin",
+                "preferredLang", "ru,en,es"), context))
+            .isFalse();
+    }
+
+    @Test
+    public void should_be_enabled_when_all_parameters_match_context() {
+        UnleashContext context = UnleashContext.builder()
+            .addProperty("role","admin")
+            .addProperty("preferredLang","en").build();
+        GradualContextMatchingStrategy gradualRolloutStrategy = new GradualContextMatchingStrategy();
+
+        assertThat(gradualRolloutStrategy.isEnabled(
+            ImmutableMap.of("role", "admin",
+                "preferredLang", "ru,en,es"), context))
+            .isTrue();
+    }
+
 
     @Test
     public void should_have_same_result_for_multiple_executions() {
         UnleashContext context = UnleashContext.builder().userId(testUserId).build();
         GradualContextMatchingStrategy gradualRolloutStrategy =
-                new GradualContextMatchingStrategy();
+            new GradualContextMatchingStrategy();
 
         Map<String, String> params = buildParams(1, "innfinn");
         boolean firstRunResult = gradualRolloutStrategy.isEnabled(params, context);
@@ -83,7 +115,7 @@ class GradualContextMatchingStrategyTest {
     public void should_be_enabled_when_using_100percent_rollout() {
         UnleashContext context = UnleashContext.builder().userId(testUserId).build();
         GradualContextMatchingStrategy gradualRolloutStrategy =
-                new GradualContextMatchingStrategy();
+            new GradualContextMatchingStrategy();
 
         Map<String, String> params = buildParams(100, "innfinn");
         boolean result = gradualRolloutStrategy.isEnabled(params, context);
@@ -95,7 +127,7 @@ class GradualContextMatchingStrategyTest {
     public void should_not_be_enabled_when_0percent_rollout() {
         UnleashContext context = UnleashContext.builder().userId(testUserId).build();
         GradualContextMatchingStrategy gradualRolloutStrategy =
-                new GradualContextMatchingStrategy();
+            new GradualContextMatchingStrategy();
 
         Map<String, String> params = buildParams(0, "innfinn");
         boolean actual = gradualRolloutStrategy.isEnabled(params, context);
@@ -110,7 +142,7 @@ class GradualContextMatchingStrategyTest {
         UnleashContext context = UnleashContext.builder().userId(testUserId).build();
 
         GradualContextMatchingStrategy gradualRolloutStrategy =
-                new GradualContextMatchingStrategy();
+            new GradualContextMatchingStrategy();
 
         for (int p = minimumPercentage; p <= 100; p++) {
             Map<String, String> params = buildParams(p, groupId);
@@ -129,10 +161,10 @@ class GradualContextMatchingStrategyTest {
         Map<String, String> params = buildParams(percentage, groupId);
 
         GradualContextMatchingStrategy gradualRolloutStrategy =
-                new GradualContextMatchingStrategy();
+            new GradualContextMatchingStrategy();
 
-        for (int user = 0; user < rounds; user++) {
-            UnleashContext context = UnleashContext.builder().userId(testUserId).build();
+        for (int userId = 0; userId < rounds; userId++) {
+            UnleashContext context = UnleashContext.builder().userId("user" + userId).build();
 
             if (gradualRolloutStrategy.isEnabled(params, context)) {
                 enabledCount++;
@@ -153,15 +185,15 @@ class GradualContextMatchingStrategyTest {
             int numberOfEnabledUsers = checkRandomLoginIDs(numberOfIDs, percentage);
             double p = ((double) numberOfEnabledUsers / (double) numberOfIDs) * 100.0;
             System.out.println(
-                    "Testing "
-                            + percentage
-                            + "% --> "
-                            + numberOfEnabledUsers
-                            + " of "
-                            + numberOfIDs
-                            + " got new feature ("
-                            + p
-                            + "%)");
+                "Testing "
+                    + percentage
+                    + "% --> "
+                    + numberOfEnabledUsers
+                    + " of "
+                    + numberOfIDs
+                    + " got new feature ("
+                    + p
+                    + "%)");
         }
     }
 
@@ -172,7 +204,7 @@ class GradualContextMatchingStrategyTest {
             UnleashContext context = UnleashContext.builder().userId(userId.toString()).build();
 
             GradualContextMatchingStrategy gradualRolloutStrategy =
-                    new GradualContextMatchingStrategy();
+                new GradualContextMatchingStrategy();
 
             Map<String, String> params = buildParams(percentage, "");
             boolean enabled = gradualRolloutStrategy.isEnabled(params, context);
@@ -185,9 +217,8 @@ class GradualContextMatchingStrategyTest {
 
     private Map<String, String> buildParams(int percentage, String groupId) {
         Map<String, String> params = new HashMap<>();
-        params.put(GradualContextMatchingStrategy.PERCENTAGE, String.valueOf(percentage));
+        params.put("userId::percentage", String.valueOf(percentage));
         params.put(GROUP_ID, groupId);
-        params.put("userId", testUserId);
 
         return params;
     }
