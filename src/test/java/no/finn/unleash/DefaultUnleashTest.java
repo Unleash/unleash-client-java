@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,5 +70,34 @@ class DefaultUnleashTest {
         sut.more().countVariant("toggle1", "variant1");
 
         verify(metricService).countVariant("toggle1", "variant1");
+    }
+
+    @Test
+    public void should_allow_fallback_strategy() {
+        Strategy fallback = mock(Strategy.class);
+
+        UnleashConfig unleashConfigWithFallback =
+                UnleashConfig.builder()
+                        .unleashAPI("http://fakeAPI")
+                        .appName("fakeApp")
+                        .fallbackStrategy(fallback)
+                        .build();
+        sut =
+                new DefaultUnleash(
+                        unleashConfigWithFallback,
+                        toggleRepository,
+                        new HashMap<>(),
+                        contextProvider,
+                        eventDispatcher,
+                        metricService);
+
+        ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
+        FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
+        when(toggleRepository.getToggle("toggle1")).thenReturn(toggle);
+        when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
+
+        sut.isEnabled("toggle1");
+
+        verify(fallback).isEnabled(any(), any(), any());
     }
 }
