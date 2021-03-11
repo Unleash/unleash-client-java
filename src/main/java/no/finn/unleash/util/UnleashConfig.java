@@ -13,6 +13,8 @@ import no.finn.unleash.event.UnleashSubscriber;
 import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.strategy.Strategy;
 
+import static no.finn.unleash.DefaultUnleash.UNKNOWN_STRATEGY;
+
 public class UnleashConfig {
 
     static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
@@ -57,7 +59,6 @@ public class UnleashConfig {
             @Nullable UnleashScheduledExecutor unleashScheduledExecutor,
             @Nullable UnleashSubscriber unleashSubscriber,
             @Nullable Strategy fallbackStrategy) {
-        this.fallbackStrategy = fallbackStrategy;
 
         if (appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -77,6 +78,12 @@ public class UnleashConfig {
 
         if (unleashSubscriber == null) {
             throw new IllegalStateException("You are required to specify a subscriber");
+        }
+
+        if ( fallbackStrategy == null) {
+            this.fallbackStrategy = UNKNOWN_STRATEGY;
+        } else {
+            this.fallbackStrategy = fallbackStrategy;
         }
 
         if (isProxyAuthenticationByJvmProperties) {
