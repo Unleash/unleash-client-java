@@ -50,7 +50,7 @@ public class FlexibleRolloutStrategy implements Strategy {
         final String stickiness = getStickiness(parameters);
         final Optional<String> stickinessId = resolveStickiness(stickiness, unleashContext);
         final int percentage = StrategyUtils.getPercentage(parameters.get(PERCENTAGE));
-        final String groupId = Optional.ofNullable(parameters.get(GROUP_ID)).orElse("");
+        final String groupId = parameters.getOrDefault(GROUP_ID, "");
 
         if (stickinessId.isPresent()) {
             final int normalizedUserId =
@@ -62,7 +62,6 @@ public class FlexibleRolloutStrategy implements Strategy {
     }
 
     private String getStickiness(Map<String, String> parameters) {
-        Optional<String> stickiness = Optional.ofNullable(parameters.get("stickiness"));
-        return stickiness.orElse("default");
+        return parameters.getOrDefault("stickiness", "default");
     }
 }
