@@ -29,4 +29,6 @@ public interface UnleashSubscriber {
     default void togglesBackedUp(ToggleCollection toggleCollection) {}
 
     default void toggleBackupRestored(ToggleCollection toggleCollection) {}
+
+    default void togglesBootstrapped(ToggleCollection toggleCollection) {}
 }

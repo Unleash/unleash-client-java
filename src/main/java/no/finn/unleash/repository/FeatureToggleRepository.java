@@ -11,6 +11,7 @@ import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 
 public final class FeatureToggleRepository implements ToggleRepository {
+    private final ToggleBootstrapHandler toggleBootstrapHandler;
     private final ToggleBackupHandler toggleBackupHandler;
     private final ToggleFetcher toggleFetcher;
     private final EventDispatcher eventDispatcher;
@@ -26,7 +27,8 @@ public final class FeatureToggleRepository implements ToggleRepository {
                 unleashConfig,
                 unleashConfig.getScheduledExecutor(),
                 toggleFetcher,
-                toggleBackupHandler);
+                toggleBackupHandler,
+                new ToggleBootstrapHandlerFile(unleashConfig));
     }
 
     @Deprecated
@@ -35,12 +37,30 @@ public final class FeatureToggleRepository implements ToggleRepository {
             UnleashScheduledExecutor executor,
             ToggleFetcher toggleFetcher,
             ToggleBackupHandler toggleBackupHandler) {
+        this(
+                unleashConfig,
+                executor,
+                toggleFetcher,
+                toggleBackupHandler,
+                new ToggleBootstrapHandlerFile(unleashConfig));
+    }
 
+    public FeatureToggleRepository(
+            UnleashConfig unleashConfig,
+            UnleashScheduledExecutor executor,
+            ToggleFetcher toggleFetcher,
+            ToggleBackupHandler toggleBackupHandler,
+            ToggleBootstrapHandler toggleBootstrapHandler) {
+
+        this.toggleBootstrapHandler = toggleBootstrapHandler;
         this.toggleBackupHandler = toggleBackupHandler;
         this.toggleFetcher = toggleFetcher;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
 
         toggleCollection = toggleBackupHandler.read();
+        if (toggleCollection.getFeatures().isEmpty()) {
+            toggleCollection = toggleBootstrapHandler.readAndValidate();
+        }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
             updateToggles().run();

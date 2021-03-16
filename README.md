@@ -221,6 +221,14 @@ based on the values stored in `unleash-repo.json`. As a result of this, the seco
 * When `unleash-repo.json` does not exists
 * When the named feature toggle does not exist in `unleash-repo.json`
 
+## Bootstrapping
+Unleash supports bootstrapping from a local file where Unleash does not have write access.
+Useful for applications deployed to ephemeral containers (docker) or more locked down file systems where Unleash's need to write back to the backup file is not desired.
+Configure using
+* `UNLEASH_BOOTSTRAP_FILE` - path to file in toggle json format as defined by the Unleash servers `/api/client/features` endpoint
+* `UNLEASH_BOOTSRAP_FILE_CHECKSUM`
+   - If you want to make sure that unleash loads the file you send in, pass in the `sha256` checksum of the file you want Unleash to load
+   - If this is set and the file checksum and the passed in checksum does not match Unleash will refuse to load the backup file
 
 ## Unit testing
 You might want to control the state of the toggles during unit-testing.
