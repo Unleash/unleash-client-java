@@ -2,6 +2,7 @@ package no.finn.unleash.strategy;
 
 import java.util.Map;
 import java.util.Optional;
+
 import no.finn.unleash.UnleashContext;
 
 /**
@@ -40,7 +41,7 @@ public final class GradualRolloutUserIdStrategy implements Strategy {
         }
 
         final int percentage = StrategyUtils.getPercentage(parameters.get(PERCENTAGE));
-        final String groupId = Optional.ofNullable(parameters.get(GROUP_ID)).orElse("");
+        final String groupId = parameters.getOrDefault(GROUP_ID, "");
 
         final int normalizedUserId = StrategyUtils.getNormalizedNumber(userId.get(), groupId);
 
