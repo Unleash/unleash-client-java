@@ -11,6 +11,9 @@ import no.finn.unleash.UnleashContextProvider;
 import no.finn.unleash.event.NoOpSubscriber;
 import no.finn.unleash.event.UnleashSubscriber;
 import no.finn.unleash.lang.Nullable;
+import no.finn.unleash.strategy.Strategy;
+
+import static no.finn.unleash.DefaultUnleash.UNKNOWN_STRATEGY;
 
 public class UnleashConfig {
 
@@ -35,6 +38,7 @@ public class UnleashConfig {
     private final boolean synchronousFetchOnInitialisation;
     private final UnleashScheduledExecutor unleashScheduledExecutor;
     private final UnleashSubscriber unleashSubscriber;
+    @Nullable private final Strategy fallbackStrategy;
 
     private UnleashConfig(
             @Nullable URI unleashAPI,
@@ -53,7 +57,8 @@ public class UnleashConfig {
             boolean isProxyAuthenticationByJvmProperties,
             boolean synchronousFetchOnInitialisation,
             @Nullable UnleashScheduledExecutor unleashScheduledExecutor,
-            @Nullable UnleashSubscriber unleashSubscriber) {
+            @Nullable UnleashSubscriber unleashSubscriber,
+            @Nullable Strategy fallbackStrategy) {
 
         if (appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -73,6 +78,12 @@ public class UnleashConfig {
 
         if (unleashSubscriber == null) {
             throw new IllegalStateException("You are required to specify a subscriber");
+        }
+
+        if ( fallbackStrategy == null) {
+            this.fallbackStrategy = UNKNOWN_STRATEGY;
+        } else {
+            this.fallbackStrategy = fallbackStrategy;
         }
 
         if (isProxyAuthenticationByJvmProperties) {
@@ -189,6 +200,11 @@ public class UnleashConfig {
         return isProxyAuthenticationByJvmProperties;
     }
 
+    @Nullable
+    public Strategy getFallbackStrategy() {
+        return fallbackStrategy;
+    }
+
     static class ProxyAuthenticator extends Authenticator {
 
         @Override
@@ -232,6 +248,7 @@ public class UnleashConfig {
         private @Nullable UnleashScheduledExecutor scheduledExecutor;
         private @Nullable UnleashSubscriber unleashSubscriber;
         private boolean isProxyAuthenticationByJvmProperties;
+        private Strategy fallbackStrategy;
 
         private static String getHostname() {
             String hostName = System.getProperty("hostname");
@@ -333,6 +350,11 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder fallbackStrategy(@Nullable Strategy fallbackStrategy) {
+            this.fallbackStrategy = fallbackStrategy;
+            return this;
+        }
+
         private String getBackupFile() {
             if (backupFile != null) {
                 return backupFile;
@@ -361,7 +383,8 @@ public class UnleashConfig {
                     synchronousFetchOnInitialisation,
                     Optional.ofNullable(scheduledExecutor)
                             .orElseGet(UnleashScheduledExecutorImpl::getInstance),
-                    Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new));
+                    Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new),
+                    fallbackStrategy);
         }
 
         public String getDefaultSdkVersion() {

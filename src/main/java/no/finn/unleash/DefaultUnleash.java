@@ -38,7 +38,7 @@ public final class DefaultUnleash implements Unleash {
                     new UserWithIdStrategy(),
                     new FlexibleRolloutStrategy());
 
-    private static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
+    public static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
     private final UnleashMetricService metricService;
     private final ToggleRepository toggleRepository;
@@ -219,7 +219,7 @@ public final class DefaultUnleash implements Unleash {
     }
 
     private Strategy getStrategy(String strategy) {
-        return strategyMap.containsKey(strategy) ? strategyMap.get(strategy) : UNKNOWN_STRATEGY;
+        return strategyMap.getOrDefault(strategy, config.getFallbackStrategy());
     }
 
     @Override
