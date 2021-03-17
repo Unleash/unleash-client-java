@@ -1,7 +1,6 @@
 package no.finn.unleash.repository;
 
 import com.google.gson.JsonParseException;
-
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -11,7 +10,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Optional;
-
 import no.finn.unleash.UnleashException;
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.UnleashEvent;
@@ -22,10 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
-    @Nullable
-    private final String path;
-    @Nullable
-    private final String checksum;
+    @Nullable private final String path;
+    @Nullable private final String checksum;
     private final EventDispatcher eventDispatcher;
 
     public ToggleBootstrapHandlerFile(UnleashConfig config) {
@@ -37,7 +33,7 @@ public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
     @Nullable
     private String getEnvOrProperty(String envName) {
         return Optional.ofNullable(System.getenv(envName))
-            .orElseGet(() -> System.getProperty(envName));
+                .orElseGet(() -> System.getProperty(envName));
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ToggleBootstrapHandlerFile.class);
@@ -56,9 +52,10 @@ public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
                         if (validate(this.checksum, shaSum)) {
                             return parseFile(file);
                         } else {
-                            LOG.info("Expected checksum: {} - Found checksum: {}. Cowardly refusing to instantiate from bootstrap file due to checksum mismatch",
-                                this.checksum,
-                                shaSum.orElse("notcalculated"));
+                            LOG.info(
+                                    "Expected checksum: {} - Found checksum: {}. Cowardly refusing to instantiate from bootstrap file due to checksum mismatch",
+                                    this.checksum,
+                                    shaSum.orElse("notcalculated"));
                         }
 
                     } else {
@@ -68,7 +65,6 @@ public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
                     LOG.info("Couldn't find SHA-256 for digesting. Reading file anyway");
                     return parseFile(file);
                 }
-
             }
         }
         return new ToggleCollection(Collections.emptyList());
@@ -79,9 +75,9 @@ public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
         if (path.startsWith("classpath:")) {
             try {
                 URL resource =
-                    getClass()
-                        .getClassLoader()
-                        .getResource(path.substring("classpath:".length()));
+                        getClass()
+                                .getClassLoader()
+                                .getResource(path.substring("classpath:".length()));
                 if (resource != null) {
                     return Paths.get(resource.toURI()).toFile();
                 }
@@ -102,12 +98,12 @@ public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
             return toggleCollection;
         } catch (FileNotFoundException fnf) {
             LOG.info(
-                "Unleash could not find the bootstrap file '{}'. Mare sure the file exists at the passed in path",
-                togglesFile.getAbsolutePath());
+                    "Unleash could not find the bootstrap file '{}'. Mare sure the file exists at the passed in path",
+                    togglesFile.getAbsolutePath());
         } catch (IOException | IllegalStateException | JsonParseException e) {
             eventDispatcher.dispatch(
-                new UnleashException(
-                    "Failed to read boostrap file: " + togglesFile.getAbsolutePath(), e));
+                    new UnleashException(
+                            "Failed to read boostrap file: " + togglesFile.getAbsolutePath(), e));
         }
         return new ToggleCollection(Collections.emptyList());
     }
@@ -121,8 +117,7 @@ public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
         MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
         try (InputStream is = new FileInputStream(path)) {
             DigestInputStream dis = new DigestInputStream(is, sha256);
-            while (dis.read() != -1)
-                ; // Clear data
+            while (dis.read() != -1) ; // Clear data
             sha256 = dis.getMessageDigest();
         } catch (IOException ioEx) {
             LOG.warn("Could not read file");

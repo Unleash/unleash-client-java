@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
-
 import no.finn.unleash.util.UnleashConfig;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +24,7 @@ class ToggleBootstrapHandlerFileTest {
                 new File(getClass().getClassLoader().getResource("unleash-repo-v0.json").getFile());
         try {
             assertThat(bootstrap.sha256sum(exampleRepoFile)).hasValue(expectedHash);
-        } catch(NoSuchAlgorithmException nsa) {
+        } catch (NoSuchAlgorithmException nsa) {
 
         }
     }
