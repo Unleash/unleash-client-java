@@ -57,8 +57,8 @@ public final class FeatureToggleRepository implements ToggleRepository {
         this.toggleFetcher = toggleFetcher;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
 
-        toggleCollection = toggleBackupHandler.read();
-        if (toggleCollection.getFeatures().isEmpty()) {
+        this.toggleCollection = toggleBackupHandler.read();
+        if (toggleCollection != null && toggleCollection.getFeatures().isEmpty()) {
             toggleCollection = toggleBootstrapHandler.readAndValidate();
         }
 

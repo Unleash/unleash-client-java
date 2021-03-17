@@ -1,5 +1,7 @@
 package no.finn.unleash.util;
 
+import static no.finn.unleash.DefaultUnleash.UNKNOWN_STRATEGY;
+
 import java.io.File;
 import java.net.*;
 import java.util.HashMap;
@@ -12,8 +14,6 @@ import no.finn.unleash.event.NoOpSubscriber;
 import no.finn.unleash.event.UnleashSubscriber;
 import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.strategy.Strategy;
-
-import static no.finn.unleash.DefaultUnleash.UNKNOWN_STRATEGY;
 
 public class UnleashConfig {
 
@@ -80,7 +80,7 @@ public class UnleashConfig {
             throw new IllegalStateException("You are required to specify a subscriber");
         }
 
-        if ( fallbackStrategy == null) {
+        if (fallbackStrategy == null) {
             this.fallbackStrategy = UNKNOWN_STRATEGY;
         } else {
             this.fallbackStrategy = fallbackStrategy;

@@ -1,14 +1,17 @@
 package no.finn.unleash.repository;
 
 import com.google.gson.JsonParseException;
+
 import java.io.*;
-import java.nio.file.Files;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Optional;
+
 import no.finn.unleash.UnleashException;
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.UnleashEvent;
@@ -19,12 +22,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
-    @Nullable private final String file;
-    @Nullable private final String checksum;
+    @Nullable
+    private final String path;
+    @Nullable
+    private final String checksum;
     private final EventDispatcher eventDispatcher;
 
     public ToggleBootstrapHandlerFile(UnleashConfig config) {
-        this.file = getEnvOrProperty("UNLEASH_BOOTSTRAP_FILE");
+        this.path = getEnvOrProperty("UNLEASH_BOOTSTRAP_FILE");
         this.checksum = getEnvOrProperty("UNLEASH_BOOTSTRAP_FILE_CHECKSUM");
         this.eventDispatcher = new EventDispatcher(config);
     }
@@ -32,33 +37,61 @@ public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
     @Nullable
     private String getEnvOrProperty(String envName) {
         return Optional.ofNullable(System.getenv(envName))
-                .orElseGet(() -> System.getProperty(envName));
+            .orElseGet(() -> System.getProperty(envName));
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ToggleBootstrapHandlerFile.class);
 
     @Override
     public ToggleCollection readAndValidate() {
-        if (file != null && Files.exists(Paths.get(file))) {
-            LOG.info("Unleash will instantiate Toggles from {}", file);
-            File togglesFile = Paths.get(file).toFile();
-            Optional<String> shaSum = sha256sum(togglesFile);
-            shaSum.ifPresent(s -> LOG.info("{} summed to {}", file, s));
-            if (this.checksum != null) {
-                if (validate(this.checksum, shaSum)) {
-                    return parseFile(togglesFile);
-                } else {
-                    LOG.info(
-                            "Expected checksum: {} - Found checksum: {}",
-                            this.checksum,
-                            shaSum.orElse("notcalculated"));
-                    LOG.warn("Cowardly refusing to read bootstrap file due to checksum mismatch");
+        if (path != null) {
+            File file = getFile(path);
+
+            if (file != null && file.exists() && file.canRead()) {
+                LOG.info("Unleash will instantiate Toggles from {}", path);
+                try {
+                    Optional<String> shaSum = sha256sum(file);
+                    shaSum.ifPresent(s -> LOG.info("{} summed to {}", path, s));
+                    if (this.checksum != null) {
+                        if (validate(this.checksum, shaSum)) {
+                            return parseFile(file);
+                        } else {
+                            LOG.info("Expected checksum: {} - Found checksum: {}. Cowardly refusing to instantiate from bootstrap file due to checksum mismatch",
+                                this.checksum,
+                                shaSum.orElse("notcalculated"));
+                        }
+
+                    } else {
+                        return parseFile(file);
+                    }
+                } catch (NoSuchAlgorithmException nsa) {
+                    LOG.info("Couldn't find SHA-256 for digesting. Reading file anyway");
+                    return parseFile(file);
                 }
-            } else {
-                return parseFile(togglesFile);
+
             }
         }
         return new ToggleCollection(Collections.emptyList());
+    }
+
+    @Nullable
+    private File getFile(String path) {
+        if (path.startsWith("classpath:")) {
+            try {
+                URL resource =
+                    getClass()
+                        .getClassLoader()
+                        .getResource(path.substring("classpath:".length()));
+                if (resource != null) {
+                    return Paths.get(resource.toURI()).toFile();
+                }
+                return null;
+            } catch (URISyntaxException e) {
+                return null;
+            }
+        } else {
+            return Paths.get(path).toFile();
+        }
     }
 
     private ToggleCollection parseFile(File togglesFile) {
@@ -69,12 +102,12 @@ public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
             return toggleCollection;
         } catch (FileNotFoundException fnf) {
             LOG.info(
-                    "Unleash could not find the bootstrap file '{}'. Mare sure the file exists at the passed in path",
-                    togglesFile.getAbsolutePath());
+                "Unleash could not find the bootstrap file '{}'. Mare sure the file exists at the passed in path",
+                togglesFile.getAbsolutePath());
         } catch (IOException | IllegalStateException | JsonParseException e) {
             eventDispatcher.dispatch(
-                    new UnleashException(
-                            "Failed to read boostrap file: " + togglesFile.getAbsolutePath(), e));
+                new UnleashException(
+                    "Failed to read boostrap file: " + togglesFile.getAbsolutePath(), e));
         }
         return new ToggleCollection(Collections.emptyList());
     }
@@ -84,23 +117,18 @@ public class ToggleBootstrapHandlerFile implements ToggleBootstrapHandler {
         return calculatedSha.map(expectedSha::equals).orElse(false);
     }
 
-    Optional<String> sha256sum(File file) {
-        try {
-            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            try (InputStream is = new FileInputStream(file)) {
-                DigestInputStream dis = new DigestInputStream(is, sha256);
-                while (dis.read() != -1)
-                    ; // Clear data
-                sha256 = dis.getMessageDigest();
-            } catch (IOException ioEx) {
-                LOG.warn("Could not read file");
-                return Optional.empty();
-            }
-            return Optional.of(shaSumToHex(sha256.digest()));
-        } catch (NoSuchAlgorithmException e) {
-            LOG.warn("Could not load algorithm sha256", e);
+    Optional<String> sha256sum(File path) throws NoSuchAlgorithmException {
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        try (InputStream is = new FileInputStream(path)) {
+            DigestInputStream dis = new DigestInputStream(is, sha256);
+            while (dis.read() != -1)
+                ; // Clear data
+            sha256 = dis.getMessageDigest();
+        } catch (IOException ioEx) {
+            LOG.warn("Could not read file");
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of(shaSumToHex(sha256.digest()));
     }
 
     private String shaSumToHex(byte[] digest) {

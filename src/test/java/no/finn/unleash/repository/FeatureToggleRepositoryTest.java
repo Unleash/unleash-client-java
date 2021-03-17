@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
@@ -174,5 +175,63 @@ public class FeatureToggleRepositoryTest {
         List<FeatureToggle> list = new ArrayList();
         list.addAll(Arrays.asList(featureToggles));
         return new ToggleCollection(list);
+    }
+
+    @Test
+    public void should_read_from_bootstrap_location_if_backup_was_empty() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(false)
+                        .appName("test-sync-update")
+                        .unleashAPI("http://localhost:8080")
+                        .build();
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
+        ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+        ToggleBootstrapHandler toggleBootstrapHandler = mock(ToggleBootstrapHandler.class);
+        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
+        FeatureToggleRepository repo =
+                new FeatureToggleRepository(
+                        config,
+                        executor,
+                        toggleFetcher,
+                        toggleBackupHandler,
+                        toggleBootstrapHandler);
+        verify(toggleBootstrapHandler, times(1)).readAndValidate();
+    }
+
+    @Test
+    public void should_not_read_bootstrap_if_backup_was_found() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(false)
+                        .appName("test-sync-update")
+                        .unleashAPI("http://localhost:8080")
+                        .build();
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
+        ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+        ToggleBootstrapHandler toggleBootstrapHandler = mock(ToggleBootstrapHandler.class);
+        when(toggleBackupHandler.read())
+                .thenReturn(
+                        populatedToggleCollection(
+                                new FeatureToggle(
+                                        "toggleFeatureName1",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null))),
+                                new FeatureToggle(
+                                        "toggleFeatureName2",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null)))));
+        FeatureToggleRepository repo =
+                new FeatureToggleRepository(
+                        config,
+                        executor,
+                        toggleFetcher,
+                        toggleBackupHandler,
+                        toggleBootstrapHandler);
+        verify(toggleBootstrapHandler, times(0)).readAndValidate();
     }
 }
