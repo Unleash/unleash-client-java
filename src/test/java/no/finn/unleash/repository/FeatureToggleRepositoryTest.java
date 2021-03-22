@@ -1,10 +1,15 @@
 package no.finn.unleash.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -178,40 +183,45 @@ public class FeatureToggleRepositoryTest {
     }
 
     @Test
-    public void should_read_from_bootstrap_location_if_backup_was_empty() {
+    public void should_read_from_bootstrap_location_if_backup_was_empty()
+            throws URISyntaxException, IOException {
+        File file =
+                new File(getClass().getClassLoader().getResource("unleash-repo-v1.json").toURI());
+        ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
+        when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
         UnleashConfig config =
                 UnleashConfig.builder()
                         .synchronousFetchOnInitialisation(false)
                         .appName("test-sync-update")
                         .unleashAPI("http://localhost:8080")
+                        .toggleBootstrapProvider(toggleBootstrapProvider)
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
-        ToggleBootstrapHandler toggleBootstrapHandler = mock(ToggleBootstrapHandler.class);
         when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
         FeatureToggleRepository repo =
-                new FeatureToggleRepository(
-                        config,
-                        executor,
-                        toggleFetcher,
-                        toggleBackupHandler,
-                        toggleBootstrapHandler);
-        verify(toggleBootstrapHandler, times(1)).readAndValidate();
+                new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        assertThat(repo.getFeatureNames()).hasSize(3);
     }
 
     @Test
-    public void should_not_read_bootstrap_if_backup_was_found() {
+    public void should_not_read_bootstrap_if_backup_was_found()
+            throws IOException, URISyntaxException {
+        File file =
+                new File(getClass().getClassLoader().getResource("unleash-repo-v1.json").toURI());
+        ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
+        when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
         UnleashConfig config =
                 UnleashConfig.builder()
                         .synchronousFetchOnInitialisation(false)
                         .appName("test-sync-update")
                         .unleashAPI("http://localhost:8080")
+                        .toggleBootstrapProvider(toggleBootstrapProvider)
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
-        ToggleBootstrapHandler toggleBootstrapHandler = mock(ToggleBootstrapHandler.class);
         when(toggleBackupHandler.read())
                 .thenReturn(
                         populatedToggleCollection(
@@ -226,12 +236,11 @@ public class FeatureToggleRepositoryTest {
                                         Collections.singletonList(
                                                 new ActivationStrategy("custom", null)))));
         FeatureToggleRepository repo =
-                new FeatureToggleRepository(
-                        config,
-                        executor,
-                        toggleFetcher,
-                        toggleBackupHandler,
-                        toggleBootstrapHandler);
-        verify(toggleBootstrapHandler, times(0)).readAndValidate();
+                new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        verify(toggleBootstrapProvider, times(0)).read();
+    }
+
+    private String fileToString(File f) throws IOException {
+        return new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
     }
 }

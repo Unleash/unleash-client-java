@@ -11,7 +11,6 @@ import no.finn.unleash.util.UnleashConfig;
 import no.finn.unleash.util.UnleashScheduledExecutor;
 
 public final class FeatureToggleRepository implements ToggleRepository {
-    private final ToggleBootstrapHandler toggleBootstrapHandler;
     private final ToggleBackupHandler toggleBackupHandler;
     private final ToggleFetcher toggleFetcher;
     private final EventDispatcher eventDispatcher;
@@ -27,39 +26,26 @@ public final class FeatureToggleRepository implements ToggleRepository {
                 unleashConfig,
                 unleashConfig.getScheduledExecutor(),
                 toggleFetcher,
-                toggleBackupHandler,
-                new ToggleBootstrapHandlerFile(unleashConfig));
+                toggleBackupHandler);
     }
 
-    @Deprecated
     public FeatureToggleRepository(
             UnleashConfig unleashConfig,
             UnleashScheduledExecutor executor,
             ToggleFetcher toggleFetcher,
             ToggleBackupHandler toggleBackupHandler) {
-        this(
-                unleashConfig,
-                executor,
-                toggleFetcher,
-                toggleBackupHandler,
-                new ToggleBootstrapHandlerFile(unleashConfig));
-    }
 
-    public FeatureToggleRepository(
-            UnleashConfig unleashConfig,
-            UnleashScheduledExecutor executor,
-            ToggleFetcher toggleFetcher,
-            ToggleBackupHandler toggleBackupHandler,
-            ToggleBootstrapHandler toggleBootstrapHandler) {
-
-        this.toggleBootstrapHandler = toggleBootstrapHandler;
         this.toggleBackupHandler = toggleBackupHandler;
         this.toggleFetcher = toggleFetcher;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
 
         this.toggleCollection = toggleBackupHandler.read();
         if (toggleCollection != null && toggleCollection.getFeatures().isEmpty()) {
-            toggleCollection = toggleBootstrapHandler.readAndValidate();
+            if (unleashConfig.getToggleBootstrapProvider() != null) {
+                toggleCollection =
+                        new ToggleBootstrapHandler(unleashConfig)
+                                .parse(unleashConfig.getToggleBootstrapProvider().read());
+            }
         }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
