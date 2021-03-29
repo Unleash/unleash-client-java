@@ -1,8 +1,8 @@
 # Changelog
 
 ## 4.2.0
-- feat: Add ability to bootstrap features from files via UNLEASH_BOOTSTRAP_FILE
-- feat: Add ability to provide bootstrap via custom ToggleBootstrapProvider
+- feat: Add ability to bootstrap features from files via UNLEASH_BOOTSTRAP_FILE (#129)
+- feat: Add ability to provide bootstrap via custom ToggleBootstrapProvider (#129)
 
 ## 4.1.0
 - feat: Add ability to disable metrics via UnleashContext (#125)
