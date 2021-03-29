@@ -40,7 +40,7 @@ public class UnleashConfig {
     private final UnleashScheduledExecutor unleashScheduledExecutor;
     private final UnleashSubscriber unleashSubscriber;
     @Nullable private final Strategy fallbackStrategy;
-    private final ToggleBootstrapProvider toggleBootstrapProvider;
+    @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
 
     private UnleashConfig(
             @Nullable URI unleashAPI,
@@ -209,6 +209,7 @@ public class UnleashConfig {
         return fallbackStrategy;
     }
 
+    @Nullable
     public ToggleBootstrapProvider getToggleBootstrapProvider() {
         return toggleBootstrapProvider;
     }
@@ -257,7 +258,7 @@ public class UnleashConfig {
         private @Nullable UnleashSubscriber unleashSubscriber;
         private boolean isProxyAuthenticationByJvmProperties;
         private Strategy fallbackStrategy;
-        private ToggleBootstrapProvider toggleBootstrapProvider;
+        private @Nullable ToggleBootstrapProvider toggleBootstrapProvider;
 
         private static String getHostname() {
             String hostName = System.getProperty("hostname");

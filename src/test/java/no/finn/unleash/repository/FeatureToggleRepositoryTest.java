@@ -112,6 +112,8 @@ public class FeatureToggleRepositoryTest {
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
 
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
+
         ToggleCollection toggleCollection =
                 populatedToggleCollection(
                         new FeatureToggle(
@@ -141,6 +143,7 @@ public class FeatureToggleRepositoryTest {
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
 
         // setup fetcher
         ToggleCollection toggleCollection = populatedToggleCollection();
@@ -164,6 +167,7 @@ public class FeatureToggleRepositoryTest {
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
 
         // setup fetcher
         ToggleCollection toggleCollection = populatedToggleCollection();

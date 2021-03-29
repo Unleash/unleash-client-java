@@ -12,6 +12,7 @@ import no.finn.unleash.util.UnleashScheduledExecutor;
 
 public final class FeatureToggleRepository implements ToggleRepository {
     private final ToggleBackupHandler toggleBackupHandler;
+    private final ToggleBootstrapHandler toggleBootstrapHandler;
     private final ToggleFetcher toggleFetcher;
     private final EventDispatcher eventDispatcher;
 
@@ -38,14 +39,10 @@ public final class FeatureToggleRepository implements ToggleRepository {
         this.toggleBackupHandler = toggleBackupHandler;
         this.toggleFetcher = toggleFetcher;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-
+        this.toggleBootstrapHandler = new ToggleBootstrapHandler(unleashConfig);
         this.toggleCollection = toggleBackupHandler.read();
-        if (toggleCollection != null && toggleCollection.getFeatures().isEmpty()) {
-            if (unleashConfig.getToggleBootstrapProvider() != null) {
-                toggleCollection =
-                        new ToggleBootstrapHandler(unleashConfig)
-                                .parse(unleashConfig.getToggleBootstrapProvider().read());
-            }
+        if (this.toggleCollection.getFeatures().isEmpty()) {
+            this.toggleCollection = toggleBootstrapHandler.read();
         }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {

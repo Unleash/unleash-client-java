@@ -6,12 +6,15 @@ import no.finn.unleash.UnleashException;
 import no.finn.unleash.event.EventDispatcher;
 import no.finn.unleash.event.UnleashEvent;
 import no.finn.unleash.event.UnleashSubscriber;
+import no.finn.unleash.lang.Nullable;
 import no.finn.unleash.util.UnleashConfig;
 
 public class ToggleBootstrapHandler {
     private final EventDispatcher eventDispatcher;
+    @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
 
     public ToggleBootstrapHandler(UnleashConfig unleashConfig) {
+        this.toggleBootstrapProvider = unleashConfig.getToggleBootstrapProvider();
         this.eventDispatcher = new EventDispatcher(unleashConfig);
     }
 
@@ -22,6 +25,13 @@ public class ToggleBootstrapHandler {
             return toggleCollection;
         } catch (IllegalStateException ise) {
             eventDispatcher.dispatch(new UnleashException("Failed to read toggle bootstrap", ise));
+        }
+        return new ToggleCollection(Collections.emptyList());
+    }
+
+    public ToggleCollection read() {
+        if (toggleBootstrapProvider != null) {
+            return parse(toggleBootstrapProvider.read());
         }
         return new ToggleCollection(Collections.emptyList());
     }
