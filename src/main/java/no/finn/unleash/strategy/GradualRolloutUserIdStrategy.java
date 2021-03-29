@@ -2,7 +2,6 @@ package no.finn.unleash.strategy;
 
 import java.util.Map;
 import java.util.Optional;
-
 import no.finn.unleash.UnleashContext;
 
 /**

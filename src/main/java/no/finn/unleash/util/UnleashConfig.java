@@ -1,5 +1,7 @@
 package no.finn.unleash.util;
 
+import static no.finn.unleash.DefaultUnleash.UNKNOWN_STRATEGY;
+
 import java.io.File;
 import java.net.*;
 import java.util.HashMap;
@@ -11,9 +13,8 @@ import no.finn.unleash.UnleashContextProvider;
 import no.finn.unleash.event.NoOpSubscriber;
 import no.finn.unleash.event.UnleashSubscriber;
 import no.finn.unleash.lang.Nullable;
+import no.finn.unleash.repository.ToggleBootstrapProvider;
 import no.finn.unleash.strategy.Strategy;
-
-import static no.finn.unleash.DefaultUnleash.UNKNOWN_STRATEGY;
 
 public class UnleashConfig {
 
@@ -39,6 +40,7 @@ public class UnleashConfig {
     private final UnleashScheduledExecutor unleashScheduledExecutor;
     private final UnleashSubscriber unleashSubscriber;
     @Nullable private final Strategy fallbackStrategy;
+    @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
 
     private UnleashConfig(
             @Nullable URI unleashAPI,
@@ -58,7 +60,8 @@ public class UnleashConfig {
             boolean synchronousFetchOnInitialisation,
             @Nullable UnleashScheduledExecutor unleashScheduledExecutor,
             @Nullable UnleashSubscriber unleashSubscriber,
-            @Nullable Strategy fallbackStrategy) {
+            @Nullable Strategy fallbackStrategy,
+            @Nullable ToggleBootstrapProvider unleashBootstrapProvider) {
 
         if (appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -80,7 +83,7 @@ public class UnleashConfig {
             throw new IllegalStateException("You are required to specify a subscriber");
         }
 
-        if ( fallbackStrategy == null) {
+        if (fallbackStrategy == null) {
             this.fallbackStrategy = UNKNOWN_STRATEGY;
         } else {
             this.fallbackStrategy = fallbackStrategy;
@@ -108,6 +111,7 @@ public class UnleashConfig {
         this.synchronousFetchOnInitialisation = synchronousFetchOnInitialisation;
         this.unleashScheduledExecutor = unleashScheduledExecutor;
         this.unleashSubscriber = unleashSubscriber;
+        this.toggleBootstrapProvider = unleashBootstrapProvider;
     }
 
     public static Builder builder() {
@@ -205,6 +209,11 @@ public class UnleashConfig {
         return fallbackStrategy;
     }
 
+    @Nullable
+    public ToggleBootstrapProvider getToggleBootstrapProvider() {
+        return toggleBootstrapProvider;
+    }
+
     static class ProxyAuthenticator extends Authenticator {
 
         @Override
@@ -249,6 +258,7 @@ public class UnleashConfig {
         private @Nullable UnleashSubscriber unleashSubscriber;
         private boolean isProxyAuthenticationByJvmProperties;
         private Strategy fallbackStrategy;
+        private @Nullable ToggleBootstrapProvider toggleBootstrapProvider;
 
         private static String getHostname() {
             String hostName = System.getProperty("hostname");
@@ -355,6 +365,12 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder toggleBootstrapProvider(
+                @Nullable ToggleBootstrapProvider toggleBootstrapProvider) {
+            this.toggleBootstrapProvider = toggleBootstrapProvider;
+            return this;
+        }
+
         private String getBackupFile() {
             if (backupFile != null) {
                 return backupFile;
@@ -384,7 +400,8 @@ public class UnleashConfig {
                     Optional.ofNullable(scheduledExecutor)
                             .orElseGet(UnleashScheduledExecutorImpl::getInstance),
                     Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new),
-                    fallbackStrategy);
+                    fallbackStrategy,
+                    toggleBootstrapProvider);
         }
 
         public String getDefaultSdkVersion() {

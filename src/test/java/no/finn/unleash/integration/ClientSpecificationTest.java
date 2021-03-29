@@ -142,6 +142,7 @@ public class ClientSpecificationTest {
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
                                         .withBody(definition.getState().toString())));
+        stubFor(post(urlEqualTo("/api/client/register")).willReturn(aResponse().withStatus(200)));
     }
 
     private TestDefinition getTestDefinition(String fileName) throws IOException {
