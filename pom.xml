@@ -8,7 +8,7 @@
     <properties>
         <version.slf4j>1.7.30</version.slf4j>
         <version.log4j2>2.13.3</version.log4j2>
-        <version.junit5>5.7.0</version.junit5>
+        <version.junit5>5.7.1</version.junit5>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.unleash.specification>3.3.0</version.unleash.specification>
         <arguments />

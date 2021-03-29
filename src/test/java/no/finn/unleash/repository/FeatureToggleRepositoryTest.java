@@ -48,6 +48,7 @@ public class FeatureToggleRepositoryTest {
                         .build();
 
         ToggleBackupHandler toggleBackupHandler = mock(ToggleBackupHandler.class);
+        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
