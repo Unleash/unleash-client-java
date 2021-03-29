@@ -21,15 +21,14 @@ class ToggleBootstrapFileProviderTest {
         File exampleRepoFile =
                 new File(getClass().getClassLoader().getResource("unleash-repo-v0.json").getFile());
         System.setProperty("UNLEASH_BOOTSTRAP_FILE", exampleRepoFile.getAbsolutePath());
-        ToggleBootstrapFileProvider toggleBootstrapFileProvider =
-                new ToggleBootstrapFileProvider(null);
+        ToggleBootstrapFileProvider toggleBootstrapFileProvider = new ToggleBootstrapFileProvider();
         assertThat(toggleBootstrapFileProvider.read()).isNotEmpty();
     }
 
     @Test
     public void shouldBeAbleToLoadfileFromClasspathReference() {
         System.setProperty("UNLEASH_BOOTSTRAP_FILE", "classpath:unleash-repo-v0.json");
-        ToggleBootstrapFileProvider bootstrap = new ToggleBootstrapFileProvider(null);
+        ToggleBootstrapFileProvider bootstrap = new ToggleBootstrapFileProvider();
 
         String read = bootstrap.read();
         assertThat(read).isNotBlank();

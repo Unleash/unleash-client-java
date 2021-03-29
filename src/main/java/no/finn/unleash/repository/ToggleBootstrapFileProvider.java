@@ -8,7 +8,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Optional;
 import no.finn.unleash.lang.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +16,17 @@ public class ToggleBootstrapFileProvider implements ToggleBootstrapProvider {
     private static final Logger LOG = LoggerFactory.getLogger(ToggleBootstrapFileProvider.class);
     final String path;
 
+    public ToggleBootstrapFileProvider() {
+        this.path = getBootstrapFile();
+    }
     /**
      * Accepts path to file to read either as constructor parameter or as environment variable in
      * "UNLEASH_BOOTSTRAP_FILE"
      *
      * @param path - path to toggles file
      */
-    public ToggleBootstrapFileProvider(@Nullable String path) {
-        this.path =
-                Optional.ofNullable(path)
-                        .orElseGet(() -> getEnvOrProperty("UNLEASH_BOOTSTRAP_FILE"));
+    public ToggleBootstrapFileProvider(String path) {
+        this.path = path;
     }
 
     @Override
@@ -35,7 +35,9 @@ public class ToggleBootstrapFileProvider implements ToggleBootstrapProvider {
         LOG.info("Trying to read feature toggles from bootstrap file found at {}", path);
         try {
             File file = getFile(path);
-            return fileAsString(file);
+            if (file != null) {
+                return fileAsString(file);
+            }
         } catch (FileNotFoundException ioEx) {
             LOG.warn("Could not find file {}", path, ioEx);
         } catch (IOException ioEx) {
@@ -45,9 +47,12 @@ public class ToggleBootstrapFileProvider implements ToggleBootstrapProvider {
     }
 
     @Nullable
-    private String getEnvOrProperty(String envName) {
-        return Optional.ofNullable(System.getenv(envName))
-                .orElseGet(() -> System.getProperty(envName));
+    private String getBootstrapFile() {
+        String path = System.getenv("UNLEASH_BOOTSTRAP_FILE");
+        if (path == null) {
+            path = System.getProperty("UNLEASH_BOOTSTRAP_FILE");
+        }
+        return path;
     }
 
     private String fileAsString(File file) throws IOException {
@@ -55,22 +60,26 @@ public class ToggleBootstrapFileProvider implements ToggleBootstrapProvider {
     }
 
     @Nullable
-    private File getFile(String path) {
-        if (path.startsWith("classpath:")) {
-            try {
-                URL resource =
-                        getClass()
-                                .getClassLoader()
-                                .getResource(path.substring("classpath:".length()));
-                if (resource != null) {
-                    return Paths.get(resource.toURI()).toFile();
+    private File getFile(@Nullable String path) {
+        if (path != null) {
+            if (path.startsWith("classpath:")) {
+                try {
+                    URL resource =
+                            getClass()
+                                    .getClassLoader()
+                                    .getResource(path.substring("classpath:".length()));
+                    if (resource != null) {
+                        return Paths.get(resource.toURI()).toFile();
+                    }
+                    return null;
+                } catch (URISyntaxException e) {
+                    return null;
                 }
-                return null;
-            } catch (URISyntaxException e) {
-                return null;
+            } else {
+                return Paths.get(path).toFile();
             }
         } else {
-            return Paths.get(path).toFile();
+            return null;
         }
     }
 }

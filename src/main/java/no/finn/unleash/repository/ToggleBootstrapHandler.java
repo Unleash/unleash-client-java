@@ -11,20 +11,27 @@ import no.finn.unleash.util.UnleashConfig;
 
 public class ToggleBootstrapHandler {
     private final EventDispatcher eventDispatcher;
-    @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
+    private final ToggleBootstrapProvider toggleBootstrapProvider;
 
     public ToggleBootstrapHandler(UnleashConfig unleashConfig) {
-        this.toggleBootstrapProvider = unleashConfig.getToggleBootstrapProvider();
+        if (unleashConfig.getToggleBootstrapProvider() != null) {
+            this.toggleBootstrapProvider = unleashConfig.getToggleBootstrapProvider();
+        } else {
+            this.toggleBootstrapProvider = new ToggleBootstrapFileProvider();
+        }
         this.eventDispatcher = new EventDispatcher(unleashConfig);
     }
 
-    public ToggleCollection parse(String jsonString) {
-        try (StringReader stringReader = new StringReader(jsonString)) {
-            ToggleCollection toggleCollection = JsonToggleParser.fromJson(stringReader);
-            eventDispatcher.dispatch(new ToggleBootstrapRead(toggleCollection));
-            return toggleCollection;
-        } catch (IllegalStateException ise) {
-            eventDispatcher.dispatch(new UnleashException("Failed to read toggle bootstrap", ise));
+    public ToggleCollection parse(@Nullable String jsonString) {
+        if (jsonString != null) {
+            try (StringReader stringReader = new StringReader(jsonString)) {
+                ToggleCollection toggleCollection = JsonToggleParser.fromJson(stringReader);
+                eventDispatcher.dispatch(new ToggleBootstrapRead(toggleCollection));
+                return toggleCollection;
+            } catch (IllegalStateException ise) {
+                eventDispatcher.dispatch(
+                        new UnleashException("Failed to read toggle bootstrap", ise));
+            }
         }
         return new ToggleCollection(Collections.emptyList());
     }

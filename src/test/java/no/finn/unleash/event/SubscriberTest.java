@@ -63,7 +63,8 @@ public class SubscriberTest {
 
         assertThat(testSubscriber.events)
                 .hasSize(
-                        3 // feature evaluations
+                        1 // Bootstrapping
+                                + 3 // feature evaluations
                                 + 2 // toggle fetches
                                 + 1 // unleash ready
                                 + 1 // client registration

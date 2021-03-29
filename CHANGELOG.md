@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2.1
+- fix: Make sure empty bootstrap path does not crash app
+- feat: Default to trying UNLEASH_BOOTSTRAP_FILE environment variable for finding bootstrap
+
 ## 4.2.0
 - feat: Add ability to bootstrap features from files via UNLEASH_BOOTSTRAP_FILE (#129)
 - feat: Add ability to provide bootstrap via custom ToggleBootstrapProvider (#129)
