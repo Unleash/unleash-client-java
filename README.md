@@ -47,7 +47,7 @@ if(unleash.isEnabled("AwesomeFeature")) {
 }
 ```
 
-Calling `unleash.isEnabled("AwesomeFeature")` is the equvivalent of calling `unleash.isEnabled("AwesomeFeature", false)`.
+Calling `unleash.isEnabled("AwesomeFeature")` is the equivalent of calling `unleash.isEnabled("AwesomeFeature", false)`.
 Which means that it will return `false` if it cannot find the named toggle.
 
 If you want it to default to `true` instead, you can pass `true` as the second argument:
