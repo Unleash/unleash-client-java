@@ -43,7 +43,7 @@ public class ToggleBootstrapHandler {
         return new ToggleCollection(Collections.emptyList());
     }
 
-    private static class ToggleBootstrapRead implements UnleashEvent {
+    public static class ToggleBootstrapRead implements UnleashEvent {
         private final ToggleCollection toggleCollection;
 
         private ToggleBootstrapRead(ToggleCollection toggleCollection) {
