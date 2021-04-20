@@ -27,9 +27,7 @@ public class UnleashURLs {
 
     public URL getFetchTogglesURL(String projectName) {
         try {
-            return URI.create(fetchTogglesURL.toString() + "?project=" + projectName)
-                    .normalize()
-                    .toURL();
+            return URI.create(fetchTogglesURL + "?project=" + projectName).normalize().toURL();
         } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Project name [" + projectName + "] was not URL friendly.", e);
@@ -42,5 +40,14 @@ public class UnleashURLs {
 
     public URL getClientRegisterURL() {
         return clientRegisterURL;
+    }
+
+    public URL getFetchTogglesURLWithNamePrefix(String namePrefix) {
+        try {
+            return URI.create(fetchTogglesURL + "?namePrefix=" + namePrefix).normalize().toURL();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "namePrefix [" + namePrefix + "] was not URL friendly.", e);
+        }
     }
 }
