@@ -164,7 +164,7 @@ public final class DefaultUnleash implements Unleash {
         if (config.getNamePrefix() != null) {
             if (!toggleName.startsWith(config.getNamePrefix())) {
                 LOGGER.warn(
-                        "Toggle [{}] doesnt start with configured name prefix of {} so it will always be disabled",
+                        "Toggle [{}] doesnt start with configured name prefix of [{}] so it will always be disabled",
                         toggleName,
                         config.getNamePrefix());
             }
