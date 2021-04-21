@@ -43,7 +43,7 @@ public class UnleashURLs {
 
         try {
             return URI.create(fetchTogglesURL + suffix.toString()).normalize().toURL();
-        } catch (MalformedURLException e) {
+        } catch (IllegalArgumentException|MalformedURLException e) {
             throw new IllegalArgumentException("fetchTogglesURL [" + fetchTogglesURL + suffix + "] was not URL friendly.", e);
         }
     }
