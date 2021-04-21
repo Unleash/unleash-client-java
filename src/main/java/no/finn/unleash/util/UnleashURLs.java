@@ -1,7 +1,10 @@
 package no.finn.unleash.util;
 
+import no.finn.unleash.lang.Nullable;
+
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class UnleashURLs {
@@ -25,15 +28,6 @@ public class UnleashURLs {
         return fetchTogglesURL;
     }
 
-    public URL getFetchTogglesURL(String projectName) {
-        try {
-            return URI.create(fetchTogglesURL + "?project=" + projectName).normalize().toURL();
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "Project name [" + projectName + "] was not URL friendly.", e);
-        }
-    }
-
     public URL getClientMetricsURL() {
         return clientMetricsURL;
     }
@@ -42,12 +36,27 @@ public class UnleashURLs {
         return clientRegisterURL;
     }
 
-    public URL getFetchTogglesURLWithNamePrefix(String namePrefix) {
+    public URL getFetchTogglesURL(@Nullable String projectName, @Nullable String namePrefix) {
+        StringBuilder suffix = new StringBuilder("");
+        appendParam(suffix, "project", projectName);
+        appendParam(suffix, "namePrefix", namePrefix);
+
         try {
-            return URI.create(fetchTogglesURL + "?namePrefix=" + namePrefix).normalize().toURL();
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "namePrefix [" + namePrefix + "] was not URL friendly.", e);
+            return URI.create(fetchTogglesURL + suffix.toString()).normalize().toURL();
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("fetchTogglesURL [" + fetchTogglesURL + suffix + "] was not URL friendly.", e);
         }
     }
+
+    private void appendParam(StringBuilder suffix, String key, @Nullable String value) {
+        if(value == null) return;
+        if(suffix.length() == 0){
+            suffix.append("?");
+        } else {
+            suffix.append("&");
+        }
+        suffix.append(key).append("=").append(value);
+    }
+
+
 }
