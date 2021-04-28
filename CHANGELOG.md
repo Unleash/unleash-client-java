@@ -3,6 +3,7 @@
 ## 4.2.1
 - fix: Make sure empty bootstrap path does not crash app
 - feat: Default to trying UNLEASH_BOOTSTRAP_FILE environment variable for finding bootstrap
+- feat: Add support for filtering by namePrefix
 
 ## 4.2.0
 - feat: Add ability to bootstrap features from files via UNLEASH_BOOTSTRAP_FILE (#129)
