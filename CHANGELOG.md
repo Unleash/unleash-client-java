@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.3.0
+- feat: Add support for leveraging namePrefix in Java SDK (#135)
+- feat: Adding support for custom proxy (#137)
+
 ## 4.2.1
 - fix: Make sure empty bootstrap path does not crash app
 - feat: Default to trying UNLEASH_BOOTSTRAP_FILE environment variable for finding bootstrap
