@@ -30,6 +30,7 @@ UnleashConfig config = UnleashConfig.builder()
             .appName("java-test")
             .instanceId("instance x")
             .unleashAPI("http://unleash.herokuapp.com/api/")
+            .customHttpHeader("Authorization", "API token")
             .build();
 
 Unleash unleash = new DefaultUnleash(config);
@@ -117,6 +118,7 @@ UnleashConfig config = new UnleashConfig.Builder()
             .appName("java-test")
             .instanceId("instance x")
             .unleashAPI("http://unleash.herokuapp.com/api/")
+            .customHttpHeader("Authorization", "API token")
             .unleashContextProvider(contextProvider)
             .build();
 
@@ -157,6 +159,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
                 .appName("my-app")
                 .instanceId("my-instance-1")
                 .unleashAPI(unleashAPI)
+                .customHttpHeader("Authorization", "API token")
                 .customHttpHeadersProvider(provider)
                 .build();
 ```
@@ -173,6 +176,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
     .appName("my-app")
     .instanceId("my-instance-1")
     .unleashAPI(unleashAPI)
+    .customHttpHeader("Authorization", "API token")
     .subscriber(new UnleashSubscriber() {
         @Override
         public void onReady(UnleashReady ready) {
@@ -207,6 +211,7 @@ to enable support for basic auth against a http proxy, you can simply enable the
 UnleashConfig config = UnleashConfig.builder()
     .appName("my-app")
     .unleashAPI("http://unleash.org")
+    .customHttpHeader("Authorization", "API token")
     .enableProxyAuthenticationByJvmProperties()
     .build();
 ```

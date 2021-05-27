@@ -42,6 +42,7 @@ public class UnleashConfig {
     private final UnleashSubscriber unleashSubscriber;
     @Nullable private final Strategy fallbackStrategy;
     @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
+    @Nullable private final Proxy proxy;
 
     private UnleashConfig(
             @Nullable URI unleashAPI,
@@ -63,7 +64,9 @@ public class UnleashConfig {
             @Nullable UnleashScheduledExecutor unleashScheduledExecutor,
             @Nullable UnleashSubscriber unleashSubscriber,
             @Nullable Strategy fallbackStrategy,
-            @Nullable ToggleBootstrapProvider unleashBootstrapProvider) {
+            @Nullable ToggleBootstrapProvider unleashBootstrapProvider,
+            @Nullable Proxy proxy,
+            @Nullable Authenticator proxyAuthenticator) {
 
         if (appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -91,8 +94,10 @@ public class UnleashConfig {
             this.fallbackStrategy = fallbackStrategy;
         }
 
-        if (isProxyAuthenticationByJvmProperties) {
+        if (isProxyAuthenticationByJvmProperties && proxyAuthenticator == null) {
             enableProxyAuthentication();
+        } else if (proxyAuthenticator != null) {
+            Authenticator.setDefault(proxyAuthenticator);
         }
 
         this.unleashAPI = unleashAPI;
@@ -115,6 +120,7 @@ public class UnleashConfig {
         this.unleashScheduledExecutor = unleashScheduledExecutor;
         this.unleashSubscriber = unleashSubscriber;
         this.toggleBootstrapProvider = unleashBootstrapProvider;
+        this.proxy = proxy;
     }
 
     public static Builder builder() {
@@ -132,7 +138,7 @@ public class UnleashConfig {
     private void enableProxyAuthentication() {
         // http.proxyUser http.proxyPassword is only consumed by Apache HTTP Client, for
         // HttpUrlConnection we have to define an Authenticator
-        Authenticator.setDefault(new ProxyAuthenticator());
+        Authenticator.setDefault(new SystemProxyAuthenticator());
     }
 
     public URI getUnleashAPI() {
@@ -222,8 +228,12 @@ public class UnleashConfig {
         return namePrefix;
     }
 
-    static class ProxyAuthenticator extends Authenticator {
+    @Nullable
+    public Proxy getProxy() {
+        return proxy;
+    }
 
+    static class SystemProxyAuthenticator extends Authenticator {
         @Override
         protected @Nullable PasswordAuthentication getPasswordAuthentication() {
             if (getRequestorType() == RequestorType.PROXY) {
@@ -235,8 +245,36 @@ public class UnleashConfig {
 
                 // Only apply PasswordAuthentication to requests to the proxy itself - if not set
                 // just ignore
-                if (getRequestingHost().equalsIgnoreCase(proxyHost)
-                        && Integer.parseInt(proxyPort) == getRequestingPort()) {
+                if (getRequestingHost().equalsIgnoreCase(proxyHost) && Integer.parseInt(proxyPort) == getRequestingPort()) {
+                    return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
+                }
+            }
+            return null;
+        }
+    }
+
+    static class CustomProxyAuthenticator extends Authenticator {
+
+        private final Proxy proxy;
+        private final String proxyUser;
+        private final String proxyPassword;
+
+        public CustomProxyAuthenticator(Proxy proxy, String proxyUser, String proxyPassword) {
+            this.proxy = proxy;
+            this.proxyUser = proxyUser;
+            this.proxyPassword = proxyPassword;
+        }
+
+        @Override
+        protected @Nullable PasswordAuthentication getPasswordAuthentication() {
+            if (getRequestorType() == RequestorType.PROXY && proxy.type() == Proxy.Type.HTTP && proxy.address() instanceof InetSocketAddress) {
+                final String proxyHost = ((InetSocketAddress) proxy.address()).getHostName();
+                final int proxyPort = ((InetSocketAddress) proxy.address()).getPort();
+
+                // Only apply PasswordAuthentication to requests to the proxy
+                // itself - if not set
+                // just ignore
+                if (getRequestingHost().equalsIgnoreCase(proxyHost) && proxyPort == getRequestingPort()) {
                     return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
                 }
             }
@@ -268,6 +306,8 @@ public class UnleashConfig {
         private boolean isProxyAuthenticationByJvmProperties;
         private @Nullable Strategy fallbackStrategy;
         private @Nullable ToggleBootstrapProvider toggleBootstrapProvider;
+        private @Nullable Proxy proxy;
+        private @Nullable Authenticator proxyAuthenticator;
 
         private static String getHostname() {
             String hostName = System.getProperty("hostname");
@@ -385,6 +425,21 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder proxy(Proxy proxy) {
+            this.proxy = proxy;
+            return this;
+        }
+
+        public Builder proxy(
+                Proxy proxy, @Nullable String proxyUser, @Nullable String proxyPassword) {
+            this.proxy = proxy;
+
+            if (proxyUser != null && proxyPassword != null) {
+                this.proxyAuthenticator = new CustomProxyAuthenticator(proxy, proxyUser, proxyPassword);
+            }
+            return this;
+        }
+
         private String getBackupFile() {
             if (backupFile != null) {
                 return backupFile;
@@ -416,7 +471,9 @@ public class UnleashConfig {
                             .orElseGet(UnleashScheduledExecutorImpl::getInstance),
                     Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new),
                     fallbackStrategy,
-                    toggleBootstrapProvider);
+                    toggleBootstrapProvider,
+                    proxy,
+                    proxyAuthenticator);
         }
 
         public String getDefaultSdkVersion() {

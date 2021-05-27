@@ -85,7 +85,11 @@ public class UnleashMetricsSender {
 
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) url.openConnection();
+            if (this.unleashConfig.getProxy() != null) {
+                connection = (HttpURLConnection) url.openConnection(this.unleashConfig.getProxy());
+            } else {
+                connection = (HttpURLConnection) url.openConnection();
+            }
             connection.setConnectTimeout(CONNECT_TIMEOUT);
             connection.setReadTimeout(CONNECT_TIMEOUT);
             connection.setRequestMethod("POST");
