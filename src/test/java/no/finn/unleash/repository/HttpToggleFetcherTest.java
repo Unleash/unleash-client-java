@@ -346,6 +346,6 @@ public class HttpToggleFetcherTest {
                 UnleashConfig.builder().appName("test").unleashAPI(uri).projectName(name).build();
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> new HttpToggleFetcher(config))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Project name [" + name + "] was not URL friendly.");
+                .hasMessageContaining("?project="+name+"] was not URL friendly.");
     }
 }

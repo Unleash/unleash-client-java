@@ -20,18 +20,13 @@ public final class HttpToggleFetcher implements ToggleFetcher {
     private Optional<String> etag = Optional.empty();
 
     private final URL toggleUrl;
-    private UnleashConfig unleashConfig;
+    private final UnleashConfig unleashConfig;
 
     public HttpToggleFetcher(UnleashConfig unleashConfig) {
         this.unleashConfig = unleashConfig;
-        if (unleashConfig.getProjectName() != null) {
-            this.toggleUrl =
-                    unleashConfig
-                            .getUnleashURLs()
-                            .getFetchTogglesURL(unleashConfig.getProjectName());
-        } else {
-            this.toggleUrl = unleashConfig.getUnleashURLs().getFetchTogglesURL();
-        }
+        this.toggleUrl = unleashConfig
+            .getUnleashURLs()
+            .getFetchTogglesURL(unleashConfig.getProjectName(), unleashConfig.getNamePrefix());
     }
 
     @Override

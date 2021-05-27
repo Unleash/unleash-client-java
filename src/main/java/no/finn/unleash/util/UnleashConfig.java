@@ -31,6 +31,7 @@ public class UnleashConfig {
     private final String sdkVersion;
     private final String backupFile;
     @Nullable private final String projectName;
+    @Nullable private final String namePrefix;
     private final long fetchTogglesInterval;
     private final long sendMetricsInterval;
     private final boolean disableMetrics;
@@ -53,6 +54,7 @@ public class UnleashConfig {
             String sdkVersion,
             String backupFile,
             @Nullable String projectName,
+            @Nullable String namePrefix,
             long fetchTogglesInterval,
             long sendMetricsInterval,
             boolean disableMetrics,
@@ -108,6 +110,7 @@ public class UnleashConfig {
         this.sdkVersion = sdkVersion;
         this.backupFile = backupFile;
         this.projectName = projectName;
+        this.namePrefix = namePrefix;
         this.fetchTogglesInterval = fetchTogglesInterval;
         this.sendMetricsInterval = sendMetricsInterval;
         this.disableMetrics = disableMetrics;
@@ -221,6 +224,11 @@ public class UnleashConfig {
     }
 
     @Nullable
+    public String getNamePrefix() {
+        return namePrefix;
+    }
+
+    @Nullable
     public Proxy getProxy() {
         return proxy;
     }
@@ -283,9 +291,10 @@ public class UnleashConfig {
         private @Nullable String appName;
         private String environment = "default";
         private String instanceId = getDefaultInstanceId();
-        private String sdkVersion = getDefaultSdkVersion();
+        private final String sdkVersion = getDefaultSdkVersion();
         private @Nullable String backupFile;
         private @Nullable String projectName;
+        private @Nullable String namePrefix;
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
@@ -295,7 +304,7 @@ public class UnleashConfig {
         private @Nullable UnleashScheduledExecutor scheduledExecutor;
         private @Nullable UnleashSubscriber unleashSubscriber;
         private boolean isProxyAuthenticationByJvmProperties;
-        private Strategy fallbackStrategy;
+        private @Nullable Strategy fallbackStrategy;
         private @Nullable ToggleBootstrapProvider toggleBootstrapProvider;
         private @Nullable Proxy proxy;
         private @Nullable Authenticator proxyAuthenticator;
@@ -352,6 +361,11 @@ public class UnleashConfig {
 
         public Builder projectName(String projectName) {
             this.projectName = projectName;
+            return this;
+        }
+
+        public Builder namePrefix(String namePrefix) {
+            this.namePrefix = namePrefix;
             return this;
         }
 
@@ -446,6 +460,7 @@ public class UnleashConfig {
                     sdkVersion,
                     getBackupFile(),
                     projectName,
+                    namePrefix,
                     fetchTogglesInterval,
                     sendMetricsInterval,
                     disableMetrics,

@@ -126,6 +126,7 @@ public final class DefaultUnleash implements Unleash {
             String toggleName,
             UnleashContext context,
             BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+        checkIfToggleMatchesNamePrefix(toggleName);
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
         boolean enabled;
         UnleashContext enhancedContext = context.applyStaticFields(config);
@@ -157,6 +158,17 @@ public final class DefaultUnleash implements Unleash {
                                     });
         }
         return enabled;
+    }
+
+    private void checkIfToggleMatchesNamePrefix(String toggleName) {
+        if (config.getNamePrefix() != null) {
+            if (!toggleName.startsWith(config.getNamePrefix())) {
+                LOGGER.warn(
+                        "Toggle [{}] doesnt start with configured name prefix of [{}] so it will always be disabled",
+                        toggleName,
+                        config.getNamePrefix());
+            }
+        }
     }
 
     @Override
