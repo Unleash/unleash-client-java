@@ -101,7 +101,12 @@ public final class HttpToggleFetcher implements ToggleFetcher {
     }
 
     private HttpURLConnection openConnection(URL url) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        HttpURLConnection connection;
+        if (this.unleashConfig.getProxy() != null) {
+            connection = (HttpURLConnection) url.openConnection(this.unleashConfig.getProxy());
+        } else {
+            connection = (HttpURLConnection) url.openConnection();
+        }
         connection.setConnectTimeout(CONNECT_TIMEOUT);
         connection.setReadTimeout(CONNECT_TIMEOUT);
         connection.setRequestProperty("Accept", "application/json");
