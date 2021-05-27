@@ -71,7 +71,7 @@ public class SubscriberTest {
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof FeatureToggleResponse).hasSize(2);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof ClientRegistration).hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof ClientMetrics).hasSize(1);
-        assertThat(testSubscriber.events).hasSize(8);
+        assertThat(testSubscriber.events).hasSize(9);
 
     }
 
