@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"no.finn.unleash"},{"l":"no.finn.unleash.event"},{"l":"no.finn.unleash.lang"},{"l":"no.finn.unleash.metric"},{"l":"no.finn.unleash.repository"},{"l":"no.finn.unleash.strategy"},{"l":"no.finn.unleash.util"},{"l":"no.finn.unleash.variant"}];updateSearchResults();
