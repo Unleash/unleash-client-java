@@ -1,0 +1,28 @@
+---
+name: Javadocs
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  javadoc:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 15
+      - name: Build
+        run: ./mvnw javadoc:javadoc
+      - name: Deploy docs to pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/site/apidocs
+
+
