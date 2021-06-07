@@ -2,6 +2,7 @@ package no.finn.unleash.variant;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.Predicate;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashContext;
@@ -61,6 +62,17 @@ public final class VariantUtil {
                                                 .orElse(Double.toString(Math.random()))));
     }
 
+    private static String randomString() {
+        int randSeed = new Random().nextInt(100000);
+        return "" + randSeed;
+    }
+
+    private static String getSeed(UnleashContext unleashContext, Optional<String> stickiness) {
+        return stickiness
+                .map(s -> unleashContext.getByName(s).orElse(randomString()))
+                .orElse(getIdentifier(unleashContext));
+    }
+
     public static Variant selectVariant(
             @Nullable FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant) {
         if (featureToggle == null) {
@@ -76,10 +88,14 @@ public final class VariantUtil {
         if (variantOverride.isPresent()) {
             return variantOverride.get().toVariant();
         }
-
+        Optional<String> customStickiness =
+                variants.stream()
+                        .filter(f -> f.getStickiness() != null)
+                        .map(VariantDefinition::getStickiness)
+                        .findFirst();
         int target =
                 StrategyUtils.getNormalizedNumber(
-                        getIdentifier(context), featureToggle.getName(), totalWeight);
+                        getSeed(context, customStickiness), featureToggle.getName(), totalWeight);
 
         int counter = 0;
         for (final VariantDefinition definition : featureToggle.getVariants()) {
