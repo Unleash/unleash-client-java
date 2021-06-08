@@ -29,7 +29,9 @@ public class ManualTesting {
                         .appName("java-test")
                         .instanceId("instance y")
                         .unleashAPI("https://unleash.herokuapp.com/api/")
-                        .customHttpHeader("Authorization", "3bd74da5b341d868443134377ba5d802ea1e6fa2d2a948276ade1f092bec8d92")
+                        .customHttpHeader(
+                                "Authorization",
+                                "3bd74da5b341d868443134377ba5d802ea1e6fa2d2a948276ade1f092bec8d92")
                         .subscriber(
                                 new UnleashSubscriber() {
                                     @Override

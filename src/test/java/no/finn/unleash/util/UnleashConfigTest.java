@@ -223,7 +223,8 @@ public class UnleashConfigTest {
 
         Field authenticator = Authenticator.class.getDeclaredField("theAuthenticator");
         authenticator.setAccessible(true);
-        SystemProxyAuthenticator proxyAuthenticator = (SystemProxyAuthenticator) authenticator.get(null);
+        SystemProxyAuthenticator proxyAuthenticator =
+                (SystemProxyAuthenticator) authenticator.get(null);
 
         Field requestingAuthType =
                 proxyAuthenticator
@@ -281,7 +282,8 @@ public class UnleashConfigTest {
 
         Field authenticator = Authenticator.class.getDeclaredField("theAuthenticator");
         authenticator.setAccessible(true);
-        CustomProxyAuthenticator proxyAuthenticator = (CustomProxyAuthenticator) authenticator.get(null);
+        CustomProxyAuthenticator proxyAuthenticator =
+                (CustomProxyAuthenticator) authenticator.get(null);
 
         Field requestingAuthType =
                 proxyAuthenticator
@@ -309,11 +311,11 @@ public class UnleashConfigTest {
         requestingPort.setAccessible(true);
         requestingPort.set(proxyAuthenticator, 8080);
 
-        PasswordAuthentication passwordAuthentication = proxyAuthenticator.getPasswordAuthentication();
+        PasswordAuthentication passwordAuthentication =
+                proxyAuthenticator.getPasswordAuthentication();
 
         assertThat(passwordAuthentication.getUserName()).isEqualTo(proxyUser);
-        assertThat(new
-            String(passwordAuthentication.getPassword())).isEqualTo(proxyPassword);
+        assertThat(new String(passwordAuthentication.getPassword())).isEqualTo(proxyPassword);
         assertThat(config.isProxyAuthenticationByJvmProperties()).isEqualTo(false);
     }
 }

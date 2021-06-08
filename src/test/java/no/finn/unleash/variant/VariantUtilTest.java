@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashContext;

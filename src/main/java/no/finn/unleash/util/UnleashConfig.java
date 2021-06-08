@@ -245,7 +245,8 @@ public class UnleashConfig {
 
                 // Only apply PasswordAuthentication to requests to the proxy itself - if not set
                 // just ignore
-                if (getRequestingHost().equalsIgnoreCase(proxyHost) && Integer.parseInt(proxyPort) == getRequestingPort()) {
+                if (getRequestingHost().equalsIgnoreCase(proxyHost)
+                        && Integer.parseInt(proxyPort) == getRequestingPort()) {
                     return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
                 }
             }
@@ -267,14 +268,17 @@ public class UnleashConfig {
 
         @Override
         protected @Nullable PasswordAuthentication getPasswordAuthentication() {
-            if (getRequestorType() == RequestorType.PROXY && proxy.type() == Proxy.Type.HTTP && proxy.address() instanceof InetSocketAddress) {
+            if (getRequestorType() == RequestorType.PROXY
+                    && proxy.type() == Proxy.Type.HTTP
+                    && proxy.address() instanceof InetSocketAddress) {
                 final String proxyHost = ((InetSocketAddress) proxy.address()).getHostName();
                 final int proxyPort = ((InetSocketAddress) proxy.address()).getPort();
 
                 // Only apply PasswordAuthentication to requests to the proxy
                 // itself - if not set
                 // just ignore
-                if (getRequestingHost().equalsIgnoreCase(proxyHost) && proxyPort == getRequestingPort()) {
+                if (getRequestingHost().equalsIgnoreCase(proxyHost)
+                        && proxyPort == getRequestingPort()) {
                     return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
                 }
             }
@@ -435,7 +439,8 @@ public class UnleashConfig {
             this.proxy = proxy;
 
             if (proxyUser != null && proxyPassword != null) {
-                this.proxyAuthenticator = new CustomProxyAuthenticator(proxy, proxyUser, proxyPassword);
+                this.proxyAuthenticator =
+                        new CustomProxyAuthenticator(proxy, proxyUser, proxyPassword);
             }
             return this;
         }
