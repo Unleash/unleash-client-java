@@ -37,11 +37,13 @@ public class FlexibleRolloutStrategy implements Strategy {
                 return context.getSessionId();
             case "random":
                 return Optional.of(randomGenerator.get());
-            default:
+            case "default":
                 String value =
                         context.getUserId()
                                 .orElse(context.getSessionId().orElse(this.randomGenerator.get()));
                 return Optional.of(value);
+            default:
+                return context.getByName(stickiness);
         }
     }
 
@@ -52,13 +54,10 @@ public class FlexibleRolloutStrategy implements Strategy {
         final int percentage = StrategyUtils.getPercentage(parameters.get(PERCENTAGE));
         final String groupId = parameters.getOrDefault(GROUP_ID, "");
 
-        if (stickinessId.isPresent()) {
-            final int normalizedUserId =
-                    StrategyUtils.getNormalizedNumber(stickinessId.get(), groupId);
-            return percentage > 0 && normalizedUserId <= percentage;
-        } else {
-            return false;
-        }
+        return stickinessId
+                .map(stick -> StrategyUtils.getNormalizedNumber(stick, groupId))
+                .map(norm -> percentage > 0 && norm <= percentage)
+                .orElse(false);
     }
 
     private String getStickiness(Map<String, String> parameters) {

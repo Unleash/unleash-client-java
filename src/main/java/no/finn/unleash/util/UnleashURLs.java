@@ -1,11 +1,9 @@
 package no.finn.unleash.util;
 
-import no.finn.unleash.lang.Nullable;
-
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import no.finn.unleash.lang.Nullable;
 
 public class UnleashURLs {
     private final URL fetchTogglesURL;
@@ -43,20 +41,19 @@ public class UnleashURLs {
 
         try {
             return URI.create(fetchTogglesURL + suffix.toString()).normalize().toURL();
-        } catch (IllegalArgumentException|MalformedURLException e) {
-            throw new IllegalArgumentException("fetchTogglesURL [" + fetchTogglesURL + suffix + "] was not URL friendly.", e);
+        } catch (IllegalArgumentException | MalformedURLException e) {
+            throw new IllegalArgumentException(
+                    "fetchTogglesURL [" + fetchTogglesURL + suffix + "] was not URL friendly.", e);
         }
     }
 
     private void appendParam(StringBuilder suffix, String key, @Nullable String value) {
-        if(value == null) return;
-        if(suffix.length() == 0){
+        if (value == null) return;
+        if (suffix.length() == 0) {
             suffix.append("?");
         } else {
             suffix.append("&");
         }
         suffix.append(key).append("=").append(value);
     }
-
-
 }

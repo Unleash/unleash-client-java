@@ -11,17 +11,28 @@ public class Variant {
     private final String name;
     @Nullable private final Payload payload;
     private final boolean enabled;
+    @Nullable private final String stickiness;
 
     public Variant(String name, @Nullable Payload payload, boolean enabled) {
+        this(name, payload, enabled, null);
+    }
+
+    public Variant(String name, @Nullable Payload payload, boolean enabled, String stickiness) {
         this.name = name;
         this.payload = payload;
         this.enabled = enabled;
+        this.stickiness = stickiness;
     }
 
     public Variant(String name, @Nullable String payload, boolean enabled) {
+        this(name, payload, enabled, null);
+    }
+
+    public Variant(String name, @Nullable String payload, boolean enabled, String stickiness) {
         this.name = name;
         this.payload = new Payload("string", payload);
         this.enabled = enabled;
+        this.stickiness = stickiness;
     }
 
     public String getName() {
@@ -34,6 +45,11 @@ public class Variant {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Nullable
+    public String getStickiness() {
+        return stickiness;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package no.finn.unleash.strategy;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
@@ -140,5 +141,47 @@ class FlexibleRolloutStrategyTest {
         UnleashContext context = UnleashContext.builder().build();
         boolean enabled = strategy.isEnabled(params, context);
         assertFalse(enabled);
+    }
+
+    @Test
+    public void should_not_be_enabled_for_custom_field_402() {
+        Supplier<String> randomGenerator = () -> "2";
+        FlexibleRolloutStrategy strategy = new FlexibleRolloutStrategy(randomGenerator);
+        Map<String, String> params = new HashMap<>();
+        params.put("rollout", "50");
+        params.put("stickiness", "customField");
+        params.put("groupId", "Feature.flexible.rollout.custom.stickiness_50");
+        UnleashContext context = UnleashContext.builder().addProperty("customField", "402").build();
+        boolean enabled = strategy.isEnabled(params, context);
+        assertThat(enabled).isFalse();
+    }
+
+    @Test
+    public void should_not_be_enabled_for_custom_field_388_and_39() {
+        Supplier<String> randomGenerator = () -> "2";
+        FlexibleRolloutStrategy strategy = new FlexibleRolloutStrategy(randomGenerator);
+        Map<String, String> params = new HashMap<>();
+        params.put("rollout", "50");
+        params.put("stickiness", "customField");
+        params.put("groupId", "Feature.flexible.rollout.custom.stickiness_50");
+        UnleashContext context = UnleashContext.builder().addProperty("customField", "388").build();
+        boolean enabled = strategy.isEnabled(params, context);
+        assertThat(enabled).isTrue();
+        context = UnleashContext.builder().addProperty("customField", "39").build();
+        enabled = strategy.isEnabled(params, context);
+        assertThat(enabled).isTrue();
+    }
+
+    @Test
+    public void should_not_be_enabled_with_custom_stickiness_if_custom_field_is_missing() {
+        Supplier<String> randomGenerator = () -> "2";
+        FlexibleRolloutStrategy strategy = new FlexibleRolloutStrategy(randomGenerator);
+        Map<String, String> params = new HashMap<>();
+        params.put("rollout", "50");
+        params.put("stickiness", "customField");
+        params.put("groupId", "Feature.flexible.rollout.custom.stickiness_50");
+        UnleashContext context = UnleashContext.builder().build();
+        boolean enabled = strategy.isEnabled(params, context);
+        assertThat(enabled).isFalse();
     }
 }

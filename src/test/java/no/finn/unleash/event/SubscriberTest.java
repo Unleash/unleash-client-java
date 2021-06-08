@@ -19,8 +19,6 @@ import no.finn.unleash.UnleashException;
 import no.finn.unleash.metric.ClientMetrics;
 import no.finn.unleash.metric.ClientRegistration;
 import no.finn.unleash.repository.FeatureToggleResponse;
-import no.finn.unleash.repository.HttpToggleFetcher;
-import no.finn.unleash.repository.ToggleBootstrapHandler;
 import no.finn.unleash.util.UnleashConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,14 +63,18 @@ public class SubscriberTest {
         assertThat(testSubscriber.toggleEnabled).isFalse();
         assertThat(testSubscriber.errors).hasSize(2);
 
-//        assertThat(testSubscriber.events).filteredOn(e -> e instanceof ToggleBootstrapHandler.ToggleBootstrapRead).hasSize(1);
+        //        assertThat(testSubscriber.events).filteredOn(e -> e instanceof
+        // ToggleBootstrapHandler.ToggleBootstrapRead).hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof UnleashReady).hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof ToggleEvaluated).hasSize(3);
-        assertThat(testSubscriber.events).filteredOn(e -> e instanceof FeatureToggleResponse).hasSize(2);
-        assertThat(testSubscriber.events).filteredOn(e -> e instanceof ClientRegistration).hasSize(1);
+        assertThat(testSubscriber.events)
+                .filteredOn(e -> e instanceof FeatureToggleResponse)
+                .hasSize(2);
+        assertThat(testSubscriber.events)
+                .filteredOn(e -> e instanceof ClientRegistration)
+                .hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof ClientMetrics).hasSize(1);
         assertThat(testSubscriber.events).hasSize(9);
-
     }
 
     private class TestSubscriber implements UnleashSubscriber {

@@ -40,29 +40,29 @@ public class UnleashURLsTest {
     public void should_set_build_fetch_url_if_project_and_prefix_are_null() {
         UnleashURLs urls = new UnleashURLs(URI.create("http://unleash.com/api/"));
         assertThat(urls.getFetchTogglesURL(null, null).toString())
-            .isEqualTo("http://unleash.com/api/client/features");
+                .isEqualTo("http://unleash.com/api/client/features");
     }
 
     @Test
     public void should_set_build_fetch_url_with_project() {
         UnleashURLs urls = new UnleashURLs(URI.create("http://unleash.com/api/"));
         assertThat(urls.getFetchTogglesURL("myProject", null).toString())
-            .isEqualTo("http://unleash.com/api/client/features?project=myProject");
+                .isEqualTo("http://unleash.com/api/client/features?project=myProject");
     }
 
     @Test
     public void should_set_build_fetch_url_with_nameprefix() {
         UnleashURLs urls = new UnleashURLs(URI.create("http://unleash.com/api/"));
         assertThat(urls.getFetchTogglesURL(null, "prefix.").toString())
-            .isEqualTo("http://unleash.com/api/client/features?namePrefix=prefix.");
+                .isEqualTo("http://unleash.com/api/client/features?namePrefix=prefix.");
     }
-
 
     @Test
     public void should_set_build_fetch_url_with_project_and_nameprefix() {
         UnleashURLs urls = new UnleashURLs(URI.create("http://unleash.com/api/"));
         assertThat(urls.getFetchTogglesURL("aproject", "prefix.").toString())
-            .isEqualTo("http://unleash.com/api/client/features?project=aproject&namePrefix=prefix.");
+                .isEqualTo(
+                        "http://unleash.com/api/client/features?project=aproject&namePrefix=prefix.");
     }
 
     @Test()

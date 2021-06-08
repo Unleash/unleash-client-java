@@ -5,6 +5,10 @@ import static no.finn.unleash.Variant.DISABLED_VARIANT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import no.finn.unleash.ActivationStrategy;
 import no.finn.unleash.FeatureToggle;
 import no.finn.unleash.UnleashContext;
@@ -167,5 +171,36 @@ public class VariantUtilTest {
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
         assertThat(variant.getName()).isEqualTo(v2.getName());
+    }
+
+    @Test
+    public void should_distribute_variants_according_to_stickiness() {
+        VariantDefinition v1 = new VariantDefinition("blue", 1, null, null, "customField");
+        VariantDefinition v2 = new VariantDefinition("red", 1, null, null, "customField");
+        VariantDefinition v3 = new VariantDefinition("green", 1, null, null, "customField");
+        VariantDefinition v4 = new VariantDefinition("yellow", 1, null, null, "customField");
+        FeatureToggle variantToggle =
+                new FeatureToggle(
+                        "toggle-with-variants",
+                        true,
+                        asList(defaultStrategy),
+                        asList(v1, v2, v3, v4));
+        UnleashContext context =
+                UnleashContext.builder()
+                        .userId("11")
+                        .addProperty("env", "prod")
+                        .sessionId("1222221")
+                        .build();
+        Map<String, List<Variant>> variantResults =
+                IntStream.range(0, 10000)
+                        .mapToObj(
+                                i ->
+                                        VariantUtil.selectVariant(
+                                                variantToggle, context, DISABLED_VARIANT))
+                        .collect(Collectors.groupingBy(Variant::getName));
+        assertThat(variantResults)
+                .allSatisfy(
+                        (name, variantResult) ->
+                                assertThat(variantResult).hasSizeBetween(2400, 2600));
     }
 }
