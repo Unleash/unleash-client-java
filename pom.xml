@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.finn.unleash</groupId>
     <artifactId>unleash-client-java</artifactId>
-    <version>4.4.0</version>
+    <version>4.4.1-SNAPSHOT</version>
 
     <properties>
         <version.slf4j>1.7.30</version.slf4j>
@@ -49,7 +49,7 @@
         <url>https://github.com/Unleash/unleash-client-java</url>
         <connection>scm:git:git@github.com:Unleash/unleash-client-java.git</connection>
         <developerConnection>scm:git:git@github.com:Unleash/unleash-client-java.git</developerConnection>
-        <tag>unleash-client-java-4.4.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
