@@ -23,11 +23,10 @@ import io.getunleash.strategy.*;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantUtil;
 import io.getunleash.lang.Nullable;
-import no.finn.unleash.strategy.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class DefaultUnleash implements Unleash {
+public class DefaultUnleash implements Unleash {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
     private static final List<Strategy> BUILTIN_STRATEGIES =
             Arrays.asList(
