@@ -3,8 +3,8 @@ package io.getunleash.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.*;
 import io.getunleash.FeatureToggle;
+import java.io.*;
 import org.junit.jupiter.api.Test;
 
 public class JsonFeatureToggleParserTest {

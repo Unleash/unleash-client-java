@@ -1,5 +1,7 @@
 package io.getunleash.repository;
 
+import io.getunleash.UnleashException;
+import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,9 +10,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-
-import io.getunleash.util.UnleashConfig;
-import io.getunleash.UnleashException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

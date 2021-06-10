@@ -5,15 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.*;
-import java.util.function.BiFunction;
-
+import io.getunleash.repository.ToggleRepository;
+import io.getunleash.strategy.Strategy;
 import io.getunleash.strategy.UserWithIdStrategy;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.Payload;
 import io.getunleash.variant.VariantDefinition;
-import io.getunleash.repository.ToggleRepository;
-import io.getunleash.strategy.Strategy;
+import java.util.*;
+import java.util.function.BiFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

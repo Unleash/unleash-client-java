@@ -3,9 +3,9 @@ package io.getunleash.strategy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.getunleash.UnleashContext;
 import java.util.HashMap;
 import java.util.Map;
-import io.getunleash.UnleashContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

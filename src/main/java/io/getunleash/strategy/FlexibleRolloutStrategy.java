@@ -1,9 +1,9 @@
 package io.getunleash.strategy;
 
+import io.getunleash.UnleashContext;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-import io.getunleash.UnleashContext;
 
 public class FlexibleRolloutStrategy implements Strategy {
     protected static final String PERCENTAGE = "rollout";

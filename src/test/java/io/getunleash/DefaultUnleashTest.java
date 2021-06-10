@@ -3,17 +3,16 @@ package io.getunleash;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.ToggleRepository;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

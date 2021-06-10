@@ -1,8 +1,7 @@
 package io.getunleash.example;
 
-import java.util.Map;
-
 import io.getunleash.strategy.Strategy;
+import java.util.Map;
 
 final class CustomStrategy implements Strategy {
     @Override

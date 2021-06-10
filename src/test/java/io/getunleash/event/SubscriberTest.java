@@ -9,17 +9,16 @@ import com.github.jenspiegsa.wiremockextension.WireMockExtension;
 import com.github.jenspiegsa.wiremockextension.WireMockSettings;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
-import java.util.ArrayList;
-import java.util.List;
-
+import io.getunleash.DefaultUnleash;
 import io.getunleash.SynchronousTestExecutor;
+import io.getunleash.Unleash;
+import io.getunleash.UnleashException;
 import io.getunleash.metric.ClientMetrics;
 import io.getunleash.metric.ClientRegistration;
 import io.getunleash.repository.FeatureToggleResponse;
 import io.getunleash.util.UnleashConfig;
-import io.getunleash.DefaultUnleash;
-import io.getunleash.Unleash;
-import io.getunleash.UnleashException;
+import java.util.ArrayList;
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,13 +57,15 @@ public class SubscriberTest {
         unleash.isEnabled("myFeature");
 
         assertThat(testSubscriber.togglesFetchedCounter).isEqualTo(2); // one forced, one scheduled
-        Assertions.assertThat(testSubscriber.status).isEqualTo(FeatureToggleResponse.Status.UNAVAILABLE);
+        Assertions.assertThat(testSubscriber.status)
+                .isEqualTo(FeatureToggleResponse.Status.UNAVAILABLE);
         assertThat(testSubscriber.toggleEvalutatedCounter).isEqualTo(3);
         assertThat(testSubscriber.toggleName).isEqualTo("myFeature");
         assertThat(testSubscriber.toggleEnabled).isFalse();
         assertThat(testSubscriber.errors).hasSize(2);
 
-//        assertThat(testSubscriber.events).filteredOn(e -> e instanceof ToggleBootstrapHandler.ToggleBootstrapRead).hasSize(1);
+        //        assertThat(testSubscriber.events).filteredOn(e -> e instanceof
+        // ToggleBootstrapHandler.ToggleBootstrapRead).hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof UnleashReady).hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof ToggleEvaluated).hasSize(3);
         assertThat(testSubscriber.events)
@@ -75,7 +76,6 @@ public class SubscriberTest {
                 .hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof ClientMetrics).hasSize(1);
         assertThat(testSubscriber.events).hasSize(9);
-
     }
 
     private class TestSubscriber implements UnleashSubscriber {

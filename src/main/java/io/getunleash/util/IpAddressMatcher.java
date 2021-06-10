@@ -15,11 +15,11 @@
  */
 package io.getunleash.util;
 
+import io.getunleash.lang.Nullable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
-import io.getunleash.lang.Nullable;
 
 /**
  * Matches a request based on IP Address or subnet mask matching against the remote address.

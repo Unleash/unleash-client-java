@@ -1,15 +1,14 @@
 package io.getunleash.repository;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import io.getunleash.event.EventDispatcher;
-import io.getunleash.event.UnleashReady;
-import io.getunleash.util.UnleashConfig;
-import io.getunleash.util.UnleashScheduledExecutor;
 import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashException;
+import io.getunleash.event.EventDispatcher;
+import io.getunleash.event.UnleashReady;
 import io.getunleash.lang.Nullable;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public final class FeatureToggleRepository implements ToggleRepository {
     private final ToggleBackupHandler toggleBackupHandler;

@@ -1,13 +1,12 @@
 package io.getunleash.repository;
 
-import java.util.Collections;
-import java.util.List;
-
-import io.getunleash.event.UnleashEvent;
-import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashException;
+import io.getunleash.event.UnleashEvent;
+import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 public final class FeatureToggleResponse implements UnleashEvent {
 

@@ -1,9 +1,9 @@
 package io.getunleash.strategy;
 
-import java.util.List;
-import java.util.Map;
 import io.getunleash.Constraint;
 import io.getunleash.UnleashContext;
+import java.util.List;
+import java.util.Map;
 
 public interface Strategy {
     String getName();

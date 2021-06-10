@@ -2,9 +2,9 @@ package io.getunleash.strategy;
 
 import static java.util.Arrays.asList;
 
+import io.getunleash.UnleashContext;
 import java.util.List;
 import java.util.Map;
-import io.getunleash.UnleashContext;
 
 public class StrategyUsingContext implements Strategy {
 

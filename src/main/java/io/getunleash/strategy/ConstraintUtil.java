@@ -1,11 +1,11 @@
 package io.getunleash.strategy;
 
-import java.util.List;
-import java.util.Optional;
 import io.getunleash.Constraint;
 import io.getunleash.Operator;
 import io.getunleash.UnleashContext;
 import io.getunleash.lang.Nullable;
+import java.util.List;
+import java.util.Optional;
 
 public class ConstraintUtil {
 

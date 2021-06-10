@@ -1,8 +1,8 @@
 package io.getunleash.event;
 
+import io.getunleash.UnleashException;
 import io.getunleash.metric.ClientMetrics;
 import io.getunleash.metric.ClientRegistration;
-import io.getunleash.UnleashException;
 import io.getunleash.repository.FeatureToggleResponse;
 import io.getunleash.repository.ToggleCollection;
 import org.slf4j.LoggerFactory;

@@ -1,14 +1,13 @@
 package io.getunleash.repository;
 
-import java.io.StringReader;
-import java.util.Collections;
-
+import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashEvent;
 import io.getunleash.event.UnleashSubscriber;
-import io.getunleash.util.UnleashConfig;
-import io.getunleash.UnleashException;
 import io.getunleash.lang.Nullable;
+import io.getunleash.util.UnleashConfig;
+import java.io.StringReader;
+import java.util.Collections;
 
 public class ToggleBootstrapHandler {
     private final EventDispatcher eventDispatcher;

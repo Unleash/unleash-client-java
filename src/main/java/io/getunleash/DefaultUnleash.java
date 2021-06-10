@@ -1,18 +1,11 @@
 package io.getunleash;
 
-import static java.util.Optional.ofNullable;
 import static io.getunleash.Variant.DISABLED_VARIANT;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
+import static java.util.Optional.ofNullable;
 
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.ToggleEvaluated;
+import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
 import io.getunleash.repository.FeatureToggleRepository;
@@ -22,7 +15,13 @@ import io.getunleash.repository.ToggleRepository;
 import io.getunleash.strategy.*;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantUtil;
-import io.getunleash.lang.Nullable;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,7 +181,9 @@ public class DefaultUnleash implements Unleash {
         FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
         boolean enabled = checkEnabled(toggleName, context, (n, c) -> false);
         Variant variant =
-                enabled ? VariantUtil.selectVariant(featureToggle, context, defaultValue) : defaultValue;
+                enabled
+                        ? VariantUtil.selectVariant(featureToggle, context, defaultValue)
+                        : defaultValue;
         metricService.countVariant(toggleName, variant.getName());
         return variant;
     }

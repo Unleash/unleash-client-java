@@ -5,11 +5,11 @@ import static java.util.Collections.singletonList;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
-import java.util.*;
 import io.getunleash.ActivationStrategy;
 import io.getunleash.FeatureToggle;
 import io.getunleash.lang.Nullable;
+import java.lang.reflect.Type;
+import java.util.*;
 
 public class JsonToggleCollectionDeserializer implements JsonDeserializer<ToggleCollection> {
     private static final Type PARAMS_TYPE = new TypeToken<Map<String, String>>() {}.getType();

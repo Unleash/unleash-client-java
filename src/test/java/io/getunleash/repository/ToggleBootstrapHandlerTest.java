@@ -2,13 +2,12 @@ package io.getunleash.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.getunleash.util.UnleashConfig;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-
-import io.getunleash.util.UnleashConfig;
 import org.junit.jupiter.api.Test;
 
 public class ToggleBootstrapHandlerTest {

@@ -1,11 +1,11 @@
 package io.getunleash.metric;
 
+import io.getunleash.lang.Nullable;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import io.getunleash.lang.Nullable;
 
 class MetricsBucket {
     private final ConcurrentMap<String, ToggleCount> toggles;

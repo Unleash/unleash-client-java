@@ -2,11 +2,10 @@ package io.getunleash;
 
 import static java.util.Collections.emptyList;
 
+import io.getunleash.lang.Nullable;
+import io.getunleash.variant.VariantDefinition;
 import java.util.Collections;
 import java.util.List;
-
-import io.getunleash.variant.VariantDefinition;
-import io.getunleash.lang.Nullable;
 
 public final class FeatureToggle {
     private final String name;

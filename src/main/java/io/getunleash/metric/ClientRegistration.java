@@ -1,10 +1,10 @@
 package io.getunleash.metric;
 
-import java.time.LocalDateTime;
-import java.util.Set;
 import io.getunleash.event.UnleashEvent;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.util.UnleashConfig;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 public class ClientRegistration implements UnleashEvent {
     private final String appName;

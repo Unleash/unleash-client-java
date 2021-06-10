@@ -1,11 +1,11 @@
 package io.getunleash.repository;
 
+import io.getunleash.FeatureToggle;
+import io.getunleash.lang.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import io.getunleash.FeatureToggle;
-import io.getunleash.lang.Nullable;
 
 public final class ToggleCollection {
     private final Collection<FeatureToggle> features;

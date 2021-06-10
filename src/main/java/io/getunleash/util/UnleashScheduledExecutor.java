@@ -1,9 +1,9 @@
 package io.getunleash.util;
 
+import io.getunleash.lang.Nullable;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
-import io.getunleash.lang.Nullable;
 
 public interface UnleashScheduledExecutor {
     @Nullable

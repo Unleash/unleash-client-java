@@ -1,14 +1,14 @@
 package io.getunleash.variant;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.function.Predicate;
 import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.StrategyUtils;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.Predicate;
 
 public final class VariantUtil {
     // Utility class

@@ -2,10 +2,10 @@ package io.getunleash.example;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import io.getunleash.TestUtil;
-import io.getunleash.util.UnleashConfig;
 import io.getunleash.DefaultUnleash;
+import io.getunleash.TestUtil;
 import io.getunleash.Unleash;
+import io.getunleash.util.UnleashConfig;
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.Test;
 

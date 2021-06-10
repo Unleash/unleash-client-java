@@ -1,5 +1,6 @@
 package io.getunleash.repository;
 
+import io.getunleash.lang.Nullable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -8,7 +9,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import io.getunleash.lang.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

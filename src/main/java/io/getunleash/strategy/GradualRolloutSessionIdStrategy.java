@@ -1,8 +1,8 @@
 package io.getunleash.strategy;
 
+import io.getunleash.UnleashContext;
 import java.util.Map;
 import java.util.Optional;
-import io.getunleash.UnleashContext;
 
 /**
  * Implements a gradual roll-out strategy based on session id.

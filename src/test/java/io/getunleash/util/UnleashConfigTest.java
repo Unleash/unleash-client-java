@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import io.getunleash.CustomHttpHeadersProvider;
+import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -11,8 +13,6 @@ import java.net.*;
 import java.net.Authenticator.RequestorType;
 import java.util.HashMap;
 import java.util.Map;
-import io.getunleash.CustomHttpHeadersProvider;
-import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mockito;
@@ -124,8 +124,10 @@ public class UnleashConfigTest {
         HttpURLConnection connection = (HttpURLConnection) someUrl.openConnection();
 
         UnleashConfig.setRequestProperties(connection, unleashConfig);
-        assertThat(connection.getRequestProperty(UnleashConfig.UNLEASH_APP_NAME_HEADER)).isEqualTo(appName);
-        assertThat(connection.getRequestProperty(UnleashConfig.UNLEASH_INSTANCE_ID_HEADER)).isEqualTo(instanceId);
+        assertThat(connection.getRequestProperty(UnleashConfig.UNLEASH_APP_NAME_HEADER))
+                .isEqualTo(appName);
+        assertThat(connection.getRequestProperty(UnleashConfig.UNLEASH_INSTANCE_ID_HEADER))
+                .isEqualTo(instanceId);
         assertThat(connection.getRequestProperty("User-Agent")).isEqualTo(appName);
     }
 
@@ -219,7 +221,8 @@ public class UnleashConfigTest {
 
         Field authenticator = Authenticator.class.getDeclaredField("theAuthenticator");
         authenticator.setAccessible(true);
-        UnleashConfig.SystemProxyAuthenticator proxyAuthenticator = (UnleashConfig.SystemProxyAuthenticator) authenticator.get(null);
+        UnleashConfig.SystemProxyAuthenticator proxyAuthenticator =
+                (UnleashConfig.SystemProxyAuthenticator) authenticator.get(null);
 
         Field requestingAuthType =
                 proxyAuthenticator
@@ -277,7 +280,8 @@ public class UnleashConfigTest {
 
         Field authenticator = Authenticator.class.getDeclaredField("theAuthenticator");
         authenticator.setAccessible(true);
-        UnleashConfig.CustomProxyAuthenticator proxyAuthenticator = (UnleashConfig.CustomProxyAuthenticator) authenticator.get(null);
+        UnleashConfig.CustomProxyAuthenticator proxyAuthenticator =
+                (UnleashConfig.CustomProxyAuthenticator) authenticator.get(null);
 
         Field requestingAuthType =
                 proxyAuthenticator

@@ -1,10 +1,9 @@
 package io.getunleash;
 
-import java.util.Map;
-import java.util.Random;
-
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
+import java.util.Map;
+import java.util.Random;
 
 public class ManualVariantTesting {
     public static void main(String[] args) throws Exception {

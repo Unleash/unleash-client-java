@@ -1,7 +1,6 @@
 package io.getunleash.util;
 
 import io.getunleash.lang.Nullable;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -57,6 +56,4 @@ public class UnleashURLs {
         }
         suffix.append(key).append("=").append(value);
     }
-
-
 }

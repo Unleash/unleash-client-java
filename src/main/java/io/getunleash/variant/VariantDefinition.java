@@ -1,9 +1,9 @@
 package io.getunleash.variant;
 
-import java.util.Collections;
-import java.util.List;
 import io.getunleash.Variant;
 import io.getunleash.lang.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 public class VariantDefinition {
 

@@ -1,7 +1,7 @@
 package io.getunleash.variant;
 
-import java.util.Objects;
 import io.getunleash.lang.Nullable;
+import java.util.Objects;
 
 public class Payload {
     private String type;

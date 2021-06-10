@@ -1,14 +1,13 @@
 package io.getunleash;
 
-import java.util.Map;
-import java.util.Random;
-
 import io.getunleash.event.UnleashReady;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.repository.FeatureToggleResponse;
-import io.getunleash.util.UnleashConfig;
 import io.getunleash.repository.ToggleCollection;
 import io.getunleash.strategy.Strategy;
+import io.getunleash.util.UnleashConfig;
+import java.util.Map;
+import java.util.Random;
 
 public class ManualTesting {
     public static void main(String[] args) throws Exception {

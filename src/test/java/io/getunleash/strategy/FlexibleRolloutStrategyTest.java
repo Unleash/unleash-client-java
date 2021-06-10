@@ -3,10 +3,10 @@ package io.getunleash.strategy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.getunleash.UnleashContext;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import io.getunleash.UnleashContext;
 import org.junit.jupiter.api.Test;
 
 class FlexibleRolloutStrategyTest {

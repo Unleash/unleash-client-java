@@ -3,6 +3,10 @@ package io.getunleash.metric;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 
 import com.google.gson.*;
+import io.getunleash.UnleashException;
+import io.getunleash.event.EventDispatcher;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashURLs;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
@@ -11,11 +15,6 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.concurrent.atomic.AtomicLong;
-
-import io.getunleash.event.EventDispatcher;
-import io.getunleash.util.UnleashConfig;
-import io.getunleash.util.UnleashURLs;
-import io.getunleash.UnleashException;
 
 public class UnleashMetricsSender {
     private static final int CONNECT_TIMEOUT = 1000;

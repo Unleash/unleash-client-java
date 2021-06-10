@@ -1,14 +1,18 @@
 package io.getunleash.variant;
 
-import static java.util.Arrays.asList;
 import static io.getunleash.Variant.DISABLED_VARIANT;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collections;
 import io.getunleash.ActivationStrategy;
 import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
 public class VariantUtilTest {

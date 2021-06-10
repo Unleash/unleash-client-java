@@ -1,11 +1,10 @@
 package io.getunleash;
 
+import io.getunleash.lang.Nullable;
+import io.getunleash.util.UnleashConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import io.getunleash.lang.Nullable;
-import io.getunleash.util.UnleashConfig;
 
 public class UnleashContext {
     private final Optional<String> appName;

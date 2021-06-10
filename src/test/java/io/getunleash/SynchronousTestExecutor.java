@@ -1,11 +1,10 @@
 package io.getunleash;
 
+import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import io.getunleash.util.UnleashScheduledExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

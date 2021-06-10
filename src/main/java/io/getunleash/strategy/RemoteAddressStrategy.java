@@ -1,12 +1,12 @@
 package io.getunleash.strategy;
 
+import io.getunleash.UnleashContext;
+import io.getunleash.util.IpAddressMatcher;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import io.getunleash.UnleashContext;
-import io.getunleash.util.IpAddressMatcher;
 
 public final class RemoteAddressStrategy implements Strategy {
     static final String PARAM = "IPs";

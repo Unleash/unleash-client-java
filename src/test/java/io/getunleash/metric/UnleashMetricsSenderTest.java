@@ -10,12 +10,11 @@ import com.github.jenspiegsa.wiremockextension.WireMockExtension;
 import com.github.jenspiegsa.wiremockextension.WireMockSettings;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
+import io.getunleash.util.UnleashConfig;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-
-import io.getunleash.util.UnleashConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

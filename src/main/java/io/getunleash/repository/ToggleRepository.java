@@ -1,8 +1,8 @@
 package io.getunleash.repository;
 
-import java.util.List;
 import io.getunleash.FeatureToggle;
 import io.getunleash.lang.Nullable;
+import java.util.List;
 
 public interface ToggleRepository {
     @Nullable

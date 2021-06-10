@@ -1,10 +1,10 @@
 package io.getunleash.metric;
 
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Set;
-import io.getunleash.util.UnleashConfig;
-import io.getunleash.util.UnleashScheduledExecutor;
 
 public class UnleashMetricServiceImpl implements UnleashMetricService {
     private final LocalDateTime started;

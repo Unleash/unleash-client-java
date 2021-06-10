@@ -1,10 +1,9 @@
 package io.getunleash;
 
+import io.getunleash.lang.Nullable;
+import io.getunleash.variant.Payload;
 import java.util.Objects;
 import java.util.Optional;
-
-import io.getunleash.variant.Payload;
-import io.getunleash.lang.Nullable;
 
 public class Variant {
     public static final Variant DISABLED_VARIANT = new Variant("disabled", (String) null, false);
