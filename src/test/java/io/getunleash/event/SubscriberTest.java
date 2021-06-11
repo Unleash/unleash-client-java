@@ -57,7 +57,7 @@ public class SubscriberTest {
         unleash.isEnabled("myFeature");
 
         assertThat(testSubscriber.togglesFetchedCounter).isEqualTo(2); // one forced, one scheduled
-        Assertions.assertThat(testSubscriber.status)
+        assertThat(testSubscriber.status)
                 .isEqualTo(FeatureToggleResponse.Status.UNAVAILABLE);
         assertThat(testSubscriber.toggleEvalutatedCounter).isEqualTo(3);
         assertThat(testSubscriber.toggleName).isEqualTo("myFeature");

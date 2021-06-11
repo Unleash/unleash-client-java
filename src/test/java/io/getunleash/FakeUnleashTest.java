@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class FakeUnleashTest {
@@ -118,7 +117,7 @@ public class FakeUnleashTest {
         fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
 
         List<EvaluatedToggle> toggles = fakeUnleash.more().evaluateAllToggles();
-        Assertions.assertThat(toggles).hasSize(2);
+        assertThat(toggles).hasSize(2);
         EvaluatedToggle t1 = toggles.get(0);
         assertThat(t1.getName()).isEqualTo("t1");
         assertThat(t1.isEnabled()).isTrue();
@@ -132,7 +131,7 @@ public class FakeUnleashTest {
 
         List<EvaluatedToggle> toggles =
                 fakeUnleash.more().evaluateAllToggles(new UnleashContext.Builder().build());
-        Assertions.assertThat(toggles).hasSize(2);
+        assertThat(toggles).hasSize(2);
         EvaluatedToggle t1 = toggles.get(0);
         assertThat(t1.getName()).isEqualTo("t1");
         assertThat(t1.isEnabled()).isTrue();

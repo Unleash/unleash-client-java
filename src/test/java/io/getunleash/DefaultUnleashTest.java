@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +49,7 @@ class DefaultUnleashTest {
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
         List<EvaluatedToggle> toggles = sut.more().evaluateAllToggles();
-        Assertions.assertThat(toggles).hasSize(2);
+        assertThat(toggles).hasSize(2);
         EvaluatedToggle t1 = toggles.get(0);
         assertThat(t1.getName()).isEqualTo("toggle1");
         assertThat(t1.isEnabled()).isFalse();

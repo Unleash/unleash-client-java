@@ -3,6 +3,7 @@ package io.getunleash.repository;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
 import com.github.jenspiegsa.wiremockextension.InjectServer;
@@ -344,7 +345,7 @@ public class HttpToggleFetcherTest {
         String name = "^!#$!$?";
         UnleashConfig config =
                 UnleashConfig.builder().appName("test").unleashAPI(uri).projectName(name).build();
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> new HttpToggleFetcher(config))
+        assertThatThrownBy(() -> new HttpToggleFetcher(config))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("?project=" + name + "] was not URL friendly.");
     }

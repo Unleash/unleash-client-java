@@ -1,8 +1,5 @@
 package no.finn.unleash;
 
-/**
- * @deprecated Use {@link io.getunleash.UnleashContextProvider}
- */
+/** @deprecated Use {@link io.getunleash.UnleashContextProvider} */
 @Deprecated
-public interface UnleashContextProvider extends io.getunleash.UnleashContextProvider{
-}
+public interface UnleashContextProvider extends io.getunleash.UnleashContextProvider {}
