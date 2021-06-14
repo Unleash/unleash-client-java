@@ -1,5 +1,6 @@
 # Changelog
-
+## 4.4.0
+- feat: Add support for custom stickiness (#132)
 ## 4.3.0
 - feat: Add support for leveraging namePrefix in Java SDK (#135)
 - feat: Adding support for custom proxy (#137)
