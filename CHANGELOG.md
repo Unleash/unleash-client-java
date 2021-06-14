@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.0.0
+- chore: Refactor package names. Moving from `no.finn.unleash` to `io.getunleash` to reflect where development is taking place.
+
 ## 4.3.0
 - feat: Add support for leveraging namePrefix in Java SDK (#135)
 - feat: Adding support for custom proxy (#137)
