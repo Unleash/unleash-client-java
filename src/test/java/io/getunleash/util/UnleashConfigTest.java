@@ -1,5 +1,7 @@
 package io.getunleash.util;
 
+import static io.getunleash.util.UnleashConfig.UNLEASH_APP_NAME_HEADER;
+import static io.getunleash.util.UnleashConfig.UNLEASH_INSTANCE_ID_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -124,9 +126,9 @@ public class UnleashConfigTest {
         HttpURLConnection connection = (HttpURLConnection) someUrl.openConnection();
 
         UnleashConfig.setRequestProperties(connection, unleashConfig);
-        assertThat(connection.getRequestProperty(UnleashConfig.UNLEASH_APP_NAME_HEADER))
+        assertThat(connection.getRequestProperty(UNLEASH_APP_NAME_HEADER))
                 .isEqualTo(appName);
-        assertThat(connection.getRequestProperty(UnleashConfig.UNLEASH_INSTANCE_ID_HEADER))
+        assertThat(connection.getRequestProperty(UNLEASH_INSTANCE_ID_HEADER))
                 .isEqualTo(instanceId);
         assertThat(connection.getRequestProperty("User-Agent")).isEqualTo(appName);
     }

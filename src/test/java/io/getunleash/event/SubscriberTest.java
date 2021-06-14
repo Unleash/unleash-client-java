@@ -1,6 +1,7 @@
 package io.getunleash.event;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static io.getunleash.repository.FeatureToggleResponse.Status.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
@@ -19,7 +20,6 @@ import io.getunleash.repository.FeatureToggleResponse;
 import io.getunleash.util.UnleashConfig;
 import java.util.ArrayList;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +58,7 @@ public class SubscriberTest {
 
         assertThat(testSubscriber.togglesFetchedCounter).isEqualTo(2); // one forced, one scheduled
         assertThat(testSubscriber.status)
-                .isEqualTo(FeatureToggleResponse.Status.UNAVAILABLE);
+                .isEqualTo(UNAVAILABLE);
         assertThat(testSubscriber.toggleEvalutatedCounter).isEqualTo(3);
         assertThat(testSubscriber.toggleName).isEqualTo("myFeature");
         assertThat(testSubscriber.toggleEnabled).isFalse();
