@@ -201,6 +201,6 @@ public class VariantUtilTest {
         assertThat(variantResults)
                 .allSatisfy(
                         (name, variantResult) ->
-                                assertThat(variantResult).hasSizeBetween(2400, 2600));
+                                assertThat(variantResult).hasSizeBetween(2300, 2700));
     }
 }
