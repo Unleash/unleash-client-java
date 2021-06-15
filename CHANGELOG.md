@@ -1,7 +1,11 @@
 # Changelog
 
+
 ## 5.0.0
 - chore: Refactor package names. Moving from `no.finn.unleash` to `io.getunleash` to reflect where development is taking place.
+
+## 4.4.0
+- feat: Add support for custom stickiness (#132)
 
 ## 4.3.0
 - feat: Add support for leveraging namePrefix in Java SDK (#135)
