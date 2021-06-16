@@ -1,8 +1,12 @@
+io.getunleash
+io.getunleash.event
+io.getunleash.lang
+io.getunleash.metric
+io.getunleash.repository
+io.getunleash.strategy
+io.getunleash.util
+io.getunleash.variant
 no.finn.unleash
 no.finn.unleash.event
-no.finn.unleash.lang
 no.finn.unleash.metric
-no.finn.unleash.repository
-no.finn.unleash.strategy
 no.finn.unleash.util
-no.finn.unleash.variant
