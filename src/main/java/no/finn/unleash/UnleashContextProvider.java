@@ -1,9 +1,5 @@
 package no.finn.unleash;
 
-public interface UnleashContextProvider {
-    UnleashContext getContext();
-
-    static UnleashContextProvider getDefaultProvider() {
-        return () -> UnleashContext.builder().build();
-    }
-}
+/** @deprecated Use {@link io.getunleash.UnleashContextProvider} */
+@Deprecated
+public interface UnleashContextProvider extends io.getunleash.UnleashContextProvider {}

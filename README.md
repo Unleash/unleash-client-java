@@ -12,7 +12,7 @@ You will require unleash on your class path, pop it in to your pom:
 
 ```xml
 <dependency>
-    <groupId>no.finn.unleash</groupId>
+    <groupId>io.getunleash</groupId>
     <artifactId>unleash-client-java</artifactId>
     <version>Latest version here</version>
 </dependency>
@@ -168,7 +168,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
 ### Subscriber API
 *(Introduced in 3.2.2)*
 
-Sometimes you want to know when Unleash updates internally. This can be achieved by registering a subscriber. An example on how to configure a custom subscriber is shown below. Have a look at [UnleashSubscriber.java](https://github.com/Unleash/unleash-client-java/blob/master/src/main/java/no/finn/unleash/event/UnleashSubscriber.java) to get a complete overview of all methods you can override.
+Sometimes you want to know when Unleash updates internally. This can be achieved by registering a subscriber. An example on how to configure a custom subscriber is shown below. Have a look at [UnleashSubscriber.java](https://github.com/Unleash/unleash-client-java/blob/master/src/main/java/io/getunleash/event/UnleashSubscriber.java) to get a complete overview of all methods you can override.
 
 
 ```java
@@ -272,7 +272,7 @@ fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
 assertThat(fakeUnleash.getVariant("t1").getName(), is("a"));
 ```
 
-Se more in [FakeUnleashTest.java](https://github.com/Unleash/unleash-client-java/blob/master/src/test/java/no/finn/unleash/FakeUnleashTest.java)
+Se more in [FakeUnleashTest.java](https://github.com/Unleash/unleash-client-java/blob/master/src/test/java/io/getunleash/FakeUnleashTest.java)
 
 ## Development
 
@@ -300,7 +300,7 @@ The generated report will be available at ```target/site/jacoco/index.html```
 
 ## Deployment
  - You'll need an account with Sonatype's JIRA - https://issues.sonatype.org
- - In addition your account needs access to publish under no.finn (for now, we'll be moving to our own groupId soon)
+ - In addition your account needs access to publish under io.getunleash
 ## GPG signing
  - You'll need gpg installed and a configured gpg key for signing the artifacts
 ### Example settings.xml
