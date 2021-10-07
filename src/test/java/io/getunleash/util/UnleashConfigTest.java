@@ -126,10 +126,8 @@ public class UnleashConfigTest {
         HttpURLConnection connection = (HttpURLConnection) someUrl.openConnection();
 
         UnleashConfig.setRequestProperties(connection, unleashConfig);
-        assertThat(connection.getRequestProperty(UNLEASH_APP_NAME_HEADER))
-                .isEqualTo(appName);
-        assertThat(connection.getRequestProperty(UNLEASH_INSTANCE_ID_HEADER))
-                .isEqualTo(instanceId);
+        assertThat(connection.getRequestProperty(UNLEASH_APP_NAME_HEADER)).isEqualTo(appName);
+        assertThat(connection.getRequestProperty(UNLEASH_INSTANCE_ID_HEADER)).isEqualTo(instanceId);
         assertThat(connection.getRequestProperty("User-Agent")).isEqualTo(appName);
     }
 

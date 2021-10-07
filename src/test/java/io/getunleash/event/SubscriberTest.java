@@ -57,8 +57,7 @@ public class SubscriberTest {
         unleash.isEnabled("myFeature");
 
         assertThat(testSubscriber.togglesFetchedCounter).isEqualTo(2); // one forced, one scheduled
-        assertThat(testSubscriber.status)
-                .isEqualTo(UNAVAILABLE);
+        assertThat(testSubscriber.status).isEqualTo(UNAVAILABLE);
         assertThat(testSubscriber.toggleEvalutatedCounter).isEqualTo(3);
         assertThat(testSubscriber.toggleName).isEqualTo("myFeature");
         assertThat(testSubscriber.toggleEnabled).isFalse();
@@ -75,7 +74,7 @@ public class SubscriberTest {
                 .filteredOn(e -> e instanceof ClientRegistration)
                 .hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof ClientMetrics).hasSize(1);
-        assertThat(testSubscriber.events).hasSize(9);
+        assertThat(testSubscriber.events).hasSize(8);
     }
 
     private class TestSubscriber implements UnleashSubscriber {
