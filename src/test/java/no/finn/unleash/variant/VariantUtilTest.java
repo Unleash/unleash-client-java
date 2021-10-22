@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import no.finn.unleash.ActivationStrategy;
@@ -202,5 +203,26 @@ public class VariantUtilTest {
                 .allSatisfy(
                         (name, variantResult) ->
                                 assertThat(variantResult).hasSizeBetween(2400, 2600));
+    }
+
+    @Test
+    public void should_return_same_variant_when_stickiness_is_set_to_default() {
+        VariantDefinition v1 = new VariantDefinition("a", 33, null, null, "default");
+        VariantDefinition v2 = new VariantDefinition("b", 33, null, null, "default");
+        VariantDefinition v3 = new VariantDefinition("c", 34, null, null, "default");
+
+        FeatureToggle toggle =
+                new FeatureToggle(
+                        "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
+
+        UnleashContext context = UnleashContext.builder().userId("40").build();
+        List<Variant> results =
+                IntStream.range(0, 500)
+                        .mapToObj(i -> VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT))
+                        .collect(Collectors.toList());
+        assertThat(results)
+                .allSatisfy(
+                        (Consumer<Variant>)
+                                variant -> assertThat(variant.getName()).isEqualTo(v3.getName()));
     }
 }

@@ -90,7 +90,10 @@ public final class VariantUtil {
         }
         Optional<String> customStickiness =
                 variants.stream()
-                        .filter(f -> f.getStickiness() != null)
+                        .filter(
+                                f ->
+                                        f.getStickiness() != null
+                                                && !"default".equals(f.getStickiness()))
                         .map(VariantDefinition::getStickiness)
                         .findFirst();
         int target =
