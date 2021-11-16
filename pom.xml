@@ -9,6 +9,7 @@
         <version.slf4j>1.7.36</version.slf4j>
         <version.log4j2>2.17.2</version.log4j2>
         <version.junit5>5.8.2</version.junit5>
+        <version.okhttp>4.9.2</version.okhttp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.unleash.specification>4.2.0</version.unleash.specification>
         <arguments />
@@ -58,6 +59,12 @@
             <artifactId>gson</artifactId>
             <version>2.9.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${version.okhttp}</version>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -106,6 +113,13 @@
             <version>4.5.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
+            <version>${version.okhttp}</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
@@ -385,8 +399,7 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
-                <sonatypeOssDistMgmtSnapshotsUrl>https://s01.oss.sonatype.org/content/repositories/snapshots
-                </sonatypeOssDistMgmtSnapshotsUrl>
+                <sonatypeOssDistMgmtSnapshotsUrl>https://s01.oss.sonatype.org/content/repositories/snapshots</sonatypeOssDistMgmtSnapshotsUrl>
             </properties>
             <repositories>
                 <repository>

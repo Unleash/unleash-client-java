@@ -8,6 +8,7 @@ import io.getunleash.UnleashContextProvider;
 import io.getunleash.event.NoOpSubscriber;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
+import io.getunleash.repository.HttpToggleFetcher;
 import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.Strategy;
 import java.io.File;
@@ -25,8 +26,8 @@ import java.util.Optional;
 
 public class UnleashConfig {
 
-    static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
-    static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
+    public static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
+    public static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
 
     private final URI unleashAPI;
     private final UnleashURLs unleashURLs;
@@ -43,6 +44,7 @@ public class UnleashConfig {
     private final long sendMetricsInterval;
     private final boolean disableMetrics;
     private final boolean isProxyAuthenticationByJvmProperties;
+    private final UnleashToggleFetcherFactory unleashToggleFetcherFactory;
     private final UnleashContextProvider contextProvider;
     private final boolean synchronousFetchOnInitialisation;
     private final UnleashScheduledExecutor unleashScheduledExecutor;
@@ -68,6 +70,7 @@ public class UnleashConfig {
             UnleashContextProvider contextProvider,
             boolean isProxyAuthenticationByJvmProperties,
             boolean synchronousFetchOnInitialisation,
+            UnleashToggleFetcherFactory unleashToggleFetcherFactory,
             @Nullable UnleashScheduledExecutor unleashScheduledExecutor,
             @Nullable UnleashSubscriber unleashSubscriber,
             @Nullable Strategy fallbackStrategy,
@@ -128,6 +131,7 @@ public class UnleashConfig {
         this.unleashSubscriber = unleashSubscriber;
         this.toggleBootstrapProvider = unleashBootstrapProvider;
         this.proxy = proxy;
+        this.unleashToggleFetcherFactory = unleashToggleFetcherFactory;
     }
 
     public static Builder builder() {
@@ -240,6 +244,10 @@ public class UnleashConfig {
         return proxy;
     }
 
+    public UnleashToggleFetcherFactory unleashToggleFetcherFactory() {
+        return this.unleashToggleFetcherFactory;
+    }
+
     static class SystemProxyAuthenticator extends Authenticator {
         @Override
         protected @Nullable PasswordAuthentication getPasswordAuthentication() {
@@ -309,6 +317,7 @@ public class UnleashConfig {
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
+        private UnleashToggleFetcherFactory unleashToggleFetcherFactory = HttpToggleFetcher::new;
         private UnleashContextProvider contextProvider =
                 UnleashContextProvider.getDefaultProvider();
         private boolean synchronousFetchOnInitialisation = false;
@@ -377,6 +386,12 @@ public class UnleashConfig {
 
         public Builder namePrefix(String namePrefix) {
             this.namePrefix = namePrefix;
+            return this;
+        }
+
+        public Builder unleashToggleFetcherFactory(
+                UnleashToggleFetcherFactory toggleFetcherFactory) {
+            this.unleashToggleFetcherFactory = toggleFetcherFactory;
             return this;
         }
 
@@ -479,6 +494,7 @@ public class UnleashConfig {
                     contextProvider,
                     isProxyAuthenticationByJvmProperties,
                     synchronousFetchOnInitialisation,
+                    unleashToggleFetcherFactory,
                     Optional.ofNullable(scheduledExecutor)
                             .orElseGet(UnleashScheduledExecutorImpl::getInstance),
                     Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new),
