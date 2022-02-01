@@ -45,10 +45,10 @@ public class ToggleBootstrapHandlerTest {
     @Test
     public void returns_empty_collection_if_invalid_json_string() {
         UnleashConfig config =
-            UnleashConfig.builder()
-                .appName("test")
-                .unleashAPI("http://http://unleash.org")
-                .build();
+                UnleashConfig.builder()
+                        .appName("test")
+                        .unleashAPI("http://http://unleash.org")
+                        .build();
         ToggleBootstrapHandler handler = new ToggleBootstrapHandler(config);
         ToggleCollection parse = handler.parse("qw;lkeruiqwplkerjql;kjglksjdfglksdjflkwsdj");
         assertThat(parse.getFeatures()).isEmpty();
