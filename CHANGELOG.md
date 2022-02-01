@@ -1,6 +1,7 @@
 # Changelog
 
-
+## 5.0.4
+- fix: Bootstrap no longer fails hard when passed invalid json. It now returns an empty list of features if the bootstrap json could not be parsed.
 ## 5.0.0
 - chore: Refactor package names. Moving from `no.finn.unleash` to `io.getunleash` to reflect where development is taking place.
 

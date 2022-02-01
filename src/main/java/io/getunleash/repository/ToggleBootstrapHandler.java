@@ -1,5 +1,6 @@
 package io.getunleash.repository;
 
+import com.google.gson.JsonSyntaxException;
 import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashEvent;
@@ -28,7 +29,7 @@ public class ToggleBootstrapHandler {
                 ToggleCollection toggleCollection = JsonToggleParser.fromJson(stringReader);
                 eventDispatcher.dispatch(new ToggleBootstrapRead(toggleCollection));
                 return toggleCollection;
-            } catch (IllegalStateException ise) {
+            } catch (IllegalStateException | JsonSyntaxException ise) {
                 eventDispatcher.dispatch(
                         new UnleashException("Failed to read toggle bootstrap", ise));
             }
