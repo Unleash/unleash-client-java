@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.1.0
+- feat: Adds support for more constraint operators (String, Number, Semver, Dates)
+  - See https://docs.getunleash.io/advanced/strategy_constraints#constraint-structure
+
 ## 5.0.4
 - fix: Bootstrap no longer fails hard when passed invalid json. It now returns an empty list of features if the bootstrap json could not be parsed.
 ## 5.0.0
