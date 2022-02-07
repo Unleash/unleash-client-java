@@ -8,6 +8,7 @@ public class UnleashContextDefinition {
     private final String remoteAddress;
     private final String environment;
     private final String appName;
+    private final String currentTime;
 
     // Custom context fields used in tests
     private final Map<String, String> properties;
@@ -18,12 +19,14 @@ public class UnleashContextDefinition {
             String remoteAddress,
             String environment,
             String appName,
+            String currentTime,
             Map<String, String> properties) {
         this.userId = userId;
         this.sessionId = sessionId;
         this.remoteAddress = remoteAddress;
         this.environment = environment;
         this.appName = appName;
+        this.currentTime = currentTime;
         this.properties = properties;
     }
 
@@ -45,6 +48,10 @@ public class UnleashContextDefinition {
 
     public String getAppName() {
         return appName;
+    }
+
+    public String getCurrentTime() {
+        return currentTime;
     }
 
     public Map<String, String> getProperties() {

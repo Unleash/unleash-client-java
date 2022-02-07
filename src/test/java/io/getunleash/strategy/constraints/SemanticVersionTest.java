@@ -1,9 +1,9 @@
 package io.getunleash.strategy.constraints;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class SemanticVersionTest {
 
@@ -23,6 +23,5 @@ class SemanticVersionTest {
         assertThat(a.compareTo(b)).isLessThan(0);
         assertThat(b.compareTo(c)).isLessThan(0);
         assertThat(a.compareTo(c)).isLessThan(0);
-
     }
 }

@@ -1,6 +1,5 @@
 package io.getunleash.strategy.constraints;
 
-import javax.annotation.Nonnull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,9 +8,10 @@ import java.util.regex.Pattern;
  * Versions 2.0.0 standard (http://semver.org).
  */
 public class SemanticVersion implements Comparable<SemanticVersion> {
-    private static Pattern VERSION_REGEX = Pattern.compile(
-        "^(?<major>0|[1-9]\\d*)(\\.(?<minor>0|[1-9]\\d*))?(\\.(?<patch>0|[1-9]\\d*))?" +
-            "(\\-(?<prerel>[0-9A-Za-z\\-\\.]+))?(\\+(?<build>[0-9A-Za-z\\-\\.]+))?$");
+    private static Pattern VERSION_REGEX =
+            Pattern.compile(
+                    "^(?<major>0|[1-9]\\d*)(\\.(?<minor>0|[1-9]\\d*))?(\\.(?<patch>0|[1-9]\\d*))?"
+                            + "(\\-(?<prerel>[0-9A-Za-z\\-\\.]+))?(\\+(?<build>[0-9A-Za-z\\-\\.]+))?$");
 
     public static class InvalidVersionException extends Exception {
         public InvalidVersionException(String message) {
@@ -25,7 +25,6 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
     private final String preRelease;
     private final String[] preReleaseComponents;
     private final String build;
-
 
     public SemanticVersion(int major, int minor, int patch, String preRelease, String build) {
         this.major = major;
@@ -62,6 +61,7 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
 
     /**
      * Attempts to parse a string as a semantic version according to the Semver 2.0.0 specification.
+     *
      * @param input the input string
      * @return a SemanticVersion instance
      * @throws InvalidVersionException if the version could not be parsed
@@ -71,15 +71,17 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
     }
 
     /**
-     * Attempts to parse a string as a semantic version according to the Semver 2.0.0 specification, except that
-     * the minor and patch versions may optionally be omitted.
+     * Attempts to parse a string as a semantic version according to the Semver 2.0.0 specification,
+     * except that the minor and patch versions may optionally be omitted.
+     *
      * @param input the input string
-     * @param allowMissingMinorAndPatch true if the parser should tolerate the absence of a minor and/or
-     *   patch version; if absent, they will be treated as zero
+     * @param allowMissingMinorAndPatch true if the parser should tolerate the absence of a minor
+     *     and/or patch version; if absent, they will be treated as zero
      * @return a SemanticVersion instance
      * @throws InvalidVersionException if the version could not be parsed
      */
-    public static SemanticVersion parse(String input, boolean allowMissingMinorAndPatch) throws InvalidVersionException {
+    public static SemanticVersion parse(String input, boolean allowMissingMinorAndPatch)
+            throws InvalidVersionException {
         Matcher matcher = VERSION_REGEX.matcher(input);
         if (!matcher.matches()) {
             throw new InvalidVersionException("Invalid semantic version");
@@ -95,7 +97,8 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
             minor = matcher.group("minor") == null ? 0 : Integer.parseInt(matcher.group("minor"));
             patch = matcher.group("patch") == null ? 0 : Integer.parseInt(matcher.group("patch"));
         } catch (NumberFormatException e) {
-            // COVERAGE: This should be impossible, because our regex should only match if these strings are numeric.
+            // COVERAGE: This should be impossible, because our regex should only match if these
+            // strings are numeric.
             throw new InvalidVersionException("Invalid semantic version");
         }
         String prerelease = matcher.group("prerel");
@@ -110,8 +113,10 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
 
     /**
      * Compares this object with another SemanticVersion according to Semver 2.0.0 precedence rules.
+     *
      * @param other another SemanticVersion
-     * @return 0 if equal, -1 if the current object has lower precedence, or 1 if the current object has higher precedence
+     * @return 0 if equal, -1 if the current object has lower precedence, or 1 if the current object
+     *     has higher precedence
      */
     public int comparePrecedence(SemanticVersion other) {
         if (other == null) {
@@ -141,16 +146,15 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
 
     private int compareIdentifiers(String[] ids1, String[] ids2) {
         for (int i = 0; ; i++) {
-            if (i >= ids1.length)
-            {
+            if (i >= ids1.length) {
                 // x.y is always less than x.y.z
                 return (i >= ids2.length) ? 0 : -1;
             }
-            if (i >= ids2.length)
-            {
+            if (i >= ids2.length) {
                 return 1;
             }
-            // each sub-identifier is compared numerically if both are numeric; if both are non-numeric,
+            // each sub-identifier is compared numerically if both are numeric; if both are
+            // non-numeric,
             // they're compared as strings; otherwise, the numeric one is the lesser one
             int n1 = 0, n2 = 0, d;
             boolean isNum1, isNum2;
@@ -166,16 +170,12 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
             } catch (NumberFormatException e) {
                 isNum2 = false;
             }
-            if (isNum1 && isNum2)
-            {
+            if (isNum1 && isNum2) {
                 d = Integer.compare(n1, n2);
-            }
-            else
-            {
+            } else {
                 d = isNum1 ? -1 : (isNum2 ? 1 : ids1[i].compareTo(ids2[i]));
             }
-            if (d != 0)
-            {
+            if (d != 0) {
                 return d;
             }
         }
