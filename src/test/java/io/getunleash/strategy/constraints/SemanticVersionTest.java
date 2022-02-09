@@ -37,4 +37,12 @@ class SemanticVersionTest {
     assertThat(a.compareTo(beta)).isGreaterThan(0);
     assertThat(a.compareTo(release)).isLessThan(0);
   }
+
+  @Test
+    public void alphaVersionsAlsoCounted() throws SemanticVersion.InvalidVersionException {
+      SemanticVersion alpha = SemanticVersion.parse("1.0.0-alpha.1");
+      SemanticVersion alpha2 = SemanticVersion.parse("1.0.0-alpha.2");
+      assertThat(alpha.compareTo(alpha2)).isLessThan(0);
+      assertThat(alpha).isLessThan(alpha2);
+  }
 }
