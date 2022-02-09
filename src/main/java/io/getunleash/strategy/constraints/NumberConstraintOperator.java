@@ -3,9 +3,7 @@ package io.getunleash.strategy.constraints;
 import io.getunleash.Constraint;
 import io.getunleash.Operator;
 import io.getunleash.UnleashContext;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class NumberConstraintOperator implements ConstraintOperator {
     @Override
@@ -22,10 +20,31 @@ public class NumberConstraintOperator implements ConstraintOperator {
                 .map(
                         cVal -> {
                             try {
-                                Double value = Double.parseDouble(
-                                    constraint.getValue()
-                                );
-                                return eval(constraint.getOperator(), context, value, cVal);
+                                if (constraint.getValues().size() > 0) {
+                                    return constraint.getValues().stream()
+                                            .map(
+                                                    v -> {
+                                                        try {
+                                                            return Double.parseDouble(v);
+                                                        } catch (NumberFormatException nfe) {
+                                                            return null;
+                                                        }
+                                                    })
+                                            .filter(Objects::nonNull)
+                                            .anyMatch(
+                                                    v ->
+                                                            eval(
+                                                                    constraint.getOperator(),
+                                                                    context,
+                                                                    v,
+                                                                    cVal));
+                                } else if (constraint.getValue() != null
+                                        && constraint.getValue().length() > 0) {
+                                    Double value = Double.parseDouble(constraint.getValue());
+                                    return eval(constraint.getOperator(), context, value, cVal);
+                                } else {
+                                    return null;
+                                }
                             } catch (NumberFormatException nfe) {
                                 return null;
                             }

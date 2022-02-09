@@ -2,7 +2,6 @@ package io.getunleash;
 
 import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
-
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,21 +32,21 @@ public class UnleashContext {
         this(appName, environment, userId, sessionId, remoteAddress, null, properties);
     }
 
-  public UnleashContext(
-      @Nullable String appName,
-      @Nullable String environment,
-      @Nullable String userId,
-      @Nullable String sessionId,
-      @Nullable String remoteAddress,
-      @Nullable ZonedDateTime currentTime,
-      Map<String, String> properties) {
-    this.appName = Optional.ofNullable(appName);
-    this.environment = Optional.ofNullable(environment);
-    this.userId = Optional.ofNullable(userId);
-    this.sessionId = Optional.ofNullable(sessionId);
-    this.remoteAddress = Optional.ofNullable(remoteAddress);
-    this.currentTime = Optional.ofNullable(currentTime);
-    this.properties = properties;
+    public UnleashContext(
+            @Nullable String appName,
+            @Nullable String environment,
+            @Nullable String userId,
+            @Nullable String sessionId,
+            @Nullable String remoteAddress,
+            @Nullable ZonedDateTime currentTime,
+            Map<String, String> properties) {
+        this.appName = Optional.ofNullable(appName);
+        this.environment = Optional.ofNullable(environment);
+        this.userId = Optional.ofNullable(userId);
+        this.sessionId = Optional.ofNullable(sessionId);
+        this.remoteAddress = Optional.ofNullable(remoteAddress);
+        this.currentTime = Optional.ofNullable(currentTime);
+        this.properties = properties;
     }
 
     public Optional<String> getUserId() {
@@ -174,7 +173,13 @@ public class UnleashContext {
 
         public UnleashContext build() {
             return new UnleashContext(
-                    appName, environment, userId, sessionId, remoteAddress, currentTime, properties);
+                    appName,
+                    environment,
+                    userId,
+                    sessionId,
+                    remoteAddress,
+                    currentTime,
+                    properties);
         }
     }
 }
