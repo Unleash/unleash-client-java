@@ -11,8 +11,8 @@ class SemanticVersionTest {
   public void obeysSgnRequirementForComparator() throws SemanticVersion.InvalidVersionException {
     SemanticVersion a = SemanticVersion.parse("1.0.0");
     SemanticVersion b = SemanticVersion.parse("1.0.1");
-    assertThat(a.compareTo(b)).isLessThan(0);
-    assertThat(b.compareTo(a)).isGreaterThan(0);
+    assertThat(a).isLessThan(b);
+    assertThat(b).isGreaterThan(a);
   }
 
   @Test
@@ -20,9 +20,9 @@ class SemanticVersionTest {
     SemanticVersion a = SemanticVersion.parse("1.0.0");
     SemanticVersion b = SemanticVersion.parse("1.0.1");
     SemanticVersion c = SemanticVersion.parse("1.1.0");
-    assertThat(a.compareTo(b)).isLessThan(0);
-    assertThat(b.compareTo(c)).isLessThan(0);
-    assertThat(a.compareTo(c)).isLessThan(0);
+    assertThat(a).isLessThan(b);
+    assertThat(b).isLessThan(c);
+    assertThat(a).isLessThan(c);
   }
 
   @Test
@@ -33,9 +33,9 @@ class SemanticVersionTest {
     SemanticVersion beta = SemanticVersion.parse("1.0.0-beta.1");
     SemanticVersion release = SemanticVersion.parse("1.0.0");
 
-    assertThat(a.compareTo(alpha)).isGreaterThan(0);
-    assertThat(a.compareTo(beta)).isGreaterThan(0);
-    assertThat(a.compareTo(release)).isLessThan(0);
+    assertThat(a).isGreaterThan(alpha);
+    assertThat(a).isGreaterThan(beta);
+    assertThat(a).isLessThan(release);
   }
 
   @Test
