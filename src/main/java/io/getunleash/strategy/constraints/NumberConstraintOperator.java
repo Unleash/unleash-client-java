@@ -35,13 +35,12 @@ public class NumberConstraintOperator implements ConstraintOperator {
                                                     v ->
                                                             eval(
                                                                     constraint.getOperator(),
-                                                                    context,
                                                                     v,
                                                                     cVal));
                                 } else if (constraint.getValue() != null
                                         && constraint.getValue().length() > 0) {
                                     Double value = Double.parseDouble(constraint.getValue());
-                                    return eval(constraint.getOperator(), context, value, cVal);
+                                    return eval(constraint.getOperator(), value, cVal);
                                 } else {
                                     return null;
                                 }
@@ -53,7 +52,7 @@ public class NumberConstraintOperator implements ConstraintOperator {
     }
 
     private boolean eval(
-            Operator operator, UnleashContext context, Double value, Double contextValue) {
+            Operator operator, Double value, Double contextValue) {
 
         switch (operator) {
             case NUM_LT:
