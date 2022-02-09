@@ -28,14 +28,14 @@ class SemanticVersionTest {
   @Test
   public void rcIsGreaterThanAlphaAndBetaButSmallerThanRelease()
       throws SemanticVersion.InvalidVersionException {
-    SemanticVersion a = SemanticVersion.parse("1.0.0-rc");
+    SemanticVersion rc = SemanticVersion.parse("1.0.0-rc");
     SemanticVersion alpha = SemanticVersion.parse("1.0.0-alpha.1");
     SemanticVersion beta = SemanticVersion.parse("1.0.0-beta.1");
     SemanticVersion release = SemanticVersion.parse("1.0.0");
 
-    assertThat(a).isGreaterThan(alpha);
-    assertThat(a).isGreaterThan(beta);
-    assertThat(a).isLessThan(release);
+    assertThat(rc).isGreaterThan(alpha);
+    assertThat(rc).isGreaterThan(beta);
+    assertThat(rc).isLessThan(release);
   }
 
   @Test
