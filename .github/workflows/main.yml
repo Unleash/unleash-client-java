@@ -45,7 +45,7 @@ jobs:
       - name: Build, test, coverage
         run: ./mvnw clean test jacoco:report coveralls:report
         env:
-          MAVEN_OPTS: "--add-opens java.base/java.net=ALL-UNNAMED"
+          MAVEN_OPTS: "--add-opens java.base/java.net=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
       - name: Notify Slack of pipeline completion
         uses: 8398a7/action-slack@v2
         with:
