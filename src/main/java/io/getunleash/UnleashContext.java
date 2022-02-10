@@ -2,7 +2,6 @@ package io.getunleash;
 
 import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
-
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -165,6 +164,7 @@ public class UnleashContext {
 
         /**
          * Defaults to now() in UTC timezone
+         *
          * @return this
          */
         public Builder now() {

@@ -31,12 +31,7 @@ public class NumberConstraintOperator implements ConstraintOperator {
                                                         }
                                                     })
                                             .filter(Objects::nonNull)
-                                            .anyMatch(
-                                                    v ->
-                                                            eval(
-                                                                    constraint.getOperator(),
-                                                                    v,
-                                                                    cVal));
+                                            .anyMatch(v -> eval(constraint.getOperator(), v, cVal));
                                 } else if (constraint.getValue() != null
                                         && constraint.getValue().length() > 0) {
                                     Double value = Double.parseDouble(constraint.getValue());
@@ -51,8 +46,7 @@ public class NumberConstraintOperator implements ConstraintOperator {
                 .orElse(false);
     }
 
-    private boolean eval(
-            Operator operator, Double value, Double contextValue) {
+    private boolean eval(Operator operator, Double value, Double contextValue) {
 
         switch (operator) {
             case NUM_LT:
