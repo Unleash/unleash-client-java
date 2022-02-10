@@ -16,9 +16,11 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v1
         with:
-          java-version: 15
+          java-version: 17
       - name: Build
         run: ./mvnw javadoc:javadoc
+        env:
+          MAVEN_OPTS: --add-opens java.base/java.net=ALL-UNNAMED
       - name: Deploy docs to pages
         uses: peaceiris/actions-gh-pages@v3
         with:
