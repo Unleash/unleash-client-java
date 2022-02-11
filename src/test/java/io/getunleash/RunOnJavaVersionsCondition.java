@@ -17,7 +17,7 @@ public class RunOnJavaVersionsCondition implements ExecutionCondition {
                 .map(
                         a -> {
                             String runtimeVersion = getJavaVersion();
-                            if (runtimeVersion != null) {
+                            if (runtimeVersion != null && !runtimeVersion.isEmpty()) {
                                 if (Arrays.stream(a.javaVersions())
                                         .anyMatch(runtimeVersion::startsWith)) {
                                     return ConditionEvaluationResult.enabled(
