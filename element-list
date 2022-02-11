@@ -4,6 +4,7 @@ io.getunleash.lang
 io.getunleash.metric
 io.getunleash.repository
 io.getunleash.strategy
+io.getunleash.strategy.constraints
 io.getunleash.util
 io.getunleash.variant
 no.finn.unleash
