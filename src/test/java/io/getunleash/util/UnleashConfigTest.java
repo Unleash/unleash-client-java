@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import io.getunleash.CustomHttpHeadersProvider;
 import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
+import io.getunleash.RunOnJavaVersions;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -199,6 +200,7 @@ public class UnleashConfigTest {
     }
 
     @Test
+    @RunOnJavaVersions(javaVersions = {"1.8", "11"})
     public void should_enable_proxy_based_on_jvm_settings()
             throws IllegalAccessException, NoSuchFieldException {
 
@@ -259,6 +261,7 @@ public class UnleashConfigTest {
     }
 
     @Test
+    @RunOnJavaVersions(javaVersions = {"1.8", "11"})
     public void should_use_specified_proxy() throws IllegalAccessException, NoSuchFieldException {
 
         String proxyHost = "proxy-host";
@@ -277,7 +280,6 @@ public class UnleashConfigTest {
                                 proxyUser,
                                 proxyPassword)
                         .build();
-
         Field authenticator = Authenticator.class.getDeclaredField("theAuthenticator");
         authenticator.setAccessible(true);
         UnleashConfig.CustomProxyAuthenticator proxyAuthenticator =

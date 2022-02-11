@@ -17,6 +17,7 @@ import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
+import io.getunleash.strategy.constraints.DateParser;
 import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
 import java.io.File;
@@ -158,6 +159,7 @@ public class ClientSpecificationTest {
                         .sessionId(context.getSessionId())
                         .remoteAddress(context.getRemoteAddress())
                         .environment(context.getEnvironment())
+                        .currentTime(DateParser.parseDate(context.getCurrentTime()))
                         .appName(context.getAppName());
 
         if (context.getProperties() != null) {

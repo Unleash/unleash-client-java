@@ -1,5 +1,11 @@
+name: Build
+
 on:
-  pull_request:
+  push:
+    branches:
+      - master
+      - main
+
 
 
 jobs:
@@ -17,6 +23,16 @@ jobs:
           java-version: ${{ matrix.version }}
       - name: Build, test, coverage
         run: ./mvnw clean test jacoco:report coveralls:report
+      - name: Notify Slack of pipeline completion
+        uses: 8398a7/action-slack@v2
+        with:
+          status: ${{ job.status }}
+          author_name: Github Action
+          text: Build on Java ${{ matrix.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook }}
+        if: always()
   java17:
     runs-on: ubuntu-latest
     steps:
@@ -30,4 +46,13 @@ jobs:
         run: ./mvnw clean test jacoco:report coveralls:report
         env:
           MAVEN_OPTS: "--add-opens java.base/java.net=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
-
+      - name: Notify Slack of pipeline completion
+        uses: 8398a7/action-slack@v2
+        with:
+          status: ${{ job.status }}
+          author_name: Github Action
+          text: Build on Java 17
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook }}
+        if: always()

@@ -2,6 +2,8 @@ package io.getunleash;
 
 import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -12,12 +14,13 @@ public class UnleashContext {
     private final Optional<String> userId;
     private final Optional<String> sessionId;
     private final Optional<String> remoteAddress;
+    private final Optional<ZonedDateTime> currentTime;
 
     private final Map<String, String> properties;
 
     public UnleashContext(
             String userId, String sessionId, String remoteAddress, Map<String, String> properties) {
-        this(null, null, userId, sessionId, remoteAddress, properties);
+        this(null, null, userId, sessionId, remoteAddress, null, properties);
     }
 
     public UnleashContext(
@@ -27,11 +30,23 @@ public class UnleashContext {
             @Nullable String sessionId,
             @Nullable String remoteAddress,
             Map<String, String> properties) {
+        this(appName, environment, userId, sessionId, remoteAddress, null, properties);
+    }
+
+    public UnleashContext(
+            @Nullable String appName,
+            @Nullable String environment,
+            @Nullable String userId,
+            @Nullable String sessionId,
+            @Nullable String remoteAddress,
+            @Nullable ZonedDateTime currentTime,
+            Map<String, String> properties) {
         this.appName = Optional.ofNullable(appName);
         this.environment = Optional.ofNullable(environment);
         this.userId = Optional.ofNullable(userId);
         this.sessionId = Optional.ofNullable(sessionId);
         this.remoteAddress = Optional.ofNullable(remoteAddress);
+        this.currentTime = Optional.ofNullable(currentTime);
         this.properties = properties;
     }
 
@@ -57,6 +72,10 @@ public class UnleashContext {
 
     public Optional<String> getEnvironment() {
         return environment;
+    }
+
+    public Optional<ZonedDateTime> getCurrentTime() {
+        return currentTime;
     }
 
     public Optional<String> getByName(String contextName) {
@@ -97,6 +116,7 @@ public class UnleashContext {
         @Nullable private String userId;
         @Nullable private String sessionId;
         @Nullable private String remoteAddress;
+        @Nullable private ZonedDateTime currentTime;
 
         private final Map<String, String> properties = new HashMap<>();
 
@@ -108,6 +128,7 @@ public class UnleashContext {
             context.userId.ifPresent(val -> this.userId = val);
             context.sessionId.ifPresent(val -> this.sessionId = val);
             context.remoteAddress.ifPresent(val -> this.remoteAddress = val);
+            context.currentTime.ifPresent(val -> this.currentTime = val);
             context.properties.forEach(this.properties::put);
         }
 
@@ -136,6 +157,21 @@ public class UnleashContext {
             return this;
         }
 
+        public Builder currentTime(ZonedDateTime currentTime) {
+            this.currentTime = currentTime;
+            return this;
+        }
+
+        /**
+         * Defaults to now() in UTC timezone
+         *
+         * @return this
+         */
+        public Builder now() {
+            this.currentTime = ZonedDateTime.now(ZoneOffset.UTC);
+            return this;
+        }
+
         public Builder addProperty(String name, String value) {
             properties.put(name, value);
             return this;
@@ -143,7 +179,13 @@ public class UnleashContext {
 
         public UnleashContext build() {
             return new UnleashContext(
-                    appName, environment, userId, sessionId, remoteAddress, properties);
+                    appName,
+                    environment,
+                    userId,
+                    sessionId,
+                    remoteAddress,
+                    currentTime,
+                    properties);
         }
     }
 }
