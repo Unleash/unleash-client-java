@@ -358,7 +358,8 @@ The generated report will be available at ```target/site/jacoco/index.html```
 
 ## Configuration options
 
-The `UnleashConfig` class exposes a set of builder methods to configure your Unleash client. The available options are listed below with a description of what they do. For the full signatures, take a look at the [`UnleashConfig` class definition](src/main/java/io/getunleash/util/UnleashConfig.java).
+The `UnleashConfigBuilder` class (created via `UnleashConfig.builder()`) exposes a set of builder methods to configure your Unleash client. The available options are listed below with a description of what they do. For the full signatures, take a look at the [`UnleashConfig` class definition](src/main/java/io/getunleash/util/UnleashConfig.java).
+
 
 | Method name                                | Description                                                                                                                                                         | Required | Default value                        |
 |--------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|--------------------------------------|
@@ -382,3 +383,20 @@ The `UnleashConfig` class exposes a set of builder methods to configure your Unl
 | `toggleBootstrapProvider`                  | Add a [bootstrap provider](#bootstrapping) (must implement the `ToggleBootstrapProvider` interface)                                                                 | No       |                                      |
 | `unleashAPI`                               | The URL of the Unleash API.                                                                                                                                         | Yes      | `null`                               |
 | `unleashContextProvider`                   | An [Unleash context provider used to configure Unleash](#2-via-an-unleashcontextprovider).                                                                          | No       | `null`                               |
+
+When you have set all the desired options, initialize the configuration with the `build` method.
+You can then pass the configuration to the Unleash client constructor.
+As an example:
+
+```java
+
+UnleashConfig config = UnleashConfig.builder()
+            .appName("your app name")
+            .instanceId("instance id")
+            .unleashAPI("http://unleash.herokuapp.com/api/")
+            .customHttpHeader("Authorization", "API token")
+            // ... more configuration options
+            .build();
+
+Unleash unleash = new DefaultUnleash(config);
+```
