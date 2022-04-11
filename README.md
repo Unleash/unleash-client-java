@@ -101,14 +101,13 @@ unleash.isEnabled("someToggle", context);
 ```
 
 
-#### 2. Via a UnleashContextProvider
-This is a bit more advanced approach, where you configure a unleash-context provider.
-By doing this you do not have rebuild or pass the unleash-context object to every
-place you are calling `unleash.isEnabled`.
+#### 2. Via an `UnleashContextProvider`
+This is a more advanced approach, where you configure an Unleash context provider.
+With a context provider, you don't need to rebuild or pass the Unleash context to every `unleash.isEnabled` call.
+
 
 The provider typically binds the context to the same thread as the request.
-If you are using Spring the `UnleashContextProvider` will typically be a
-'request scoped' bean.
+If you use Spring, the `UnleashContextProvider` will typically be a 'request scoped' bean.
 
 
 ```java
