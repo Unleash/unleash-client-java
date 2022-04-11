@@ -296,14 +296,19 @@ The generated report will be available at ```target/site/jacoco/index.html```
 * For VSCode you can use https://marketplace.visualstudio.com/items?itemName=wx-chevalier.google-java-format
 * For VIM there's https://github.com/google/vim-codefmt
 
-# Releasing
+## Releasing
 
-## Deployment
+### Deployment
+
  - You'll need an account with Sonatype's JIRA - https://issues.sonatype.org
  - In addition your account needs access to publish under io.getunleash
-## GPG signing
+
+### GPG signing
+
  - You'll need gpg installed and a configured gpg key for signing the artifacts
-### Example settings.xml
+
+#### Example settings.xml
+
  - In ~/.m2/settings.xml put
 ```xml
 <settings>
@@ -343,5 +348,6 @@ The generated report will be available at ```target/site/jacoco/index.html```
 </settings>
 ```
 
-### More information
+#### More information
+
 - https://central.sonatype.org/pages/ossrh-guide.html
