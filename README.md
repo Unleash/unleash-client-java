@@ -8,6 +8,11 @@ This is the Unleash Client SDK for Java. It is compatible with the [Unleash-host
 
 
 ## Getting started
+
+This section shows you how to get started quickly and explains some common configuration scenarios. For a full overview of Unleash configuration options, check out [the _Configuration options_ section](#configuration-options).
+
+### Add the Unleash client to your class path
+
 You will require unleash on your class path, pop it in to your pom:
 
 ```xml
