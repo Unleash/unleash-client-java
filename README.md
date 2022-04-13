@@ -8,6 +8,11 @@ This is the Unleash Client SDK for Java. It is compatible with the [Unleash-host
 
 
 ## Getting started
+
+This section shows you how to get started quickly and explains some common configuration scenarios. For a full overview of Unleash configuration options, check out [the _Configuration options_ section](#configuration-options).
+
+### Add the Unleash client to your class path
+
 You will require unleash on your class path, pop it in to your pom:
 
 ```xml
@@ -101,14 +106,13 @@ unleash.isEnabled("someToggle", context);
 ```
 
 
-#### 2. Via a UnleashContextProvider
-This is a bit more advanced approach, where you configure a unleash-context provider.
-By doing this you do not have rebuild or pass the unleash-context object to every
-place you are calling `unleash.isEnabled`.
+#### 2. Via an `UnleashContextProvider`
+This is a more advanced approach, where you configure an Unleash context provider.
+With a context provider, you don't need to rebuild or pass the Unleash context to every `unleash.isEnabled` call.
+
 
 The provider typically binds the context to the same thread as the request.
-If you are using Spring the `UnleashContextProvider` will typically be a
-'request scoped' bean.
+If you use Spring, the `UnleashContextProvider` will typically be a 'request scoped' bean.
 
 
 ```java
@@ -296,14 +300,19 @@ The generated report will be available at ```target/site/jacoco/index.html```
 * For VSCode you can use https://marketplace.visualstudio.com/items?itemName=wx-chevalier.google-java-format
 * For VIM there's https://github.com/google/vim-codefmt
 
-# Releasing
+## Releasing
 
-## Deployment
+### Deployment
+
  - You'll need an account with Sonatype's JIRA - https://issues.sonatype.org
  - In addition your account needs access to publish under io.getunleash
-## GPG signing
+
+### GPG signing
+
  - You'll need gpg installed and a configured gpg key for signing the artifacts
-### Example settings.xml
+
+#### Example settings.xml
+
  - In ~/.m2/settings.xml put
 ```xml
 <settings>
@@ -343,5 +352,51 @@ The generated report will be available at ```target/site/jacoco/index.html```
 </settings>
 ```
 
-### More information
+#### More information
+
 - https://central.sonatype.org/pages/ossrh-guide.html
+
+## Configuration options
+
+The `UnleashConfigBuilder` class (created via `UnleashConfig.builder()`) exposes a set of builder methods to configure your Unleash client. The available options are listed below with a description of what they do. For the full signatures, take a look at the [`UnleashConfig` class definition](src/main/java/io/getunleash/util/UnleashConfig.java).
+
+
+| Method name                                | Description                                                                                                                                                                                                                                      | Required | Default value                                                                                                        |
+|--------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------|
+| `appName`                                  | The name of the application as shown in the Unleash UI. Registered applications are listed on the Applications page.                                                                                                                             | Yes      | `null`                                                                                                               |
+| `backupFile`                               | The path to the file where [local backups](#local-backup) get stored.                                                                                                                                                                            | No       | Synthesized from your system's `java.io.tmpdir` and your `appName`: `"<java.io.tmpdir>/unleash-<appName>-repo.json"` |
+| `customHttpHeader`                         | Add a [custom HTTP header](#custom-http-headers) to the list of HTTP headers that will the client sends to the Unleash API. Each method call will add a new header. Note: in most cases, you'll need to use this method to provide an API token. | No       | N/A                                                                                                                  |
+| `customHttpHeadersProvider`                | Add a custom HTTP header provider. Useful for [dynamic custom HTTP headers](#dynamic-custom-http-headers).                                                                                                                                       | No       | `null`                                                                                                               |
+| `disableMetrics`                           | A boolean indicating whether the client should disable sending usage metrics to the Unleash server.                                                                                                                                              | No       | `false`                                                                                                              |
+| `enableProxyAuthenticationByJvmProperties` | Enable support for [using JVM properties for HTTP proxy authentication](#http-proxy-with-authentication).                                                                                                                                        | No       | `false`                                                                                                              |
+| `environment`                              | The name of the current environment.                                                                                                                                                                                                             | No       | `null`                                                                                                               |
+| `fallbackStrategy`                         | A strategy implementation that the client can use if it doesn't recognize the strategy type returned from the server.                                                                                                                            | No       | `null`                                                                                                               |
+| `fetchTogglesInterval`                     | How often (in seconds) the client should check for toggle updates.                                                                                                                                                                               | No       | `10`                                                                                                                 |
+| `instanceId`                               | A unique(-ish) identifier for your instance. Typically a hostname, pod id or something similar. Unleash uses this to separate metrics from the client SDKs with the same `appName`.                                                              | Yes      | `null`                                                                                                               |
+| `namePrefix`                               | If provided, the client will only fetch toggles whose name starts with the provided value.                                                                                                                                                       | No       | `null`                                                                                                               |
+| `projectName`                              | If provided, the client will only fetch toggles from the specified project. (This can also be achieved with an API token).                                                                                                                       | No       | `null`                                                                                                               |
+| `proxy`                                    | A `Proxy` object. Use this to configure a third-party proxy that sits between your client and the Unleash server.                                                                                                                                | No       | `null`                                                                                                               |
+| `scheduledExecutor`                        | A custom executor to control timing and running of tasks (such as fetching toggles, sending metrics).                                                                                                                                            | No       | [`UnleashScheduledExecutorImpl`](src/main/java/io/getunleash/util/UnleashScheduledExecutorImpl.java)                 |
+| `sendMetricsInterval`                      | How often (in seconds) the client should send metrics to the Unleash server. Ignored if you disable metrics with the `disableMetrics` method.                                                                                                    | No       | `60`                                                                                                                 |
+| `subscriber`                               | [Register a subscriber to Unleash client events](#subscriber-api).                                                                                                                                                                               | No       | `null`                                                                                                               |
+| `synchronousFetchOnInitialisation`         | Whether the client should fetch toggle configuration synchronously (in a blocking manner).                                                                                                                                                       | No       | `false`                                                                                                              |
+| `toggleBootstrapProvider`                  | Add a [bootstrap provider](#bootstrapping) (must implement the `ToggleBootstrapProvider` interface)                                                                                                                                              | No       |                                                                                                                      |
+| `unleashAPI`                               | The URL of the Unleash API.                                                                                                                                                                                                                      | Yes      | `null`                                                                                                               |
+| `unleashContextProvider`                   | An [Unleash context provider used to configure Unleash](#2-via-an-unleashcontextprovider).                                                                                                                                                       | No       | `null`                                                                                                               |
+
+When you have set all the desired options, initialize the configuration with the `build` method.
+You can then pass the configuration to the Unleash client constructor.
+As an example:
+
+```java
+
+UnleashConfig config = UnleashConfig.builder()
+            .appName("your app name")
+            .instanceId("instance id")
+            .unleashAPI("http://unleash.herokuapp.com/api/")
+            .customHttpHeader("Authorization", "API token")
+            // ... more configuration options
+            .build();
+
+Unleash unleash = new DefaultUnleash(config);
+```
