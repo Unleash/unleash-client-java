@@ -3,7 +3,7 @@ This is the Unleash Client SDK for Java. It is compatible with the [Unleash-host
 
 
 [![Build Status](https://github.com/Unleash/unleash-client-java/workflows/Build/badge.svg)](https://github.com/Unleash/unleash-client-java/actions)
-[![Coverage Status](https://coveralls.io/repos/github/Unleash/unleash-client-java/badge.svg?branch=master)](https://coveralls.io/github/Unleash/unleash-client-java?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/Unleash/unleash-client-java/badge.svg?branch=main)](https://coveralls.io/github/Unleash/unleash-client-java?branch=main)
 [![Maven Central](https://img.shields.io/maven-central/v/io.getunleash/unleash-client-java)](https://mvnrepository.com/artifact/io.getunleash/unleash-client-java)
 
 
@@ -75,7 +75,7 @@ provided by unleash.
 - RemoteAddressStrategy
 - ApplicationHostnameStrategy
 
-Read more about the strategies in [activation-strategy.md](https://github.com/Unleash/unleash/blob/master/docs/activation-strategies.md).
+Read more about the strategies in [the activation strategies documentation](https://docs.getunleash.io/user_guide/activation_strategy).
 
 #### Custom strategies
 You may also specify and implement your own strategy. The specification must be registered in the Unleash UI and
@@ -90,7 +90,7 @@ Unleash unleash return new DefaultUnleash(config, s1, s2);
 
 ### Unleash context
 
-In order to use some of the common activation strategies you must provide a [unleash-context](https://github.com/Unleash/unleash/blob/master/docs/unleash-context.md).
+In order to use some of the common activation strategies you must provide an [Unleash context](https://docs.getunleash.io/user_guide/unleash_context).
 This client SDK provides two ways of provide the unleash-context:
 
 #### 1. As part of isEnabled call
@@ -172,7 +172,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
 ### Subscriber API
 *(Introduced in 3.2.2)*
 
-Sometimes you want to know when Unleash updates internally. This can be achieved by registering a subscriber. An example on how to configure a custom subscriber is shown below. Have a look at [UnleashSubscriber.java](https://github.com/Unleash/unleash-client-java/blob/master/src/main/java/io/getunleash/event/UnleashSubscriber.java) to get a complete overview of all methods you can override.
+Sometimes you want to know when Unleash updates internally. This can be achieved by registering a subscriber. An example on how to configure a custom subscriber is shown below. Have a look at [UnleashSubscriber.java](https://github.com/Unleash/unleash-client-java/blob/main/src/main/java/io/getunleash/event/UnleashSubscriber.java) to get a complete overview of all methods you can override.
 
 
 ```java
@@ -276,7 +276,7 @@ fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
 assertThat(fakeUnleash.getVariant("t1").getName(), is("a"));
 ```
 
-Se more in [FakeUnleashTest.java](https://github.com/Unleash/unleash-client-java/blob/master/src/test/java/io/getunleash/FakeUnleashTest.java)
+Se more in [FakeUnleashTest.java](https://github.com/Unleash/unleash-client-java/blob/main/src/test/java/io/getunleash/FakeUnleashTest.java)
 
 ## Development
 
@@ -295,7 +295,7 @@ The generated report will be available at ```target/site/jacoco/index.html```
 
 * We're using AOSP Java code style, enforced by [spotless](https://github.com/diffplug/spotless).
   For formatting, use `mvn spotless:apply` and spotless will do the job for you
-* It should apply spotless automatically upon compilation for you, but only on code that is changed since origin/master
+* It should apply spotless automatically upon compilation for you, but only on code that is changed since origin/main
 * For Intelij you can use https://plugins.jetbrains.com/plugin/8527-google-java-format
 * For VSCode you can use https://marketplace.visualstudio.com/items?itemName=wx-chevalier.google-java-format
 * For VIM there's https://github.com/google/vim-codefmt
