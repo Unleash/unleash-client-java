@@ -75,7 +75,7 @@ provided by unleash.
 - RemoteAddressStrategy
 - ApplicationHostnameStrategy
 
-Read more about the strategies in [activation-strategy.md](https://github.com/Unleash/unleash/blob/main/website/docs/user_guide/activation-strategies.md).
+Read more about the strategies in [the activation strategies documentation](https://docs.getunleash.io/user_guide/activation_strategy).
 
 #### Custom strategies
 You may also specify and implement your own strategy. The specification must be registered in the Unleash UI and
@@ -90,7 +90,7 @@ Unleash unleash return new DefaultUnleash(config, s1, s2);
 
 ### Unleash context
 
-In order to use some of the common activation strategies you must provide a [unleash-context](https://github.com/Unleash/unleash/blob/main/website/docs/user_guide/unleash-context.md).
+In order to use some of the common activation strategies you must provide an [Unleash context](https://docs.getunleash.io/user_guide/unleash_context).
 This client SDK provides two ways of provide the unleash-context:
 
 #### 1. As part of isEnabled call
