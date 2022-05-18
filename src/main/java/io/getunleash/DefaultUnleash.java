@@ -1,6 +1,7 @@
 package io.getunleash;
 
 import static io.getunleash.Variant.DISABLED_VARIANT;
+import static io.getunleash.util.ArrayUtils.isNullOrEmpty;
 import static java.util.Optional.ofNullable;
 
 import io.getunleash.event.EventDispatcher;
@@ -8,18 +9,13 @@ import io.getunleash.event.ToggleEvaluated;
 import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
-import io.getunleash.repository.FeatureToggleRepository;
-import io.getunleash.repository.HttpToggleFetcher;
-import io.getunleash.repository.ToggleBackupHandlerFile;
-import io.getunleash.repository.ToggleRepository;
+import io.getunleash.repository.*;
 import io.getunleash.strategy.*;
+import io.getunleash.strategy.segments.Lazy;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantUtil;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -41,17 +37,17 @@ public class DefaultUnleash implements Unleash {
     public static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
     private final UnleashMetricService metricService;
-    private final ToggleRepository toggleRepository;
+    private final IFeatureRepository featureRepository;
     private final Map<String, Strategy> strategyMap;
     private final UnleashContextProvider contextProvider;
     private final EventDispatcher eventDispatcher;
     private final UnleashConfig config;
 
-    private static FeatureToggleRepository defaultToggleRepository(UnleashConfig unleashConfig) {
-        return new FeatureToggleRepository(
+    private static FeatureRepository defaultToggleRepository(UnleashConfig unleashConfig) {
+        return new FeatureRepository(
                 unleashConfig,
                 new HttpToggleFetcher(unleashConfig),
-                new ToggleBackupHandlerFile(unleashConfig));
+                new FeatureBackupHandler(unleashConfig));
     }
 
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {

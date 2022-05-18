@@ -8,8 +8,8 @@ import io.getunleash.util.UnleashConfig;
 public class AdvancedConstraints {
     public static void main(String[] args) throws InterruptedException {
         UnleashConfig config = UnleashConfig.builder().appName("client-example.advanced")
-            .customHttpHeader("Authorization", "default:development.5ad8536b3f4f527355a92a628b4519751804d499ac7155794eb039bf")
-            .unleashAPI("https://app.unleash-hosted.com/hosted/api").instanceId("example")
+            .customHttpHeader("Authorization", "*:development.5f4b073484dd6de99fc2c8a9667b457e6cdb850224ffd71c32996aea")
+            .unleashAPI("http://localhost:4242/api").instanceId("example")
             .build();
         Unleash unleash = new DefaultUnleash(config);
         Thread.sleep(2000);

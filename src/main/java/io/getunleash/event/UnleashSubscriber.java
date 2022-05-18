@@ -3,6 +3,7 @@ package io.getunleash.event;
 import io.getunleash.UnleashException;
 import io.getunleash.metric.ClientMetrics;
 import io.getunleash.metric.ClientRegistration;
+import io.getunleash.repository.FeatureCollection;
 import io.getunleash.repository.FeatureToggleResponse;
 import io.getunleash.repository.ToggleCollection;
 import org.slf4j.LoggerFactory;
@@ -31,4 +32,10 @@ public interface UnleashSubscriber {
     default void toggleBackupRestored(ToggleCollection toggleCollection) {}
 
     default void togglesBootstrapped(ToggleCollection toggleCollection) {}
+
+    default void featuresBootstrapped(FeatureCollection featureCollection) {}
+
+    default void featuresBackedUp(FeatureCollection featureCollection) {}
+
+    default void featuresBackupRestored(FeatureCollection featureCollection) {}
 }
