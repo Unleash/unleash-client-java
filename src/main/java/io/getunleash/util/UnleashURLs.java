@@ -10,15 +10,12 @@ public class UnleashURLs {
     private final URL clientMetricsURL;
     private final URL clientRegisterURL;
 
-    private final URL featuresURL;
-
     public UnleashURLs(URI unleashAPI) {
         try {
             String unleashAPIstr = unleashAPI.toString();
             fetchTogglesURL = URI.create(unleashAPIstr + "/client/features").normalize().toURL();
             clientMetricsURL = URI.create(unleashAPIstr + "/client/metrics").normalize().toURL();
             clientRegisterURL = URI.create(unleashAPIstr + "/client/register").normalize().toURL();
-            featuresURL = URI.create(unleashAPIstr + "/client/register").normalize().toURL();
 
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Unleash API is not a valid URL: " + unleashAPI);

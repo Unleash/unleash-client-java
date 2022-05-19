@@ -6,9 +6,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-/**
- * Lazily resolves the value on get
- * **/
+/** Lazily resolves the value on get * */
 public final class Lazy<T> implements Supplier<T> {
     private transient Supplier<T> supplier;
     private volatile T value;
@@ -46,4 +44,3 @@ public final class Lazy<T> implements Supplier<T> {
         return new Lazy<>(supplier);
     }
 }
-

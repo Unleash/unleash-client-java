@@ -1,7 +1,6 @@
 package io.getunleash.repository;
 
 import io.getunleash.lang.Nullable;
-
 import java.io.Serializable;
 import java.util.Collections;
 
@@ -16,16 +15,29 @@ public final class ClientFeaturesResponse extends FeatureToggleResponse implemen
         this.segmentCollection = new SegmentCollection(Collections.emptyList());
     }
 
-    public ClientFeaturesResponse(Status status, int httpStatusCode, @Nullable SegmentCollection segmentCollection,@Nullable int version) {
+    public ClientFeaturesResponse(
+            Status status,
+            int httpStatusCode,
+            @Nullable SegmentCollection segmentCollection,
+            @Nullable int version) {
         super(status, httpStatusCode);
         this.version = version;
         this.segmentCollection = segmentCollection;
     }
 
-    public ClientFeaturesResponse(Status status, ToggleCollection toggleCollection, @Nullable SegmentCollection segmentCollection) {
+    public ClientFeaturesResponse(
+            Status status,
+            ToggleCollection toggleCollection,
+            @Nullable SegmentCollection segmentCollection) {
         super(status, toggleCollection);
         this.version = 1;
         this.segmentCollection = segmentCollection;
+    }
+
+    public ClientFeaturesResponse(Status status, FeatureCollection featureCollection) {
+        super(status, featureCollection.getToggleCollection());
+        this.version = 1;
+        this.segmentCollection = featureCollection.getSegmentCollection();
     }
 
     public ClientFeaturesResponse(Status status, int httpStatusCode, @Nullable String location) {
@@ -46,9 +58,9 @@ public final class ClientFeaturesResponse extends FeatureToggleResponse implemen
     @Override
     public String toString() {
         return "ClientFeatureResponse:"
-            + " status="
-            + this.getStatus()
-            + " httpStatus="
-            + this.getHttpStatusCode();
+                + " status="
+                + this.getStatus()
+                + " httpStatus="
+                + this.getHttpStatusCode();
     }
 }

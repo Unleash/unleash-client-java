@@ -1,24 +1,35 @@
 package io.getunleash;
 
+import io.getunleash.lang.Nullable;
 import io.getunleash.repository.FeatureRepository;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class ActivationStrategy {
     private final String name;
-    private final Map<String, String> parameters;
+    private final @Nullable Map<String, String> parameters;
     private final List<Constraint> constraints;
     private final List<Integer> segmentIds;
-    private final FeatureRepository repository;
+    private final @Nullable FeatureRepository repository;
 
-    public ActivationStrategy(String name, Map<String, String> parameters, FeatureRepository repository) {
+    public ActivationStrategy(String name, @Nullable Map<String, String> parameters) {
+        this(name, parameters, Collections.emptyList(), Collections.emptyList(), null);
+    }
+
+    public ActivationStrategy(
+            String name,
+            @Nullable Map<String, String> parameters,
+            @Nullable FeatureRepository repository) {
         this(name, parameters, Collections.emptyList(), Collections.emptyList(), repository);
     }
 
     public ActivationStrategy(
-            String name, Map<String, String> parameters, List<Constraint> constraints, List<Integer> segmentIds, FeatureRepository repository) {
+            String name,
+            @Nullable Map<String, String> parameters,
+            List<Constraint> constraints,
+            List<Integer> segmentIds,
+            @Nullable FeatureRepository repository) {
         this.name = name;
         this.parameters = parameters;
         this.constraints = constraints;
@@ -35,14 +46,19 @@ public final class ActivationStrategy {
     }
 
     public List<Constraint> getConstraints() {
-        return Stream.of(constraints,
-                         segmentIds.stream()
-                            .map(repository::getSegment)
-                            .filter(Objects::nonNull)
-                            .map(Segment::getConstraints)
-                            .flatMap(Collection::stream).collect(Collectors.toList()))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-    }
+        if (repository != null) {
+            return Stream.of(
+                            constraints,
+                            segmentIds.stream()
+                                    .map(repository::getSegment)
+                                    .filter(Objects::nonNull)
+                                    .map(Segment::getConstraints)
+                                    .flatMap(Collection::stream)
+                                    .collect(Collectors.toList()))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+        }
 
+        return constraints;
+    }
 }

@@ -6,5 +6,4 @@ import io.getunleash.lang.Nullable;
 public interface IFeatureRepository extends ToggleRepository {
     @Nullable
     Segment getSegment(Integer id);
-
 }

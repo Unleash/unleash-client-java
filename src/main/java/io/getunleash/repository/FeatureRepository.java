@@ -8,12 +8,11 @@ import io.getunleash.event.UnleashReady;
 import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class FeatureRepository implements IFeatureRepository {
-    private final FeatureBackupHandler featureBackupHandler;
+public class FeatureRepository implements IFeatureRepository {
+    private final BackupHandler<FeatureCollection> featureBackupHandler;
     private final FeatureBootstrapHandler featureBootstrapHandler;
     private final FeatureFetcher featureFetcher;
     private final EventDispatcher eventDispatcher;
@@ -24,19 +23,15 @@ public final class FeatureRepository implements IFeatureRepository {
     public FeatureRepository(
             UnleashConfig unleashConfig,
             FeatureFetcher fetcher,
-            FeatureBackupHandler backupHandler) {
-        this(
-                unleashConfig,
-                unleashConfig.getScheduledExecutor(),
-                fetcher,
-                backupHandler);
+            BackupHandler<FeatureCollection> backupHandler) {
+        this(unleashConfig, unleashConfig.getScheduledExecutor(), fetcher, backupHandler);
     }
 
     public FeatureRepository(
             UnleashConfig unleashConfig,
             UnleashScheduledExecutor executor,
             FeatureFetcher featureFetcher,
-            FeatureBackupHandler featureBackupHandler) {
+            BackupHandler<FeatureCollection> featureBackupHandler) {
 
         this.featureBackupHandler = featureBackupHandler;
         this.featureFetcher = featureFetcher;
@@ -60,7 +55,10 @@ public final class FeatureRepository implements IFeatureRepository {
                 ClientFeaturesResponse response = featureFetcher.fetchFeatures();
                 eventDispatcher.dispatch(response);
                 if (response.getStatus() == ClientFeaturesResponse.Status.CHANGED) {
-                    featureCollection = new FeatureCollection(response.getToggleCollection(), response.getSegmentCollection());
+                    featureCollection =
+                            new FeatureCollection(
+                                    response.getToggleCollection(),
+                                    response.getSegmentCollection());
                     featureBackupHandler.write(featureCollection);
                 }
 

@@ -7,7 +7,6 @@ import io.getunleash.event.UnleashEvent;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
-
 import java.io.StringReader;
 import java.util.Collections;
 

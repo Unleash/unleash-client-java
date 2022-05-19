@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import io.getunleash.repository.ToggleRepository;
+import io.getunleash.repository.FeatureRepository;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.strategy.UserWithIdStrategy;
 import io.getunleash.util.UnleashConfig;
@@ -18,13 +18,13 @@ import org.junit.jupiter.api.Test;
 
 public class UnleashTest {
 
-    private ToggleRepository toggleRepository;
+    private FeatureRepository toggleRepository;
     private UnleashContextProvider contextProvider;
     private Unleash unleash;
 
     @BeforeEach
     public void setup() {
-        toggleRepository = mock(ToggleRepository.class);
+        toggleRepository = mock(FeatureRepository.class);
         contextProvider = mock(UnleashContextProvider.class);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
@@ -403,7 +403,9 @@ public class UnleashTest {
     public void should_be_enabled_with_strategy_constraints() {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test")));
-        ActivationStrategy activeStrategy = new ActivationStrategy("default", null, constraints);
+        ActivationStrategy activeStrategy =
+                new ActivationStrategy(
+                        "default", null, constraints, Collections.emptyList(), toggleRepository);
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
@@ -416,7 +418,9 @@ public class UnleashTest {
     public void should_be_disabled_with_strategy_constraints() {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("dev", "prod")));
-        ActivationStrategy activeStrategy = new ActivationStrategy("default", null, constraints);
+        ActivationStrategy activeStrategy =
+                new ActivationStrategy(
+                        "default", null, constraints, Collections.emptyList(), toggleRepository);
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 

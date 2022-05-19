@@ -2,9 +2,6 @@ package io.getunleash.repository;
 
 import io.getunleash.UnleashException;
 import io.getunleash.util.UnleashConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class HttpFeatureFetcher implements FeatureFetcher {
     private static final Logger LOG = LoggerFactory.getLogger(HttpFeatureFetcher.class);
@@ -33,7 +32,7 @@ public final class HttpFeatureFetcher implements FeatureFetcher {
     }
 
     @Override
-    public ClientFeaturesResponse fetchFeatures () throws UnleashException {
+    public ClientFeaturesResponse fetchFeatures() throws UnleashException {
         HttpURLConnection connection = null;
         try {
             connection = openConnection(toggleUrl);
@@ -64,7 +63,10 @@ public final class HttpFeatureFetcher implements FeatureFetcher {
                                     (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
                 FeatureCollection features = JsonFeatureParser.fromJson(reader);
-                return new ClientFeaturesResponse(ClientFeaturesResponse.Status.CHANGED, features.getToggleCollection(), features.getSegmentCollection());
+                return new ClientFeaturesResponse(
+                        ClientFeaturesResponse.Status.CHANGED,
+                        features.getToggleCollection(),
+                        features.getSegmentCollection());
             }
         } else if (followRedirect
                 && (responseCode == HttpURLConnection.HTTP_MOVED_TEMP

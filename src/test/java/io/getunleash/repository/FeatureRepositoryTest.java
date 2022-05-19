@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import io.getunleash.ActivationStrategy;
-import io.getunleash.FeatureToggle;
+import io.getunleash.*;
+import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.io.File;
@@ -13,14 +13,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-public class FeatureToggleRepositoryTest {
+public class FeatureRepositoryTest {
 
     @Test
     public void no_backup_file_and_no_repository_available_should_give_empty_repo() {
@@ -29,11 +26,12 @@ public class FeatureToggleRepositoryTest {
                         .appName("test")
                         .unleashAPI("http://localhost:4242/api/")
                         .build();
-        ToggleFetcher toggleFetcher = new HttpToggleFetcher(config);
-        BackupHandler<ToggleCollection> toggleBackupHandler = new ToggleBackupHandlerFile(config);
+        FeatureFetcher fetcher = new HttpFeatureFetcher(config);
+        BackupHandler<FeatureCollection> featureCollectionBackupHandler =
+                new FeatureBackupHandlerFile(config);
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         ToggleRepository toggleRepository =
-                new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+                new FeatureRepository(config, executor, fetcher, featureCollectionBackupHandler);
         assertNull(toggleRepository.getToggle("unknownFeature"), "should be null");
     }
 
@@ -46,40 +44,48 @@ public class FeatureToggleRepositoryTest {
                         .fetchTogglesInterval(Long.MAX_VALUE)
                         .build();
 
-        BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
-        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
-        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
+        BackupHandler<FeatureCollection> backupHandler = mock(BackupHandler.class);
+        when(backupHandler.read())
+                .thenReturn(
+                        new FeatureCollection(
+                                new ToggleCollection(Collections.emptyList()),
+                                new SegmentCollection(Collections.emptyList())));
+        FeatureFetcher fetcher = mock(FeatureFetcher.class);
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        new FeatureRepository(config, executor, fetcher, backupHandler);
 
-        verify(toggleBackupHandler, times(1)).read();
+        verify(backupHandler, times(1)).read();
     }
 
     @Test
     public void feature_toggles_should_be_updated()
             throws URISyntaxException, InterruptedException {
-        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
+        FeatureFetcher fetcher = mock(FeatureFetcher.class);
 
         // setup backupHandler
-        BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
-        ToggleCollection toggleCollection =
-                populatedToggleCollection(
+        BackupHandler<FeatureCollection> backupHandler = mock(BackupHandler.class);
+        FeatureCollection featureCollection =
+                populatedFeatureCollection(
+                        null,
                         new FeatureToggle(
                                 "toggleFetcherCalled",
                                 false,
                                 Arrays.asList(new ActivationStrategy("custom", null))));
-        when(toggleBackupHandler.read()).thenReturn(toggleCollection);
+        when(backupHandler.read()).thenReturn(featureCollection);
 
         // setup fetcher
-        toggleCollection =
-                populatedToggleCollection(
+        featureCollection =
+                populatedFeatureCollection(
+                        null,
                         new FeatureToggle(
                                 "toggleFetcherCalled",
                                 true,
                                 Arrays.asList(new ActivationStrategy("custom", null))));
-        FeatureToggleResponse response =
-                new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggleCollection);
-        when(toggleFetcher.fetchToggles()).thenReturn(response);
+        ClientFeaturesResponse response =
+                new ClientFeaturesResponse(
+                        ClientFeaturesResponse.Status.CHANGED, featureCollection);
+
+        when(fetcher.fetchFeatures()).thenReturn(response);
 
         // init
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
@@ -92,32 +98,33 @@ public class FeatureToggleRepositoryTest {
                         .fetchTogglesInterval(200L)
                         .build();
 
-        ToggleRepository toggleRepository =
-                new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        FeatureRepository featureRepository =
+                new FeatureRepository(config, executor, fetcher, backupHandler);
 
         // run the toggleName fetcher callback
         verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
-        verify(toggleFetcher, times(0)).fetchToggles();
+        verify(fetcher, times(0)).fetchFeatures();
         runnableArgumentCaptor.getValue().run();
 
-        verify(toggleBackupHandler, times(1)).read();
-        verify(toggleFetcher, times(1)).fetchToggles();
-        assertTrue(toggleRepository.getToggle("toggleFetcherCalled").isEnabled());
+        verify(backupHandler, times(1)).read();
+        verify(fetcher, times(1)).fetchFeatures();
+        assertTrue(featureRepository.getToggle("toggleFetcherCalled").isEnabled());
     }
 
     @Test
     public void get_feature_names_should_return_list_of_names() {
         UnleashConfig config = mock(UnleashConfig.class);
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
+        FeatureFetcher fetcher = mock(FeatureFetcher.class);
 
-        BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
-        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
+        BackupHandler<FeatureCollection> backupHandler = mock(BackupHandler.class);
+        when(backupHandler.read()).thenReturn(new FeatureCollection());
 
-        ToggleRepository toggleRepository =
-                new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
-        ToggleCollection toggleCollection =
-                populatedToggleCollection(
+        FeatureRepository featureRepository =
+                new FeatureRepository(config, executor, fetcher, backupHandler);
+        FeatureCollection featureCollection =
+                populatedFeatureCollection(
+                        null,
                         new FeatureToggle(
                                 "toggleFeatureName1",
                                 true,
@@ -126,10 +133,10 @@ public class FeatureToggleRepositoryTest {
                                 "toggleFeatureName2",
                                 true,
                                 Arrays.asList(new ActivationStrategy("custom", null))));
-        when(toggleBackupHandler.read()).thenReturn(toggleCollection);
+        when(backupHandler.read()).thenReturn(featureCollection);
 
-        assertEquals(2, toggleRepository.getFeatureNames().size());
-        assertEquals("toggleFeatureName2", toggleRepository.getFeatureNames().get(1));
+        assertEquals(2, featureRepository.getFeatureNames().size());
+        assertEquals("toggleFeatureName2", featureRepository.getFeatureNames().get(1));
     }
 
     @Test
@@ -141,19 +148,21 @@ public class FeatureToggleRepositoryTest {
                         .unleashAPI("http://localhost:8080")
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
-        BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
-        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
+
+        FeatureFetcher fetcher = new HttpFeatureFetcher(config);
+        BackupHandler<FeatureCollection> backupHandler = new FeatureBackupHandlerFile(config);
+        when(backupHandler.read()).thenReturn(new FeatureCollection());
 
         // setup fetcher
-        ToggleCollection toggleCollection = populatedToggleCollection();
-        FeatureToggleResponse response =
-                new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggleCollection);
-        when(toggleFetcher.fetchToggles()).thenReturn(response);
+        FeatureCollection featureCollection = populatedFeatureCollection(null);
+        ClientFeaturesResponse response =
+                new ClientFeaturesResponse(
+                        ClientFeaturesResponse.Status.CHANGED, featureCollection);
+        when(fetcher.fetchFeatures()).thenReturn(response);
 
-        new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        new FeatureRepository(config, executor, fetcher, backupHandler);
 
-        verify(toggleFetcher, times(1)).fetchToggles();
+        verify(fetcher, times(1)).fetchFeatures();
     }
 
     @Test
@@ -165,25 +174,32 @@ public class FeatureToggleRepositoryTest {
                         .unleashAPI("http://localhost:8080")
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
-        BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
-        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
+        FeatureFetcher fetcher = new HttpFeatureFetcher(config);
+        BackupHandler<FeatureCollection> backupHandler = new FeatureBackupHandlerFile(config);
+        when(backupHandler.read()).thenReturn(new FeatureCollection());
 
         // setup fetcher
-        ToggleCollection toggleCollection = populatedToggleCollection();
-        FeatureToggleResponse response =
-                new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggleCollection);
-        when(toggleFetcher.fetchToggles()).thenReturn(response);
+        FeatureCollection featureCollection = populatedFeatureCollection(null);
+        ClientFeaturesResponse response =
+                new ClientFeaturesResponse(
+                        ClientFeaturesResponse.Status.CHANGED, featureCollection);
+        when(fetcher.fetchFeatures()).thenReturn(response);
 
-        new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        new FeatureRepository(config, executor, fetcher, backupHandler);
 
-        verify(toggleFetcher, times(0)).fetchToggles();
+        verify(fetcher, times(0)).fetchFeatures();
     }
 
-    private ToggleCollection populatedToggleCollection(FeatureToggle... featureToggles) {
-        List<FeatureToggle> list = new ArrayList();
-        list.addAll(Arrays.asList(featureToggles));
-        return new ToggleCollection(list);
+    private FeatureCollection populatedFeatureCollection(
+            @Nullable List<Segment> segments, FeatureToggle... featureToggles) {
+        List<FeatureToggle> toggleList = new ArrayList();
+        toggleList.addAll(Arrays.asList(featureToggles));
+
+        List<Segment> segmentList = new ArrayList<>();
+        if (segments != null) segmentList.addAll(segments);
+
+        return new FeatureCollection(
+                new ToggleCollection(toggleList), new SegmentCollection(segmentList));
     }
 
     @Test
@@ -201,11 +217,10 @@ public class FeatureToggleRepositoryTest {
                         .toggleBootstrapProvider(toggleBootstrapProvider)
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
-        BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
-        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
-        FeatureToggleRepository repo =
-                new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        FeatureFetcher fetcher = new HttpFeatureFetcher(config);
+        BackupHandler<FeatureCollection> backupHandler = new FeatureBackupHandlerFile(config);
+        when(backupHandler.read()).thenReturn(new FeatureCollection());
+        FeatureRepository repo = new FeatureRepository(config, executor, fetcher, backupHandler);
         assertThat(repo.getFeatureNames()).hasSize(3);
     }
 
@@ -224,11 +239,24 @@ public class FeatureToggleRepositoryTest {
                         .toggleBootstrapProvider(toggleBootstrapProvider)
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
-        BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
-        when(toggleBackupHandler.read())
+        FeatureFetcher fetcher = new HttpFeatureFetcher(config);
+        BackupHandler<FeatureCollection> backupHandler = new FeatureBackupHandlerFile(config);
+        when(backupHandler.read()).thenReturn(new FeatureCollection());
+        when(backupHandler.read())
                 .thenReturn(
-                        populatedToggleCollection(
+                        populatedFeatureCollection(
+                                Arrays.asList(
+                                        new Segment(
+                                                1,
+                                                "some-name",
+                                                null,
+                                                Arrays.asList(
+                                                        new Constraint(
+                                                                "some-context",
+                                                                Operator.IN,
+                                                                "some-value")),
+                                                "some-created-by",
+                                                "some-created-on")),
                                 new FeatureToggle(
                                         "toggleFeatureName1",
                                         true,
@@ -239,8 +267,7 @@ public class FeatureToggleRepositoryTest {
                                         true,
                                         Collections.singletonList(
                                                 new ActivationStrategy("custom", null)))));
-        FeatureToggleRepository repo =
-                new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        FeatureRepository repo = new FeatureRepository(config, executor, fetcher, backupHandler);
         verify(toggleBootstrapProvider, times(0)).read();
     }
 

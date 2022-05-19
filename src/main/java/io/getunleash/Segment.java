@@ -1,19 +1,23 @@
 package io.getunleash;
 
 import io.getunleash.lang.Nullable;
-
 import java.util.List;
 
 public class Segment {
     private int id;
     private String name;
-    @Nullable
-    private String description;
+    @Nullable private String description;
     private List<Constraint> constraints;
     private String createdBy;
     private String createdAt;
 
-    public Segment(int id, String name, @Nullable String description, List<Constraint> constraints, String createdBy, String createdAt) {
+    public Segment(
+            int id,
+            String name,
+            @Nullable String description,
+            List<Constraint> constraints,
+            String createdBy,
+            String createdAt) {
         this.id = id;
         this.name = name;
         this.description = description;

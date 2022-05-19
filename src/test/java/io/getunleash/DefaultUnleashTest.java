@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.metric.UnleashMetricService;
-import io.getunleash.repository.ToggleRepository;
+import io.getunleash.repository.FeatureRepository;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
 import java.util.Arrays;
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 class DefaultUnleashTest {
     private DefaultUnleash sut;
-    private ToggleRepository toggleRepository;
+    private FeatureRepository featureRepository;
     private UnleashContextProvider contextProvider;
     private EventDispatcher eventDispatcher;
     private UnleashMetricService metricService;
@@ -27,7 +27,7 @@ class DefaultUnleashTest {
     public void setup() {
         UnleashConfig unleashConfig =
                 UnleashConfig.builder().unleashAPI("http://fakeAPI").appName("fakeApp").build();
-        toggleRepository = mock(ToggleRepository.class);
+        featureRepository = mock(FeatureRepository.class);
         Map<String, Strategy> strategyMap = new HashMap<>();
         contextProvider = mock(UnleashContextProvider.class);
         eventDispatcher = mock(EventDispatcher.class);
@@ -36,7 +36,7 @@ class DefaultUnleashTest {
         sut =
                 new DefaultUnleash(
                         unleashConfig,
-                        toggleRepository,
+                        featureRepository,
                         strategyMap,
                         contextProvider,
                         eventDispatcher,
@@ -45,7 +45,7 @@ class DefaultUnleashTest {
 
     @Test
     public void should_evaluate_all_toggle_with_context() {
-        when(toggleRepository.getFeatureNames()).thenReturn(Arrays.asList("toggle1", "toggle2"));
+        when(featureRepository.getFeatureNames()).thenReturn(Arrays.asList("toggle1", "toggle2"));
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
         List<EvaluatedToggle> toggles = sut.more().evaluateAllToggles();
@@ -84,7 +84,7 @@ class DefaultUnleashTest {
         sut =
                 new DefaultUnleash(
                         unleashConfigWithFallback,
-                        toggleRepository,
+                        featureRepository,
                         new HashMap<>(),
                         contextProvider,
                         eventDispatcher,
@@ -92,7 +92,7 @@ class DefaultUnleashTest {
 
         ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
         FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
-        when(toggleRepository.getToggle("toggle1")).thenReturn(toggle);
+        when(featureRepository.getToggle("toggle1")).thenReturn(toggle);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
         sut.isEnabled("toggle1");

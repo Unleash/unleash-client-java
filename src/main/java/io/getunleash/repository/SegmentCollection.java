@@ -2,7 +2,6 @@ package io.getunleash.repository;
 
 import io.getunleash.Segment;
 import io.getunleash.lang.Nullable;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,8 +17,9 @@ public final class SegmentCollection implements Serializable {
 
     public SegmentCollection(final Collection<Segment> segments) {
         this.segments = ensureNotNull(segments);
-        this.cache = segments.stream()
-            .collect(Collectors.toConcurrentMap(Segment::getId, Function.identity()));
+        this.cache =
+                segments.stream()
+                        .collect(Collectors.toConcurrentMap(Segment::getId, Function.identity()));
     }
 
     private Collection<Segment> ensureNotNull(@Nullable Collection<Segment> segments) {

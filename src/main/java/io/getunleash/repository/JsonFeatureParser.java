@@ -2,16 +2,15 @@ package io.getunleash.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import java.io.Reader;
 
 final class JsonFeatureParser {
 
     private JsonFeatureParser() {}
 
-    public static String toJsonString(SegmentCollection segmentCollection) {
+    public static String toJsonString(FeatureCollection featureCollection) {
         Gson gson = new GsonBuilder().create();
-        return gson.toJson(segmentCollection);
+        return gson.toJson(featureCollection);
     }
 
     public static FeatureCollection fromJson(Reader reader) throws IllegalStateException {
@@ -24,6 +23,7 @@ final class JsonFeatureParser {
         if (gsonCollection == null) {
             throw new IllegalStateException("Could not extract features from json");
         }
-        return new FeatureCollection(gsonCollection.getToggleCollection(), gsonCollection.getSegmentCollection());
+        return new FeatureCollection(
+                gsonCollection.getToggleCollection(), gsonCollection.getSegmentCollection());
     }
 }
