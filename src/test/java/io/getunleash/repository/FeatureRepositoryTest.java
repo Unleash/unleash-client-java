@@ -44,7 +44,7 @@ public class FeatureRepositoryTest {
                         .fetchTogglesInterval(Long.MAX_VALUE)
                         .build();
 
-        BackupHandler<FeatureCollection> backupHandler = mock(BackupHandler.class);
+        BackupHandler<FeatureCollection> backupHandler = mock(FeatureBackupHandlerFile.class);
         when(backupHandler.read())
                 .thenReturn(
                         new FeatureCollection(
@@ -63,7 +63,7 @@ public class FeatureRepositoryTest {
         FeatureFetcher fetcher = mock(FeatureFetcher.class);
 
         // setup backupHandler
-        BackupHandler<FeatureCollection> backupHandler = mock(BackupHandler.class);
+        BackupHandler<FeatureCollection> backupHandler = mock(FeatureBackupHandlerFile.class);
         FeatureCollection featureCollection =
                 populatedFeatureCollection(
                         null,
@@ -117,11 +117,8 @@ public class FeatureRepositoryTest {
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         FeatureFetcher fetcher = mock(FeatureFetcher.class);
 
-        BackupHandler<FeatureCollection> backupHandler = mock(BackupHandler.class);
-        when(backupHandler.read()).thenReturn(new FeatureCollection());
+        BackupHandler<FeatureCollection> backupHandler = mock(FeatureBackupHandlerFile.class);
 
-        FeatureRepository featureRepository =
-                new FeatureRepository(config, executor, fetcher, backupHandler);
         FeatureCollection featureCollection =
                 populatedFeatureCollection(
                         null,
@@ -134,6 +131,9 @@ public class FeatureRepositoryTest {
                                 true,
                                 Arrays.asList(new ActivationStrategy("custom", null))));
         when(backupHandler.read()).thenReturn(featureCollection);
+
+        FeatureRepository featureRepository =
+            new FeatureRepository(config, executor, fetcher, backupHandler);
 
         assertEquals(2, featureRepository.getFeatureNames().size());
         assertEquals("toggleFeatureName2", featureRepository.getFeatureNames().get(1));
@@ -149,8 +149,8 @@ public class FeatureRepositoryTest {
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
 
-        FeatureFetcher fetcher = new HttpFeatureFetcher(config);
-        BackupHandler<FeatureCollection> backupHandler = new FeatureBackupHandlerFile(config);
+        FeatureFetcher fetcher = mock(HttpFeatureFetcher.class);
+        BackupHandler<FeatureCollection> backupHandler = mock(FeatureBackupHandlerFile.class);
         when(backupHandler.read()).thenReturn(new FeatureCollection());
 
         // setup fetcher
@@ -174,8 +174,8 @@ public class FeatureRepositoryTest {
                         .unleashAPI("http://localhost:8080")
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        FeatureFetcher fetcher = new HttpFeatureFetcher(config);
-        BackupHandler<FeatureCollection> backupHandler = new FeatureBackupHandlerFile(config);
+        FeatureFetcher fetcher = mock(HttpFeatureFetcher.class);
+        BackupHandler<FeatureCollection> backupHandler = mock(FeatureBackupHandlerFile.class);
         when(backupHandler.read()).thenReturn(new FeatureCollection());
 
         // setup fetcher
@@ -206,7 +206,7 @@ public class FeatureRepositoryTest {
     public void should_read_from_bootstrap_location_if_backup_was_empty()
             throws URISyntaxException, IOException {
         File file =
-                new File(getClass().getClassLoader().getResource("unleash-repo-v1.json").toURI());
+                new File(getClass().getClassLoader().getResource("unleash-repo-v2.json").toURI());
         ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
         when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
         UnleashConfig config =
@@ -218,10 +218,10 @@ public class FeatureRepositoryTest {
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         FeatureFetcher fetcher = new HttpFeatureFetcher(config);
-        BackupHandler<FeatureCollection> backupHandler = new FeatureBackupHandlerFile(config);
+        BackupHandler<FeatureCollection> backupHandler = mock(FeatureBackupHandlerFile.class);
         when(backupHandler.read()).thenReturn(new FeatureCollection());
         FeatureRepository repo = new FeatureRepository(config, executor, fetcher, backupHandler);
-        assertThat(repo.getFeatureNames()).hasSize(3);
+        assertThat(repo.getFeatureNames()).hasSize(5);
     }
 
     @Test
@@ -240,8 +240,7 @@ public class FeatureRepositoryTest {
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         FeatureFetcher fetcher = new HttpFeatureFetcher(config);
-        BackupHandler<FeatureCollection> backupHandler = new FeatureBackupHandlerFile(config);
-        when(backupHandler.read()).thenReturn(new FeatureCollection());
+        BackupHandler<FeatureCollection> backupHandler = mock(FeatureBackupHandlerFile.class);
         when(backupHandler.read())
                 .thenReturn(
                         populatedFeatureCollection(

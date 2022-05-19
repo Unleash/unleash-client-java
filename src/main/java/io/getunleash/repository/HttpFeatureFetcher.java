@@ -13,7 +13,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HttpFeatureFetcher implements FeatureFetcher {
+public class HttpFeatureFetcher implements FeatureFetcher {
     private static final Logger LOG = LoggerFactory.getLogger(HttpFeatureFetcher.class);
 
     private static final int CONNECT_TIMEOUT = 10000;

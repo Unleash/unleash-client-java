@@ -112,10 +112,7 @@ public class FeatureToggleRepositoryTest {
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
 
         BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
-        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
 
-        ToggleRepository toggleRepository =
-                new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
         ToggleCollection toggleCollection =
                 populatedToggleCollection(
                         new FeatureToggle(
@@ -127,6 +124,9 @@ public class FeatureToggleRepositoryTest {
                                 true,
                                 Arrays.asList(new ActivationStrategy("custom", null))));
         when(toggleBackupHandler.read()).thenReturn(toggleCollection);
+
+        ToggleRepository toggleRepository =
+            new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
 
         assertEquals(2, toggleRepository.getFeatureNames().size());
         assertEquals("toggleFeatureName2", toggleRepository.getFeatureNames().get(1));
