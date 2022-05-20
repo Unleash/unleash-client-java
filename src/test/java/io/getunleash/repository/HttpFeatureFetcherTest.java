@@ -2,7 +2,7 @@ package io.getunleash.repository;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
@@ -16,6 +16,7 @@ import io.getunleash.util.UnleashConfig;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,8 +27,20 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class HttpFeatureFetcherTest {
 
     @ConfigureWireMock Options options = wireMockConfig().dynamicPort();
-
     @InjectServer WireMockServer serverMock;
+    HttpFeatureFetcher fetcher;
+
+    @BeforeEach
+    void setUp() {
+        URI uri = null;
+        try {
+            uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
+        fetcher = HttpFeatureFetcher.init(config);
+    }
 
     /*
     @Test
@@ -49,7 +62,7 @@ public class HttpFeatureFetcherTest {
     */
 
     @Test
-    public void happy_path_test() throws URISyntaxException {
+    public void happy_path_test_with_variants_and_segments() throws URISyntaxException {
         stubFor(
                 get(urlEqualTo("/api/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
@@ -57,11 +70,8 @@ public class HttpFeatureFetcherTest {
                                 aResponse()
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
-                                        .withBodyFile("features-v0.json")));
+                                        .withBodyFile("features-v2-with-segments.json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
         FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
@@ -73,32 +83,8 @@ public class HttpFeatureFetcherTest {
     }
 
     @Test
-    public void happy_path_test_version_with_variants() throws URISyntaxException {
-        stubFor(
-                get(urlEqualTo("/api/client/features"))
-                        .withHeader("Accept", equalTo("application/json"))
-                        .willReturn(
-                                aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBodyFile("features-v1-with-variants.json")));
-
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
-        ClientFeaturesResponse response = fetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("Test.variants");
-
-        assertThat(featureX.isEnabled()).isTrue();
-        assertThat(featureX.getVariants().get(0).getName()).isEqualTo("variant1");
-
-        verify(
-                getRequestedFor(urlMatching("/api/client/features"))
-                        .withHeader("Content-Type", matching("application/json")));
-    }
-
-    @Test
     public void should_include_etag_in_second_request() throws URISyntaxException {
+
         // First fetch
         stubFor(
                 get(urlEqualTo("/api/client/features"))
@@ -108,7 +94,7 @@ public class HttpFeatureFetcherTest {
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
                                         .withHeader("ETag", "AZ12")
-                                        .withBodyFile("features-v1-with-variants.json")));
+                                        .withBodyFile("features-v2-with-segments.json")));
 
         // Second fetch
         stubFor(
@@ -119,9 +105,6 @@ public class HttpFeatureFetcherTest {
                                         .withStatus(304)
                                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
         ClientFeaturesResponse response1 = fetcher.fetchFeatures();
         ClientFeaturesResponse response2 = fetcher.fetchFeatures();
 
@@ -132,7 +115,9 @@ public class HttpFeatureFetcherTest {
     @Test
     @ExtendWith(UnleashExceptionExtension.class)
     public void given_empty_body() throws URISyntaxException {
-        stubFor(
+        serverMock.resetAll();
+        ;
+        serverMock.stubFor(
                 get(urlEqualTo("/api/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
                         .willReturn(
@@ -140,12 +125,9 @@ public class HttpFeatureFetcherTest {
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
         fetcher.fetchFeatures();
 
-        verify(
+        serverMock.verify(
                 getRequestedFor(urlMatching("/api/client/features"))
                         .withHeader("Content-Type", matching("application/json")));
     }
@@ -153,7 +135,8 @@ public class HttpFeatureFetcherTest {
     @Test
     @ExtendWith(UnleashExceptionExtension.class)
     public void given_json_without_feature_field() throws Exception {
-        stubFor(
+
+        serverMock.stubFor(
                 get(urlEqualTo("/api/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
                         .willReturn(
@@ -162,19 +145,17 @@ public class HttpFeatureFetcherTest {
                                         .withHeader("Content-Type", "application/json")
                                         .withBody("{}")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
         fetcher.fetchFeatures();
 
-        verify(
+        serverMock.verify(
                 getRequestedFor(urlMatching("/api/client/features"))
                         .withHeader("Content-Type", matching("application/json")));
     }
 
     @Test
     public void should_handle_not_changed() throws URISyntaxException {
-        stubFor(
+        serverMock.resetAll();
+        serverMock.stubFor(
                 get(urlEqualTo("/api/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
                         .willReturn(
@@ -182,13 +163,10 @@ public class HttpFeatureFetcherTest {
                                         .withStatus(304)
                                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
         assertThat(response.getStatus()).isEqualTo(ClientFeaturesResponse.Status.NOT_CHANGED);
 
-        verify(
+        serverMock.verify(
                 getRequestedFor(urlMatching("/api/client/features"))
                         .withHeader("Content-Type", matching("application/json")));
     }
@@ -201,7 +179,8 @@ public class HttpFeatureFetcherTest {
                 HttpURLConnection.HTTP_SEE_OTHER
             })
     public void should_handle_redirect(int responseCode) throws URISyntaxException {
-        stubFor(
+        serverMock.resetAll();
+        serverMock.stubFor(
                 get(urlEqualTo("/api/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
                         .willReturn(
@@ -212,25 +191,22 @@ public class HttpFeatureFetcherTest {
                                                 "http://localhost:"
                                                         + serverMock.port()
                                                         + "/api/v2/client/features")));
-        stubFor(
+        serverMock.stubFor(
                 get(urlEqualTo("/api/v2/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
                         .willReturn(
                                 aResponse()
                                         .withStatus(HttpURLConnection.HTTP_OK)
                                         .withHeader("Content-Type", "application/json")
-                                        .withBodyFile("features-v1.json")));
+                                        .withBodyFile("features-v2-with-segments.json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
         assertThat(response.getStatus()).isEqualTo(ClientFeaturesResponse.Status.CHANGED);
 
-        verify(
+        serverMock.verify(
                 getRequestedFor(urlMatching("/api/client/features"))
                         .withHeader("Content-Type", matching("application/json")));
-        verify(
+        serverMock.verify(
                 getRequestedFor(urlMatching("/api/v2/client/features"))
                         .withHeader("Content-Type", matching("application/json")));
     }
@@ -238,7 +214,8 @@ public class HttpFeatureFetcherTest {
     @ParameterizedTest
     @ValueSource(ints = {400, 401, 403, 404, 500, 503})
     public void should_handle_errors(int httpCode) throws URISyntaxException {
-        stubFor(
+        serverMock.resetAll();
+        serverMock.stubFor(
                 get(urlEqualTo("/api/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
                         .willReturn(
@@ -246,40 +223,37 @@ public class HttpFeatureFetcherTest {
                                         .withStatus(httpCode)
                                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
         assertThat(response.getStatus()).isEqualTo(ClientFeaturesResponse.Status.UNAVAILABLE);
         assertThat(response.getHttpStatusCode()).isEqualTo(httpCode);
 
-        verify(
+        serverMock.verify(
                 getRequestedFor(urlMatching("/api/client/features"))
                         .withHeader("Content-Type", matching("application/json")));
     }
 
     @Test
     public void should_not_set_empty_ifNoneMatchHeader() throws URISyntaxException {
-        stubFor(
+        serverMock.stubFor(
                 get(urlEqualTo("/api/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
                         .willReturn(
                                 aResponse()
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
-                                        .withBodyFile("features-v1.json")));
+                                        .withBodyFile("features-v2-with-segments.json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
         fetcher.fetchFeatures();
 
-        verify(getRequestedFor(urlMatching("/api/client/features")).withoutHeader("If-None-Match"));
+        serverMock.verify(
+                getRequestedFor(urlMatching("/api/client/features"))
+                        .withoutHeader("If-None-Match"));
     }
 
     @Test
     public void should_notify_location_on_error() throws URISyntaxException {
-        stubFor(
+        serverMock.resetAll();
+        serverMock.stubFor(
                 get(urlEqualTo("/api/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
                         .willReturn(
@@ -287,9 +261,6 @@ public class HttpFeatureFetcherTest {
                                         .withStatus(308)
                                         .withHeader("Location", "https://unleash.com")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
         assertThat(response.getLocation()).isEqualTo("https://unleash.com");
     }
@@ -297,20 +268,17 @@ public class HttpFeatureFetcherTest {
     @Test
     public void should_add_project_filter_to_toggles_url_if_config_has_it_set()
             throws URISyntaxException {
-        stubFor(
+        serverMock.resetAll();
+        serverMock.stubFor(
                 get(urlEqualTo("/api/client/features?project=name"))
                         .withHeader("Accept", equalTo("application/json"))
                         .willReturn(
                                 aResponse()
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
-                                        .withBodyFile("features-v1.json")));
-        URI uri = new URI(serverMock.baseUrl() + "/api/");
-        UnleashConfig config =
-                UnleashConfig.builder().appName("test").unleashAPI(uri).projectName("name").build();
-        HttpFeatureFetcher fetcher = new HttpFeatureFetcher(config);
+                                        .withBodyFile("features-v2-with-segments.json")));
         fetcher.fetchFeatures();
-        verify(getRequestedFor(urlMatching("/api/client/features\\?project=name")));
+        serverMock.verify(getRequestedFor(urlMatching("/api/client/features\\?project=name")));
     }
 
     @Test

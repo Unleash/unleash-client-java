@@ -20,8 +20,10 @@ public final class SegmentCollection implements Serializable {
         this.segments = ensureNotNull(segments);
         if (segments.size() > 0) {
             this.cache =
-                segments.stream()
-                    .collect(Collectors.toConcurrentMap(Segment::getId, Function.identity()));
+                    segments.stream()
+                            .collect(
+                                    Collectors.toConcurrentMap(
+                                            Segment::getId, Function.identity()));
         } else {
             this.cache = new ConcurrentHashMap<>();
         }

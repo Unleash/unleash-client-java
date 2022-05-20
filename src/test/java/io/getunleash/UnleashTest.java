@@ -5,12 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import io.getunleash.repository.FeatureRepository;
+import io.getunleash.repository.*;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.strategy.UserWithIdStrategy;
 import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import io.getunleash.variant.Payload;
 import io.getunleash.variant.VariantDefinition;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +27,8 @@ public class UnleashTest {
     @BeforeEach
     public void setup() {
         toggleRepository = mock(FeatureRepository.class);
+        setMock(toggleRepository);
+
         contextProvider = mock(UnleashContextProvider.class);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
@@ -33,10 +37,21 @@ public class UnleashTest {
                         .appName("test")
                         .unleashAPI("http://localhost:4242/api/")
                         .environment("test")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
                         .unleashContextProvider(contextProvider)
                         .build();
 
         unleash = new DefaultUnleash(config, toggleRepository, new UserWithIdStrategy());
+    }
+
+    private void setMock(FeatureRepository mock) {
+        try {
+            Field instance = FeatureRepository.class.getDeclaredField("instance");
+            instance.setAccessible(true);
+            instance.set(instance, mock);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -404,8 +419,7 @@ public class UnleashTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test")));
         ActivationStrategy activeStrategy =
-                new ActivationStrategy(
-                        "default", null, constraints, Collections.emptyList(), toggleRepository);
+                new ActivationStrategy("default", null, constraints, Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
@@ -419,8 +433,7 @@ public class UnleashTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("dev", "prod")));
         ActivationStrategy activeStrategy =
-                new ActivationStrategy(
-                        "default", null, constraints, Collections.emptyList(), toggleRepository);
+                new ActivationStrategy("default", null, constraints, Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 

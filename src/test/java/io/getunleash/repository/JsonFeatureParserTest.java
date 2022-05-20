@@ -2,26 +2,73 @@ package io.getunleash.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import io.getunleash.FeatureToggle;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import java.io.*;
+import java.lang.reflect.Field;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class JsonFeatureParserTest {
+    FeatureRepository repository;
+
+    @BeforeEach
+    void setUp() {
+        UnleashConfig defaultConfig =
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .unleashAPI("http://localhost:4242/api/")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                        .fetchTogglesInterval(200L)
+                        .synchronousFetchOnInitialisation(false)
+                        .build();
+
+        this.repository = mock(FeatureRepository.class);
+        setupMock(repository);
+    }
+
+    @AfterEach
+    void tearDown() {
+        resetMock();
+    }
+
+    private void setupMock(FeatureRepository mock) {
+        try {
+            Field instance = FeatureRepository.class.getDeclaredField("instance");
+            instance.setAccessible(true);
+            instance.set(instance, mock);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void resetMock() {
+        try {
+            Field instance = FeatureRepository.class.getDeclaredField("instance");
+            instance.setAccessible(true);
+            instance.set(null, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     public void should_deserialize_correctly() throws IOException {
-        Reader content = getFileReader("/features-v1-with-segments.json");
+        Reader content = getFileReader("/features-v2-with-segments.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
 
-        assertThat(featureCollection.getToggleCollection().getFeatures()).hasSize(3);
+        assertThat(featureCollection.getToggleCollection().getFeatures()).hasSize(5);
         assertThat(featureCollection.getToggleCollection().getToggle("featureX").isEnabled())
                 .isTrue();
     }
 
     @Test
     public void should_deserialize_with_one_strategy() throws IOException {
-        Reader content = getFileReader("/features-v1-with-segments.json");
+        Reader content = getFileReader("/features-v2-with-segments.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
         FeatureToggle featureY = featureCollection.getToggleCollection().getToggle("featureY");
 
@@ -32,7 +79,7 @@ public class JsonFeatureParserTest {
 
     @Test
     public void should_deserialize_with_multiple_strategies() throws IOException {
-        Reader content = getFileReader("features-v1-with-segments.json");
+        Reader content = getFileReader("/features-v2-with-segments.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
         FeatureToggle feature = featureCollection.getToggleCollection().getToggle("featureZ");
 
@@ -55,7 +102,7 @@ public class JsonFeatureParserTest {
 
     @Test
     public void should_deserialize_empty_litst_of_toggles() throws IOException {
-        Reader content = getFileReader("/features-v1-empty.json");
+        Reader content = getFileReader("/features-v2-empty.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
 
         assertThat(featureCollection.getToggleCollection().getFeatures()).hasSize(0);
@@ -63,11 +110,11 @@ public class JsonFeatureParserTest {
 
     @Test
     public void should_deserialize_list_of_toggles_with_variants() throws IOException {
-        Reader content = getFileReader("/features-v1-with-variants.json");
+        Reader content = getFileReader("/features-v2-with-segments.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
         ToggleCollection toggleCollection = featureCollection.getToggleCollection();
 
-        assertThat(toggleCollection.getFeatures()).hasSize(2);
+        assertThat(toggleCollection.getFeatures()).hasSize(5);
         assertThat(toggleCollection.getToggle("Test.old").isEnabled()).isTrue();
         assertThat(toggleCollection.getToggle("Test.variants").isEnabled()).isTrue();
         assertThat(toggleCollection.getToggle("Test.variants").getVariants()).isNotNull();
@@ -84,18 +131,6 @@ public class JsonFeatureParserTest {
                 .isNull();
         assertThat(toggleCollection.getToggle("Test.variants").getVariants().get(1).getPayload())
                 .isNull();
-    }
-
-    @Test
-    public void should_deserialize_with_segments() throws IOException {
-        Reader content = getFileReader("features-v1-with-segments.json");
-        FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
-        FeatureToggle feature = featureCollection.getToggleCollection().getToggle("featureZ");
-
-        assertThat(feature.getStrategies()).hasSize(2);
-        assertThat(feature.getStrategies().get(1).getName()).isEqualTo("hola");
-        assertThat(feature.getStrategies().get(1).getConstraints().size()).isEqualTo(1);
-        assertThat(feature.getStrategies().get(1).getParameters().get("name")).isEqualTo("val");
     }
 
     private Reader getFileReader(String filename) throws IOException {

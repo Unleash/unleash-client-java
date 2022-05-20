@@ -14,7 +14,22 @@ public class FeatureBootstrapHandler {
     private final EventDispatcher eventDispatcher;
     private final ToggleBootstrapProvider toggleBootstrapProvider;
 
-    public FeatureBootstrapHandler(UnleashConfig unleashConfig) {
+    private static FeatureBootstrapHandler instance = null;
+
+    public static FeatureBootstrapHandler getInstance() {
+        if (instance == null) {
+            throw new AssertionError("FeatureBootstrapHandler:: You have to call init first");
+        }
+
+        return instance;
+    }
+
+    public static synchronized FeatureBootstrapHandler init(UnleashConfig unleashConfig) {
+        instance = new FeatureBootstrapHandler(unleashConfig);
+        return instance;
+    }
+
+    private FeatureBootstrapHandler(UnleashConfig unleashConfig) {
         if (unleashConfig.getToggleBootstrapProvider() != null) {
             this.toggleBootstrapProvider = unleashConfig.getToggleBootstrapProvider();
         } else {

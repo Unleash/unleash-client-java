@@ -27,7 +27,9 @@ class DefaultUnleashTest {
     public void setup() {
         UnleashConfig unleashConfig =
                 UnleashConfig.builder().unleashAPI("http://fakeAPI").appName("fakeApp").build();
-        featureRepository = mock(FeatureRepository.class);
+        featureRepository = FeatureRepository.init(unleashConfig);
+        when(FeatureRepository.getInstance()).thenReturn(featureRepository);
+
         Map<String, Strategy> strategyMap = new HashMap<>();
         contextProvider = mock(UnleashContextProvider.class);
         eventDispatcher = mock(EventDispatcher.class);

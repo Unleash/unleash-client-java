@@ -22,7 +22,25 @@ public class HttpFeatureFetcher implements FeatureFetcher {
     private final URL toggleUrl;
     private final UnleashConfig unleashConfig;
 
-    public HttpFeatureFetcher(UnleashConfig unleashConfig) {
+    private static HttpFeatureFetcher instance = null;
+
+    public static HttpFeatureFetcher getInstance() {
+        if (instance == null) {
+            throw new AssertionError("HttpFeatureFetcher:: should call init first");
+        }
+
+        return instance;
+    }
+
+    public static synchronized HttpFeatureFetcher init(UnleashConfig unleashConfig) {
+        if (instance != null) {
+            return instance;
+        }
+        instance = new HttpFeatureFetcher(unleashConfig);
+        return instance;
+    }
+
+    private HttpFeatureFetcher(UnleashConfig unleashConfig) {
         this.unleashConfig = unleashConfig;
         this.toggleUrl =
                 unleashConfig

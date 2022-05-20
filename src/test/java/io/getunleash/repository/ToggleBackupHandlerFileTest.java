@@ -1,15 +1,28 @@
 package io.getunleash.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import io.getunleash.TestUtil;
 import io.getunleash.util.UnleashConfig;
-import java.io.*;
+import java.io.File;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import org.apache.logging.log4j.Level;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class ToggleBackupHandlerFileTest {
+
+    FeatureFetcher fetcher;
+    BackupHandler<FeatureCollection> backupHandler;
+
+    @BeforeEach
+    void setUp() {
+        fetcher = mock(HttpFeatureFetcher.class);
+        backupHandler = mock(FeatureBackupHandlerFile.class);
+    }
 
     @Test
     public void test_read() {
@@ -20,8 +33,8 @@ public class ToggleBackupHandlerFileTest {
                         .backupFile(getClass().getResource("/unleash-repo-v0.json").getFile())
                         .build();
         ToggleBackupHandlerFile toggleBackupHandlerFile = new ToggleBackupHandlerFile(config);
+        FeatureRepository.init(config);
         ToggleCollection toggleCollection = toggleBackupHandlerFile.read();
-
         assertNotNull(
                 toggleCollection.getToggle("presentFeature"), "presentFeature should be present");
     }

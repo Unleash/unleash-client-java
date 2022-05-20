@@ -126,7 +126,7 @@ public class FeatureToggleRepositoryTest {
         when(toggleBackupHandler.read()).thenReturn(toggleCollection);
 
         ToggleRepository toggleRepository =
-            new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+                new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
 
         assertEquals(2, toggleRepository.getFeatureNames().size());
         assertEquals("toggleFeatureName2", toggleRepository.getFeatureNames().get(1));
