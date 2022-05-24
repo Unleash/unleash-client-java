@@ -181,8 +181,7 @@ public class FeatureToggleRepositoryTest {
     }
 
     private ToggleCollection populatedToggleCollection(FeatureToggle... featureToggles) {
-        List<FeatureToggle> list = new ArrayList();
-        list.addAll(Arrays.asList(featureToggles));
+        List<FeatureToggle> list = new ArrayList<>(Arrays.asList(featureToggles));
         return new ToggleCollection(list);
     }
 

@@ -35,7 +35,7 @@ public class UnleashURLs {
     }
 
     public URL getFetchTogglesURL(@Nullable String projectName, @Nullable String namePrefix) {
-        StringBuilder suffix = new StringBuilder("");
+        StringBuilder suffix = new StringBuilder();
         appendParam(suffix, "project", projectName);
         appendParam(suffix, "namePrefix", namePrefix);
 

@@ -64,7 +64,7 @@ public class FeatureRepositoryTest {
 
     private void resetFetcherMock() {
         try {
-            Field instance = FeatureBackupHandlerFile.class.getDeclaredField("instance");
+            Field instance = HttpFeatureFetcher.class.getDeclaredField("instance");
             instance.setAccessible(true);
             instance.set(null, null);
         } catch (Exception e) {

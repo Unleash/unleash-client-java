@@ -58,7 +58,7 @@ public class SubscriberTest {
 
         assertThat(testSubscriber.togglesFetchedCounter).isEqualTo(2); // one forced, one scheduled
         assertThat(testSubscriber.status).isEqualTo(UNAVAILABLE);
-        assertThat(testSubscriber.toggleEvalutatedCounter).isEqualTo(3);
+        assertThat(testSubscriber.toggleEvaluatedCounter).isEqualTo(3);
         assertThat(testSubscriber.toggleName).isEqualTo("myFeature");
         assertThat(testSubscriber.toggleEnabled).isFalse();
         assertThat(testSubscriber.errors).hasSize(2);
@@ -81,7 +81,7 @@ public class SubscriberTest {
         private int togglesFetchedCounter;
         private FeatureToggleResponse.Status status;
 
-        private int toggleEvalutatedCounter;
+        private int toggleEvaluatedCounter;
         private String toggleName;
         private boolean toggleEnabled;
 
@@ -100,7 +100,7 @@ public class SubscriberTest {
 
         @Override
         public void toggleEvaluated(ToggleEvaluated toggleEvaluated) {
-            this.toggleEvalutatedCounter++;
+            this.toggleEvaluatedCounter++;
             this.toggleName = toggleEvaluated.getToggleName();
             this.toggleEnabled = toggleEvaluated.isEnabled();
         }

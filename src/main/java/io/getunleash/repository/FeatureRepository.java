@@ -7,7 +7,6 @@ import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashReady;
 import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
-import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +22,7 @@ public class FeatureRepository implements IFeatureRepository {
 
     private static FeatureRepository instance = null;
 
-    private FeatureRepository(UnleashConfig unleashConfig, UnleashScheduledExecutor executor) {
+    private FeatureRepository(UnleashConfig unleashConfig) {
         this.featureBackupHandler = FeatureBackupHandlerFile.init(unleashConfig);
         this.featureFetcher = HttpFeatureFetcher.init(unleashConfig);
         this.featureBootstrapHandler = FeatureBootstrapHandler.init(unleashConfig);
@@ -38,14 +37,15 @@ public class FeatureRepository implements IFeatureRepository {
             updateFeatures().run();
         }
 
-        executor.setInterval(updateFeatures(), 0, unleashConfig.getFetchTogglesInterval());
+        unleashConfig
+                .getScheduledExecutor()
+                .setInterval(updateFeatures(), 0, unleashConfig.getFetchTogglesInterval());
     }
 
     public static synchronized FeatureRepository getInstance() {
         if (instance == null) {
             throw new AssertionError("FeatureRepository:: You have to call init first");
         }
-
         return instance;
     }
 
@@ -53,7 +53,8 @@ public class FeatureRepository implements IFeatureRepository {
         if (instance != null) {
             return instance;
         }
-        return new FeatureRepository(unleashConfig, unleashConfig.getScheduledExecutor());
+        instance = new FeatureRepository(unleashConfig);
+        return instance;
     }
 
     private Runnable updateFeatures() {

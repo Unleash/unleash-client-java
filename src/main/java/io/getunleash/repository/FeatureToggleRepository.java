@@ -80,7 +80,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
     @Override
     public List<String> getFeatureNames() {
         return toggleCollection.getFeatures().stream()
-                .map(toggle -> toggle.getName())
+                .map(FeatureToggle::getName)
                 .collect(Collectors.toList());
     }
 }
