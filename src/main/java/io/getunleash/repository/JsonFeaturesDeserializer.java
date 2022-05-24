@@ -7,6 +7,7 @@ import io.getunleash.Segment;
 import io.getunleash.lang.Nullable;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 public class JsonFeaturesDeserializer implements JsonDeserializer<FeatureCollection> {
@@ -30,17 +31,15 @@ public class JsonFeaturesDeserializer implements JsonDeserializer<FeatureCollect
         if (!rootElement.getAsJsonObject().has("features")) {
             return null;
         }
-        JsonArray togglesArray =
-                rootElement
-                        .getAsJsonObject()
-                        .getAsJsonObject("features")
-                        .getAsJsonArray("features");
-        JsonArray segmentArray = rootElement.getAsJsonObject().getAsJsonArray("segments");
+        JsonObject root = rootElement.getAsJsonObject();
+        JsonArray togglesArray = root.getAsJsonArray("features");
+        JsonArray segmentArray = root.getAsJsonArray("segments");
 
         Collection<FeatureToggle> toggles =
                 context.deserialize(togglesArray, TOGGLE_COLLECTION_TYPE);
         Collection<Segment> segments = context.deserialize(segmentArray, SEGMENT_COLLECTION_TYPE);
         return new FeatureCollection(
-                new ToggleCollection(toggles), new SegmentCollection(segments));
+                new ToggleCollection(toggles),
+                new SegmentCollection(segments != null ? segments : Collections.emptyList()));
     }
 }

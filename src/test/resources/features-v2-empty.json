@@ -1,7 +1,5 @@
 {
+    "version": "2",
     "segments": [],
-    "features": {
-        "version" : 2,
-        "features": []
-    }
+    "features": []
 }

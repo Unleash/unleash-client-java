@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -18,7 +19,7 @@ public final class SegmentCollection implements Serializable {
 
     public SegmentCollection(final Collection<Segment> segments) {
         this.segments = ensureNotNull(segments);
-        if (segments.size() > 0) {
+        if (this.segments.size() > 0) {
             this.cache =
                     segments.stream()
                             .collect(
@@ -30,10 +31,7 @@ public final class SegmentCollection implements Serializable {
     }
 
     private Collection<Segment> ensureNotNull(@Nullable Collection<Segment> segments) {
-        if (segments == null) {
-            return Collections.emptyList();
-        }
-        return segments;
+        return Optional.ofNullable(segments).orElseGet(Collections::emptyList);
     }
 
     public Collection<Segment> getSegments() {

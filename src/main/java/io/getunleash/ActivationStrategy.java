@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 public final class ActivationStrategy {
     private final String name;
-    private final @Nullable Map<String, String> parameters;
+    private final Map<String, String> parameters;
     private final List<Constraint> constraints;
     private final List<Integer> segments;
 
@@ -22,9 +22,9 @@ public final class ActivationStrategy {
             List<Constraint> constraints,
             List<Integer> segments) {
         this.name = name;
-        this.parameters = parameters;
-        this.constraints = constraints;
-        this.segments = segments;
+        this.parameters = Optional.ofNullable(parameters).orElseGet(Collections::emptyMap);
+        this.constraints = Optional.ofNullable(constraints).orElseGet(Collections::emptyList);
+        this.segments = Optional.ofNullable(segments).orElseGet(Collections::emptyList);
     }
 
     public String getName() {
@@ -37,8 +37,8 @@ public final class ActivationStrategy {
 
     public List<Constraint> getConstraints() {
         return Stream.of(
-                        constraints,
-                        segments.stream()
+                        Optional.ofNullable(constraints).orElseGet(Collections::emptyList),
+                        Optional.ofNullable(segments).orElseGet(Collections::emptyList).stream()
                                 .map(
                                         (segmentId) ->
                                                 FeatureRepository.getInstance()
