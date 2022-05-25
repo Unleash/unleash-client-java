@@ -10,6 +10,7 @@ import io.getunleash.util.UnleashConfig;
 import java.io.StringReader;
 import java.util.Collections;
 
+@Deprecated()
 public class ToggleBootstrapHandler {
     private final EventDispatcher eventDispatcher;
     private final ToggleBootstrapProvider toggleBootstrapProvider;

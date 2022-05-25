@@ -7,7 +7,7 @@ import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
 import java.util.Collections;
 import java.util.List;
-
+@Deprecated
 public class FeatureToggleResponse implements UnleashEvent {
 
     public enum Status {
