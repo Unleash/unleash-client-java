@@ -32,8 +32,8 @@ public class JsonFeaturesDeserializer implements JsonDeserializer<FeatureCollect
             return null;
         }
         JsonObject root = rootElement.getAsJsonObject();
-        JsonArray togglesArray = root.getAsJsonArray("features");
         JsonArray segmentArray = root.getAsJsonArray("segments");
+        JsonArray togglesArray = root.getAsJsonArray("features");
 
         Collection<FeatureToggle> toggles =
                 context.deserialize(togglesArray, TOGGLE_COLLECTION_TYPE);

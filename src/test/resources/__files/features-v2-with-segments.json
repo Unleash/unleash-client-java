@@ -16,9 +16,7 @@
             ]
         }
     ],
-    "features": {
-        "version": 1,
-        "features": [
+    "features": [
             {
                 "name": "Test.old",
                 "description": "No variants here!",
@@ -95,5 +93,4 @@
 
             }
         ]
-    }
 }

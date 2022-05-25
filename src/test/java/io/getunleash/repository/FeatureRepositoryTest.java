@@ -11,7 +11,6 @@ import io.getunleash.util.UnleashScheduledExecutor;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -42,7 +41,7 @@ public class FeatureRepositoryTest {
                         .unleashAPI("http://localhost:4242/api/")
                         .scheduledExecutor(mock(UnleashScheduledExecutor.class))
                         .fetchTogglesInterval(200L)
-                        .synchronousFetchOnInitialisation(true)
+                        .synchronousFetchOnInitialisation(false)
                         .build();
     }
 
@@ -50,6 +49,17 @@ public class FeatureRepositoryTest {
     public void reset() throws Exception {
         this.resetBackupMock();
         this.resetFetcherMock();
+        this.resetBootstrapMock();
+    }
+
+    private void resetBootstrapMock() {
+        try {
+            Field instance = FeatureBootstrapHandler.class.getDeclaredField("instance");
+            instance.setAccessible(true);
+            instance.set(null, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void resetBackupMock() {
@@ -74,14 +84,9 @@ public class FeatureRepositoryTest {
 
     private void setBootStrapMock(FeatureBootstrapHandler mock, UnleashConfig config) {
         try {
-            Method init =
-                    FeatureBootstrapHandler.class.getDeclaredMethod("init", UnleashConfig.class);
-            init.setAccessible(true);
-            FeatureBootstrapHandler invoked = (FeatureBootstrapHandler) init.invoke(mock, config);
-
             Field instance = FeatureBootstrapHandler.class.getDeclaredField("instance");
             instance.setAccessible(true);
-            instance.set(instance, invoked);
+            instance.set(instance, mock);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -89,14 +94,9 @@ public class FeatureRepositoryTest {
 
     private void setBackupMock(BackupHandler<FeatureCollection> mock, UnleashConfig config) {
         try {
-            Method init =
-                    FeatureBackupHandlerFile.class.getDeclaredMethod("init", UnleashConfig.class);
-            init.setAccessible(true);
-            FeatureBackupHandlerFile invoked = (FeatureBackupHandlerFile) init.invoke(mock, config);
-
             Field instance = FeatureBackupHandlerFile.class.getDeclaredField("instance");
             instance.setAccessible(true);
-            instance.set(instance, invoked);
+            instance.set(instance, mock);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -104,15 +104,9 @@ public class FeatureRepositoryTest {
 
     private void setFetcherMock(FeatureFetcher mock, UnleashConfig config) {
         try {
-
-            Method init = HttpFeatureFetcher.class.getDeclaredMethod("init", UnleashConfig.class);
-            HttpFeatureFetcher invoked = (HttpFeatureFetcher) init.invoke(mock, config);
-            init.setAccessible(true);
-
             Field instance = HttpFeatureFetcher.class.getDeclaredField("instance");
             instance.setAccessible(true);
-            instance.set(instance, invoked);
-
+            instance.set(instance, mock);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -157,6 +151,8 @@ public class FeatureRepositoryTest {
                                 new ToggleCollection(Collections.emptyList()),
                                 new SegmentCollection(Collections.emptyList())));
 
+        FeatureRepository.init(config);
+
         verify(backupHandler, times(1)).read();
     }
 
@@ -174,12 +170,19 @@ public class FeatureRepositoryTest {
                                 false,
                                 Arrays.asList(new ActivationStrategy("custom", null))));
 
-        setBackupMock(backupHandler, defaultConfig);
-        setFetcherMock(fetcher, defaultConfig);
-        setBootStrapMock(bootstrapHandler, defaultConfig);
+        UnleashConfig config =
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .unleashAPI("http://localhost:4242/api/")
+                        .scheduledExecutor(executor)
+                        .fetchTogglesInterval(200L)
+                        .synchronousFetchOnInitialisation(false)
+                        .build();
+        setFetcherMock(fetcher, config);
+        setBootStrapMock(bootstrapHandler, config);
 
+        setBackupMock(backupHandler, config);
         when(backupHandler.read()).thenReturn(featureCollection);
-        FeatureRepository featureRepository = FeatureRepository.init(defaultConfig);
 
         featureCollection =
                 populatedFeatureCollection(
@@ -192,12 +195,14 @@ public class FeatureRepositoryTest {
                 new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.CHANGED, featureCollection);
 
+        FeatureRepository featureRepository = FeatureRepository.init(config);
+
         // run the toggleName fetcher callback
         verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
         verify(fetcher, times(0)).fetchFeatures();
-        runnableArgumentCaptor.getValue().run();
 
         when(fetcher.fetchFeatures()).thenReturn(response);
+        runnableArgumentCaptor.getValue().run();
 
         verify(backupHandler, times(1)).read();
         verify(fetcher, times(1)).fetchFeatures();
@@ -226,8 +231,8 @@ public class FeatureRepositoryTest {
 
         FeatureRepository featureRepository = FeatureRepository.init(defaultConfig);
 
-        assertEquals(5, featureRepository.getFeatureNames().size());
-        assertEquals("Test.variants", featureRepository.getFeatureNames().get(1));
+        assertEquals(2, featureRepository.getFeatureNames().size());
+        assertEquals("toggleFeatureName2", featureRepository.getFeatureNames().get(1));
     }
 
     @Test
@@ -246,14 +251,13 @@ public class FeatureRepositoryTest {
 
         when(backupHandler.read()).thenReturn(new FeatureCollection());
 
-        FeatureRepository.init(config);
-
         FeatureCollection featureCollection = populatedFeatureCollection(null);
         ClientFeaturesResponse response =
                 new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.CHANGED, featureCollection);
         when(fetcher.fetchFeatures()).thenReturn(response);
 
+        FeatureRepository.init(config);
         verify(fetcher, times(1)).fetchFeatures();
     }
 
@@ -317,9 +321,11 @@ public class FeatureRepositoryTest {
                         .build();
 
         setBackupMock(backupHandler, config);
+        when(backupHandler.read()).thenReturn(new FeatureCollection());
+
         setFetcherMock(fetcher, config);
 
-        when(backupHandler.read()).thenReturn(new FeatureCollection());
+        FeatureBootstrapHandler.init(config);
         FeatureRepository repo = FeatureRepository.init(config);
         assertThat(repo.getFeatureNames()).hasSize(5);
     }

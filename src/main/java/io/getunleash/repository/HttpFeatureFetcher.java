@@ -40,7 +40,7 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         return instance;
     }
 
-    private HttpFeatureFetcher(UnleashConfig unleashConfig) {
+    protected HttpFeatureFetcher(UnleashConfig unleashConfig) {
         this.unleashConfig = unleashConfig;
         this.toggleUrl =
                 unleashConfig

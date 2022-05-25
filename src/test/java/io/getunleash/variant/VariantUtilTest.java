@@ -9,7 +9,10 @@ import io.getunleash.ActivationStrategy;
 import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
+import io.getunleash.repository.FeatureBackupHandlerFile;
+import io.getunleash.repository.FeatureBootstrapHandler;
 import io.getunleash.repository.FeatureRepository;
+import io.getunleash.repository.HttpFeatureFetcher;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
@@ -36,6 +39,9 @@ public class VariantUtilTest {
                         .synchronousFetchOnInitialisation(true)
                         .build();
 
+        FeatureBackupHandlerFile.init(defaultConfig);
+        FeatureBootstrapHandler.init(defaultConfig);
+        HttpFeatureFetcher.init(defaultConfig);
         FeatureRepository.init(defaultConfig);
         defaultStrategy = new ActivationStrategy("default", Collections.emptyMap());
     }

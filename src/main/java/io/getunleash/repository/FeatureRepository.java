@@ -23,14 +23,14 @@ public class FeatureRepository implements IFeatureRepository {
     private static FeatureRepository instance = null;
 
     private FeatureRepository(UnleashConfig unleashConfig) {
-        this.featureBackupHandler = FeatureBackupHandlerFile.init(unleashConfig);
-        this.featureFetcher = HttpFeatureFetcher.init(unleashConfig);
-        this.featureBootstrapHandler = FeatureBootstrapHandler.init(unleashConfig);
+        this.featureBackupHandler = FeatureBackupHandlerFile.getInstance();
+        this.featureFetcher = HttpFeatureFetcher.getInstance();
+        this.featureBootstrapHandler = FeatureBootstrapHandler.getInstance();
 
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-        this.featureCollection = featureBackupHandler.read();
+        this.featureCollection = this.featureBackupHandler.read();
         if (this.featureCollection.getToggleCollection().getFeatures().isEmpty()) {
-            this.featureCollection = featureBootstrapHandler.read();
+            this.featureCollection = this.featureBootstrapHandler.read();
         }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
@@ -50,9 +50,6 @@ public class FeatureRepository implements IFeatureRepository {
     }
 
     public static synchronized FeatureRepository init(UnleashConfig unleashConfig) {
-        if (instance != null) {
-            return instance;
-        }
         instance = new FeatureRepository(unleashConfig);
         return instance;
     }

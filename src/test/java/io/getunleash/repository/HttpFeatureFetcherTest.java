@@ -39,7 +39,7 @@ public class HttpFeatureFetcherTest {
             throw new RuntimeException(e);
         }
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        fetcher = HttpFeatureFetcher.init(config);
+        fetcher = new HttpFeatureFetcher(config);
     }
 
     /*
