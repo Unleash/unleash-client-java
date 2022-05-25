@@ -155,7 +155,7 @@ public class UnleashTest {
         unleash.isEnabled("test");
 
         verify(customStrategy, times(1))
-                .isEnabled(isNull(), any(UnleashContext.class), any(List.class));
+                .isEnabled(any(), any(UnleashContext.class), any());
     }
 
     @Test
