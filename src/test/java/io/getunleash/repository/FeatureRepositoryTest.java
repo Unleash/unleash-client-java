@@ -46,7 +46,7 @@ public class FeatureRepositoryTest {
     }
 
     @AfterEach
-    public void reset() throws Exception {
+    public void reset() {
         this.resetBackupMock();
         this.resetFetcherMock();
         this.resetBootstrapMock();
@@ -126,6 +126,8 @@ public class FeatureRepositoryTest {
         setFetcherMock(fetcher, config);
         setBootStrapMock(bootstrapHandler, config);
 
+        when(backupHandler.read()).thenReturn(new FeatureCollection());
+        when(bootstrapHandler.read()).thenReturn(new FeatureCollection());
         FeatureRepository featureRepository = FeatureRepository.init(config);
         assertNull(featureRepository.getToggle("unknownFeature"), "should be null");
     }
@@ -157,8 +159,7 @@ public class FeatureRepositoryTest {
     }
 
     @Test
-    public void feature_toggles_should_be_updated()
-            throws URISyntaxException, InterruptedException {
+    public void feature_toggles_should_be_updated() {
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -274,6 +275,7 @@ public class FeatureRepositoryTest {
 
         setBackupMock(backupHandler, config);
         setFetcherMock(fetcher, config);
+        setBootStrapMock(bootstrapHandler, config);
 
         when(backupHandler.read()).thenReturn(new FeatureCollection());
 
@@ -291,7 +293,7 @@ public class FeatureRepositoryTest {
 
     private FeatureCollection populatedFeatureCollection(
             @Nullable List<Segment> segments, FeatureToggle... featureToggles) {
-        List<FeatureToggle> toggleList = new ArrayList();
+        List<FeatureToggle> toggleList = new ArrayList<>();
         toggleList.addAll(Arrays.asList(featureToggles));
 
         List<Segment> segmentList = new ArrayList<>();
@@ -348,6 +350,7 @@ public class FeatureRepositoryTest {
 
         setBackupMock(backupHandler, config);
         setFetcherMock(fetcher, config);
+        setBootStrapMock(bootstrapHandler, config);
 
         when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
 
