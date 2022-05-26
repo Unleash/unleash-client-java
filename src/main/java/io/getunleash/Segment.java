@@ -6,24 +6,15 @@ import java.util.List;
 public class Segment {
     private int id;
     private String name;
-    @Nullable private String description;
     private List<Constraint> constraints;
-    private String createdBy;
-    private String createdAt;
 
     public Segment(
             int id,
             String name,
-            @Nullable String description,
-            List<Constraint> constraints,
-            String createdBy,
-            String createdAt) {
+            List<Constraint> constraints){
         this.id = id;
         this.name = name;
-        this.description = description;
         this.constraints = constraints;
-        this.createdBy = createdBy;
-        this.createdAt = createdAt;
     }
 
     public int getId() {
@@ -42,35 +33,11 @@ public class Segment {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public List<Constraint> getConstraints() {
         return constraints;
     }
 
     public void setConstraints(List<Constraint> constraints) {
         this.constraints = constraints;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
     }
 }
