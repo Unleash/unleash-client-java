@@ -42,25 +42,6 @@ public class HttpFeatureFetcherTest {
         fetcher = new HttpFeatureFetcher(config);
     }
 
-    /*
-    @Test
-    public void uri_is_not_absoulute() throws URISyntaxException {
-        URI badUri = new URI("notAbsolute");
-        exception.expectMessage("Invalid unleash repository uri [notAbsolute]");
-        exception.expect(UnleashException.class);
-        new HttpToggleFetcher(badUri);
-    }
-
-    @Test
-    public void given_malformed_url_should_give_exception() throws URISyntaxException {
-        String unknownProtocolUrl = "foo://bar";
-        URI badUrl = new URI(unknownProtocolUrl);
-        exception.expectMessage("Invalid unleash repository uri [" + unknownProtocolUrl + "]");
-        exception.expect(UnleashException.class);
-        new HttpToggleFetcher(badUrl);
-    }
-    */
-
     @Test
     public void happy_path_test_with_variants_and_segments() {
         stubFor(

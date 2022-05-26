@@ -108,7 +108,7 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         request = openConnection(new URL(newUrl));
         request.connect();
         LOG.info(
-                "Redirecting from {} to {}. Please consider to update your config.",
+                "Redirecting from {} to {}. Please consider updating your config.",
                 toggleUrl,
                 newUrl);
 
