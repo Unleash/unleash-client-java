@@ -10,6 +10,7 @@ import io.getunleash.FeatureToggle;
 import io.getunleash.lang.Nullable;
 import java.lang.reflect.Type;
 import java.util.*;
+
 @Deprecated()
 public class JsonToggleCollectionDeserializer implements JsonDeserializer<ToggleCollection> {
     private static final Type PARAMS_TYPE = new TypeToken<Map<String, String>>() {}.getType();

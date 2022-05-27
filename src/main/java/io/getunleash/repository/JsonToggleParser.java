@@ -3,6 +3,7 @@ package io.getunleash.repository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.Reader;
+
 @Deprecated()
 final class JsonToggleParser {
 

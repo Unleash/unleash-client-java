@@ -361,14 +361,11 @@ public class FeatureRepositoryTest {
                                         new Segment(
                                                 1,
                                                 "some-name",
-                                                null,
                                                 Arrays.asList(
                                                         new Constraint(
                                                                 "some-context",
                                                                 Operator.IN,
-                                                                "some-value")),
-                                                "some-created-by",
-                                                "some-created-on")),
+                                                                "some-value")))),
                                 new FeatureToggle(
                                         "toggleFeatureName1",
                                         true,

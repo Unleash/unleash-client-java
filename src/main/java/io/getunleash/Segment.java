@@ -1,6 +1,5 @@
 package io.getunleash;
 
-import io.getunleash.lang.Nullable;
 import java.util.List;
 
 public class Segment {
@@ -8,10 +7,7 @@ public class Segment {
     private String name;
     private List<Constraint> constraints;
 
-    public Segment(
-            int id,
-            String name,
-            List<Constraint> constraints){
+    public Segment(int id, String name, List<Constraint> constraints) {
         this.id = id;
         this.name = name;
         this.constraints = constraints;

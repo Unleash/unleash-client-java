@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 @Deprecated
 public final class HttpToggleFetcher implements ToggleFetcher {
     private static final Logger LOG = LoggerFactory.getLogger(HttpToggleFetcher.class);
