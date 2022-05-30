@@ -54,7 +54,7 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
                             context.deserialize(featureObj.get("parameters"), PARAMS_TYPE);
 
                     ActivationStrategy strategy =
-                            new ActivationStrategy(strategyName, strategyParams);
+                            new ActivationStrategy(strategyName, strategyParams, null);
                     featureToggles.add(
                             new FeatureToggle(name, enabled, singletonList(strategy), emptyList()));
                 });

@@ -19,41 +19,22 @@ public class HttpFeatureFetcher implements FeatureFetcher {
     private static final int CONNECT_TIMEOUT = 10000;
     private Optional<String> etag = Optional.empty();
 
+    private final UnleashConfig config;
+
     private final URL toggleUrl;
-    private final UnleashConfig unleashConfig;
 
-    private static HttpFeatureFetcher instance = null;
-
-    public static HttpFeatureFetcher getInstance() {
-        if (instance == null) {
-            throw new AssertionError("HttpFeatureFetcher:: should call init first");
-        }
-
-        return instance;
-    }
-
-    public static synchronized HttpFeatureFetcher init(UnleashConfig unleashConfig) {
-        if (instance != null) {
-            return instance;
-        }
-        instance = new HttpFeatureFetcher(unleashConfig);
-        return instance;
-    }
-
-    protected HttpFeatureFetcher(UnleashConfig unleashConfig) {
-        this.unleashConfig = unleashConfig;
+    public HttpFeatureFetcher(UnleashConfig config) {
+        this.config = config;
         this.toggleUrl =
-                unleashConfig
-                        .getUnleashURLs()
-                        .getFetchTogglesURL(
-                                unleashConfig.getProjectName(), unleashConfig.getNamePrefix());
+                config.getUnleashURLs()
+                        .getFetchTogglesURL(config.getProjectName(), config.getNamePrefix());
     }
 
     @Override
     public ClientFeaturesResponse fetchFeatures() throws UnleashException {
         HttpURLConnection connection = null;
         try {
-            connection = openConnection(toggleUrl);
+            connection = openConnection(this.toggleUrl);
             connection.connect();
 
             return getFeatureResponse(connection, true);
@@ -109,7 +90,7 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         request.connect();
         LOG.info(
                 "Redirecting from {} to {}. Please consider updating your config.",
-                toggleUrl,
+                this.toggleUrl,
                 newUrl);
 
         return getFeatureResponse(request, false);
@@ -121,8 +102,8 @@ public class HttpFeatureFetcher implements FeatureFetcher {
 
     private HttpURLConnection openConnection(URL url) throws IOException {
         HttpURLConnection connection;
-        if (this.unleashConfig.getProxy() != null) {
-            connection = (HttpURLConnection) url.openConnection(this.unleashConfig.getProxy());
+        if (this.config.getProxy() != null) {
+            connection = (HttpURLConnection) url.openConnection(this.config.getProxy());
         } else {
             connection = (HttpURLConnection) url.openConnection();
         }
@@ -130,7 +111,7 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         connection.setReadTimeout(CONNECT_TIMEOUT);
         connection.setRequestProperty("Accept", "application/json");
         connection.setRequestProperty("Content-Type", "application/json");
-        UnleashConfig.setRequestProperties(connection, this.unleashConfig);
+        UnleashConfig.setRequestProperties(connection, this.config);
 
         etag.ifPresent(val -> connection.setRequestProperty("If-None-Match", val));
 

@@ -17,22 +17,7 @@ public class FeatureBackupHandlerFile implements BackupHandler<FeatureCollection
     private final String backupFile;
     private final EventDispatcher eventDispatcher;
 
-    private static FeatureBackupHandlerFile instance = null;
-
-    public static FeatureBackupHandlerFile getInstance() {
-        if (instance == null) {
-            throw new AssertionError("FeatureBackupHandlerFile:: You have to call init first");
-        }
-
-        return instance;
-    }
-
-    public static synchronized FeatureBackupHandlerFile init(UnleashConfig unleashConfig) {
-        instance = new FeatureBackupHandlerFile(unleashConfig);
-        return instance;
-    }
-
-    private FeatureBackupHandlerFile(UnleashConfig config) {
+    public FeatureBackupHandlerFile(UnleashConfig config) {
         this.backupFile = config.getBackupFile();
         this.eventDispatcher = new EventDispatcher(config);
     }

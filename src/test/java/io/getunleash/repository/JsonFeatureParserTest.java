@@ -8,8 +8,6 @@ import io.getunleash.FeatureToggle;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.io.*;
-import java.lang.reflect.Field;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,32 +26,6 @@ public class JsonFeatureParserTest {
                         .build();
 
         this.repository = mock(FeatureRepository.class);
-        setupMock(repository);
-    }
-
-    @AfterEach
-    void tearDown() {
-        resetMock();
-    }
-
-    private void setupMock(FeatureRepository mock) {
-        try {
-            Field instance = FeatureRepository.class.getDeclaredField("instance");
-            instance.setAccessible(true);
-            instance.set(instance, mock);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void resetMock() {
-        try {
-            Field instance = FeatureRepository.class.getDeclaredField("instance");
-            instance.setAccessible(true);
-            instance.set(null, null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Test

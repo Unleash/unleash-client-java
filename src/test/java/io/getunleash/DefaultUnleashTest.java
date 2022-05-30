@@ -90,7 +90,8 @@ class DefaultUnleashTest {
                         eventDispatcher,
                         metricService);
 
-        ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
+        ActivationStrategy as =
+                new ActivationStrategy("forFallback", new HashMap<>(), featureRepository);
         FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
         when(featureRepository.getToggle("toggle1")).thenReturn(toggle);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());

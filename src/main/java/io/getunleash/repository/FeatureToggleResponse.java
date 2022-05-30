@@ -8,7 +8,7 @@ import io.getunleash.lang.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-@Deprecated
+@Deprecated // Use ClientFeaturesResponse instead
 public class FeatureToggleResponse implements UnleashEvent {
 
     public enum Status {

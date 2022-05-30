@@ -248,7 +248,6 @@ public class HttpFeatureFetcherTest {
 
     @Test
     public void should_add_project_filter_to_toggles_url_if_config_has_it_set() {
-        serverMock.resetAll();
         serverMock.stubFor(
                 get(urlEqualTo("/api/client/features?project=name"))
                         .withHeader("Accept", equalTo("application/json"))
@@ -259,6 +258,7 @@ public class HttpFeatureFetcherTest {
                                         .withBodyFile("features-v2-with-segments.json")));
         UnleashConfig config =
                 UnleashConfig.builder().appName("test").unleashAPI(uri).projectName("name").build();
+
         fetcher = new HttpFeatureFetcher(config);
         fetcher.fetchFeatures();
         serverMock.verify(getRequestedFor(urlMatching("/api/client/features\\?project=name")));

@@ -7,11 +7,14 @@ import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashReady;
 import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FeatureRepository implements IFeatureRepository {
+
+    private final UnleashConfig unleashConfig;
     private final FeatureBackupHandlerFile featureBackupHandler;
     private final FeatureBootstrapHandler featureBootstrapHandler;
     private final HttpFeatureFetcher featureFetcher;
@@ -20,14 +23,45 @@ public class FeatureRepository implements IFeatureRepository {
     private FeatureCollection featureCollection;
     private boolean ready;
 
-    private static FeatureRepository instance = null;
-
-    private FeatureRepository(UnleashConfig unleashConfig) {
-        this.featureBackupHandler = FeatureBackupHandlerFile.getInstance();
-        this.featureFetcher = HttpFeatureFetcher.getInstance();
-        this.featureBootstrapHandler = FeatureBootstrapHandler.getInstance();
-
+    public FeatureRepository(UnleashConfig unleashConfig) {
+        this.unleashConfig = unleashConfig;
+        this.featureBackupHandler = new FeatureBackupHandlerFile(unleashConfig);
+        this.featureFetcher = new HttpFeatureFetcher(unleashConfig);
+        this.featureBootstrapHandler = new FeatureBootstrapHandler(unleashConfig);
         this.eventDispatcher = new EventDispatcher(unleashConfig);
+
+        this.initCollections(unleashConfig.getScheduledExecutor());
+    }
+
+    protected FeatureRepository(
+            UnleashConfig unleashConfig,
+            FeatureBackupHandlerFile featureBackupHandler,
+            EventDispatcher eventDispatcher,
+            HttpFeatureFetcher featureFetcher,
+            FeatureBootstrapHandler featureBootstrapHandler) {
+        this.unleashConfig = unleashConfig;
+        this.featureBackupHandler = featureBackupHandler;
+        this.featureFetcher = featureFetcher;
+        this.featureBootstrapHandler = featureBootstrapHandler;
+        this.eventDispatcher = eventDispatcher;
+        this.initCollections(unleashConfig.getScheduledExecutor());
+    }
+
+    protected FeatureRepository(
+            UnleashConfig unleashConfig,
+            FeatureBackupHandlerFile featureBackupHandler,
+            UnleashScheduledExecutor executor,
+            HttpFeatureFetcher featureFetcher,
+            FeatureBootstrapHandler featureBootstrapHandler) {
+        this.unleashConfig = unleashConfig;
+        this.featureBackupHandler = featureBackupHandler;
+        this.featureFetcher = featureFetcher;
+        this.featureBootstrapHandler = featureBootstrapHandler;
+        this.eventDispatcher = new EventDispatcher(unleashConfig);
+        this.initCollections(executor);
+    }
+
+    private void initCollections(UnleashScheduledExecutor executor) {
         this.featureCollection = this.featureBackupHandler.read();
         if (this.featureCollection.getToggleCollection().getFeatures().isEmpty()) {
             this.featureCollection = this.featureBootstrapHandler.read();
@@ -37,21 +71,7 @@ public class FeatureRepository implements IFeatureRepository {
             updateFeatures().run();
         }
 
-        unleashConfig
-                .getScheduledExecutor()
-                .setInterval(updateFeatures(), 0, unleashConfig.getFetchTogglesInterval());
-    }
-
-    public static synchronized FeatureRepository getInstance() {
-        if (instance == null) {
-            throw new AssertionError("FeatureRepository:: You have to call init first");
-        }
-        return instance;
-    }
-
-    public static synchronized FeatureRepository init(UnleashConfig unleashConfig) {
-        instance = new FeatureRepository(unleashConfig);
-        return instance;
+        executor.setInterval(updateFeatures(), 0, unleashConfig.getFetchTogglesInterval());
     }
 
     private Runnable updateFeatures() {

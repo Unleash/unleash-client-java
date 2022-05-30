@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Deprecated
+// Use HttpFeatureFetcher instead
 public final class HttpToggleFetcher implements ToggleFetcher {
     private static final Logger LOG = LoggerFactory.getLogger(HttpToggleFetcher.class);
 

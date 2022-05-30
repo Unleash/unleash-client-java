@@ -42,10 +42,7 @@ public class DefaultUnleash implements Unleash {
     private final UnleashConfig config;
 
     private static FeatureRepository defaultToggleRepository(UnleashConfig unleashConfig) {
-        HttpFeatureFetcher.init(unleashConfig);
-        FeatureBootstrapHandler.init(unleashConfig);
-        FeatureBackupHandlerFile.init(unleashConfig);
-        return FeatureRepository.init(unleashConfig);
+        return new FeatureRepository(unleashConfig);
     }
 
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {

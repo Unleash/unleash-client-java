@@ -10,7 +10,7 @@ import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Deprecated()
+@Deprecated() // Use FeatureRepository instead
 public final class FeatureToggleRepository implements ToggleRepository {
     private final BackupHandler<ToggleCollection> toggleBackupHandler;
     private final ToggleBootstrapHandler toggleBootstrapHandler;
