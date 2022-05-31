@@ -40,6 +40,6 @@ public class JsonFeaturesDeserializer implements JsonDeserializer<FeatureCollect
         Collection<Segment> segments = context.deserialize(segmentArray, SEGMENT_COLLECTION_TYPE);
         return new FeatureCollection(
                 new ToggleCollection(toggles),
-                new SegmentCollection(segments != null ? segments : Collections.emptyList()));
+                new SegmentCollection(segments));
     }
 }

@@ -19,11 +19,10 @@ final class JsonFeatureParser {
                         .registerTypeAdapter(
                                 FeatureCollection.class, new JsonFeaturesDeserializer())
                         .create();
-        FeatureCollection gsonCollection = gson.fromJson(reader, FeatureCollection.class);
-        if (gsonCollection == null) {
+        FeatureCollection featureCollection = gson.fromJson(reader, FeatureCollection.class);
+        if (featureCollection == null) {
             throw new IllegalStateException("Could not extract features from json");
         }
-        return new FeatureCollection(
-                gsonCollection.getToggleCollection(), gsonCollection.getSegmentCollection());
+        return featureCollection;
     }
 }

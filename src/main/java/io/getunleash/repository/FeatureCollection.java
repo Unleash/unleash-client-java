@@ -1,5 +1,8 @@
 package io.getunleash.repository;
 
+import io.getunleash.FeatureToggle;
+import io.getunleash.Segment;
+
 import java.util.Collections;
 
 public final class FeatureCollection {
@@ -25,5 +28,13 @@ public final class FeatureCollection {
 
     public SegmentCollection getSegmentCollection() {
         return segmentCollection;
+    }
+
+    public FeatureToggle getToggle(String name) {
+        return toggleCollection.getToggle(name);
+    }
+
+    public Segment getSegment(int id) {
+        return segmentCollection.getSegment(id);
     }
 }
