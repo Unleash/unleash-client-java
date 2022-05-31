@@ -11,7 +11,7 @@ public final class ActivationStrategy {
     private final Map<String, String> parameters;
     private final List<Constraint> constraints;
     private final List<Integer> segments;
-    @Nullable private final FeatureRepository repository;
+    @Nullable private final transient FeatureRepository repository;
 
     public ActivationStrategy(
             String name,
