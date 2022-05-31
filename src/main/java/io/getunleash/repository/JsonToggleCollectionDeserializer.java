@@ -70,9 +70,9 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
 
         JsonArray featureArray = rootElement.getAsJsonObject().getAsJsonArray("features");
 
-        Collection<FeatureToggle> featureTgggles =
+        Collection<FeatureToggle> featureToggles =
                 context.deserialize(featureArray, FEATURE_COLLECTION_TYPE);
-        return new ToggleCollection(featureTgggles);
+        return new ToggleCollection(featureToggles);
     }
 
     private int getVersion(JsonElement rootElement) {
