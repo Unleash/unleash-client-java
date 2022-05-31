@@ -4,8 +4,7 @@ import io.getunleash.lang.Nullable;
 import java.io.Serializable;
 import java.util.Collections;
 
-public final class ClientFeaturesResponse extends FeatureToggleResponse implements Serializable {
-    private final long serialVersionUID = 1L;
+public final class ClientFeaturesResponse extends FeatureToggleResponse {
     private final int version;
     private final @Nullable SegmentCollection segmentCollection;
 
