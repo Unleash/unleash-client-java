@@ -10,6 +10,7 @@ import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
 import io.getunleash.repository.*;
 import io.getunleash.strategy.*;
+import io.getunleash.util.ConstraintMerger;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantUtil;
 import java.util.*;
@@ -145,7 +146,7 @@ public class DefaultUnleash implements Unleash {
                                         return configuredStrategy.isEnabled(
                                                 strategy.getParameters(),
                                                 enhancedContext,
-                                                strategy.getConstraints());
+                                                ConstraintMerger.mergeConstraints(featureRepository, strategy));
                                     });
         }
         return enabled;

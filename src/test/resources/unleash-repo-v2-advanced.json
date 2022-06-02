@@ -2,7 +2,7 @@
     "version": 2,
     "segments": [
         {
-            "id": 1,
+            "id": 0,
             "name": "hasEnoughWins",
             "description": null,
             "constraints": [
@@ -23,7 +23,7 @@
             ]
         },
         {
-            "id": 2,
+            "id": 1,
             "name": "hasEnoughFollowers",
             "description": null,
             "constraints": [
@@ -37,7 +37,7 @@
             ]
         },
         {
-            "id": 3,
+            "id": 2,
             "name": "isSingle",
             "description": null,
             "constraints": [
@@ -51,7 +51,7 @@
             ]
         },
         {
-            "id": 4,
+            "id": 3,
             "name": "isCatPerson",
             "description": null,
             "constraints": [
@@ -69,12 +69,12 @@
         {
             "name": "Test.variants",
             "description": null,
-            "enabled": false,
+            "enabled": true,
             "strategies": [
                 {
                     "name": "default",
                     "segments": [
-                        1, 2, 3, 4
+                        0,1,2,3
                     ]
                 }
             ],

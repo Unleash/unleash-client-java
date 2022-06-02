@@ -106,7 +106,7 @@ public class FeatureRepositoryTest {
                         new FeatureToggle(
                                 "toggleFetcherCalled",
                                 false,
-                                Arrays.asList(new ActivationStrategy("custom", null, null))));
+                                Arrays.asList(new ActivationStrategy("custom", null))));
 
         when(backupHandler.read()).thenReturn(featureCollection);
 
@@ -116,7 +116,7 @@ public class FeatureRepositoryTest {
                         new FeatureToggle(
                                 "toggleFetcherCalled",
                                 true,
-                                Arrays.asList(new ActivationStrategy("custom", null, null))));
+                                Arrays.asList(new ActivationStrategy("custom", null))));
         ClientFeaturesResponse response =
                 new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.CHANGED, featureCollection);
@@ -143,11 +143,11 @@ public class FeatureRepositoryTest {
                         new FeatureToggle(
                                 "toggleFeatureName1",
                                 true,
-                                Arrays.asList(new ActivationStrategy("custom", null, null))),
+                                Arrays.asList(new ActivationStrategy("custom", null))),
                         new FeatureToggle(
                                 "toggleFeatureName2",
                                 true,
-                                Arrays.asList(new ActivationStrategy("custom", null, null))));
+                                Arrays.asList(new ActivationStrategy("custom", null))));
 
         when(backupHandler.read()).thenReturn(featureCollection);
         FeatureRepository featureRepository =
@@ -281,12 +281,12 @@ public class FeatureRepositoryTest {
                                         "toggleFeatureName1",
                                         true,
                                         Collections.singletonList(
-                                                new ActivationStrategy("custom", null, null))),
+                                                new ActivationStrategy("custom", null))),
                                 new FeatureToggle(
                                         "toggleFeatureName2",
                                         true,
                                         Collections.singletonList(
-                                                new ActivationStrategy("custom", null, null)))));
+                                                new ActivationStrategy("custom", null)))));
 
         new FeatureRepository(
                 config, backupHandler, new EventDispatcher(config), fetcher, bootstrapHandler);

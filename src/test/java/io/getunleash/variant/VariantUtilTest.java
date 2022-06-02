@@ -38,7 +38,7 @@ public class VariantUtilTest {
 
         defaultStrategy =
                 new ActivationStrategy(
-                        "default", Collections.emptyMap(), new FeatureRepository(defaultConfig));
+                        "default", Collections.emptyMap());
     }
 
     @Test

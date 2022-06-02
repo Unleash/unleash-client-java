@@ -49,7 +49,7 @@ public class UnleashTest {
                         new FeatureToggle(
                                 "test",
                                 true,
-                                asList(new ActivationStrategy("default", null, toggleRepository))));
+                                asList(new ActivationStrategy("default", null))));
 
         assertThat(unleash.isEnabled("test")).isTrue();
     }
@@ -63,7 +63,7 @@ public class UnleashTest {
                                 true,
                                 asList(
                                         new ActivationStrategy(
-                                                "whoot_strat", null, toggleRepository))));
+                                                "whoot_strat", null))));
 
         assertThat(unleash.isEnabled("test")).isFalse();
     }
@@ -121,7 +121,7 @@ public class UnleashTest {
                         new FeatureToggle(
                                 "test",
                                 true,
-                                asList(new ActivationStrategy("default", null, toggleRepository))));
+                                asList(new ActivationStrategy("default", null))));
 
         BiFunction<String, UnleashContext, Boolean> fallbackAction = mock(BiFunction.class);
         when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(false);
@@ -148,7 +148,7 @@ public class UnleashTest {
                         new FeatureToggle(
                                 "test",
                                 true,
-                                asList(new ActivationStrategy("custom", null, toggleRepository))));
+                                asList(new ActivationStrategy("custom", null))));
 
         unleash.isEnabled("test");
 
@@ -157,9 +157,9 @@ public class UnleashTest {
 
     @Test
     public void should_support_multiple_strategies() {
-        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null, toggleRepository);
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
         ActivationStrategy activeStrategy =
-                new ActivationStrategy("default", null, toggleRepository);
+                new ActivationStrategy("default", null);
 
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy1, activeStrategy));
@@ -178,7 +178,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121");
         ActivationStrategy strategy =
-                new ActivationStrategy("userWithId", params, toggleRepository);
+                new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(strategy));
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
@@ -194,7 +194,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy =
-                new ActivationStrategy("userWithId", params, toggleRepository);
+                new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(strategy));
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
@@ -215,7 +215,7 @@ public class UnleashTest {
 
     @Test
     public void inactive_feature_toggle() {
-        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null, toggleRepository);
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy1));
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
@@ -224,7 +224,7 @@ public class UnleashTest {
 
     @Test
     public void should_return_known_feature_toggle_definition() {
-        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null, toggleRepository);
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy1));
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
@@ -234,7 +234,7 @@ public class UnleashTest {
 
     @Test
     public void should_return_empty_for_unknown_feature_toggle_definition() {
-        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null, toggleRepository);
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy1));
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
@@ -258,7 +258,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy =
-                new ActivationStrategy("userWithId", params, toggleRepository);
+                new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(strategy));
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
@@ -280,7 +280,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy =
-                new ActivationStrategy("userWithId", params, toggleRepository);
+                new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(strategy));
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
@@ -301,7 +301,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 356");
         ActivationStrategy strategy =
-                new ActivationStrategy("userWithId", params, toggleRepository);
+                new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());
 
@@ -323,7 +323,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy =
-                new ActivationStrategy("userWithId", params, toggleRepository);
+                new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());
 
@@ -341,7 +341,7 @@ public class UnleashTest {
     public void get_disabled_variant_without_context() {
 
         // Set up a toggleName using UserWithIdStrategy
-        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null, toggleRepository);
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy1), getTestVariants());
 
@@ -358,7 +358,7 @@ public class UnleashTest {
     @Test
     public void get_default_variant_without_context() {
         // Set up a toggleName using UserWithIdStrategy
-        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null, toggleRepository);
+        ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy1), getTestVariants());
 
@@ -382,7 +382,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 356");
         ActivationStrategy strategy =
-                new ActivationStrategy("userWithId", params, toggleRepository);
+                new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());
 
@@ -406,7 +406,7 @@ public class UnleashTest {
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121");
         ActivationStrategy strategy =
-                new ActivationStrategy("userWithId", params, toggleRepository);
+                new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());
 
@@ -425,7 +425,7 @@ public class UnleashTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test")));
         ActivationStrategy activeStrategy =
-                new ActivationStrategy("default", null, constraints, Collections.emptyList(), null);
+                new ActivationStrategy("default", null, constraints, Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
@@ -439,7 +439,7 @@ public class UnleashTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("dev", "prod")));
         ActivationStrategy activeStrategy =
-                new ActivationStrategy("default", null, constraints, Collections.emptyList(), null);
+                new ActivationStrategy("default", null, constraints, Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
@@ -460,6 +460,10 @@ public class UnleashTest {
         FeatureCollection featureCollection = backupHandler.read();
 
         when(toggleRepository.getToggle(anyString())).thenReturn(featureCollection.getToggle("Test.variants"));
+        when(toggleRepository.getSegment(0)).thenReturn(featureCollection.getSegment(0));
+        when(toggleRepository.getSegment(1)).thenReturn(featureCollection.getSegment(1));
+        when(toggleRepository.getSegment(2)).thenReturn(featureCollection.getSegment(2));
+        when(toggleRepository.getSegment(3)).thenReturn(featureCollection.getSegment(3));
 
         UnleashContext context = UnleashContext.builder()
                                     .addProperty("wins", "6")
@@ -484,6 +488,10 @@ public class UnleashTest {
         FeatureCollection featureCollection = backupHandler.read();
 
         when(toggleRepository.getToggle(anyString())).thenReturn(featureCollection.getToggle("Test.variants"));
+        when(toggleRepository.getSegment(0)).thenReturn(featureCollection.getSegment(0));
+        when(toggleRepository.getSegment(1)).thenReturn(featureCollection.getSegment(1));
+        when(toggleRepository.getSegment(2)).thenReturn(featureCollection.getSegment(2));
+        when(toggleRepository.getSegment(3)).thenReturn(featureCollection.getSegment(3));
 
         UnleashContext context = UnleashContext.builder()
             .addProperty("wins", "4")
