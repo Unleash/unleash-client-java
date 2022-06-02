@@ -448,6 +448,55 @@ public class UnleashTest {
         assertThat(unleash.isEnabled("test")).isFalse();
     }
 
+    @Test
+    public void should_handle_complex_segment_chains() {
+        UnleashConfig config =
+            UnleashConfig.builder()
+                .appName("test")
+                .unleashAPI("http://http://unleash.org")
+                .backupFile(getClass().getResource("/unleash-repo-v2-advanced.json").getFile())
+                .build();
+        FeatureBackupHandlerFile backupHandler = new FeatureBackupHandlerFile(config);
+        FeatureCollection featureCollection = backupHandler.read();
+
+        when(toggleRepository.getToggle(anyString())).thenReturn(featureCollection.getToggle("Test.variants"));
+
+        UnleashContext context = UnleashContext.builder()
+                                    .addProperty("wins", "6")
+                                    .addProperty("dateLastWin", "2022-06-01")
+                                    .addProperty("followers", "1500")
+                                    .addProperty("single", "true")
+                                    .addProperty("catOrDog", "cat").build();
+
+        when(contextProvider.getContext()).thenReturn(context);
+        assertThat(unleash.isEnabled("Test.variants")).isTrue();
+    }
+
+    @Test
+    public void should_handle_complex_segment_chains_2() {
+        UnleashConfig config =
+            UnleashConfig.builder()
+                .appName("test")
+                .unleashAPI("http://http://unleash.org")
+                .backupFile(getClass().getResource("/unleash-repo-v2-advanced.json").getFile())
+                .build();
+        FeatureBackupHandlerFile backupHandler = new FeatureBackupHandlerFile(config);
+        FeatureCollection featureCollection = backupHandler.read();
+
+        when(toggleRepository.getToggle(anyString())).thenReturn(featureCollection.getToggle("Test.variants"));
+
+        UnleashContext context = UnleashContext.builder()
+            .addProperty("wins", "4")
+            .addProperty("dateLastWin", "2020-06-01")
+            .addProperty("followers", "900")
+            .addProperty("single", "false")
+            .addProperty("catOrDog", "dog").build();
+
+        when(contextProvider.getContext()).thenReturn(context);
+        assertThat(unleash.isEnabled("Test.variants")).isFalse();
+    }
+
+
     private List<VariantDefinition> getTestVariants() {
         return asList(
                 new VariantDefinition(

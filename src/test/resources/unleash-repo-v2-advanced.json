@@ -1,0 +1,94 @@
+{
+    "version": 2,
+    "segments": [
+        {
+            "id": 1,
+            "name": "hasEnoughWins",
+            "description": null,
+            "constraints": [
+                {
+                    "contextName": "wins",
+                    "operator": "NUM_LT",
+                    "value": "5",
+                    "inverted": false,
+                    "caseInsensitive": true
+                },
+                {
+                    "contextName": "dateLastWin",
+                    "operator": "DATE_AFTER",
+                    "value": "2022-05-01",
+                    "inverted": false,
+                    "caseInsensitive": true
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "hasEnoughFollowers",
+            "description": null,
+            "constraints": [
+                {
+                    "contextName": "followers",
+                    "operator": "NUM_LT",
+                    "value": "1000",
+                    "inverted": false,
+                    "caseInsensitive": true
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "isSingle",
+            "description": null,
+            "constraints": [
+                {
+                    "contextName": "single",
+                    "operator": "STR_CONTAINS",
+                    "value": "true",
+                    "inverted": false,
+                    "caseInsensitive": true
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "isCatPerson",
+            "description": null,
+            "constraints": [
+                {
+                    "contextName": "catOrDog",
+                    "operator": "STR_CONTAINS",
+                    "value": "cat",
+                    "inverted": false,
+                    "caseInsensitive": true
+                }
+            ]
+        }
+    ],
+    "features": [
+        {
+            "name": "Test.variants",
+            "description": null,
+            "enabled": false,
+            "strategies": [
+                {
+                    "name": "default",
+                    "segments": [
+                        1, 2, 3, 4
+                    ]
+                }
+            ],
+            "variants": [
+                {
+                    "name": "variant1",
+                    "weight": 50
+                },
+                {
+                    "name": "variant2",
+                    "weight": 50
+                }
+            ],
+            "createdAt": "2019-01-24T10:41:45.236Z"
+        }
+    ]
+}
