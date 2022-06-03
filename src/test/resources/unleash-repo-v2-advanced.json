@@ -8,7 +8,7 @@
             "constraints": [
                 {
                     "contextName": "wins",
-                    "operator": "NUM_LT",
+                    "operator": "NUM_GT",
                     "value": "5",
                     "inverted": false,
                     "caseInsensitive": true
@@ -16,7 +16,7 @@
                 {
                     "contextName": "dateLastWin",
                     "operator": "DATE_AFTER",
-                    "value": "2022-05-01",
+                    "value": "2022-05-01T12:00:00",
                     "inverted": false,
                     "caseInsensitive": true
                 }
@@ -29,7 +29,7 @@
             "constraints": [
                 {
                     "contextName": "followers",
-                    "operator": "NUM_LT",
+                    "operator": "NUM_GT",
                     "value": "1000",
                     "inverted": false,
                     "caseInsensitive": true
@@ -44,7 +44,7 @@
                 {
                     "contextName": "single",
                     "operator": "STR_CONTAINS",
-                    "value": "true",
+                    "values": ["true"],
                     "inverted": false,
                     "caseInsensitive": true
                 }
@@ -58,7 +58,7 @@
                 {
                     "contextName": "catOrDog",
                     "operator": "STR_CONTAINS",
-                    "value": "cat",
+                    "values": ["cat"],
                     "inverted": false,
                     "caseInsensitive": true
                 }

@@ -467,7 +467,7 @@ public class UnleashTest {
 
         UnleashContext context = UnleashContext.builder()
                                     .addProperty("wins", "6")
-                                    .addProperty("dateLastWin", "2022-06-01")
+                                    .addProperty("dateLastWin", "2022-06-01T12:00:00")
                                     .addProperty("followers", "1500")
                                     .addProperty("single", "true")
                                     .addProperty("catOrDog", "cat").build();
@@ -495,7 +495,7 @@ public class UnleashTest {
 
         UnleashContext context = UnleashContext.builder()
             .addProperty("wins", "4")
-            .addProperty("dateLastWin", "2020-06-01")
+            .addProperty("dateLastWin", "2022-06-01T12:00:00")
             .addProperty("followers", "900")
             .addProperty("single", "false")
             .addProperty("catOrDog", "dog").build();
