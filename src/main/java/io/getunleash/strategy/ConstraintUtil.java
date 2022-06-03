@@ -54,7 +54,6 @@ public class ConstraintUtil {
 
     public static boolean validate(@Nullable List<Constraint> constraints, UnleashContext context) {
         if (constraints != null && constraints.size() > 0) {
-            List<Constraint> failing = constraints.stream().filter(c -> !validateConstraint(c, context)).collect(Collectors.toList());
             return constraints.stream().allMatch(c -> validateConstraint(c, context));
         } else {
             return true;
