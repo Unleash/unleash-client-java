@@ -16,6 +16,7 @@ jobs:
         with:
           java-version: ${{ matrix.version }}
           cache: 'maven'
+          distribution: 'temurin'
       - name: Build, test, coverage
         run: ./mvnw clean test jacoco:report coveralls:report
   java17:
@@ -28,6 +29,7 @@ jobs:
         with:
           java-version: 17
           cache: 'maven'
+          distribution: 'temurin'
       - name: Build, test, coverage
         run: ./mvnw clean test jacoco:report coveralls:report
         env:
