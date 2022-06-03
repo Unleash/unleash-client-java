@@ -146,7 +146,8 @@ public class DefaultUnleash implements Unleash {
                                         return configuredStrategy.isEnabled(
                                                 strategy.getParameters(),
                                                 enhancedContext,
-                                                ConstraintMerger.mergeConstraints(featureRepository, strategy));
+                                                ConstraintMerger.mergeConstraints(
+                                                        featureRepository, strategy));
                                     });
         }
         return enabled;

@@ -1,10 +1,7 @@
 package io.getunleash;
 
 import io.getunleash.lang.Nullable;
-import io.getunleash.repository.FeatureRepository;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class ActivationStrategy {
     private final String name;
@@ -12,9 +9,7 @@ public final class ActivationStrategy {
     private final List<Constraint> constraints;
     private final List<Integer> segments;
 
-    public ActivationStrategy(
-            String name,
-            @Nullable Map<String, String> parameters) {
+    public ActivationStrategy(String name, @Nullable Map<String, String> parameters) {
         this(name, parameters, Collections.emptyList(), Collections.emptyList());
     }
 
@@ -32,6 +27,7 @@ public final class ActivationStrategy {
     public String getName() {
         return name;
     }
+
     public List<Integer> getSegments() {
         return segments;
     }

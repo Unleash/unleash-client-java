@@ -2,7 +2,6 @@ package io.getunleash.repository;
 
 import io.getunleash.FeatureToggle;
 import io.getunleash.Segment;
-
 import java.util.Collections;
 
 public final class FeatureCollection {

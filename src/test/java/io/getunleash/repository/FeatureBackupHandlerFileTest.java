@@ -1,16 +1,15 @@
 package io.getunleash.repository;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.getunleash.TestUtil;
 import io.getunleash.util.UnleashConfig;
-import org.apache.logging.log4j.Level;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.logging.log4j.Level;
+import org.junit.jupiter.api.Test;
 
 public class FeatureBackupHandlerFileTest {
 
@@ -26,9 +25,8 @@ public class FeatureBackupHandlerFileTest {
         FeatureCollection featureCollection = backupHandler.read();
 
         assertNotNull(
-            featureCollection.getToggle("featureX"), "featureX feature should be present");
-        assertNotNull(
-            featureCollection.getSegment(1), "segment 1 should be present");
+                featureCollection.getToggle("featureX"), "featureX feature should be present");
+        assertNotNull(featureCollection.getSegment(1), "segment 1 should be present");
     }
 
     @Test
@@ -60,7 +58,7 @@ public class FeatureBackupHandlerFileTest {
         FeatureCollection featureCollection = backupHandler.read();
 
         assertNull(
-            featureCollection.getToggle("presentFeature"),
+                featureCollection.getToggle("presentFeature"),
                 "presentFeature should not be present");
     }
 
@@ -87,9 +85,9 @@ public class FeatureBackupHandlerFileTest {
         backupHandler = new FeatureBackupHandlerFile(config);
         featureCollection = backupHandler.read();
         assertNotNull(
-            featureCollection.getToggle("Test.variants"), "Test.variants feature should be present");
-        assertNotNull(
-            featureCollection.getSegment(1), "segment 1 should be present");
+                featureCollection.getToggle("Test.variants"),
+                "Test.variants feature should be present");
+        assertNotNull(featureCollection.getSegment(1), "segment 1 should be present");
     }
 
     @Test
@@ -105,7 +103,7 @@ public class FeatureBackupHandlerFileTest {
                         .build();
 
         String staticData =
-            "{\"version\":2,\"segments\":[{\"id\":1,\"name\":\"some-name\",\"description\":null,\"constraints\":[{\"contextName\":\"some-name\",\"operator\":\"IN\",\"value\":\"name\",\"inverted\":false,\"caseInsensitive\":true}]}],\"features\":[{\"name\":\"Test.variants\",\"description\":null,\"enabled\":true,\"strategies\":[{\"name\":\"default\",\"segments\":[1]}],\"variants\":[{\"name\":\"variant1\",\"weight\":50},{\"name\":\"variant2\",\"weight\":50}],\"createdAt\":\"2019-01-24T10:41:45.236Z\"}]}";
+                "{\"version\":2,\"segments\":[{\"id\":1,\"name\":\"some-name\",\"description\":null,\"constraints\":[{\"contextName\":\"some-name\",\"operator\":\"IN\",\"value\":\"name\",\"inverted\":false,\"caseInsensitive\":true}]}],\"features\":[{\"name\":\"Test.variants\",\"description\":null,\"enabled\":true,\"strategies\":[{\"name\":\"default\",\"segments\":[1]}],\"variants\":[{\"name\":\"variant1\",\"weight\":50},{\"name\":\"variant2\",\"weight\":50}],\"createdAt\":\"2019-01-24T10:41:45.236Z\"}]}";
         Reader staticReader = new StringReader(staticData);
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(staticReader);
 
