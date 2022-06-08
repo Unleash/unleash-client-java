@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ConstraintUtil {
     private static final Map<Operator, ConstraintOperator> operators = new HashMap<>();
@@ -62,6 +61,7 @@ public class ConstraintUtil {
 
     private static boolean validateConstraint(Constraint constraint, UnleashContext context) {
         ConstraintOperator operator = operators.get(constraint.getOperator());
+        if (operator == null) return false;
         return constraint.isInverted() ^ operator.evaluate(constraint, context);
     }
 }

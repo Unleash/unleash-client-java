@@ -9,9 +9,9 @@ final class JsonFeatureParser {
     private JsonFeatureParser() {}
 
     public static String toJsonString(FeatureCollection featureCollection) {
-        Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(
-                            FeatureCollection.class, new JsonFeatureSerializer())
+        Gson gson =
+                new GsonBuilder()
+                        .registerTypeAdapter(FeatureCollection.class, new JsonFeatureSerializer())
                         .create();
         return gson.toJson(featureCollection);
     }

@@ -1,7 +1,6 @@
 package io.getunleash.repository;
 
 import io.getunleash.lang.Nullable;
-
 import java.util.Collections;
 
 public final class ClientFeaturesResponse extends FeatureToggleResponse {

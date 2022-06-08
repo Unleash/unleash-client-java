@@ -9,7 +9,6 @@ import io.getunleash.ActivationStrategy;
 import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
-import io.getunleash.repository.FeatureRepository;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
@@ -36,9 +35,7 @@ public class VariantUtilTest {
                         .synchronousFetchOnInitialisation(true)
                         .build();
 
-        defaultStrategy =
-                new ActivationStrategy(
-                        "default", Collections.emptyMap());
+        defaultStrategy = new ActivationStrategy("default", Collections.emptyMap());
     }
 
     @Test
