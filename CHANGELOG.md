@@ -2,11 +2,10 @@
 
 ## 6.0.x (unreleased)
 - Remove deprecated `no.finn.unleash` package
-
+- feat: Added support for providing custom ToggleFetcher through a UnleashToggleFetcherFactory (A Function<UnleashConfig, ToggleFetcher>). Two fetchers are now included, one using java.net.http and one using OkHttp, if you want to use the OkHttp one, your project will need to add a dependency on ```<dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp</artifactId><version>4.9+</version></dependency>```
 ## 5.1.0
 - feat: Adds support for more constraint operators (String, Number, Semver, Dates)
   - See https://docs.getunleash.io/advanced/strategy_constraints#constraint-structure
-- feat: Added support for providing custom ToggleFetcher through a UnleashToggleFetcherFactory (A Function<UnleashConfig, ToggleFetcher>). Two fetchers are now included, one using java.net.http and one using OkHttp, if you want to use the OkHttp one, your project will need to add a dependency on ```<dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp</artifactId><version>4.9+</version></dependency>```
 
 ## 5.0.4
 - fix: Bootstrap no longer fails hard when passed invalid json. It now returns an empty list of features if the bootstrap json could not be parsed.
