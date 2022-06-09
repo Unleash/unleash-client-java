@@ -9,7 +9,7 @@
         <version.slf4j>1.7.36</version.slf4j>
         <version.log4j2>2.17.2</version.log4j2>
         <version.junit5>5.8.2</version.junit5>
-        <version.okhttp>4.9.2</version.okhttp>
+        <version.okhttp>4.9.3</version.okhttp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.unleash.specification>4.2.0</version.unleash.specification>
         <arguments />
@@ -103,14 +103,14 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.22.0</version>
+            <version>3.23.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.5.1</version>
+            <version>4.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
