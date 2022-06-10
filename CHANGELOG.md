@@ -1,5 +1,8 @@
 # Changelog
 
+## 6.0.x (unreleased)
+- Remove deprecated `no.finn.unleash` package
+
 ## 5.1.0
 - feat: Adds support for more constraint operators (String, Number, Semver, Dates)
   - See https://docs.getunleash.io/advanced/strategy_constraints#constraint-structure
