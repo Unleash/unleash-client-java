@@ -2,7 +2,9 @@ package no.finn.unleash;
 
 import java.util.Map;
 
-/** @deprecated use {@link io.getunleash.UnleashContext} */
+/**
+ * @deprecated use {@link io.getunleash.UnleashContext}
+ */
 @Deprecated
 public class UnleashContext extends io.getunleash.UnleashContext {
     public UnleashContext(

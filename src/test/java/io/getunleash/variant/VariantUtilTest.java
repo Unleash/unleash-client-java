@@ -3,22 +3,40 @@ package io.getunleash.variant;
 import static io.getunleash.Variant.DISABLED_VARIANT;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import io.getunleash.ActivationStrategy;
 import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class VariantUtilTest {
-    private final ActivationStrategy defaultStrategy =
-            new ActivationStrategy("default", Collections.emptyMap());
+
+    private ActivationStrategy defaultStrategy;
+
+    @BeforeEach
+    void setUp() {
+        UnleashConfig defaultConfig =
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .unleashAPI("http://localhost:4242/api/")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                        .fetchTogglesInterval(200L)
+                        .synchronousFetchOnInitialisation(true)
+                        .build();
+
+        defaultStrategy = new ActivationStrategy("default", Collections.emptyMap());
+    }
 
     @Test
     public void should_return_default_variant_when_toggle_has_no_variants() {

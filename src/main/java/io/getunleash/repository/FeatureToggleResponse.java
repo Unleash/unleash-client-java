@@ -8,7 +8,7 @@ import io.getunleash.lang.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-public final class FeatureToggleResponse implements UnleashEvent {
+public class FeatureToggleResponse implements UnleashEvent {
 
     public enum Status {
         NOT_CHANGED,

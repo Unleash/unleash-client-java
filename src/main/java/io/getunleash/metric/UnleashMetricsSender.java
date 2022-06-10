@@ -46,7 +46,7 @@ public class UnleashMetricsSender {
                 Type type,
                 JsonSerializationContext jsonSerializationContext) {
             return new JsonPrimitive(ISO_INSTANT.format(localDateTime.toInstant(ZoneOffset.UTC)));
-        };
+        }
     }
 
     static class AtomicLongSerializer implements JsonSerializer<AtomicLong> {

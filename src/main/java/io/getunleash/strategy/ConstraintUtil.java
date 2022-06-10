@@ -61,6 +61,7 @@ public class ConstraintUtil {
 
     private static boolean validateConstraint(Constraint constraint, UnleashContext context) {
         ConstraintOperator operator = operators.get(constraint.getOperator());
+        if (operator == null) return false;
         return constraint.isInverted() ^ operator.evaluate(constraint, context);
     }
 }

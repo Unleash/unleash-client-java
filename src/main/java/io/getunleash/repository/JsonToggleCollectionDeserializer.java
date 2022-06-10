@@ -11,6 +11,7 @@ import io.getunleash.lang.Nullable;
 import java.lang.reflect.Type;
 import java.util.*;
 
+@Deprecated()
 public class JsonToggleCollectionDeserializer implements JsonDeserializer<ToggleCollection> {
     private static final Type PARAMS_TYPE = new TypeToken<Map<String, String>>() {}.getType();
     private static final Type FEATURE_COLLECTION_TYPE =
@@ -69,9 +70,9 @@ public class JsonToggleCollectionDeserializer implements JsonDeserializer<Toggle
 
         JsonArray featureArray = rootElement.getAsJsonObject().getAsJsonArray("features");
 
-        Collection<FeatureToggle> featureTgggles =
+        Collection<FeatureToggle> featureToggles =
                 context.deserialize(featureArray, FEATURE_COLLECTION_TYPE);
-        return new ToggleCollection(featureTgggles);
+        return new ToggleCollection(featureToggles);
     }
 
     private int getVersion(JsonElement rootElement) {

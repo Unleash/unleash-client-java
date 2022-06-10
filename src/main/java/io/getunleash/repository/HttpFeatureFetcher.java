@@ -13,34 +13,31 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
-// Use HttpFeatureFetcher instead
-public final class HttpToggleFetcher implements ToggleFetcher {
-    private static final Logger LOG = LoggerFactory.getLogger(HttpToggleFetcher.class);
+public class HttpFeatureFetcher implements FeatureFetcher {
+    private static final Logger LOG = LoggerFactory.getLogger(HttpFeatureFetcher.class);
 
     private static final int CONNECT_TIMEOUT = 10000;
     private Optional<String> etag = Optional.empty();
 
-    private final URL toggleUrl;
-    private final UnleashConfig unleashConfig;
+    private final UnleashConfig config;
 
-    public HttpToggleFetcher(UnleashConfig unleashConfig) {
-        this.unleashConfig = unleashConfig;
+    private final URL toggleUrl;
+
+    public HttpFeatureFetcher(UnleashConfig config) {
+        this.config = config;
         this.toggleUrl =
-                unleashConfig
-                        .getUnleashURLs()
-                        .getFetchTogglesURL(
-                                unleashConfig.getProjectName(), unleashConfig.getNamePrefix());
+                config.getUnleashURLs()
+                        .getFetchTogglesURL(config.getProjectName(), config.getNamePrefix());
     }
 
     @Override
-    public FeatureToggleResponse fetchToggles() throws UnleashException {
+    public ClientFeaturesResponse fetchFeatures() throws UnleashException {
         HttpURLConnection connection = null;
         try {
-            connection = openConnection(toggleUrl);
+            connection = openConnection(this.toggleUrl);
             connection.connect();
 
-            return getToggleResponse(connection, true);
+            return getFeatureResponse(connection, true);
         } catch (IOException e) {
             throw new UnleashException("Could not fetch toggles", e);
         } catch (IllegalStateException e) {
@@ -52,9 +49,10 @@ public final class HttpToggleFetcher implements ToggleFetcher {
         }
     }
 
-    private FeatureToggleResponse getToggleResponse(
+    private ClientFeaturesResponse getFeatureResponse(
             HttpURLConnection request, boolean followRedirect) throws IOException {
         int responseCode = request.getResponseCode();
+
         if (responseCode < 300) {
             etag = Optional.ofNullable(request.getHeaderField("ETag"));
 
@@ -63,8 +61,11 @@ public final class HttpToggleFetcher implements ToggleFetcher {
                             new InputStreamReader(
                                     (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
-                ToggleCollection toggles = JsonToggleParser.fromJson(reader);
-                return new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggles);
+                FeatureCollection features = JsonFeatureParser.fromJson(reader);
+                return new ClientFeaturesResponse(
+                        ClientFeaturesResponse.Status.CHANGED,
+                        features.getToggleCollection(),
+                        features.getSegmentCollection());
             }
         } else if (followRedirect
                 && (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
@@ -72,27 +73,27 @@ public final class HttpToggleFetcher implements ToggleFetcher {
                         || responseCode == HttpURLConnection.HTTP_SEE_OTHER)) {
             return followRedirect(request);
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-            return new FeatureToggleResponse(
-                    FeatureToggleResponse.Status.NOT_CHANGED, responseCode);
+            return new ClientFeaturesResponse(
+                    ClientFeaturesResponse.Status.NOT_CHANGED, responseCode);
         } else {
-            return new FeatureToggleResponse(
-                    FeatureToggleResponse.Status.UNAVAILABLE,
+            return new ClientFeaturesResponse(
+                    ClientFeaturesResponse.Status.UNAVAILABLE,
                     responseCode,
                     getLocationHeader(request));
         }
     }
 
-    private FeatureToggleResponse followRedirect(HttpURLConnection request) throws IOException {
+    private ClientFeaturesResponse followRedirect(HttpURLConnection request) throws IOException {
         String newUrl = getLocationHeader(request);
 
         request = openConnection(new URL(newUrl));
         request.connect();
         LOG.info(
-                "Redirecting from {} to {}. Please consider to update your config.",
-                toggleUrl,
+                "Redirecting from {} to {}. Please consider updating your config.",
+                this.toggleUrl,
                 newUrl);
 
-        return getToggleResponse(request, false);
+        return getFeatureResponse(request, false);
     }
 
     private String getLocationHeader(HttpURLConnection connection) {
@@ -101,8 +102,8 @@ public final class HttpToggleFetcher implements ToggleFetcher {
 
     private HttpURLConnection openConnection(URL url) throws IOException {
         HttpURLConnection connection;
-        if (this.unleashConfig.getProxy() != null) {
-            connection = (HttpURLConnection) url.openConnection(this.unleashConfig.getProxy());
+        if (this.config.getProxy() != null) {
+            connection = (HttpURLConnection) url.openConnection(this.config.getProxy());
         } else {
             connection = (HttpURLConnection) url.openConnection();
         }
@@ -110,7 +111,7 @@ public final class HttpToggleFetcher implements ToggleFetcher {
         connection.setReadTimeout(CONNECT_TIMEOUT);
         connection.setRequestProperty("Accept", "application/json");
         connection.setRequestProperty("Content-Type", "application/json");
-        UnleashConfig.setRequestProperties(connection, this.unleashConfig);
+        UnleashConfig.setRequestProperties(connection, this.config);
 
         etag.ifPresent(val -> connection.setRequestProperty("If-None-Match", val));
 

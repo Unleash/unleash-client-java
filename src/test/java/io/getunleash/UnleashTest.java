@@ -5,10 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import io.getunleash.repository.ToggleRepository;
+import io.getunleash.repository.*;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.strategy.UserWithIdStrategy;
 import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import io.getunleash.variant.Payload;
 import io.getunleash.variant.VariantDefinition;
 import java.util.*;
@@ -18,13 +19,14 @@ import org.junit.jupiter.api.Test;
 
 public class UnleashTest {
 
-    private ToggleRepository toggleRepository;
+    private FeatureRepository toggleRepository;
     private UnleashContextProvider contextProvider;
     private Unleash unleash;
 
     @BeforeEach
     public void setup() {
-        toggleRepository = mock(ToggleRepository.class);
+        toggleRepository = mock(FeatureRepository.class);
+
         contextProvider = mock(UnleashContextProvider.class);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
@@ -33,6 +35,7 @@ public class UnleashTest {
                         .appName("test")
                         .unleashAPI("http://localhost:4242/api/")
                         .environment("test")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
                         .unleashContextProvider(contextProvider)
                         .build();
 
@@ -139,8 +142,7 @@ public class UnleashTest {
 
         unleash.isEnabled("test");
 
-        verify(customStrategy, times(1))
-                .isEnabled(isNull(), any(UnleashContext.class), any(List.class));
+        verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class), any());
     }
 
     @Test
@@ -403,7 +405,8 @@ public class UnleashTest {
     public void should_be_enabled_with_strategy_constraints() {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test")));
-        ActivationStrategy activeStrategy = new ActivationStrategy("default", null, constraints);
+        ActivationStrategy activeStrategy =
+                new ActivationStrategy("default", null, constraints, Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
@@ -416,13 +419,78 @@ public class UnleashTest {
     public void should_be_disabled_with_strategy_constraints() {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("dev", "prod")));
-        ActivationStrategy activeStrategy = new ActivationStrategy("default", null, constraints);
+        ActivationStrategy activeStrategy =
+                new ActivationStrategy("default", null, constraints, Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
         assertThat(unleash.isEnabled("test")).isFalse();
+    }
+
+    @Test
+    public void should_handle_complex_segment_chains() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test")
+                        .unleashAPI("http://http://unleash.org")
+                        .backupFile(
+                                getClass().getResource("/unleash-repo-v2-advanced.json").getFile())
+                        .build();
+        FeatureBackupHandlerFile backupHandler = new FeatureBackupHandlerFile(config);
+        FeatureCollection featureCollection = backupHandler.read();
+
+        when(toggleRepository.getToggle(anyString()))
+                .thenReturn(featureCollection.getToggle("Test.variants"));
+        when(toggleRepository.getSegment(0)).thenReturn(featureCollection.getSegment(0));
+        when(toggleRepository.getSegment(1)).thenReturn(featureCollection.getSegment(1));
+        when(toggleRepository.getSegment(2)).thenReturn(featureCollection.getSegment(2));
+        when(toggleRepository.getSegment(3)).thenReturn(featureCollection.getSegment(3));
+
+        UnleashContext context =
+                UnleashContext.builder()
+                        .addProperty("wins", "6")
+                        .addProperty("dateLastWin", "2022-06-01T12:00:00")
+                        .addProperty("followers", "1500")
+                        .addProperty("single", "true")
+                        .addProperty("catOrDog", "cat")
+                        .build();
+
+        when(contextProvider.getContext()).thenReturn(context);
+        assertThat(unleash.isEnabled("Test.variants")).isTrue();
+    }
+
+    @Test
+    public void should_handle_complex_segment_chains_2() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test")
+                        .unleashAPI("http://http://unleash.org")
+                        .backupFile(
+                                getClass().getResource("/unleash-repo-v2-advanced.json").getFile())
+                        .build();
+        FeatureBackupHandlerFile backupHandler = new FeatureBackupHandlerFile(config);
+        FeatureCollection featureCollection = backupHandler.read();
+
+        when(toggleRepository.getToggle(anyString()))
+                .thenReturn(featureCollection.getToggle("Test.variants"));
+        when(toggleRepository.getSegment(0)).thenReturn(featureCollection.getSegment(0));
+        when(toggleRepository.getSegment(1)).thenReturn(featureCollection.getSegment(1));
+        when(toggleRepository.getSegment(2)).thenReturn(featureCollection.getSegment(2));
+        when(toggleRepository.getSegment(3)).thenReturn(featureCollection.getSegment(3));
+
+        UnleashContext context =
+                UnleashContext.builder()
+                        .addProperty("wins", "4")
+                        .addProperty("dateLastWin", "2022-06-01T12:00:00")
+                        .addProperty("followers", "900")
+                        .addProperty("single", "false")
+                        .addProperty("catOrDog", "dog")
+                        .build();
+
+        when(contextProvider.getContext()).thenReturn(context);
+        assertThat(unleash.isEnabled("Test.variants")).isFalse();
     }
 
     private List<VariantDefinition> getTestVariants() {

@@ -10,12 +10,11 @@ import io.getunleash.util.UnleashConfig;
 import java.io.StringReader;
 import java.util.Collections;
 
-@Deprecated()
-public class ToggleBootstrapHandler {
+public class FeatureBootstrapHandler {
     private final EventDispatcher eventDispatcher;
     private final ToggleBootstrapProvider toggleBootstrapProvider;
 
-    public ToggleBootstrapHandler(UnleashConfig unleashConfig) {
+    public FeatureBootstrapHandler(UnleashConfig unleashConfig) {
         if (unleashConfig.getToggleBootstrapProvider() != null) {
             this.toggleBootstrapProvider = unleashConfig.getToggleBootstrapProvider();
         } else {
@@ -24,37 +23,41 @@ public class ToggleBootstrapHandler {
         this.eventDispatcher = new EventDispatcher(unleashConfig);
     }
 
-    public ToggleCollection parse(@Nullable String jsonString) {
+    public FeatureCollection parse(@Nullable String jsonString) {
         if (jsonString != null) {
             try (StringReader stringReader = new StringReader(jsonString)) {
-                ToggleCollection toggleCollection = JsonToggleParser.fromJson(stringReader);
-                eventDispatcher.dispatch(new ToggleBootstrapRead(toggleCollection));
-                return toggleCollection;
+                FeatureCollection featureCollection = JsonFeatureParser.fromJson(stringReader);
+                eventDispatcher.dispatch(new FeatureBootstrapRead(featureCollection));
+                return featureCollection;
             } catch (IllegalStateException | JsonSyntaxException ise) {
                 eventDispatcher.dispatch(
                         new UnleashException("Failed to read toggle bootstrap", ise));
             }
         }
-        return new ToggleCollection(Collections.emptyList());
+        return new FeatureCollection(
+                new ToggleCollection(Collections.emptyList()),
+                new SegmentCollection(Collections.emptyList()));
     }
 
-    public ToggleCollection read() {
+    public FeatureCollection read() {
         if (toggleBootstrapProvider != null) {
             return parse(toggleBootstrapProvider.read());
         }
-        return new ToggleCollection(Collections.emptyList());
+        return new FeatureCollection(
+                new ToggleCollection(Collections.emptyList()),
+                new SegmentCollection(Collections.emptyList()));
     }
 
-    public static class ToggleBootstrapRead implements UnleashEvent {
-        private final ToggleCollection toggleCollection;
+    public static class FeatureBootstrapRead implements UnleashEvent {
+        private final FeatureCollection featureCollection;
 
-        private ToggleBootstrapRead(ToggleCollection toggleCollection) {
-            this.toggleCollection = toggleCollection;
+        public FeatureBootstrapRead(FeatureCollection featureCollection) {
+            this.featureCollection = featureCollection;
         }
 
         @Override
         public void publishTo(UnleashSubscriber unleashSubscriber) {
-            unleashSubscriber.togglesBootstrapped(toggleCollection);
+            unleashSubscriber.featuresBootstrapped(featureCollection);
         }
     }
 }

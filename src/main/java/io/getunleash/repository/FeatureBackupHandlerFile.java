@@ -1,7 +1,6 @@
 package io.getunleash.repository;
 
 import com.google.gson.JsonParseException;
-import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashEvent;
@@ -9,30 +8,28 @@ import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.util.UnleashConfig;
 import java.io.*;
 import java.util.Collections;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated()
-public class ToggleBackupHandlerFile implements BackupHandler<ToggleCollection> {
-    private static final Logger LOG = LoggerFactory.getLogger(ToggleBackupHandlerFile.class);
+public class FeatureBackupHandlerFile implements BackupHandler<FeatureCollection> {
+    private static final Logger LOG = LoggerFactory.getLogger(FeatureBackupHandlerFile.class);
 
     private final String backupFile;
     private final EventDispatcher eventDispatcher;
 
-    public ToggleBackupHandlerFile(UnleashConfig config) {
+    public FeatureBackupHandlerFile(UnleashConfig config) {
         this.backupFile = config.getBackupFile();
         this.eventDispatcher = new EventDispatcher(config);
     }
 
     @Override
-    public ToggleCollection read() {
+    public FeatureCollection read() {
         LOG.info("Unleash will try to load feature toggle states from temporary backup");
         try (FileReader reader = new FileReader(backupFile)) {
             BufferedReader br = new BufferedReader(reader);
-            ToggleCollection toggleCollection = JsonToggleParser.fromJson(br);
-            eventDispatcher.dispatch(new ToggleBackupRead(toggleCollection));
-            return toggleCollection;
+            FeatureCollection featureCollection = JsonFeatureParser.fromJson(br);
+            eventDispatcher.dispatch(new FeatureBackupRead(featureCollection));
+            return featureCollection;
         } catch (FileNotFoundException e) {
             LOG.info(
                     " Unleash could not find the backup-file '"
@@ -43,15 +40,16 @@ public class ToggleBackupHandlerFile implements BackupHandler<ToggleCollection> 
             eventDispatcher.dispatch(
                     new UnleashException("Failed to read backup file: " + backupFile, e));
         }
-        List<FeatureToggle> emptyList = Collections.emptyList();
-        return new ToggleCollection(emptyList);
+        return new FeatureCollection(
+                new ToggleCollection(Collections.emptyList()),
+                new SegmentCollection(Collections.emptyList()));
     }
 
     @Override
-    public void write(ToggleCollection toggleCollection) {
+    public void write(FeatureCollection featureCollection) {
         try (FileWriter writer = new FileWriter(backupFile)) {
-            writer.write(JsonToggleParser.toJsonString(toggleCollection));
-            eventDispatcher.dispatch(new ToggleBackupWritten(toggleCollection));
+            writer.write(JsonFeatureParser.toJsonString(featureCollection));
+            eventDispatcher.dispatch(new FeatureBackupWritten(featureCollection));
         } catch (IOException e) {
             eventDispatcher.dispatch(
                     new UnleashException(
@@ -60,31 +58,31 @@ public class ToggleBackupHandlerFile implements BackupHandler<ToggleCollection> 
         }
     }
 
-    private static class ToggleBackupRead implements UnleashEvent {
+    private static class FeatureBackupRead implements UnleashEvent {
 
-        private final ToggleCollection toggleCollection;
+        private final FeatureCollection featureCollection;
 
-        private ToggleBackupRead(ToggleCollection toggleCollection) {
-            this.toggleCollection = toggleCollection;
+        private FeatureBackupRead(FeatureCollection featureCollection) {
+            this.featureCollection = featureCollection;
         }
 
         @Override
         public void publishTo(UnleashSubscriber unleashSubscriber) {
-            unleashSubscriber.toggleBackupRestored(toggleCollection);
+            unleashSubscriber.featuresBackupRestored(featureCollection);
         }
     }
 
-    private static class ToggleBackupWritten implements UnleashEvent {
+    private static class FeatureBackupWritten implements UnleashEvent {
 
-        private final ToggleCollection toggleCollection;
+        private final FeatureCollection featureCollection;
 
-        private ToggleBackupWritten(ToggleCollection toggleCollection) {
-            this.toggleCollection = toggleCollection;
+        private FeatureBackupWritten(FeatureCollection featureCollection) {
+            this.featureCollection = featureCollection;
         }
 
         @Override
         public void publishTo(UnleashSubscriber unleashSubscriber) {
-            unleashSubscriber.togglesBackedUp(toggleCollection);
+            unleashSubscriber.featuresBackedUp(featureCollection);
         }
     }
 }

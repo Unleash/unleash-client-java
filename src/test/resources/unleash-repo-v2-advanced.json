@@ -1,0 +1,94 @@
+{
+    "version": 2,
+    "segments": [
+        {
+            "id": 0,
+            "name": "hasEnoughWins",
+            "description": null,
+            "constraints": [
+                {
+                    "contextName": "wins",
+                    "operator": "NUM_GT",
+                    "value": "5",
+                    "inverted": false,
+                    "caseInsensitive": true
+                },
+                {
+                    "contextName": "dateLastWin",
+                    "operator": "DATE_AFTER",
+                    "value": "2022-05-01T12:00:00",
+                    "inverted": false,
+                    "caseInsensitive": true
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "name": "hasEnoughFollowers",
+            "description": null,
+            "constraints": [
+                {
+                    "contextName": "followers",
+                    "operator": "NUM_GT",
+                    "value": "1000",
+                    "inverted": false,
+                    "caseInsensitive": true
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "isSingle",
+            "description": null,
+            "constraints": [
+                {
+                    "contextName": "single",
+                    "operator": "STR_CONTAINS",
+                    "values": ["true"],
+                    "inverted": false,
+                    "caseInsensitive": true
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "isCatPerson",
+            "description": null,
+            "constraints": [
+                {
+                    "contextName": "catOrDog",
+                    "operator": "STR_CONTAINS",
+                    "values": ["cat"],
+                    "inverted": false,
+                    "caseInsensitive": true
+                }
+            ]
+        }
+    ],
+    "features": [
+        {
+            "name": "Test.variants",
+            "description": null,
+            "enabled": true,
+            "strategies": [
+                {
+                    "name": "default",
+                    "segments": [
+                        0,1,2,3
+                    ]
+                }
+            ],
+            "variants": [
+                {
+                    "name": "variant1",
+                    "weight": 50
+                },
+                {
+                    "name": "variant2",
+                    "weight": 50
+                }
+            ],
+            "createdAt": "2019-01-24T10:41:45.236Z"
+        }
+    ]
+}

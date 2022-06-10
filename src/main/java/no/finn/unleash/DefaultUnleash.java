@@ -3,12 +3,14 @@ package no.finn.unleash;
 import io.getunleash.UnleashContextProvider;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.metric.UnleashMetricService;
-import io.getunleash.repository.ToggleRepository;
+import io.getunleash.repository.FeatureRepository;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
 import java.util.Map;
 
-/** @deprecated Use {@link io.getunleash.DefaultUnleash} (since v5.0.0) */
+/**
+ * @deprecated Use {@link io.getunleash.DefaultUnleash} (since v5.0.0)
+ */
 @Deprecated
 public class DefaultUnleash extends io.getunleash.DefaultUnleash {
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {
@@ -16,22 +18,20 @@ public class DefaultUnleash extends io.getunleash.DefaultUnleash {
     }
 
     public DefaultUnleash(
-            UnleashConfig unleashConfig,
-            ToggleRepository toggleRepository,
-            Strategy... strategies) {
-        super(unleashConfig, toggleRepository, strategies);
+            UnleashConfig unleashConfig, FeatureRepository repository, Strategy... strategies) {
+        super(unleashConfig, repository, strategies);
     }
 
     public DefaultUnleash(
             UnleashConfig unleashConfig,
-            ToggleRepository toggleRepository,
+            FeatureRepository repository,
             Map<String, Strategy> strategyMap,
             UnleashContextProvider contextProvider,
             EventDispatcher eventDispatcher,
             UnleashMetricService metricService) {
         super(
                 unleashConfig,
-                toggleRepository,
+                repository,
                 strategyMap,
                 contextProvider,
                 eventDispatcher,

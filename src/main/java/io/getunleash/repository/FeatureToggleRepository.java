@@ -10,8 +10,9 @@ import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Deprecated() // Use FeatureRepository instead
 public final class FeatureToggleRepository implements ToggleRepository {
-    private final ToggleBackupHandler toggleBackupHandler;
+    private final BackupHandler<ToggleCollection> toggleBackupHandler;
     private final ToggleBootstrapHandler toggleBootstrapHandler;
     private final ToggleFetcher toggleFetcher;
     private final EventDispatcher eventDispatcher;
@@ -22,7 +23,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
     public FeatureToggleRepository(
             UnleashConfig unleashConfig,
             ToggleFetcher toggleFetcher,
-            ToggleBackupHandler toggleBackupHandler) {
+            BackupHandler<ToggleCollection> toggleBackupHandler) {
         this(
                 unleashConfig,
                 unleashConfig.getScheduledExecutor(),
@@ -34,7 +35,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
             UnleashConfig unleashConfig,
             UnleashScheduledExecutor executor,
             ToggleFetcher toggleFetcher,
-            ToggleBackupHandler toggleBackupHandler) {
+            BackupHandler<ToggleCollection> toggleBackupHandler) {
 
         this.toggleBackupHandler = toggleBackupHandler;
         this.toggleFetcher = toggleFetcher;
@@ -80,7 +81,7 @@ public final class FeatureToggleRepository implements ToggleRepository {
     @Override
     public List<String> getFeatureNames() {
         return toggleCollection.getFeatures().stream()
-                .map(toggle -> toggle.getName())
+                .map(FeatureToggle::getName)
                 .collect(Collectors.toList());
     }
 }
