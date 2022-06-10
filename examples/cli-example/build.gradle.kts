@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    implementation("io.getunleash:unleash-client-java:5.1.1-SNAPSHOT")
+    implementation("io.getunleash:unleash-client-java:5.1.0")
 }

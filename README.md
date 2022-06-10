@@ -222,7 +222,7 @@ UnleashConfig config = UnleashConfig.builder()
 
 ### Toggle fetcher
 The Unleash Java client now supports using your own toggle fetcher.
-The Config builder has been expanded to accept a `io.getunleash.util.UnleashToggleFetcherFactory` which should be a `Function<UnleashConfig, ToggleFetcher>`.
+The Config builder has been expanded to accept a `io.getunleash.util.UnleashFeatureFetcherFactory` which should be a `Function<UnleashConfig, FeatureFetcher>`.
 If you want to use OkHttp instead of HttpURLConnection you'll need a dependency on okhttp
 
 ```xml
@@ -239,7 +239,7 @@ UnleashConfig config = UnleashConfig.builder()
     .appName("my-app")
     .unleashAPI("http://unleash.org")
     .customHttpHeader("Authorization", "API token")
-    .unleashToggleFetcherFactory(OkHttpToggleFetcher::new)
+    .unleashFeatureFetcherFactory(OkHttpFeatureFetcher::new)
     .build();
 ```
 

@@ -18,7 +18,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class OkHttpToggleFetcher implements FeatureFetcher {
+public class OkHttpFeatureFetcher implements FeatureFetcher {
 
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration CALL_TIMEOUT = Duration.ofSeconds(5);
@@ -26,7 +26,7 @@ public class OkHttpToggleFetcher implements FeatureFetcher {
     private final HttpUrl toggleUrl;
     private final OkHttpClient client;
 
-    public OkHttpToggleFetcher(UnleashConfig unleashConfig) {
+    public OkHttpFeatureFetcher(UnleashConfig unleashConfig) {
         File tempDir = null;
         try {
             tempDir = Files.createTempDirectory("http_cache").toFile();
@@ -55,7 +55,7 @@ public class OkHttpToggleFetcher implements FeatureFetcher {
         this.client = configureInterceptor(unleashConfig, builder.build());
     }
 
-    public OkHttpToggleFetcher(UnleashConfig unleashConfig, OkHttpClient client) {
+    public OkHttpFeatureFetcher(UnleashConfig unleashConfig, OkHttpClient client) {
         this.client = configureInterceptor(unleashConfig, client);
         this.toggleUrl =
                 Objects.requireNonNull(

@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @ExtendWith(WireMockExtension.class)
 @WireMockSettings(failOnUnmatchedRequests = false)
-public class OkHttpToggleFetcherTest {
+public class OkHttpFeatureFetcherTest {
     @ConfigureWireMock Options options = wireMockConfig().dynamicPort();
 
     @InjectServer WireMockServer serverMock;
@@ -48,7 +48,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = okHttpToggleFetcher.fetchFeatures();
         FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
@@ -72,7 +72,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
         FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
@@ -96,7 +96,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
         FeatureToggle featureX = response.getToggleCollection().getToggle("Test.variants");
 
@@ -132,7 +132,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
 
         FeatureToggleResponse response1 = okHttpToggleFetcher.fetchFeatures();
         FeatureToggleResponse response2 = okHttpToggleFetcher.fetchFeatures();
@@ -160,7 +160,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         okHttpToggleFetcher.fetchFeatures();
 
         verify(
@@ -182,7 +182,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         okHttpToggleFetcher.fetchFeatures();
 
         verify(
@@ -202,7 +202,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
         assertThat(response.getStatus()).isEqualTo(FeatureToggleResponse.Status.NOT_CHANGED);
 
@@ -241,7 +241,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
         assertThat(response.getStatus()).isEqualTo(FeatureToggleResponse.Status.CHANGED);
 
@@ -266,7 +266,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
         assertThat(response.getStatus()).isEqualTo(FeatureToggleResponse.Status.UNAVAILABLE);
         assertThat(response.getHttpStatusCode()).isEqualTo(httpCode);
@@ -289,7 +289,7 @@ public class OkHttpToggleFetcherTest {
 
         URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
 
         verify(getRequestedFor(urlMatching("/api/client/features")).withoutHeader("If-None-Match"));
@@ -309,8 +309,8 @@ public class OkHttpToggleFetcherTest {
         URI uri = new URI(serverMock.baseUrl() + "/api/");
         UnleashConfig config =
                 UnleashConfig.builder().appName("test").unleashAPI(uri).projectName("name").build();
-        OkHttpToggleFetcher okHttpToggleFetcher = new OkHttpToggleFetcher(config);
-        FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
+        OkHttpFeatureFetcher okHttpFeatureFetcher = new OkHttpFeatureFetcher(config);
+        FeatureToggleResponse response = okHttpFeatureFetcher.fetchFeatures();
         verify(getRequestedFor(urlMatching("/api/client/features\\?project=name")));
     }
 
@@ -326,7 +326,7 @@ public class OkHttpToggleFetcherTest {
                                         .withBodyFile("features-v2-with-segments.json")));
         URI uri = new URI(serverMock.baseUrl() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpToggleFetcher fetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher fetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
         FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
@@ -352,7 +352,7 @@ public class OkHttpToggleFetcherTest {
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
                                         .withBodyFile("features-v2-with-segments.json")));
-        OkHttpToggleFetcher fetcher = new OkHttpToggleFetcher(config);
+        OkHttpFeatureFetcher fetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
         FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
