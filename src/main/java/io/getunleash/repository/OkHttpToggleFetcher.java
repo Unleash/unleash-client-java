@@ -18,7 +18,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class OkHttpToggleFetcher implements ToggleFetcher {
+public class OkHttpToggleFetcher implements FeatureFetcher {
 
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration CALL_TIMEOUT = Duration.ofSeconds(5);
@@ -80,7 +80,10 @@ public class OkHttpToggleFetcher implements ToggleFetcher {
                                             .addHeader(
                                                     UNLEASH_INSTANCE_ID_HEADER,
                                                     config.getInstanceId())
-                                            .addHeader("User-Agent", config.getAppName());
+                                            .addHeader("User-Agent", config.getAppName())
+                                            .addHeader(
+                                                    "Unleash-Client-Spec",
+                                                    config.getClientSpecificationVersion());
                             for (Map.Entry<String, String> headerEntry :
                                     config.getCustomHttpHeaders().entrySet()) {
                                 headers =
@@ -101,7 +104,7 @@ public class OkHttpToggleFetcher implements ToggleFetcher {
     }
 
     @Override
-    public FeatureToggleResponse fetchToggles() throws UnleashException {
+    public ClientFeaturesResponse fetchFeatures() throws UnleashException {
         Request request = new Request.Builder().url(toggleUrl).get().build();
         HttpUrl location = toggleUrl;
         int code = 200;
@@ -110,24 +113,28 @@ public class OkHttpToggleFetcher implements ToggleFetcher {
                 location = response.request().url();
                 code = response.code();
                 if (response.cacheResponse() != null) {
-                    return new FeatureToggleResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304);
+                    return new ClientFeaturesResponse(
+                            ClientFeaturesResponse.Status.NOT_CHANGED, 304);
                 } else {
-                    ToggleCollection toggles =
-                            JsonToggleParser.fromJson(response.body().charStream());
-                    return new FeatureToggleResponse(FeatureToggleResponse.Status.CHANGED, toggles);
+                    FeatureCollection features =
+                            JsonFeatureParser.fromJson(response.body().charStream());
+                    return new ClientFeaturesResponse(
+                            ClientFeaturesResponse.Status.CHANGED,
+                            features.getToggleCollection(),
+                            features.getSegmentCollection());
                 }
             } else if (response.code() >= 301 && response.code() <= 304) {
-                return new FeatureToggleResponse(
-                        FeatureToggleResponse.Status.NOT_CHANGED, response.code());
+                return new ClientFeaturesResponse(
+                        ClientFeaturesResponse.Status.NOT_CHANGED, response.code());
             } else {
-                return new FeatureToggleResponse(
-                        FeatureToggleResponse.Status.UNAVAILABLE, response.code());
+                return new ClientFeaturesResponse(
+                        ClientFeaturesResponse.Status.UNAVAILABLE, response.code());
             }
         } catch (IOException ioEx) {
             throw new UnleashException("Could not fetch toggles", ioEx);
         } catch (IllegalStateException | JsonSyntaxException ex) {
-            return new FeatureToggleResponse(
-                    FeatureToggleResponse.Status.UNAVAILABLE, code, location.toString());
+            return new ClientFeaturesResponse(
+                    ClientFeaturesResponse.Status.UNAVAILABLE, code, location.toString());
         }
     }
 }

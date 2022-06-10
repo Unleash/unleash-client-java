@@ -9,9 +9,6 @@ import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
 import io.getunleash.repository.FeatureRepository;
-import io.getunleash.repository.FeatureToggleRepository;
-import io.getunleash.repository.ToggleBackupHandlerFile;
-import io.getunleash.repository.ToggleRepository;
 import io.getunleash.strategy.*;
 import io.getunleash.util.ConstraintMerger;
 import io.getunleash.util.UnleashConfig;
@@ -58,7 +55,7 @@ public class DefaultUnleash implements Unleash {
             Strategy... strategies) {
         this(
                 unleashConfig,
-            featureRepository,
+                featureRepository,
                 buildStrategyMap(strategies),
                 unleashConfig.getContextProvider(),
                 new EventDispatcher(unleashConfig),
@@ -121,7 +118,7 @@ public class DefaultUnleash implements Unleash {
             UnleashContext context,
             BiFunction<String, UnleashContext, Boolean> fallbackAction) {
         checkIfToggleMatchesNamePrefix(toggleName);
-        FeatureToggle featureToggle = toggleRepository.getToggle(toggleName);
+        FeatureToggle featureToggle = featureRepository.getToggle(toggleName);
         boolean enabled;
         UnleashContext enhancedContext = context.applyStaticFields(config);
 

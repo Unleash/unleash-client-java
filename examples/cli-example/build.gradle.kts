@@ -4,8 +4,9 @@ plugins {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
-    implementation("io.getunleash:unleash-client-java:5.1.0")
+    implementation("io.getunleash:unleash-client-java:5.1.1-SNAPSHOT")
 }
