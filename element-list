@@ -7,7 +7,3 @@ io.getunleash.strategy
 io.getunleash.strategy.constraints
 io.getunleash.util
 io.getunleash.variant
-no.finn.unleash
-no.finn.unleash.event
-no.finn.unleash.metric
-no.finn.unleash.util
