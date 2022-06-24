@@ -8,6 +8,7 @@ import io.getunleash.UnleashContextProvider;
 import io.getunleash.event.NoOpSubscriber;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
+import io.getunleash.repository.HttpFeatureFetcher;
 import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.Strategy;
 import java.io.File;
@@ -25,8 +26,8 @@ import java.util.Optional;
 
 public class UnleashConfig {
 
-    static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
-    static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
+    public static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
+    public static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
 
     private final URI unleashAPI;
     private final UnleashURLs unleashURLs;
@@ -37,12 +38,15 @@ public class UnleashConfig {
     private final String instanceId;
     private final String sdkVersion;
     private final String backupFile;
+
+    private final String clientSpecificationVersion;
     @Nullable private final String projectName;
     @Nullable private final String namePrefix;
     private final long fetchTogglesInterval;
     private final long sendMetricsInterval;
     private final boolean disableMetrics;
     private final boolean isProxyAuthenticationByJvmProperties;
+    private final UnleashFeatureFetcherFactory unleashFeatureFetcherFactory;
     private final UnleashContextProvider contextProvider;
     private final boolean synchronousFetchOnInitialisation;
     private final UnleashScheduledExecutor unleashScheduledExecutor;
@@ -68,6 +72,7 @@ public class UnleashConfig {
             UnleashContextProvider contextProvider,
             boolean isProxyAuthenticationByJvmProperties,
             boolean synchronousFetchOnInitialisation,
+            UnleashFeatureFetcherFactory unleashFeatureFetcherFactory,
             @Nullable UnleashScheduledExecutor unleashScheduledExecutor,
             @Nullable UnleashSubscriber unleashSubscriber,
             @Nullable Strategy fallbackStrategy,
@@ -128,6 +133,9 @@ public class UnleashConfig {
         this.unleashSubscriber = unleashSubscriber;
         this.toggleBootstrapProvider = unleashBootstrapProvider;
         this.proxy = proxy;
+        this.unleashFeatureFetcherFactory = unleashFeatureFetcherFactory;
+        this.clientSpecificationVersion =
+                UnleashProperties.getProperty("client.specification.version");
     }
 
     public static Builder builder() {
@@ -138,6 +146,8 @@ public class UnleashConfig {
         connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
         connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
         connection.setRequestProperty("User-Agent", config.getAppName());
+        connection.setRequestProperty(
+                "Unleash-Client-Spec", config.getClientSpecificationVersion());
         config.getCustomHttpHeaders().forEach(connection::setRequestProperty);
         config.customHttpHeadersProvider.getCustomHeaders().forEach(connection::setRequestProperty);
     }
@@ -174,6 +184,10 @@ public class UnleashConfig {
 
     public String getSdkVersion() {
         return sdkVersion;
+    }
+
+    public String getClientSpecificationVersion() {
+        return clientSpecificationVersion;
     }
 
     public @Nullable String getProjectName() {
@@ -238,6 +252,10 @@ public class UnleashConfig {
     @Nullable
     public Proxy getProxy() {
         return proxy;
+    }
+
+    public UnleashFeatureFetcherFactory unleashFeatureFetcherFactory() {
+        return this.unleashFeatureFetcherFactory;
     }
 
     static class SystemProxyAuthenticator extends Authenticator {
@@ -309,6 +327,7 @@ public class UnleashConfig {
         private long fetchTogglesInterval = 10;
         private long sendMetricsInterval = 60;
         private boolean disableMetrics = false;
+        private UnleashFeatureFetcherFactory unleashFeatureFetcherFactory = HttpFeatureFetcher::new;
         private UnleashContextProvider contextProvider =
                 UnleashContextProvider.getDefaultProvider();
         private boolean synchronousFetchOnInitialisation = false;
@@ -377,6 +396,12 @@ public class UnleashConfig {
 
         public Builder namePrefix(String namePrefix) {
             this.namePrefix = namePrefix;
+            return this;
+        }
+
+        public Builder unleashFeatureFetcherFactory(
+                UnleashFeatureFetcherFactory unleashFeatureFetcherFactory) {
+            this.unleashFeatureFetcherFactory = unleashFeatureFetcherFactory;
             return this;
         }
 
@@ -479,6 +504,7 @@ public class UnleashConfig {
                     contextProvider,
                     isProxyAuthenticationByJvmProperties,
                     synchronousFetchOnInitialisation,
+                    unleashFeatureFetcherFactory,
                     Optional.ofNullable(scheduledExecutor)
                             .orElseGet(UnleashScheduledExecutorImpl::getInstance),
                     Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new),

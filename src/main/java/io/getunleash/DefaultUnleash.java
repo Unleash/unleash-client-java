@@ -8,7 +8,7 @@ import io.getunleash.event.ToggleEvaluated;
 import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
-import io.getunleash.repository.*;
+import io.getunleash.repository.FeatureRepository;
 import io.getunleash.strategy.*;
 import io.getunleash.util.ConstraintMerger;
 import io.getunleash.util.UnleashConfig;
@@ -35,7 +35,6 @@ public class DefaultUnleash implements Unleash {
     public static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
     private final UnleashMetricService metricService;
-
     private final FeatureRepository featureRepository;
     private final Map<String, Strategy> strategyMap;
     private final UnleashContextProvider contextProvider;

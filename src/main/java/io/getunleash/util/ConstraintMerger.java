@@ -15,8 +15,7 @@ public class ConstraintMerger {
                         Optional.ofNullable(strategy.getConstraints())
                                 .orElseGet(Collections::emptyList),
                         Optional.ofNullable(strategy.getSegments())
-                                .orElseGet(Collections::emptyList)
-                                .stream()
+                                .orElseGet(Collections::emptyList).stream()
                                 .map(repository::getSegment)
                                 .filter(Objects::nonNull)
                                 .map(Segment::getConstraints)

@@ -48,7 +48,9 @@ public class UnleashURLs {
     }
 
     private void appendParam(StringBuilder suffix, String key, @Nullable String value) {
-        if (value == null) return;
+        if (value == null) {
+            return;
+        }
         if (suffix.length() == 0) {
             suffix.append("?");
         } else {

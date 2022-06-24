@@ -138,10 +138,11 @@ public class FakeUnleash implements Unleash {
         public List<EvaluatedToggle> evaluateAllToggles(@Nullable UnleashContext context) {
             return getFeatureToggleNames().stream()
                     .map(
-                            toggleName -> {
-                                return new EvaluatedToggle(
-                                        toggleName, isEnabled(toggleName), getVariant(toggleName));
-                            })
+                            toggleName ->
+                                    new EvaluatedToggle(
+                                            toggleName,
+                                            isEnabled(toggleName),
+                                            getVariant(toggleName)))
                     .collect(Collectors.toList());
         }
 

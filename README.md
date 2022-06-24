@@ -220,6 +220,31 @@ UnleashConfig config = UnleashConfig.builder()
     .build();
 ```
 
+### Toggle fetcher
+The Unleash Java client now supports using your own toggle fetcher.
+The Config builder has been expanded to accept a `io.getunleash.util.UnleashFeatureFetcherFactory` which should be a `Function<UnleashConfig, FeatureFetcher>`.
+If you want to use OkHttp instead of HttpURLConnection you'll need a dependency on okhttp
+
+```xml
+<dependency>
+    <groupId>com.squareup.okhttp3</groupId>
+    <artifactId>okhttp</artifactId>
+    <version>4.9+</version>
+</dependency>
+```
+
+Then you can change your config to
+```java
+UnleashConfig config = UnleashConfig.builder()
+    .appName("my-app")
+    .unleashAPI("http://unleash.org")
+    .customHttpHeader("Authorization", "API token")
+    .unleashFeatureFetcherFactory(OkHttpFeatureFetcher::new)
+    .build();
+```
+
+This will then start using OkHttp instead of HttpURLConnection.
+
 ## Local backup
 By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the
 result in `unleash-repo.json` which is located in the `java.io.tmpdir` directory. This means that if
