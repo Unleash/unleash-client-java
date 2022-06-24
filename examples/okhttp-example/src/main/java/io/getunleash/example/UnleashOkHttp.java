@@ -11,7 +11,7 @@ public class UnleashOkHttp {
         UnleashConfig config = UnleashConfig.builder().appName("client-example.okhttp")
             .customHttpHeader("Authorization", "*:development.afaa5c22450312a6e727af54a163cf7aae0115d9ef83deb175b9d311")
             .unleashAPI("http://localhost:4242/api").instanceId("okhttp-example")
-            .unleashFeatureFetcherFactory(() -> new OkHttpFeatureFetcher())
+            .unleashFeatureFetcherFactory(OkHttpFeatureFetcher::new)
             .synchronousFetchOnInitialisation(true)
             .build();
         Unleash unleash = new DefaultUnleash(config);
