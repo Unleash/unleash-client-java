@@ -17,7 +17,7 @@ public class FeatureRepository implements IFeatureRepository {
     private final UnleashConfig unleashConfig;
     private final FeatureBackupHandlerFile featureBackupHandler;
     private final FeatureBootstrapHandler featureBootstrapHandler;
-    private final HttpFeatureFetcher featureFetcher;
+    private final FeatureFetcher featureFetcher;
     private final EventDispatcher eventDispatcher;
 
     private FeatureCollection featureCollection;
@@ -26,7 +26,7 @@ public class FeatureRepository implements IFeatureRepository {
     public FeatureRepository(UnleashConfig unleashConfig) {
         this.unleashConfig = unleashConfig;
         this.featureBackupHandler = new FeatureBackupHandlerFile(unleashConfig);
-        this.featureFetcher = new HttpFeatureFetcher(unleashConfig);
+        this.featureFetcher = unleashConfig.getUnleashFeatureFetcherFactory().apply(unleashConfig);
         this.featureBootstrapHandler = new FeatureBootstrapHandler(unleashConfig);
         this.eventDispatcher = new EventDispatcher(unleashConfig);
 
@@ -37,7 +37,7 @@ public class FeatureRepository implements IFeatureRepository {
             UnleashConfig unleashConfig,
             FeatureBackupHandlerFile featureBackupHandler,
             EventDispatcher eventDispatcher,
-            HttpFeatureFetcher featureFetcher,
+            FeatureFetcher featureFetcher,
             FeatureBootstrapHandler featureBootstrapHandler) {
         this.unleashConfig = unleashConfig;
         this.featureBackupHandler = featureBackupHandler;
@@ -51,7 +51,7 @@ public class FeatureRepository implements IFeatureRepository {
             UnleashConfig unleashConfig,
             FeatureBackupHandlerFile featureBackupHandler,
             UnleashScheduledExecutor executor,
-            HttpFeatureFetcher featureFetcher,
+            FeatureFetcher featureFetcher,
             FeatureBootstrapHandler featureBootstrapHandler) {
         this.unleashConfig = unleashConfig;
         this.featureBackupHandler = featureBackupHandler;

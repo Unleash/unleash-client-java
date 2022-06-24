@@ -254,7 +254,7 @@ public class UnleashConfig {
         return proxy;
     }
 
-    public UnleashFeatureFetcherFactory unleashFeatureFetcherFactory() {
+    public UnleashFeatureFetcherFactory getUnleashFeatureFetcherFactory() {
         return this.unleashFeatureFetcherFactory;
     }
 
