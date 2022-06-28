@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 public class FakeUnleashTest {
@@ -99,6 +100,27 @@ public class FakeUnleashTest {
 
         List<String> expected = Arrays.asList(new String[] {"t1", "t2"});
         assertThat(fakeUnleash.more().getFeatureToggleNames()).containsAll(expected);
+    }
+
+    @Test
+    public void should_get_feature_definition() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.enable("t1");
+
+        Optional<FeatureToggle> optionalToggle =
+                fakeUnleash.more().getFeatureToggleDefinition("t1");
+        assertThat(optionalToggle).isPresent();
+
+        FeatureToggle toggle = optionalToggle.get();
+        assertThat(toggle.getName()).isEqualTo("t1");
+        assertThat(toggle.getStrategies()).isEmpty();
+        assertThat(toggle.isEnabled()).isTrue();
+    }
+
+    @Test
+    public void should_get_empty_optional_when_feature_definition_not_present() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        assertThat(fakeUnleash.more().getFeatureToggleDefinition("t1")).isEmpty();
     }
 
     @Test

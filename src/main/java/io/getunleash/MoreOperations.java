@@ -1,10 +1,13 @@
 package io.getunleash;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MoreOperations {
 
     List<String> getFeatureToggleNames();
+
+    Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName);
 
     List<EvaluatedToggle> evaluateAllToggles();
 
