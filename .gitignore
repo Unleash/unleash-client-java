@@ -38,3 +38,4 @@ target
 /unleash-server/public/js/bundle.js
 
 .DS_Store
+**/bin/

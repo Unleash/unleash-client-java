@@ -1,6 +1,8 @@
 # Changelog
 
-## 6.0.x (unreleased)
+## 6.0.1
+- Make connect and read timeouts configurable for both toggle fetching and metrics posting
+## 6.0.0 
 - Remove deprecated `no.finn.unleash` package
 - feat: Added support for providing custom ToggleFetcher through a UnleashToggleFetcherFactory (A Function<UnleashConfig, ToggleFetcher>). Two fetchers are now included, one using java.net.http and one using OkHttp, if you want to use the OkHttp one, your project will need to add a dependency on ```<dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp</artifactId><version>4.9+</version></dependency>```
 ## 5.1.0
