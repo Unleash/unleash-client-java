@@ -20,6 +20,7 @@ import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -43,7 +44,15 @@ public class UnleashConfig {
     @Nullable private final String projectName;
     @Nullable private final String namePrefix;
     private final long fetchTogglesInterval;
+
+    private final Duration fetchTogglesConnectTimeout;
+
+    private final Duration fetchTogglesReadTimeout;
     private final long sendMetricsInterval;
+
+    private final Duration sendMetricsConnectTimeout;
+
+    private final Duration sendMetricsReadTimeout;
     private final boolean disableMetrics;
     private final boolean isProxyAuthenticationByJvmProperties;
     private final UnleashFeatureFetcherFactory unleashFeatureFetcherFactory;
@@ -67,7 +76,11 @@ public class UnleashConfig {
             @Nullable String projectName,
             @Nullable String namePrefix,
             long fetchTogglesInterval,
+            Duration fetchTogglesConnectTimeout,
+            Duration fetchTogglesReadTimeout,
             long sendMetricsInterval,
+            Duration sendMetricsConnectTimeout,
+            Duration sendMetricsReadTimeout,
             boolean disableMetrics,
             UnleashContextProvider contextProvider,
             boolean isProxyAuthenticationByJvmProperties,
@@ -124,7 +137,11 @@ public class UnleashConfig {
         this.projectName = projectName;
         this.namePrefix = namePrefix;
         this.fetchTogglesInterval = fetchTogglesInterval;
+        this.fetchTogglesConnectTimeout = fetchTogglesConnectTimeout;
+        this.fetchTogglesReadTimeout = fetchTogglesReadTimeout;
         this.sendMetricsInterval = sendMetricsInterval;
+        this.sendMetricsConnectTimeout = sendMetricsConnectTimeout;
+        this.sendMetricsReadTimeout = sendMetricsReadTimeout;
         this.disableMetrics = disableMetrics;
         this.contextProvider = contextProvider;
         this.isProxyAuthenticationByJvmProperties = isProxyAuthenticationByJvmProperties;
@@ -198,8 +215,24 @@ public class UnleashConfig {
         return fetchTogglesInterval;
     }
 
+    public Duration getFetchTogglesConnectTimeout() {
+        return fetchTogglesConnectTimeout;
+    }
+
+    public Duration getFetchTogglesReadTimeout() {
+        return fetchTogglesReadTimeout;
+    }
+
     public long getSendMetricsInterval() {
         return sendMetricsInterval;
+    }
+
+    public Duration getSendMetricsConnectTimeout() {
+        return sendMetricsConnectTimeout;
+    }
+
+    public Duration getSendMetricsReadTimeout() {
+        return sendMetricsReadTimeout;
     }
 
     public UnleashURLs getUnleashURLs() {
@@ -325,7 +358,15 @@ public class UnleashConfig {
         private @Nullable String projectName;
         private @Nullable String namePrefix;
         private long fetchTogglesInterval = 10;
+
+        private Duration fetchTogglesConnectTimeout = Duration.ofSeconds(10);
+
+        private Duration fetchTogglesReadTimeout = Duration.ofSeconds(10);
         private long sendMetricsInterval = 60;
+
+        private Duration sendMetricsConnectTimeout = Duration.ofSeconds(10);
+
+        private Duration sendMetricsReadTimeout = Duration.ofSeconds(10);
         private boolean disableMetrics = false;
         private UnleashFeatureFetcherFactory unleashFeatureFetcherFactory = HttpFeatureFetcher::new;
         private UnleashContextProvider contextProvider =
@@ -410,10 +451,50 @@ public class UnleashConfig {
             return this;
         }
 
+        public Builder fetchTogglesConnectTimeout(Duration connectTimeout) {
+            this.fetchTogglesConnectTimeout = connectTimeout;
+            return this;
+        }
+
+        public Builder fetchTogglesConnectTimeoutSeconds(long connectTimeoutSeconds) {
+            this.fetchTogglesConnectTimeout = Duration.ofSeconds(connectTimeoutSeconds);
+            return this;
+        }
+        public Builder fetchTogglesReadTimeout(Duration readTimeout) {
+            this.fetchTogglesReadTimeout = readTimeout;
+            return this;
+        }
+
+        public Builder fetchTogglesReadTimeoutSeconds(long readTimeoutSeconds) {
+            this.fetchTogglesReadTimeout = Duration.ofSeconds(readTimeoutSeconds);
+            return this;
+        }
+
         public Builder sendMetricsInterval(long sendMetricsInterval) {
             this.sendMetricsInterval = sendMetricsInterval;
             return this;
         }
+
+        public Builder sendMetricsConnectTimeout(Duration connectTimeout) {
+            this.sendMetricsConnectTimeout = connectTimeout;
+            return this;
+        }
+
+        public Builder sendMetricsConnectTimeoutSeconds(long connectTimeoutSeconds) {
+            this.sendMetricsConnectTimeout = Duration.ofSeconds(connectTimeoutSeconds);
+            return this;
+        }
+        public Builder sendMetricsReadTimeout(Duration readTimeout) {
+            this.sendMetricsReadTimeout = readTimeout;
+            return this;
+        }
+
+        public Builder sendMetricsReadTimeoutSeconds(long readTimeoutSeconds) {
+            this.sendMetricsReadTimeout = Duration.ofSeconds(readTimeoutSeconds);
+            return this;
+        }
+
+
 
         public Builder disableMetrics() {
             this.disableMetrics = true;
@@ -499,7 +580,11 @@ public class UnleashConfig {
                     projectName,
                     namePrefix,
                     fetchTogglesInterval,
+                    fetchTogglesConnectTimeout,
+                    fetchTogglesReadTimeout,
                     sendMetricsInterval,
+                    sendMetricsConnectTimeout,
+                    sendMetricsReadTimeout,
                     disableMetrics,
                     contextProvider,
                     isProxyAuthenticationByJvmProperties,
