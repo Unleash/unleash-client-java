@@ -460,6 +460,7 @@ public class UnleashConfig {
             this.fetchTogglesConnectTimeout = Duration.ofSeconds(connectTimeoutSeconds);
             return this;
         }
+
         public Builder fetchTogglesReadTimeout(Duration readTimeout) {
             this.fetchTogglesReadTimeout = readTimeout;
             return this;
@@ -484,6 +485,7 @@ public class UnleashConfig {
             this.sendMetricsConnectTimeout = Duration.ofSeconds(connectTimeoutSeconds);
             return this;
         }
+
         public Builder sendMetricsReadTimeout(Duration readTimeout) {
             this.sendMetricsReadTimeout = readTimeout;
             return this;
@@ -493,8 +495,6 @@ public class UnleashConfig {
             this.sendMetricsReadTimeout = Duration.ofSeconds(readTimeoutSeconds);
             return this;
         }
-
-
 
         public Builder disableMetrics() {
             this.disableMetrics = true;

@@ -89,7 +89,8 @@ public class UnleashMetricsSender {
             } else {
                 connection = (HttpURLConnection) url.openConnection();
             }
-            connection.setConnectTimeout((int) unleashConfig.getSendMetricsConnectTimeout().toMillis());
+            connection.setConnectTimeout(
+                    (int) unleashConfig.getSendMetricsConnectTimeout().toMillis());
             connection.setReadTimeout((int) unleashConfig.getSendMetricsReadTimeout().toMillis());
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Accept", "application/json");
