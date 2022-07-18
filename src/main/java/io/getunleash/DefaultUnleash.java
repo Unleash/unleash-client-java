@@ -190,6 +190,12 @@ public class DefaultUnleash implements Unleash {
         return getVariant(toggleName, contextProvider.getContext(), defaultValue);
     }
 
+    /**
+     * Use more().getFeatureToggleDefinition() instead
+     *
+     * @return the feature toggle
+     */
+    @Deprecated
     public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
         return ofNullable(featureRepository.getToggle(toggleName));
     }
@@ -243,6 +249,11 @@ public class DefaultUnleash implements Unleash {
         @Override
         public List<String> getFeatureToggleNames() {
             return featureRepository.getFeatureNames();
+        }
+
+        @Override
+        public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
+            return ofNullable(featureRepository.getToggle(toggleName));
         }
 
         @Override

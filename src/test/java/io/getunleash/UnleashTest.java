@@ -215,8 +215,7 @@ public class UnleashTest {
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy1));
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(((DefaultUnleash) unleash).getFeatureToggleDefinition("test"))
-                .hasValue(featureToggle);
+        assertThat(unleash.more().getFeatureToggleDefinition("test")).hasValue(featureToggle);
     }
 
     @Test
@@ -225,8 +224,7 @@ public class UnleashTest {
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy1));
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(((DefaultUnleash) unleash).getFeatureToggleDefinition("another toggleName"))
-                .isEmpty();
+        assertThat(unleash.more().getFeatureToggleDefinition("another toggleName")).isEmpty();
     }
 
     @Test

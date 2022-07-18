@@ -1,17 +1,16 @@
 package io.getunleash;
 
+import static java.util.Collections.emptyList;
+
 import io.getunleash.lang.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;
-    private Map<String, Boolean> features = new HashMap<>();
+    private Map<String, FeatureToggle> features = new HashMap<>();
     private Map<String, Variant> variants = new HashMap<>();
 
     @Override
@@ -26,7 +25,9 @@ public class FakeUnleash implements Unleash {
         } else if (disableAll) {
             return false;
         } else {
-            return features.getOrDefault(toggleName, defaultSetting);
+            return more().getFeatureToggleDefinition(toggleName)
+                    .map(FeatureToggle::isEnabled)
+                    .orElse(defaultSetting);
         }
     }
 
@@ -102,13 +103,13 @@ public class FakeUnleash implements Unleash {
 
     public void enable(String... features) {
         for (String name : features) {
-            this.features.put(name, true);
+            this.features.put(name, new FeatureToggle(name, true, emptyList()));
         }
     }
 
     public void disable(String... features) {
         for (String name : features) {
-            this.features.put(name, false);
+            this.features.put(name, new FeatureToggle(name, false, emptyList()));
         }
     }
 
@@ -127,6 +128,11 @@ public class FakeUnleash implements Unleash {
         @Override
         public List<String> getFeatureToggleNames() {
             return new ArrayList<>(features.keySet());
+        }
+
+        @Override
+        public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
+            return Optional.ofNullable(features.get(toggleName));
         }
 
         @Override
