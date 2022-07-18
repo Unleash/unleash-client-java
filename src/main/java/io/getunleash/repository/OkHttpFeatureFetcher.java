@@ -19,10 +19,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class OkHttpFeatureFetcher implements FeatureFetcher {
-
-    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
-    private static final Duration CALL_TIMEOUT = Duration.ofSeconds(5);
-
     private final HttpUrl toggleUrl;
     private final OkHttpClient client;
 
@@ -34,8 +30,8 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
         }
         OkHttpClient.Builder builder =
                 new OkHttpClient.Builder()
-                        .connectTimeout(CONNECT_TIMEOUT)
-                        .callTimeout(CALL_TIMEOUT)
+                        .connectTimeout(unleashConfig.getFetchTogglesConnectTimeout())
+                        .callTimeout(unleashConfig.getFetchTogglesReadTimeout())
                         .followRedirects(true);
         if (tempDir != null) {
             builder = builder.cache(new Cache(tempDir, 1024 * 1024 * 50));

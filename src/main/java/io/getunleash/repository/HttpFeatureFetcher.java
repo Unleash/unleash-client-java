@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory;
 
 public class HttpFeatureFetcher implements FeatureFetcher {
     private static final Logger LOG = LoggerFactory.getLogger(HttpFeatureFetcher.class);
-
-    private static final int CONNECT_TIMEOUT = 10000;
     private Optional<String> etag = Optional.empty();
 
     private final UnleashConfig config;
@@ -107,8 +105,8 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         } else {
             connection = (HttpURLConnection) url.openConnection();
         }
-        connection.setConnectTimeout(CONNECT_TIMEOUT);
-        connection.setReadTimeout(CONNECT_TIMEOUT);
+        connection.setConnectTimeout((int) this.config.getFetchTogglesConnectTimeout().toMillis());
+        connection.setReadTimeout((int) this.config.getFetchTogglesReadTimeout().toMillis());
         connection.setRequestProperty("Accept", "application/json");
         connection.setRequestProperty("Content-Type", "application/json");
         UnleashConfig.setRequestProperties(connection, this.config);
