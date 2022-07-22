@@ -10,9 +10,9 @@ import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
 import io.getunleash.metric.DefaultHttpMetricsSender;
 import io.getunleash.repository.HttpFeatureFetcher;
-import io.getunleash.repository.OkHttpFeatureFetcher;
 import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.Strategy;
+
 import java.io.File;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
@@ -26,8 +26,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
 
 public class UnleashConfig {
 
