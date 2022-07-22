@@ -9,27 +9,26 @@ import java.util.Set;
 public class UnleashMetricServiceImpl implements UnleashMetricService {
     private final LocalDateTime started;
     private final UnleashConfig unleashConfig;
-    private final long metricsInterval;
-    private final UnleashMetricsSender unleashMetricsSender;
+
+    private final MetricSender metricSender;
 
     // mutable
     private volatile MetricsBucket currentMetricsBucket;
 
     public UnleashMetricServiceImpl(
             UnleashConfig unleashConfig, UnleashScheduledExecutor executor) {
-        this(unleashConfig, new UnleashMetricsSender(unleashConfig), executor);
+        this(unleashConfig, unleashConfig.getMetricSenderFactory().apply(unleashConfig), executor);
     }
 
     public UnleashMetricServiceImpl(
             UnleashConfig unleashConfig,
-            UnleashMetricsSender unleashMetricsSender,
+            MetricSender metricSender,
             UnleashScheduledExecutor executor) {
         this.currentMetricsBucket = new MetricsBucket();
         this.started = LocalDateTime.now(ZoneId.of("UTC"));
         this.unleashConfig = unleashConfig;
-        this.metricsInterval = unleashConfig.getSendMetricsInterval();
-        this.unleashMetricsSender = unleashMetricsSender;
-
+        this.metricSender = metricSender;
+        long metricsInterval = unleashConfig.getSendMetricsInterval();
         executor.setInterval(sendMetrics(), metricsInterval, metricsInterval);
     }
 
@@ -37,7 +36,7 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
     public void register(Set<String> strategies) {
         ClientRegistration registration =
                 new ClientRegistration(unleashConfig, started, strategies);
-        unleashMetricsSender.registerClient(registration);
+        metricSender.registerClient(registration);
     }
 
     @Override
@@ -56,7 +55,7 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
             this.currentMetricsBucket = new MetricsBucket();
             metricsBucket.end();
             ClientMetrics metrics = new ClientMetrics(unleashConfig, metricsBucket);
-            unleashMetricsSender.sendMetrics(metrics);
+            metricSender.sendMetrics(metrics);
         };
     }
 }

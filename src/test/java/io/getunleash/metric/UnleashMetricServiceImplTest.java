@@ -38,7 +38,7 @@ public class UnleashMetricServiceImplTest {
                         .build();
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        UnleashMetricsSender sender = mock(UnleashMetricsSender.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
 
         UnleashMetricService unleashMetricService =
                 new UnleashMetricServiceImpl(config, sender, executor);
@@ -70,7 +70,7 @@ public class UnleashMetricServiceImplTest {
                         .build();
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        UnleashMetricsSender sender = mock(UnleashMetricsSender.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
 
         UnleashMetricService unleashMetricService =
                 new UnleashMetricServiceImpl(config, sender, executor);
@@ -96,7 +96,7 @@ public class UnleashMetricServiceImplTest {
                         .build();
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        UnleashMetricsSender sender = mock(UnleashMetricsSender.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
 
         UnleashMetricService unleashMetricService =
                 new UnleashMetricServiceImpl(config, sender, executor);
@@ -119,7 +119,7 @@ public class UnleashMetricServiceImplTest {
                         .build();
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        UnleashMetricsSender sender = mock(UnleashMetricsSender.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
 
         UnleashMetricService unleashMetricService =
                 new UnleashMetricServiceImpl(config, sender, executor);
@@ -160,7 +160,7 @@ public class UnleashMetricServiceImplTest {
                         .build();
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        UnleashMetricsSender sender = mock(UnleashMetricsSender.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
 
         UnleashMetricService unleashMetricService =
                 new UnleashMetricServiceImpl(config, sender, executor);
