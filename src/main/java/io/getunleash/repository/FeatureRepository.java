@@ -70,8 +70,12 @@ public class FeatureRepository implements IFeatureRepository {
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
             updateFeatures().run();
         }
-        if (!unleashConfig.isDisablePolling() && unleashConfig.getFetchTogglesInterval() > 0) {
-            executor.setInterval(updateFeatures(), 0, unleashConfig.getFetchTogglesInterval());
+        if (!unleashConfig.isDisablePolling()) {
+            if (unleashConfig.getFetchTogglesInterval() > 0) {
+                executor.setInterval(updateFeatures(), 0, unleashConfig.getFetchTogglesInterval());
+            } else {
+                executor.scheduleOnce(updateFeatures());
+            }
         }
     }
 

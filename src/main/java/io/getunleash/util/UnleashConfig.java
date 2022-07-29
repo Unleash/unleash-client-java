@@ -486,6 +486,9 @@ public class UnleashConfig {
             return this;
         }
 
+        /***
+         * Don't poll for feature toggle updates
+         */
         public Builder disablePolling() {
             this.disablePolling = true;
             return this;
@@ -511,6 +514,10 @@ public class UnleashConfig {
             return this;
         }
 
+        /**
+         * Don't send metrics to Unleash server
+         * @return
+         */
         public Builder disableMetrics() {
             this.disableMetrics = true;
             return this;
@@ -580,6 +587,16 @@ public class UnleashConfig {
                 String fileName = "unleash-" + appName + "-repo.json";
                 return System.getProperty("java.io.tmpdir") + File.separatorChar + fileName;
             }
+        }
+
+        /**
+         * Adds a custom http header for authorizing the client
+         * @param apiKey the client key to use to connect to the Unleash Server
+         * @return
+         */
+        public Builder apiKey(String apiKey) {
+            this.customHttpHeaders.put("Authorization", apiKey);
+            return this;
         }
 
         public UnleashConfig build() {
