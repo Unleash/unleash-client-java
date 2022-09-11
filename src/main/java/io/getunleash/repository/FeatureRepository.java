@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class FeatureRepository implements IFeatureRepository {
 
     private final UnleashConfig unleashConfig;
-    private final FeatureBackupHandlerFile featureBackupHandler;
+    private final BackupHandler<FeatureCollection> featureBackupHandler;
     private final FeatureBootstrapHandler featureBootstrapHandler;
     private final FeatureFetcher featureFetcher;
     private final EventDispatcher eventDispatcher;
@@ -24,8 +24,14 @@ public class FeatureRepository implements IFeatureRepository {
     private boolean ready;
 
     public FeatureRepository(UnleashConfig unleashConfig) {
+        this(unleashConfig, new FeatureBackupHandlerFile(unleashConfig));
+    }
+
+    public FeatureRepository(
+            UnleashConfig unleashConfig,
+            final BackupHandler<FeatureCollection> featureBackupHandler) {
         this.unleashConfig = unleashConfig;
-        this.featureBackupHandler = new FeatureBackupHandlerFile(unleashConfig);
+        this.featureBackupHandler = featureBackupHandler;
         this.featureFetcher = unleashConfig.getUnleashFeatureFetcherFactory().apply(unleashConfig);
         this.featureBootstrapHandler = new FeatureBootstrapHandler(unleashConfig);
         this.eventDispatcher = new EventDispatcher(unleashConfig);
@@ -35,10 +41,11 @@ public class FeatureRepository implements IFeatureRepository {
 
     protected FeatureRepository(
             UnleashConfig unleashConfig,
-            FeatureBackupHandlerFile featureBackupHandler,
+            BackupHandler<FeatureCollection> featureBackupHandler,
             EventDispatcher eventDispatcher,
             FeatureFetcher featureFetcher,
             FeatureBootstrapHandler featureBootstrapHandler) {
+
         this.unleashConfig = unleashConfig;
         this.featureBackupHandler = featureBackupHandler;
         this.featureFetcher = featureFetcher;
