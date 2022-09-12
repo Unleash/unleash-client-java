@@ -3,14 +3,14 @@ package io.getunleash.util;
 import io.getunleash.ActivationStrategy;
 import io.getunleash.Constraint;
 import io.getunleash.Segment;
-import io.getunleash.repository.FeatureRepository;
+import io.getunleash.repository.IFeatureRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ConstraintMerger {
     public static List<Constraint> mergeConstraints(
-            FeatureRepository repository, ActivationStrategy strategy) {
+            IFeatureRepository repository, ActivationStrategy strategy) {
         return Stream.of(
                         Optional.ofNullable(strategy.getConstraints())
                                 .orElseGet(Collections::emptyList),

@@ -9,6 +9,7 @@ import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
 import io.getunleash.repository.FeatureRepository;
+import io.getunleash.repository.IFeatureRepository;
 import io.getunleash.strategy.*;
 import io.getunleash.util.ConstraintMerger;
 import io.getunleash.util.UnleashConfig;
@@ -35,13 +36,13 @@ public class DefaultUnleash implements Unleash {
     public static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
     private final UnleashMetricService metricService;
-    private final FeatureRepository featureRepository;
+    private final IFeatureRepository featureRepository;
     private final Map<String, Strategy> strategyMap;
     private final UnleashContextProvider contextProvider;
     private final EventDispatcher eventDispatcher;
     private final UnleashConfig config;
 
-    private static FeatureRepository defaultToggleRepository(UnleashConfig unleashConfig) {
+    private static IFeatureRepository defaultToggleRepository(UnleashConfig unleashConfig) {
         return new FeatureRepository(unleashConfig);
     }
 
@@ -51,7 +52,7 @@ public class DefaultUnleash implements Unleash {
 
     public DefaultUnleash(
             UnleashConfig unleashConfig,
-            FeatureRepository featureRepository,
+            IFeatureRepository featureRepository,
             Strategy... strategies) {
         this(
                 unleashConfig,
@@ -65,7 +66,7 @@ public class DefaultUnleash implements Unleash {
     // Visible for testing
     public DefaultUnleash(
             UnleashConfig unleashConfig,
-            FeatureRepository featureRepository,
+            IFeatureRepository featureRepository,
             Map<String, Strategy> strategyMap,
             UnleashContextProvider contextProvider,
             EventDispatcher eventDispatcher,
