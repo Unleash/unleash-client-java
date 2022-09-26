@@ -41,10 +41,15 @@ public class DefaultUnleash implements Unleash {
     private final EventDispatcher eventDispatcher;
     private final UnleashConfig config;
 
-    private static FeatureRepository defaultToggleRepository(UnleashConfig unleashConfig) {
+    protected static FeatureRepository defaultToggleRepository(UnleashConfig unleashConfig) {
         return new FeatureRepository(unleashConfig);
     }
 
+    /**
+     * @deprecated This constructor will be removed in version 7.0.0
+     *     <p>Use {@link UnleashClientFactory#getInstance()}#getClient(UnleashConfig, Strategy)}
+     *     instead.
+     */
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {
         this(unleashConfig, defaultToggleRepository(unleashConfig), strategies);
     }
@@ -70,6 +75,7 @@ public class DefaultUnleash implements Unleash {
             UnleashContextProvider contextProvider,
             EventDispatcher eventDispatcher,
             UnleashMetricService metricService) {
+        System.out.println("Creating new instance of unleash");
         this.config = unleashConfig;
         this.featureRepository = featureRepository;
         this.strategyMap = strategyMap;

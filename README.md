@@ -38,7 +38,7 @@ UnleashConfig config = UnleashConfig.builder()
             .customHttpHeader("Authorization", "API token")
             .build();
 
-Unleash unleash = new DefaultUnleash(config);
+Unleash unleash = UnleashClientFactory.getInstance().getClient(config);
 ```
 
 ### Awesome feature toggle API
