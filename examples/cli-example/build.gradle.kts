@@ -1,5 +1,10 @@
 plugins {
     java
+    application
+}
+
+application {
+    mainClass.set("io.getunleash.example.AdvancedConstraints")
 }
 
 repositories {
@@ -8,5 +13,5 @@ repositories {
 }
 
 dependencies {
-    implementation("io.getunleash:unleash-client-java:5.1.0")
+    implementation("io.getunleash:unleash-client-java:6.0.1")
 }
