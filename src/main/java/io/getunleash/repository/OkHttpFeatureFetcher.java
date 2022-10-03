@@ -114,7 +114,7 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
                 location = response.request().url();
                 code = response.code();
                 FeatureCollection features =
-                    JsonFeatureParser.fromJson(response.body().charStream());
+                    JsonFeatureParser.fromJson(Objects.requireNonNull(response.body()).charStream());
                 return new ClientFeaturesResponse(
                     ClientFeaturesResponse.Status.CHANGED,
                     features.getToggleCollection(),
@@ -123,7 +123,7 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
                 return new ClientFeaturesResponse(
                     ClientFeaturesResponse.Status.UNAVAILABLE, response.code());
             }
-        } catch (IOException ioEx) {
+        } catch (IOException | NullPointerException ioEx) {
             throw new UnleashException("Could not fetch toggles", ioEx);
         } catch (IllegalStateException | JsonSyntaxException ex) {
             return new ClientFeaturesResponse(
