@@ -107,7 +107,7 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
         int code = 200;
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
-                if (response.networkResponse().code() == 304) {
+                if (response.networkResponse() != null && response.networkResponse().code() == 304) {
                     return new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.NOT_CHANGED, 304);
                 }
