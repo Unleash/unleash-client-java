@@ -48,6 +48,8 @@ public class UnleashConfig {
     private final Duration fetchTogglesConnectTimeout;
 
     private final Duration fetchTogglesReadTimeout;
+
+    private final boolean disablePolling;
     private final long sendMetricsInterval;
 
     private final Duration sendMetricsConnectTimeout;
@@ -78,6 +80,7 @@ public class UnleashConfig {
             long fetchTogglesInterval,
             Duration fetchTogglesConnectTimeout,
             Duration fetchTogglesReadTimeout,
+            boolean disablePolling,
             long sendMetricsInterval,
             Duration sendMetricsConnectTimeout,
             Duration sendMetricsReadTimeout,
@@ -139,6 +142,7 @@ public class UnleashConfig {
         this.fetchTogglesInterval = fetchTogglesInterval;
         this.fetchTogglesConnectTimeout = fetchTogglesConnectTimeout;
         this.fetchTogglesReadTimeout = fetchTogglesReadTimeout;
+        this.disablePolling = disablePolling;
         this.sendMetricsInterval = sendMetricsInterval;
         this.sendMetricsConnectTimeout = sendMetricsConnectTimeout;
         this.sendMetricsReadTimeout = sendMetricsReadTimeout;
@@ -221,6 +225,10 @@ public class UnleashConfig {
 
     public Duration getFetchTogglesReadTimeout() {
         return fetchTogglesReadTimeout;
+    }
+
+    public boolean isDisablePolling() {
+        return disablePolling;
     }
 
     public long getSendMetricsInterval() {
@@ -362,6 +370,8 @@ public class UnleashConfig {
         private Duration fetchTogglesConnectTimeout = Duration.ofSeconds(10);
 
         private Duration fetchTogglesReadTimeout = Duration.ofSeconds(10);
+
+        private boolean disablePolling = false;
         private long sendMetricsInterval = 60;
 
         private Duration sendMetricsConnectTimeout = Duration.ofSeconds(10);
@@ -476,6 +486,14 @@ public class UnleashConfig {
             return this;
         }
 
+        /***
+         * Don't poll for feature toggle updates
+         */
+        public Builder disablePolling() {
+            this.disablePolling = true;
+            return this;
+        }
+
         public Builder sendMetricsConnectTimeout(Duration connectTimeout) {
             this.sendMetricsConnectTimeout = connectTimeout;
             return this;
@@ -496,6 +514,10 @@ public class UnleashConfig {
             return this;
         }
 
+        /**
+         * Don't send metrics to Unleash server
+         * @return
+         */
         public Builder disableMetrics() {
             this.disableMetrics = true;
             return this;
@@ -567,6 +589,16 @@ public class UnleashConfig {
             }
         }
 
+        /**
+         * Adds a custom http header for authorizing the client
+         * @param apiKey the client key to use to connect to the Unleash Server
+         * @return
+         */
+        public Builder apiKey(String apiKey) {
+            this.customHttpHeaders.put("Authorization", apiKey);
+            return this;
+        }
+
         public UnleashConfig build() {
             return new UnleashConfig(
                     unleashAPI,
@@ -582,6 +614,7 @@ public class UnleashConfig {
                     fetchTogglesInterval,
                     fetchTogglesConnectTimeout,
                     fetchTogglesReadTimeout,
+                    disablePolling,
                     sendMetricsInterval,
                     sendMetricsConnectTimeout,
                     sendMetricsReadTimeout,
