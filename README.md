@@ -35,7 +35,7 @@ UnleashConfig config = UnleashConfig.builder()
             .appName("java-test")
             .instanceId("instance x")
             .unleashAPI("http://unleash.herokuapp.com/api/")
-            .customHttpHeader("Authorization", "API token")
+            .apiKey("API token")
             .build();
 
 Unleash unleash = new DefaultUnleash(config);
@@ -141,7 +141,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
                 .appName("my-app")
                 .instanceId("my-instance-1")
                 .unleashAPI(unleashAPI)
-                .customHttpHeader("Authorization", "12312Random")
+                .apiKey("12312Random")
                 .build();
 ```
 
@@ -163,7 +163,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
                 .appName("my-app")
                 .instanceId("my-instance-1")
                 .unleashAPI(unleashAPI)
-                .customHttpHeader("Authorization", "API token")
+                .apiKey("API token")
                 .customHttpHeadersProvider(provider)
                 .build();
 ```
@@ -180,7 +180,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
     .appName("my-app")
     .instanceId("my-instance-1")
     .unleashAPI(unleashAPI)
-    .customHttpHeader("Authorization", "API token")
+    .apiKey("API token")
     .subscriber(new UnleashSubscriber() {
         @Override
         public void onReady(UnleashReady ready) {
@@ -216,7 +216,7 @@ to enable support for basic auth against a http proxy, you can simply enable the
 UnleashConfig config = UnleashConfig.builder()
     .appName("my-app")
     .unleashAPI("http://unleash.org")
-    .customHttpHeader("Authorization", "API token")
+    .apiKey("API token")
     .enableProxyAuthenticationByJvmProperties()
     .build();
 ```
@@ -239,7 +239,7 @@ Then you can change your config to
 UnleashConfig config = UnleashConfig.builder()
     .appName("my-app")
     .unleashAPI("http://unleash.org")
-    .customHttpHeader("Authorization", "API token")
+    .apiKey("API token")
     .unleashFeatureFetcherFactory(OkHttpFeatureFetcher::new)
     .build();
 ```
@@ -389,16 +389,17 @@ The `UnleashConfigBuilder` class (created via `UnleashConfig.builder()`) exposes
 
 | Method name                                | Description                                                                                                                                                                                                                                      | Required | Default value                                                                                                        |
 |--------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------|
+| `apiKey`                                   | The api key to use for authenticating against the Unleash API.                                                                                                                                                                                   | Yes      | `null`                                                                                                               |
 | `appName`                                  | The name of the application as shown in the Unleash UI. Registered applications are listed on the Applications page.                                                                                                                             | Yes      | `null`                                                                                                               |
 | `backupFile`                               | The path to the file where [local backups](#local-backup) get stored.                                                                                                                                                                            | No       | Synthesized from your system's `java.io.tmpdir` and your `appName`: `"<java.io.tmpdir>/unleash-<appName>-repo.json"` |
 | `customHttpHeader`                         | Add a [custom HTTP header](#custom-http-headers) to the list of HTTP headers that will the client sends to the Unleash API. Each method call will add a new header. Note: in most cases, you'll need to use this method to provide an API token. | No       | N/A                                                                                                                  |
 | `customHttpHeadersProvider`                | Add a custom HTTP header provider. Useful for [dynamic custom HTTP headers](#dynamic-custom-http-headers).                                                                                                                                       | No       | `null`                                                                                                               |
-| `disablePolling`                           | A boolean indicating whether the client should poll the unleash api for updates to toggles.                                                                                                                                                       |
+| `disablePolling`                           | A boolean indicating whether the client should poll the unleash api for updates to toggles.                                                                                                                                                      |
 | `disableMetrics`                           | A boolean indicating whether the client should disable sending usage metrics to the Unleash server.                                                                                                                                              | No       | `false`                                                                                                              |
 | `enableProxyAuthenticationByJvmProperties` | Enable support for [using JVM properties for HTTP proxy authentication](#http-proxy-with-authentication).                                                                                                                                        | No       | `false`                                                                                                              |
 | `environment`                              | The name of the current environment.                                                                                                                                                                                                             | No       | `null`                                                                                                               |
 | `fallbackStrategy`                         | A strategy implementation that the client can use if it doesn't recognize the strategy type returned from the server.                                                                                                                            | No       | `null`                                                                                                               |
-| `fetchTogglesInterval`                     | How often (in seconds) the client should check for toggle updates. Set to `0` if you want to only check once.                                                                                                                                     | No       | `10`                                                                                                                 |
+| `fetchTogglesInterval`                     | How often (in seconds) the client should check for toggle updates. Set to `0` if you want to only check once.                                                                                                                                    | No       | `10`                                                                                                                 |
 | `instanceId`                               | A unique(-ish) identifier for your instance. Typically a hostname, pod id or something similar. Unleash uses this to separate metrics from the client SDKs with the same `appName`.                                                              | Yes      | `null`                                                                                                               |
 | `namePrefix`                               | If provided, the client will only fetch toggles whose name starts with the provided value.                                                                                                                                                       | No       | `null`                                                                                                               |
 | `projectName`                              | If provided, the client will only fetch toggles from the specified project. (This can also be achieved with an API token).                                                                                                                       | No       | `null`                                                                                                               |
@@ -421,7 +422,7 @@ UnleashConfig config = UnleashConfig.builder()
             .appName("your app name")
             .instanceId("instance id")
             .unleashAPI("http://unleash.herokuapp.com/api/")
-            .customHttpHeader("Authorization", "API token")
+            .apiKey("API token")
             // ... more configuration options
             .build();
 
