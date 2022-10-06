@@ -6,13 +6,11 @@ import static io.getunleash.util.UnleashConfig.UNLEASH_INSTANCE_ID_HEADER;
 import com.google.gson.JsonSyntaxException;
 import io.getunleash.UnleashException;
 import io.getunleash.util.UnleashConfig;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Objects;
-
 import okhttp3.Cache;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -30,10 +28,10 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
         } catch (IOException ignored) {
         }
         OkHttpClient.Builder builder =
-            new OkHttpClient.Builder()
-                .connectTimeout(unleashConfig.getFetchTogglesConnectTimeout())
-                .callTimeout(unleashConfig.getFetchTogglesReadTimeout())
-                .followRedirects(true);
+                new OkHttpClient.Builder()
+                        .connectTimeout(unleashConfig.getFetchTogglesConnectTimeout())
+                        .callTimeout(unleashConfig.getFetchTogglesReadTimeout())
+                        .followRedirects(true);
         if (tempDir != null) {
             builder = builder.cache(new Cache(tempDir, 1024 * 1024 * 50));
         }
@@ -42,62 +40,62 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
         }
 
         this.toggleUrl =
-            Objects.requireNonNull(
-                HttpUrl.get(
-                    unleashConfig
-                        .getUnleashURLs()
-                        .getFetchTogglesURL(
-                            unleashConfig.getProjectName(),
-                            unleashConfig.getNamePrefix())));
+                Objects.requireNonNull(
+                        HttpUrl.get(
+                                unleashConfig
+                                        .getUnleashURLs()
+                                        .getFetchTogglesURL(
+                                                unleashConfig.getProjectName(),
+                                                unleashConfig.getNamePrefix())));
         this.client = configureInterceptor(unleashConfig, builder.build());
     }
 
     public OkHttpFeatureFetcher(UnleashConfig unleashConfig, OkHttpClient client) {
         this.client = configureInterceptor(unleashConfig, client);
         this.toggleUrl =
-            Objects.requireNonNull(
-                HttpUrl.get(
-                    unleashConfig
-                        .getUnleashURLs()
-                        .getFetchTogglesURL(
-                            unleashConfig.getProjectName(),
-                            unleashConfig.getNamePrefix())));
+                Objects.requireNonNull(
+                        HttpUrl.get(
+                                unleashConfig
+                                        .getUnleashURLs()
+                                        .getFetchTogglesURL(
+                                                unleashConfig.getProjectName(),
+                                                unleashConfig.getNamePrefix())));
     }
 
     public OkHttpClient configureInterceptor(UnleashConfig config, OkHttpClient client) {
         return client.newBuilder()
-            .addInterceptor(
-                (c) -> {
-                    Request.Builder headers =
-                        c.request()
-                            .newBuilder()
-                            .addHeader("Content-Type", "application/json")
-                            .addHeader("Accept", "application/json")
-                            .addHeader(UNLEASH_APP_NAME_HEADER, config.getAppName())
-                            .addHeader(
-                                UNLEASH_INSTANCE_ID_HEADER,
-                                config.getInstanceId())
-                            .addHeader("User-Agent", config.getAppName())
-                            .addHeader(
-                                "Unleash-Client-Spec",
-                                config.getClientSpecificationVersion());
-                    for (Map.Entry<String, String> headerEntry :
-                        config.getCustomHttpHeaders().entrySet()) {
-                        headers =
-                            headers.addHeader(
-                                headerEntry.getKey(), headerEntry.getValue());
-                    }
-                    for (Map.Entry<String, String> headerEntry :
-                        config.getCustomHttpHeadersProvider()
-                            .getCustomHeaders()
-                            .entrySet()) {
-                        headers =
-                            headers.addHeader(
-                                headerEntry.getKey(), headerEntry.getValue());
-                    }
-                    return c.proceed(headers.build());
-                })
-            .build();
+                .addInterceptor(
+                        (c) -> {
+                            Request.Builder headers =
+                                    c.request()
+                                            .newBuilder()
+                                            .addHeader("Content-Type", "application/json")
+                                            .addHeader("Accept", "application/json")
+                                            .addHeader(UNLEASH_APP_NAME_HEADER, config.getAppName())
+                                            .addHeader(
+                                                    UNLEASH_INSTANCE_ID_HEADER,
+                                                    config.getInstanceId())
+                                            .addHeader("User-Agent", config.getAppName())
+                                            .addHeader(
+                                                    "Unleash-Client-Spec",
+                                                    config.getClientSpecificationVersion());
+                            for (Map.Entry<String, String> headerEntry :
+                                    config.getCustomHttpHeaders().entrySet()) {
+                                headers =
+                                        headers.addHeader(
+                                                headerEntry.getKey(), headerEntry.getValue());
+                            }
+                            for (Map.Entry<String, String> headerEntry :
+                                    config.getCustomHttpHeadersProvider()
+                                            .getCustomHeaders()
+                                            .entrySet()) {
+                                headers =
+                                        headers.addHeader(
+                                                headerEntry.getKey(), headerEntry.getValue());
+                            }
+                            return c.proceed(headers.build());
+                        })
+                .build();
     }
 
     @Override
@@ -107,27 +105,31 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
         int code = 200;
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
-                if (response.networkResponse() != null && response.networkResponse().code() == 304) {
+                if (response.networkResponse() != null
+                        && response.networkResponse().code() == 304) {
                     return new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.NOT_CHANGED, 304);
+                            ClientFeaturesResponse.Status.NOT_CHANGED, 304);
                 }
                 location = response.request().url();
                 code = response.code();
                 FeatureCollection features =
-                    JsonFeatureParser.fromJson(Objects.requireNonNull(response.body()).charStream());
+                        JsonFeatureParser.fromJson(
+                                Objects.requireNonNull(response.body()).charStream());
                 return new ClientFeaturesResponse(
-                    ClientFeaturesResponse.Status.CHANGED,
-                    features.getToggleCollection(),
-                    features.getSegmentCollection());
+                        ClientFeaturesResponse.Status.CHANGED,
+                        features.getToggleCollection(),
+                        features.getSegmentCollection());
+            } else if (response.code() == 304) {
+                return new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, response.code());
             } else {
                 return new ClientFeaturesResponse(
-                    ClientFeaturesResponse.Status.UNAVAILABLE, response.code());
+                        ClientFeaturesResponse.Status.UNAVAILABLE, response.code());
             }
         } catch (IOException | NullPointerException ioEx) {
             throw new UnleashException("Could not fetch toggles", ioEx);
         } catch (IllegalStateException | JsonSyntaxException ex) {
             return new ClientFeaturesResponse(
-                ClientFeaturesResponse.Status.UNAVAILABLE, code, location.toString());
+                    ClientFeaturesResponse.Status.UNAVAILABLE, code, location.toString());
         }
     }
 }
