@@ -124,7 +124,7 @@ public class OkHttpFeatureFetcherTest {
         // Second fetch
         stubFor(
                 get(urlEqualTo("/api/client/features"))
-                        .withHeader("If-None-Match", equalTo("AZ12--gzip"))
+                        .withHeader("If-None-Match", equalTo("AZ12"))
                         .willReturn(
                                 aResponse()
                                         .withStatus(304)
@@ -142,7 +142,7 @@ public class OkHttpFeatureFetcherTest {
         verify(
                 1,
                 getRequestedFor(urlEqualTo("/api/client/features"))
-                        .withHeader("If-None-Match", equalTo("AZ12--gzip")));
+                        .withHeader("If-None-Match", equalTo("AZ12")));
         assertThat(response1.getStatus()).isEqualTo(FeatureToggleResponse.Status.CHANGED);
         assertThat(response2.getStatus()).isEqualTo(FeatureToggleResponse.Status.NOT_CHANGED);
     }
