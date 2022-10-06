@@ -101,7 +101,6 @@ class DefaultUnleashTest {
                         asList(404, 1));
         when(featureRepository.getToggle(toggleName))
                 .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
-        when(featureRepository.getSegment(404)).thenReturn(Segment.DENY_SEGMENT);
         when(featureRepository.getSegment(1))
                 .thenReturn(
                         new Segment(
