@@ -1,16 +1,16 @@
 package io.getunleash.integration;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
-import com.github.jenspiegsa.wiremockextension.InjectServer;
-import com.github.jenspiegsa.wiremockextension.WireMockExtension;
-import com.github.jenspiegsa.wiremockextension.WireMockSettings;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.getunleash.DefaultUnleash;
@@ -34,15 +34,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-@ExtendWith(WireMockExtension.class)
-@WireMockSettings(failOnUnmatchedRequests = false)
 public class ClientSpecificationTest {
 
-    @ConfigureWireMock Options options = wireMockConfig().dynamicPort();
-
-    @InjectServer WireMockServer serverMock;
+    @RegisterExtension
+    static WireMockExtension serverMock =
+            WireMockExtension.newInstance()
+                    .configureStaticDsl(true)
+                    .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
+                    .build();
 
     @TestFactory
     public Stream<DynamicTest> clientSpecification() throws IOException, URISyntaxException {
@@ -126,7 +127,7 @@ public class ClientSpecificationTest {
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName(testDefinition.getName())
-                        .unleashAPI(new URI("http://localhost:" + serverMock.port() + "/api/"))
+                        .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
                         .synchronousFetchOnInitialisation(true)
                         .backupFile(backupFile)
                         .build();

@@ -12,12 +12,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
-import com.github.jenspiegsa.wiremockextension.InjectServer;
-import com.github.jenspiegsa.wiremockextension.WireMockExtension;
-import com.github.jenspiegsa.wiremockextension.WireMockSettings;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.getunleash.FeatureToggle;
 import io.getunleash.util.UnleashConfig;
 import java.net.HttpURLConnection;
@@ -25,15 +20,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-@ExtendWith(WireMockExtension.class)
-@WireMockSettings(failOnUnmatchedRequests = false)
 public class OkHttpFeatureFetcherTest {
-    @ConfigureWireMock Options options = wireMockConfig().dynamicPort();
-
-    @InjectServer WireMockServer serverMock;
+    @RegisterExtension
+    static WireMockExtension serverMock =
+            WireMockExtension.newInstance()
+                    .configureStaticDsl(true)
+                    .options(wireMockConfig().dynamicPort())
+                    .build();
 
     @Test
     public void happy_path_test_version0() throws URISyntaxException {
@@ -46,7 +43,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withHeader("Content-Type", "application/json")
                                         .withBodyFile("features-v0.json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = okHttpToggleFetcher.fetchFeatures();
@@ -70,7 +67,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withHeader("Content-Type", "application/json")
                                         .withBodyFile("features-v1.json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
@@ -94,7 +91,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withHeader("Content-Type", "application/json")
                                         .withBodyFile("features-v1-with-variants.json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
@@ -130,7 +127,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withStatus(304)
                                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
 
@@ -158,7 +155,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         okHttpToggleFetcher.fetchFeatures();
@@ -180,7 +177,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withHeader("Content-Type", "application/json")
                                         .withBody("{}")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         okHttpToggleFetcher.fetchFeatures();
@@ -200,7 +197,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withStatus(304)
                                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
@@ -228,7 +225,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withHeader(
                                                 "Location",
                                                 "http://localhost:"
-                                                        + serverMock.port()
+                                                        + serverMock.getPort()
                                                         + "/api/v2/client/features")));
         stubFor(
                 get(urlEqualTo("/api/v2/client/features"))
@@ -239,7 +236,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withHeader("Content-Type", "application/json")
                                         .withBodyFile("features-v1.json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
@@ -264,7 +261,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withStatus(httpCode)
                                         .withHeader("Content-Type", "application/json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
@@ -287,7 +284,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withHeader("Content-Type", "application/json")
                                         .withBodyFile("features-v1.json")));
 
-        URI uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();

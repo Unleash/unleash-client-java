@@ -1,15 +1,10 @@
 package io.getunleash.event;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static io.getunleash.repository.FeatureToggleResponse.Status.*;
+import static io.getunleash.repository.FeatureToggleResponse.Status.UNAVAILABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
-import com.github.jenspiegsa.wiremockextension.InjectServer;
-import com.github.jenspiegsa.wiremockextension.WireMockExtension;
-import com.github.jenspiegsa.wiremockextension.WireMockSettings;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.SynchronousTestExecutor;
 import io.getunleash.Unleash;
@@ -22,15 +17,15 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-@ExtendWith(WireMockExtension.class)
-@WireMockSettings(failOnUnmatchedRequests = false)
 public class SubscriberTest {
 
-    @ConfigureWireMock Options options = wireMockConfig().dynamicPort();
-
-    @InjectServer WireMockServer serverMock;
+    @RegisterExtension
+    static WireMockExtension serverMock =
+            WireMockExtension.newInstance()
+                    .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
+                    .build();
 
     private TestSubscriber testSubscriber = new TestSubscriber();
     private UnleashConfig unleashConfig;
@@ -42,7 +37,7 @@ public class SubscriberTest {
                         .appName(SubscriberTest.class.getSimpleName())
                         .instanceId(SubscriberTest.class.getSimpleName())
                         .synchronousFetchOnInitialisation(true)
-                        .unleashAPI("http://localhost:" + serverMock.port())
+                        .unleashAPI("http://localhost:" + serverMock.getPort())
                         .subscriber(testSubscriber)
                         .scheduledExecutor(new SynchronousTestExecutor())
                         .build();

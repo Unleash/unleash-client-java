@@ -127,6 +127,11 @@ public class FeatureRepository implements IFeatureRepository {
 
     @Override
     public Segment getSegment(Integer id) {
-        return featureCollection.getSegmentCollection().getSegment(id);
+        Segment seg = featureCollection.getSegmentCollection().getSegment(id);
+        if (seg == null) {
+            return Segment.DENY_SEGMENT;
+        } else {
+            return seg;
+        }
     }
 }
