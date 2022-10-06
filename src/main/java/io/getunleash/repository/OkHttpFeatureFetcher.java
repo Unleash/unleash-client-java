@@ -81,7 +81,8 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
                         features.getToggleCollection(),
                         features.getSegmentCollection());
             } else if (response.code() == 304) {
-                return new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, response.code());
+                return new ClientFeaturesResponse(
+                        FeatureToggleResponse.Status.NOT_CHANGED, response.code());
             } else {
                 return new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.UNAVAILABLE, response.code());

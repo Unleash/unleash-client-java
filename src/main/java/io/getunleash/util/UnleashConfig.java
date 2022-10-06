@@ -12,7 +12,6 @@ import io.getunleash.metric.DefaultHttpMetricsSender;
 import io.getunleash.repository.HttpFeatureFetcher;
 import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.Strategy;
-
 import java.io.File;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
