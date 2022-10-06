@@ -1,16 +1,19 @@
 package io.getunleash.repository;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
-import com.github.jenspiegsa.wiremockextension.InjectServer;
-import com.github.jenspiegsa.wiremockextension.WireMockExtension;
-import com.github.jenspiegsa.wiremockextension.WireMockSettings;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.getunleash.FeatureToggle;
 import io.getunleash.util.UnleashConfig;
 import java.net.HttpURLConnection;
@@ -19,22 +22,26 @@ import java.net.URISyntaxException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-@ExtendWith(WireMockExtension.class)
-@WireMockSettings(failOnUnmatchedRequests = false)
 public class HttpFeatureFetcherTest {
 
-    @ConfigureWireMock Options options = wireMockConfig().dynamicPort();
-    @InjectServer WireMockServer serverMock;
+    @RegisterExtension
+    static WireMockExtension serverMock =
+            WireMockExtension.newInstance()
+                    .configureStaticDsl(true)
+                    .options(wireMockConfig().dynamicPort())
+                    .build();
+
     HttpFeatureFetcher fetcher;
     URI uri;
 
     @BeforeEach
     void setUp() {
         try {
-            uri = new URI("http://localhost:" + serverMock.port() + "/api/");
+            uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -170,7 +177,7 @@ public class HttpFeatureFetcherTest {
                                         .withHeader(
                                                 "Location",
                                                 "http://localhost:"
-                                                        + serverMock.port()
+                                                        + serverMock.getPort()
                                                         + "/api/v2/client/features")));
         serverMock.stubFor(
                 get(urlEqualTo("/api/v2/client/features"))

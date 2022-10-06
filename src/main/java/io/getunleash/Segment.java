@@ -1,5 +1,8 @@
 package io.getunleash;
 
+import static java.util.Arrays.asList;
+
+import java.util.Collections;
 import java.util.List;
 
 public class Segment {
@@ -36,4 +39,14 @@ public class Segment {
     public void setConstraints(List<Constraint> constraints) {
         this.constraints = constraints;
     }
+
+    public static Segment DENY_SEGMENT =
+            new Segment(
+                    -9999,
+                    "NON_EXISTING_SEGMENT_ID",
+                    asList(
+                            new Constraint(
+                                    "non-existing-segment-id",
+                                    Operator.IN,
+                                    Collections.emptyList())));
 }

@@ -1,14 +1,15 @@
 package io.getunleash;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.FeatureRepository;
+import io.getunleash.strategy.DefaultStrategy;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ class DefaultUnleashTest {
                 UnleashConfig.builder().unleashAPI("http://fakeAPI").appName("fakeApp").build();
         featureRepository = mock(FeatureRepository.class);
         Map<String, Strategy> strategyMap = new HashMap<>();
+        strategyMap.put("default", new DefaultStrategy());
         contextProvider = mock(UnleashContextProvider.class);
         eventDispatcher = mock(EventDispatcher.class);
         metricService = mock(UnleashMetricService.class);
@@ -45,7 +47,7 @@ class DefaultUnleashTest {
 
     @Test
     public void should_evaluate_all_toggle_with_context() {
-        when(featureRepository.getFeatureNames()).thenReturn(Arrays.asList("toggle1", "toggle2"));
+        when(featureRepository.getFeatureNames()).thenReturn(asList("toggle1", "toggle2"));
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
         List<EvaluatedToggle> toggles = sut.more().evaluateAllToggles();
@@ -69,6 +71,49 @@ class DefaultUnleashTest {
         sut.more().countVariant("toggle1", "variant1");
 
         verify(metricService).countVariant("toggle1", "variant1");
+    }
+
+    @Test
+    public void should_evaluate_missing_segment_as_false() {
+        String toggleName = "F9.withMissingSegment";
+        String semVer = "1.2.2";
+        Constraint semverConstraint = new Constraint("version", Operator.SEMVER_EQ, semVer);
+        ActivationStrategy withMissingSegment =
+                new ActivationStrategy(
+                        "default", Collections.emptyMap(), asList(semverConstraint), asList(404));
+        when(featureRepository.getToggle(toggleName))
+                .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
+        when(featureRepository.getSegment(404)).thenReturn(Segment.DENY_SEGMENT);
+        when(contextProvider.getContext())
+                .thenReturn(UnleashContext.builder().addProperty("version", semVer).build());
+        assertThat(sut.isEnabled(toggleName)).isFalse();
+    }
+
+    @Test
+    public void should_evaluate_segment_collection_with_one_missing_segment_as_false() {
+        String toggleName = "F9.withMissingSegment";
+        Constraint semverConstraint = new Constraint("version", Operator.SEMVER_EQ, "1.2.2");
+        ActivationStrategy withMissingSegment =
+                new ActivationStrategy(
+                        "default",
+                        Collections.emptyMap(),
+                        asList(semverConstraint),
+                        asList(404, 1));
+        when(featureRepository.getToggle(toggleName))
+                .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
+        when(featureRepository.getSegment(1))
+                .thenReturn(
+                        new Segment(
+                                1,
+                                "always true",
+                                asList(
+                                        new Constraint(
+                                                "always_true",
+                                                Operator.NOT_IN,
+                                                Collections.EMPTY_LIST))));
+        when(contextProvider.getContext())
+                .thenReturn(UnleashContext.builder().addProperty("version", "1.2.2").build());
+        assertThat(sut.isEnabled(toggleName)).isFalse();
     }
 
     @Test

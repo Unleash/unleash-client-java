@@ -1,5 +1,7 @@
 package io.getunleash.util;
 
+import static io.getunleash.Segment.DENY_SEGMENT;
+
 import io.getunleash.ActivationStrategy;
 import io.getunleash.Constraint;
 import io.getunleash.Segment;
@@ -18,7 +20,7 @@ public class ConstraintMerger {
                                 .orElseGet(Collections::emptyList)
                                 .stream()
                                 .map(repository::getSegment)
-                                .filter(Objects::nonNull)
+                                .map(s -> s == null ? DENY_SEGMENT : s)
                                 .map(Segment::getConstraints)
                                 .flatMap(Collection::stream)
                                 .collect(Collectors.toList()))
