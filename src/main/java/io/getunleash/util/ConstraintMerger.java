@@ -8,6 +8,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.getunleash.Segment.DENY_SEGMENT;
+
 public class ConstraintMerger {
     public static List<Constraint> mergeConstraints(
             IFeatureRepository repository, ActivationStrategy strategy) {
@@ -18,7 +20,7 @@ public class ConstraintMerger {
                                 .orElseGet(Collections::emptyList)
                                 .stream()
                                 .map(repository::getSegment)
-                                .filter(Objects::nonNull)
+                                .map(s -> s == null? DENY_SEGMENT : s)
                                 .map(Segment::getConstraints)
                                 .flatMap(Collection::stream)
                                 .collect(Collectors.toList()))
