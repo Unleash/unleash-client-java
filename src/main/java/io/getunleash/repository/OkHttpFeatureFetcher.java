@@ -104,28 +104,28 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
         HttpUrl location = toggleUrl;
         int code = 200;
         try (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                location = response.request().url();
-                code = response.code();
-                if (response.cacheResponse() != null) {
+            if (response.isSuccessful()) {
+                if (response.networkResponse() != null
+                        && response.networkResponse().code() == 304) {
                     return new ClientFeaturesResponse(
                             ClientFeaturesResponse.Status.NOT_CHANGED, 304);
-                } else {
-                    FeatureCollection features =
-                            JsonFeatureParser.fromJson(response.body().charStream());
-                    return new ClientFeaturesResponse(
-                            ClientFeaturesResponse.Status.CHANGED,
-                            features.getToggleCollection(),
-                            features.getSegmentCollection());
                 }
-            } else if (response.code() >= 301 && response.code() <= 304) {
+                location = response.request().url();
+                code = response.code();
+                FeatureCollection features =
+                        JsonFeatureParser.fromJson(
+                                Objects.requireNonNull(response.body()).charStream());
                 return new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.NOT_CHANGED, response.code());
+                        ClientFeaturesResponse.Status.CHANGED,
+                        features.getToggleCollection(),
+                        features.getSegmentCollection());
+            } else if (response.code() == 304) {
+                return new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, response.code());
             } else {
                 return new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.UNAVAILABLE, response.code());
             }
-        } catch (IOException ioEx) {
+        } catch (IOException | NullPointerException ioEx) {
             throw new UnleashException("Could not fetch toggles", ioEx);
         } catch (IllegalStateException | JsonSyntaxException ex) {
             return new ClientFeaturesResponse(
