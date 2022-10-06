@@ -516,6 +516,7 @@ public class UnleashConfig {
 
         /**
          * Don't send metrics to Unleash server
+         *
          * @return
          */
         public Builder disableMetrics() {
@@ -591,6 +592,7 @@ public class UnleashConfig {
 
         /**
          * Adds a custom http header for authorizing the client
+         *
          * @param apiKey the client key to use to connect to the Unleash Server
          * @return
          */
