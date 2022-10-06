@@ -8,9 +8,11 @@ import io.getunleash.UnleashContextProvider;
 import io.getunleash.event.NoOpSubscriber;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
+import io.getunleash.metric.DefaultHttpMetricsSender;
 import io.getunleash.repository.HttpFeatureFetcher;
 import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.Strategy;
+
 import java.io.File;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
@@ -58,6 +60,9 @@ public class UnleashConfig {
     private final boolean disableMetrics;
     private final boolean isProxyAuthenticationByJvmProperties;
     private final UnleashFeatureFetcherFactory unleashFeatureFetcherFactory;
+
+    private final MetricSenderFactory metricSenderFactory;
+
     private final UnleashContextProvider contextProvider;
     private final boolean synchronousFetchOnInitialisation;
     private final UnleashScheduledExecutor unleashScheduledExecutor;
@@ -89,6 +94,7 @@ public class UnleashConfig {
             boolean isProxyAuthenticationByJvmProperties,
             boolean synchronousFetchOnInitialisation,
             UnleashFeatureFetcherFactory unleashFeatureFetcherFactory,
+            MetricSenderFactory metricSenderFactory,
             @Nullable UnleashScheduledExecutor unleashScheduledExecutor,
             @Nullable UnleashSubscriber unleashSubscriber,
             @Nullable Strategy fallbackStrategy,
@@ -155,6 +161,7 @@ public class UnleashConfig {
         this.toggleBootstrapProvider = unleashBootstrapProvider;
         this.proxy = proxy;
         this.unleashFeatureFetcherFactory = unleashFeatureFetcherFactory;
+        this.metricSenderFactory = metricSenderFactory;
         this.clientSpecificationVersion =
                 UnleashProperties.getProperty("client.specification.version");
     }
@@ -295,6 +302,10 @@ public class UnleashConfig {
         return proxy;
     }
 
+    public MetricSenderFactory getMetricSenderFactory() {
+        return this.metricSenderFactory;
+    }
+
     public UnleashFeatureFetcherFactory getUnleashFeatureFetcherFactory() {
         return this.unleashFeatureFetcherFactory;
     }
@@ -379,6 +390,8 @@ public class UnleashConfig {
         private Duration sendMetricsReadTimeout = Duration.ofSeconds(10);
         private boolean disableMetrics = false;
         private UnleashFeatureFetcherFactory unleashFeatureFetcherFactory = HttpFeatureFetcher::new;
+
+        private MetricSenderFactory unleashMetricSenderFactory = DefaultHttpMetricsSender::new;
         private UnleashContextProvider contextProvider =
                 UnleashContextProvider.getDefaultProvider();
         private boolean synchronousFetchOnInitialisation = false;
@@ -453,6 +466,11 @@ public class UnleashConfig {
         public Builder unleashFeatureFetcherFactory(
                 UnleashFeatureFetcherFactory unleashFeatureFetcherFactory) {
             this.unleashFeatureFetcherFactory = unleashFeatureFetcherFactory;
+            return this;
+        }
+
+        public Builder metricsSenderFactory(MetricSenderFactory metricSenderFactory) {
+            this.unleashMetricSenderFactory = metricSenderFactory;
             return this;
         }
 
@@ -625,6 +643,7 @@ public class UnleashConfig {
                     isProxyAuthenticationByJvmProperties,
                     synchronousFetchOnInitialisation,
                     unleashFeatureFetcherFactory,
+                    unleashMetricSenderFactory,
                     Optional.ofNullable(scheduledExecutor)
                             .orElseGet(UnleashScheduledExecutorImpl::getInstance),
                     Optional.ofNullable(unleashSubscriber).orElseGet(NoOpSubscriber::new),

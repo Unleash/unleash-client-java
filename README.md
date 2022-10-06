@@ -230,7 +230,7 @@ If you want to use OkHttp instead of HttpURLConnection you'll need a dependency 
 <dependency>
     <groupId>com.squareup.okhttp3</groupId>
     <artifactId>okhttp</artifactId>
-    <version>4.9+</version>
+    <version>4.10+</version>
 </dependency>
 ```
 
@@ -245,6 +245,32 @@ UnleashConfig config = UnleashConfig.builder()
 ```
 
 This will then start using OkHttp instead of HttpURLConnection.
+
+### Metrics sender
+The Unleash Java client now supports using your own metrics sender.
+The Config builder has been expanded to accept a `io.getunleash.util.MetricsSenderFactory` which should be a `Function<UnleashConfig, MetricsSender>`.
+
+If you want to use OkHttp instead of HttpURLConnection you'll need a dependency on okhttp
+
+```xml
+<dependency>
+    <groupId>com.squareup.okhttp3</groupId>
+    <artifactId>okhttp</artifactId>
+    <version>4.10+</version>
+</dependency>
+```
+
+Then you can change your config to
+```java
+UnleashConfig config = UnleashConfig.builder()
+    .appName("my-app")
+    .unleashAPI("http://unleash.org")
+    .customHttpHeader("Authorization", "API token")
+    .unleashMetricsSenderFactory(OkHttpMetricsSender::new)
+    .build();
+```
+
+This will then start using OkHttp instead of HttpURLConnection to send metrics
 
 ## Local backup
 By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the
@@ -411,6 +437,8 @@ The `UnleashConfigBuilder` class (created via `UnleashConfig.builder()`) exposes
 | `toggleBootstrapProvider`                  | Add a [bootstrap provider](#bootstrapping) (must implement the `ToggleBootstrapProvider` interface)                                                                                                                                              | No       |                                                                                                                      |
 | `unleashAPI`                               | The URL of the Unleash API.                                                                                                                                                                                                                      | Yes      | `null`                                                                                                               |
 | `unleashContextProvider`                   | An [Unleash context provider used to configure Unleash](#2-via-an-unleashcontextprovider).                                                                                                                                                       | No       | `null`                                                                                                               |
+| `unleashFeatureFetcherFactory`             | A factory providing a FeatureFetcher implementation.                                                                                                                                                                                             | No       | [`HttpFeatureFetcher::new`](src/main/java/io/getunleash/repository/HttpFeatureFetcher.java)                          |
+| `unleashMetricsSenderFactory`              | A factory providing a MetricSender implementation.                                                                                                                                                                                               | No       | [`JavaHttpMetricsSender::new`](src/main/java/io/getunleash/metric/JavaHttpMetricsSender.java)                        |
 
 When you have set all the desired options, initialize the configuration with the `build` method.
 You can then pass the configuration to the Unleash client constructor.

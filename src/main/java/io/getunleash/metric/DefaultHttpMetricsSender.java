@@ -1,22 +1,20 @@
 package io.getunleash.metric;
 
-import static java.time.format.DateTimeFormatter.ISO_INSTANT;
-
 import com.google.gson.*;
 import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
+import io.getunleash.util.AtomicLongSerializer;
+import io.getunleash.util.DateTimeSerializer;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashURLs;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class UnleashMetricsSender {
+public class DefaultHttpMetricsSender implements MetricSender {
     private static final int CONNECT_TIMEOUT = 1000;
 
     private final Gson gson;
@@ -25,7 +23,7 @@ public class UnleashMetricsSender {
     private final URL clientRegistrationURL;
     private final URL clientMetricsURL;
 
-    public UnleashMetricsSender(UnleashConfig unleashConfig) {
+    public DefaultHttpMetricsSender(UnleashConfig unleashConfig) {
         this.unleashConfig = unleashConfig;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
         UnleashURLs urls = unleashConfig.getUnleashURLs();
@@ -37,25 +35,6 @@ public class UnleashMetricsSender {
                         .registerTypeAdapter(LocalDateTime.class, new DateTimeSerializer())
                         .registerTypeAdapter(AtomicLong.class, new AtomicLongSerializer())
                         .create();
-    }
-
-    static class DateTimeSerializer implements JsonSerializer<LocalDateTime> {
-        @Override
-        public JsonElement serialize(
-                LocalDateTime localDateTime,
-                Type type,
-                JsonSerializationContext jsonSerializationContext) {
-            return new JsonPrimitive(ISO_INSTANT.format(localDateTime.toInstant(ZoneOffset.UTC)));
-        }
-    }
-
-    static class AtomicLongSerializer implements JsonSerializer<AtomicLong> {
-
-        @Override
-        public JsonElement serialize(
-                AtomicLong src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.get());
-        }
     }
 
     public void registerClient(ClientRegistration registration) {

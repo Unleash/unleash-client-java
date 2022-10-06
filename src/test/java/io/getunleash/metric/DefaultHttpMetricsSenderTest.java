@@ -19,7 +19,7 @@ import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public class UnleashMetricsSenderTest {
+public class DefaultHttpMetricsSenderTest {
 
     @RegisterExtension
     static WireMockExtension serverMock =
@@ -38,7 +38,7 @@ public class UnleashMetricsSenderTest {
         URI uri = new URI("http://localhost:" + serverMock.getPort());
         UnleashConfig config = UnleashConfig.builder().appName("test-app").unleashAPI(uri).build();
 
-        UnleashMetricsSender sender = new UnleashMetricsSender(config);
+        DefaultHttpMetricsSender sender = new DefaultHttpMetricsSender(config);
         sender.registerClient(
                 new ClientRegistration(config, LocalDateTime.now(), new HashSet<String>()));
 
@@ -59,7 +59,7 @@ public class UnleashMetricsSenderTest {
         URI uri = new URI("http://localhost:" + serverMock.getPort());
         UnleashConfig config = UnleashConfig.builder().appName("test-app").unleashAPI(uri).build();
 
-        UnleashMetricsSender sender = new UnleashMetricsSender(config);
+        DefaultHttpMetricsSender sender = new DefaultHttpMetricsSender(config);
         MetricsBucket bucket = new MetricsBucket();
         ClientMetrics metrics = new ClientMetrics(config, bucket);
         sender.sendMetrics(metrics);
@@ -81,7 +81,7 @@ public class UnleashMetricsSenderTest {
         URI uri = new URI("http://localhost:" + serverMock.getPort());
         UnleashConfig config = UnleashConfig.builder().appName("test-app").unleashAPI(uri).build();
 
-        UnleashMetricsSender sender = new UnleashMetricsSender(config);
+        DefaultHttpMetricsSender sender = new DefaultHttpMetricsSender(config);
         MetricsBucket bucket = new MetricsBucket();
         ClientMetrics metrics = new ClientMetrics(config, bucket);
         sender.sendMetrics(metrics);
