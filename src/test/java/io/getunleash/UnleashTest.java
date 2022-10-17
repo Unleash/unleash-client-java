@@ -13,7 +13,7 @@ import io.getunleash.util.UnleashScheduledExecutor;
 import io.getunleash.variant.Payload;
 import io.getunleash.variant.VariantDefinition;
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -79,33 +79,33 @@ public class UnleashTest {
     @Test
     public void fallback_function_should_be_invoked_and_return_true() {
         when(toggleRepository.getToggle("test")).thenReturn(null);
-        BiFunction<String, UnleashContext, Boolean> fallbackAction = mock(BiFunction.class);
-        when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(true);
+        BiPredicate<String, UnleashContext> fallbackAction = mock(BiPredicate.class);
+        when(fallbackAction.test(eq("test"), any(UnleashContext.class))).thenReturn(true);
 
         assertThat(unleash.isEnabled("test", fallbackAction)).isTrue();
-        verify(fallbackAction, times(1)).apply(anyString(), any(UnleashContext.class));
+        verify(fallbackAction, times(1)).test(anyString(), any(UnleashContext.class));
     }
 
     @Test
     public void fallback_function_should_be_invoked_also_with_context() {
         when(toggleRepository.getToggle("test")).thenReturn(null);
-        BiFunction<String, UnleashContext, Boolean> fallbackAction = mock(BiFunction.class);
-        when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(true);
+        BiPredicate<String, UnleashContext> fallbackAction = mock(BiPredicate.class);
+        when(fallbackAction.test(eq("test"), any(UnleashContext.class))).thenReturn(true);
 
         UnleashContext context = UnleashContext.builder().userId("123").build();
 
         assertThat(unleash.isEnabled("test", context, fallbackAction)).isTrue();
-        verify(fallbackAction, times(1)).apply(anyString(), any(UnleashContext.class));
+        verify(fallbackAction, times(1)).test(anyString(), any(UnleashContext.class));
     }
 
     @Test
     void fallback_function_should_be_invoked_and_return_false() {
         when(toggleRepository.getToggle("test")).thenReturn(null);
-        BiFunction<String, UnleashContext, Boolean> fallbackAction = mock(BiFunction.class);
-        when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(false);
+        BiPredicate<String, UnleashContext> fallbackAction = mock(BiPredicate.class);
+        when(fallbackAction.test(eq("test"), any(UnleashContext.class))).thenReturn(false);
 
         assertThat(unleash.isEnabled("test", fallbackAction)).isFalse();
-        verify(fallbackAction, times(1)).apply(anyString(), any(UnleashContext.class));
+        verify(fallbackAction, times(1)).test(anyString(), any(UnleashContext.class));
     }
 
     @Test
@@ -115,11 +115,11 @@ public class UnleashTest {
                         new FeatureToggle(
                                 "test", true, asList(new ActivationStrategy("default", null))));
 
-        BiFunction<String, UnleashContext, Boolean> fallbackAction = mock(BiFunction.class);
-        when(fallbackAction.apply(eq("test"), any(UnleashContext.class))).thenReturn(false);
+        BiPredicate<String, UnleashContext> fallbackAction = mock(BiPredicate.class);
+        when(fallbackAction.test(eq("test"), any(UnleashContext.class))).thenReturn(false);
 
         assertThat(unleash.isEnabled("test", fallbackAction)).isTrue();
-        verify(fallbackAction, never()).apply(anyString(), any(UnleashContext.class));
+        verify(fallbackAction, never()).test(anyString(), any(UnleashContext.class));
     }
 
     @Test

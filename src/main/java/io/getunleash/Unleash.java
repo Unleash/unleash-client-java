@@ -1,7 +1,7 @@
 package io.getunleash;
 
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 
 public interface Unleash {
     boolean isEnabled(String toggleName);
@@ -17,14 +17,14 @@ public interface Unleash {
     }
 
     default boolean isEnabled(
-            String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+            String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
         return isEnabled(toggleName, false);
     }
 
     default boolean isEnabled(
             String toggleName,
             UnleashContext context,
-            BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+            BiPredicate<String, UnleashContext> fallbackAction) {
         return isEnabled(toggleName, context, false);
     }
 
