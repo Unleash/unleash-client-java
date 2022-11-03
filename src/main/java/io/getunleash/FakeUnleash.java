@@ -4,7 +4,7 @@ import static java.util.Collections.emptyList;
 
 import io.getunleash.lang.Nullable;
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 public class FakeUnleash implements Unleash {
@@ -35,15 +35,15 @@ public class FakeUnleash implements Unleash {
     public boolean isEnabled(
             String toggleName,
             UnleashContext context,
-            BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+            BiPredicate<String, UnleashContext> fallbackAction) {
         return isEnabled(toggleName, fallbackAction);
     }
 
     @Override
     public boolean isEnabled(
-            String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+            String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
         if (!features.containsKey(toggleName)) {
-            return fallbackAction.apply(toggleName, UnleashContext.builder().build());
+            return fallbackAction.test(toggleName, UnleashContext.builder().build());
         }
         return isEnabled(toggleName);
     }

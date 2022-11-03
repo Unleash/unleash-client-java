@@ -15,7 +15,7 @@ import io.getunleash.util.ConstraintMerger;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantUtil;
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +99,7 @@ public class DefaultUnleash implements Unleash {
     @Override
     public boolean isEnabled(
             final String toggleName,
-            final BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+            final BiPredicate<String, UnleashContext> fallbackAction) {
         return isEnabled(toggleName, contextProvider.getContext(), fallbackAction);
     }
 
@@ -107,7 +107,7 @@ public class DefaultUnleash implements Unleash {
     public boolean isEnabled(
             String toggleName,
             UnleashContext context,
-            BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+            BiPredicate<String, UnleashContext> fallbackAction) {
         boolean enabled = checkEnabled(toggleName, context, fallbackAction);
         count(toggleName, enabled);
         eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
@@ -117,14 +117,14 @@ public class DefaultUnleash implements Unleash {
     private boolean checkEnabled(
             String toggleName,
             UnleashContext context,
-            BiFunction<String, UnleashContext, Boolean> fallbackAction) {
+            BiPredicate<String, UnleashContext> fallbackAction) {
         checkIfToggleMatchesNamePrefix(toggleName);
         FeatureToggle featureToggle = featureRepository.getToggle(toggleName);
         boolean enabled;
         UnleashContext enhancedContext = context.applyStaticFields(config);
 
         if (featureToggle == null) {
-            enabled = fallbackAction.apply(toggleName, enhancedContext);
+            enabled = fallbackAction.test(toggleName, enhancedContext);
         } else if (!featureToggle.isEnabled()) {
             enabled = false;
         } else if (featureToggle.getStrategies().size() == 0) {
