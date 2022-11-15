@@ -68,6 +68,34 @@ public class UnleashConfigTest {
     }
 
     @Test
+    public void should_generate_backupfile_app_name_with_slash() {
+        UnleashConfig config =
+                UnleashConfig.builder().appName("fix/baz-123456").unleashAPI("http://unleash.org").build();
+
+        assertThat(config.getAppName()).isEqualTo("fix/baz-123456");
+        assertThat(config.getBackupFile())
+                .isEqualTo(
+                        System.getProperty("java.io.tmpdir")
+                                + "unleash-"
+                                + "fix-baz-123456"
+                                + "-repo.json");
+    }
+
+    @Test
+    public void should_generate_backupfile_app_name_with_backslash() {
+        UnleashConfig config =
+                UnleashConfig.builder().appName("fix\\baz-123456").unleashAPI("http://unleash.org").build();
+
+        assertThat(config.getAppName()).isEqualTo("fix\\baz-123456");
+        assertThat(config.getBackupFile())
+                .isEqualTo(
+                        System.getProperty("java.io.tmpdir")
+                                + "unleash-"
+                                + "fix-baz-123456"
+                                + "-repo.json");
+    }
+
+    @Test
     public void should_use_provided_backupfile() {
         UnleashConfig config =
                 UnleashConfig.builder()

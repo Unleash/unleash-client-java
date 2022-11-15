@@ -602,8 +602,18 @@ public class UnleashConfig {
             if (backupFile != null) {
                 return backupFile;
             } else {
-                String fileName = "unleash-" + appName + "-repo.json";
-                return System.getProperty("java.io.tmpdir") + File.separatorChar + fileName;
+                String fileName = "unleash-" + sanitizedAppName(appName) + "-repo.json";
+                String tmpDir = System.getProperty("java.io.tmpdir");
+                tmpDir = (!tmpDir.endsWith(String.valueOf(File.separatorChar))) ? tmpDir + File.separatorChar : tmpDir;
+                return tmpDir + fileName;
+            }
+        }
+
+        private String sanitizedAppName(String appName) {
+            if (appName.contains("/") || appName.contains("\\")) {
+                return appName.replace("/", "-").replace("\\", "-");
+            } else {
+                return appName;
             }
         }
 
