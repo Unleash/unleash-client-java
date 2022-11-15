@@ -603,7 +603,7 @@ public class UnleashConfig {
                 return backupFile;
             } else {
                 String fileName = "unleash-" + sanitizedAppName(appName) + "-repo.json";
-                String tmpDir = System.getProperty("java.io.tmpdir");
+                        !tmpDir.endsWith(String.valueOf(File.separatorChar))
                 tmpDir = (!tmpDir.endsWith(String.valueOf(File.separatorChar))) ? tmpDir + File.separatorChar : tmpDir;
                 return tmpDir + fileName;
             }
