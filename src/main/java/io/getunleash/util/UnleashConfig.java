@@ -603,8 +603,11 @@ public class UnleashConfig {
                 return backupFile;
             } else {
                 String fileName = "unleash-" + sanitizedAppName(appName) + "-repo.json";
-                        !tmpDir.endsWith(String.valueOf(File.separatorChar))
-                tmpDir = (!tmpDir.endsWith(String.valueOf(File.separatorChar))) ? tmpDir + File.separatorChar : tmpDir;
+                String tmpDir = System.getProperty("java.io.tmpdir");
+                if (tmpDir == null) {
+                    throw new IllegalStateException("'java.io.tmpdir' must not be empty, cause we write backup files into it.");
+                }
+                tmpDir = !tmpDir.endsWith(String.valueOf(File.separatorChar)) ? tmpDir + File.separatorChar : tmpDir;
                 return tmpDir + fileName;
             }
         }
