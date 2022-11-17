@@ -73,9 +73,11 @@ public class UnleashConfigTest {
                 UnleashConfig.builder().appName("fix/baz-123456").unleashAPI("http://unleash.org").build();
 
         assertThat(config.getAppName()).isEqualTo("fix/baz-123456");
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        tmpDir = tmpDir.endsWith(File.separator) ? tmpDir : tmpDir + File.separatorChar;
         assertThat(config.getBackupFile())
                 .isEqualTo(
-                        System.getProperty("java.io.tmpdir")
+                        tmpDir
                                 + "unleash-"
                                 + "fix-baz-123456"
                                 + "-repo.json");
@@ -87,9 +89,11 @@ public class UnleashConfigTest {
                 UnleashConfig.builder().appName("fix\\baz-123456").unleashAPI("http://unleash.org").build();
 
         assertThat(config.getAppName()).isEqualTo("fix\\baz-123456");
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        tmpDir = tmpDir.endsWith(File.separator) ? tmpDir : tmpDir + File.separatorChar;
         assertThat(config.getBackupFile())
                 .isEqualTo(
-                        System.getProperty("java.io.tmpdir")
+                        tmpDir
                                 + "unleash-"
                                 + "fix-baz-123456"
                                 + "-repo.json");

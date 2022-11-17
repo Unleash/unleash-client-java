@@ -607,7 +607,7 @@ public class UnleashConfig {
                 if (tmpDir == null) {
                     throw new IllegalStateException("'java.io.tmpdir' must not be empty, cause we write backup files into it.");
                 }
-                tmpDir = !tmpDir.endsWith(String.valueOf(File.separatorChar)) ? tmpDir + File.separatorChar : tmpDir;
+                tmpDir = !tmpDir.endsWith(File.separator) ? tmpDir + File.separatorChar : tmpDir;
                 return tmpDir + fileName;
             }
         }
