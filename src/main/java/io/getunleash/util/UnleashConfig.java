@@ -605,7 +605,8 @@ public class UnleashConfig {
                 String fileName = "unleash-" + sanitizedAppName(appName) + "-repo.json";
                 String tmpDir = System.getProperty("java.io.tmpdir");
                 if (tmpDir == null) {
-                    throw new IllegalStateException("'java.io.tmpdir' must not be empty, cause we write backup files into it.");
+                    throw new IllegalStateException(
+                            "'java.io.tmpdir' must not be empty, cause we write backup files into it.");
                 }
                 tmpDir = !tmpDir.endsWith(File.separator) ? tmpDir + File.separatorChar : tmpDir;
                 return tmpDir + fileName;
@@ -613,7 +614,9 @@ public class UnleashConfig {
         }
 
         private String sanitizedAppName(String appName) {
-            if (appName.contains("/") || appName.contains("\\")) {
+            if (null == appName) {
+                return "default";
+            } else if (appName.contains("/") || appName.contains("\\")) {
                 return appName.replace("/", "-").replace("\\", "-");
             } else {
                 return appName;

@@ -98,8 +98,7 @@ public class DefaultUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(
-            final String toggleName,
-            final BiPredicate<String, UnleashContext> fallbackAction) {
+            final String toggleName, final BiPredicate<String, UnleashContext> fallbackAction) {
         return isEnabled(toggleName, contextProvider.getContext(), fallbackAction);
     }
 
