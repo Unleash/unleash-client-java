@@ -178,6 +178,8 @@ public class DefaultUnleash implements Unleash {
                         ? VariantUtil.selectVariant(featureToggle, context, defaultValue)
                         : defaultValue;
         metricService.countVariant(toggleName, variant.getName());
+        // Should count yes/no also when getting variant.
+        metricService.count(toggleName, enabled);
         return variant;
     }
 
