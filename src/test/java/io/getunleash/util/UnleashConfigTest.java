@@ -60,11 +60,39 @@ public class UnleashConfigTest {
                 UnleashConfig.builder().appName("my-app").unleashAPI("http://unleash.org").build();
 
         assertThat(config.getAppName()).isEqualTo("my-app");
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        tmpDir = tmpDir.endsWith(File.separator) ? tmpDir : tmpDir + File.separatorChar;
+        assertThat(config.getBackupFile()).isEqualTo(tmpDir + "unleash-my-app-repo.json");
+    }
+
+    @Test
+    public void should_generate_backupfile_app_name_with_slash() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("fix/baz-123456")
+                        .unleashAPI("http://unleash.org")
+                        .build();
+
+        assertThat(config.getAppName()).isEqualTo("fix/baz-123456");
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        tmpDir = tmpDir.endsWith(File.separator) ? tmpDir : tmpDir + File.separatorChar;
         assertThat(config.getBackupFile())
-                .isEqualTo(
-                        System.getProperty("java.io.tmpdir")
-                                + File.separatorChar
-                                + "unleash-my-app-repo.json");
+                .isEqualTo(tmpDir + "unleash-" + "fix-baz-123456" + "-repo.json");
+    }
+
+    @Test
+    public void should_generate_backupfile_app_name_with_backslash() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("fix\\baz-123456")
+                        .unleashAPI("http://unleash.org")
+                        .build();
+
+        assertThat(config.getAppName()).isEqualTo("fix\\baz-123456");
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        tmpDir = tmpDir.endsWith(File.separator) ? tmpDir : tmpDir + File.separatorChar;
+        assertThat(config.getBackupFile())
+                .isEqualTo(tmpDir + "unleash-" + "fix-baz-123456" + "-repo.json");
     }
 
     @Test
