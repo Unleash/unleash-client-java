@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import io.getunleash.event.EventDispatcher;
+import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.*;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.strategy.UserWithIdStrategy;
@@ -254,6 +256,41 @@ public class UnleashTest {
         assertThat(result.getName()).isEqualTo("Chuck");
         assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("Norris");
         assertThat(result.isEnabled()).isTrue();
+    }
+
+    @Test
+    public void getting_variant_when_disabled_should_increment_no_counter() {
+        UnleashContext context = UnleashContext.builder().userId("1").build();
+        UnleashMetricService metricService = mock(UnleashMetricService.class);
+        UnleashConfig config =
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .unleashAPI("http://localhost:4242/api/")
+                        .environment("test")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                        .unleashContextProvider(contextProvider)
+                        .build();
+        Unleash thisUnleash =
+                new DefaultUnleash(
+                        config,
+                        toggleRepository,
+                        Collections.emptyMap(),
+                        contextProvider,
+                        new EventDispatcher(config),
+                        metricService);
+        // Set up a toggleName using UserWithIdStrategy
+        Map<String, String> params = new HashMap<>();
+        params.put("userIds", "123, 111, 121, 13");
+        ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
+        FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy));
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        final Variant result = thisUnleash.getVariant("test", context);
+
+        assertThat(result).isNotNull();
+        verify(metricService).count(anyString(), eq(false));
+        verify(metricService).countVariant(anyString(), eq(result.getName()));
     }
 
     @Test
