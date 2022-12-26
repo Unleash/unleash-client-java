@@ -1,6 +1,7 @@
 package io.getunleash;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -136,12 +137,27 @@ class DefaultUnleashTest {
                         metricService);
 
         ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
-        FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
+        FeatureToggle toggle = new FeatureToggle("toggle1", true, singletonList(as));
         when(featureRepository.getToggle("toggle1")).thenReturn(toggle);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
         sut.isEnabled("toggle1");
 
         verify(fallback).isEnabled(any(), any(), any());
+    }
+
+    @Test
+    public void should_evaluate_toggle_with_context() {
+        String toggleName = "IsEnabledWithContext";
+        String semVer = "1.2.2";
+        Constraint semverConstraint = new Constraint("version", Operator.SEMVER_EQ, semVer);
+        ActivationStrategy semVerStrategy =
+            new ActivationStrategy(
+                "default", Collections.emptyMap(), singletonList(semverConstraint), null);
+        when(featureRepository.getToggle(toggleName))
+            .thenReturn(new FeatureToggle(toggleName, true, singletonList(semVerStrategy)));
+
+        assertThat(sut.isEnabled(toggleName, UnleashContext.builder().build())).isFalse();
+        assertThat(sut.isEnabled(toggleName, UnleashContext.builder().addProperty("version", semVer).build())).isTrue();
     }
 }
