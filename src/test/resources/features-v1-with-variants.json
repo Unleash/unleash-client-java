@@ -14,6 +14,18 @@
       "createdAt": "2019-01-24T10:38:10.370Z"
     },
     {
+      "name": "Test.empty",
+      "description": "Empty variants here!",
+      "enabled": true,
+      "strategies": [
+          {
+              "name": "default"
+          }
+      ],
+      "variants": [],
+      "createdAt": "2022-12-15T10:38:10.370Z"
+    },
+    {
       "name": "Test.variants",
       "description": null,
       "enabled": true,

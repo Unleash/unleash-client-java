@@ -98,8 +98,9 @@ public class JsonFeatureToggleParserTest {
         Reader content = getFileReader("/features-v1-with-variants.json");
         ToggleCollection toggleCollection = JsonToggleParser.fromJson(content);
 
-        assertThat(toggleCollection.getFeatures()).hasSize(2);
+        assertThat(toggleCollection.getFeatures()).hasSize(3);
         assertThat(toggleCollection.getToggle("Test.old").isEnabled()).isTrue();
+        assertThat(toggleCollection.getToggle("Test.empty").isEnabled()).isFalse();
         assertThat(toggleCollection.getToggle("Test.variants").isEnabled()).isTrue();
         assertThat(toggleCollection.getToggle("Test.variants").getVariants()).isNotNull();
         assertThat(toggleCollection.getToggle("Test.variants").getVariants()).hasSize(2);
