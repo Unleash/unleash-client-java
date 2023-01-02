@@ -4,38 +4,43 @@ import java.util.List;
 import java.util.function.BiPredicate;
 
 public interface Unleash {
-    boolean isEnabled(String toggleName);
+    default boolean isEnabled(String toggleName) {
+        return isEnabled(toggleName, false);
+    }
 
-    boolean isEnabled(String toggleName, boolean defaultSetting);
+    default boolean isEnabled(String toggleName, boolean defaultSetting) {
+        return isEnabled(toggleName, UnleashContext.builder().build(), defaultSetting);
+    }
 
     default boolean isEnabled(String toggleName, UnleashContext context) {
         return isEnabled(toggleName, context, false);
     }
 
     default boolean isEnabled(String toggleName, UnleashContext context, boolean defaultSetting) {
-        return isEnabled(toggleName, defaultSetting);
+        return isEnabled(toggleName, context, (n, c) -> defaultSetting);
     }
 
-    default boolean isEnabled(
-            String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
-        return isEnabled(toggleName, false);
+    default boolean isEnabled(String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
+        return isEnabled(toggleName, UnleashContext.builder().build(), fallbackAction);
     }
 
-    default boolean isEnabled(
+    boolean isEnabled(
             String toggleName,
             UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction) {
-        return isEnabled(toggleName, context, false);
-    }
+            BiPredicate<String, UnleashContext> fallbackAction);
 
     Variant getVariant(final String toggleName, final UnleashContext context);
 
     Variant getVariant(
             final String toggleName, final UnleashContext context, final Variant defaultValue);
 
-    Variant getVariant(final String toggleName);
+    default Variant getVariant(final String toggleName) {
+        return getVariant(toggleName, UnleashContext.builder().build());
+    }
 
-    Variant getVariant(final String toggleName, final Variant defaultValue);
+    default Variant getVariant(final String toggleName, final Variant defaultValue) {
+        return getVariant(toggleName, UnleashContext.builder().build(), defaultValue);
+    }
 
     /**
      * Use more().getFeatureToggleNames() instead

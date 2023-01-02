@@ -14,11 +14,6 @@ public class FakeUnleash implements Unleash {
     private Map<String, Variant> variants = new HashMap<>();
 
     @Override
-    public boolean isEnabled(String toggleName) {
-        return isEnabled(toggleName, false);
-    }
-
-    @Override
     public boolean isEnabled(String toggleName, boolean defaultSetting) {
         if (enableAll) {
             return true;
