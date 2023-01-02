@@ -1,5 +1,8 @@
 package io.getunleash;
 
+import static io.getunleash.Variant.DISABLED_VARIANT;
+import static java.util.Optional.ofNullable;
+
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.ToggleEvaluated;
 import io.getunleash.lang.Nullable;
@@ -11,17 +14,13 @@ import io.getunleash.strategy.*;
 import io.getunleash.util.ConstraintMerger;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
-
-import static io.getunleash.Variant.DISABLED_VARIANT;
-import static java.util.Optional.ofNullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultUnleash implements Unleash {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
