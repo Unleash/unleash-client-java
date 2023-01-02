@@ -16,7 +16,6 @@ import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantUtil;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -66,7 +65,7 @@ public class DefaultUnleash implements Unleash {
                 unleashConfig.getContextProvider(),
                 new EventDispatcher(unleashConfig),
                 new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor()),
-            false);
+                false);
     }
 
     // Visible for testing
@@ -77,17 +76,24 @@ public class DefaultUnleash implements Unleash {
             UnleashContextProvider contextProvider,
             EventDispatcher eventDispatcher,
             UnleashMetricService metricService) {
-        this(unleashConfig, featureRepository, strategyMap, contextProvider, eventDispatcher, metricService, false);
+        this(
+                unleashConfig,
+                featureRepository,
+                strategyMap,
+                contextProvider,
+                eventDispatcher,
+                metricService,
+                false);
     }
 
     public DefaultUnleash(
-        UnleashConfig unleashConfig,
-        IFeatureRepository featureRepository,
-        Map<String, Strategy> strategyMap,
-        UnleashContextProvider contextProvider,
-        EventDispatcher eventDispatcher,
-        UnleashMetricService metricService,
-        boolean failOnMultipleInstantiations) {
+            UnleashConfig unleashConfig,
+            IFeatureRepository featureRepository,
+            Map<String, Strategy> strategyMap,
+            UnleashContextProvider contextProvider,
+            EventDispatcher eventDispatcher,
+            UnleashMetricService metricService,
+            boolean failOnMultipleInstantiations) {
         this.config = unleashConfig;
         this.featureRepository = featureRepository;
         this.strategyMap = strategyMap;
@@ -95,19 +101,24 @@ public class DefaultUnleash implements Unleash {
         this.eventDispatcher = eventDispatcher;
         this.metricService = metricService;
         metricService.register(strategyMap.keySet());
-        this.initCounts.compute(config.getClientIdentifier(), (key, inits) -> {
-            if (inits != null) {
-                String error = String.format("You already have %d clients for Unleash Configuration [%s] running. Please double check your code where you are instantiating the Unleash SDK", inits.sum(), key);
-                if (failOnMultipleInstantiations) {
-                    throw new RuntimeException(error);
-                } else {
-                    LOGGER.error(error);
-                }
-            }
-            LongAdder a = inits == null ? new LongAdder() : inits;
-            a.increment();
-            return a;
-        });
+        this.initCounts.compute(
+                config.getClientIdentifier(),
+                (key, inits) -> {
+                    if (inits != null) {
+                        String error =
+                                String.format(
+                                        "You already have %d clients for Unleash Configuration [%s] running. Please double check your code where you are instantiating the Unleash SDK",
+                                        inits.sum(), key);
+                        if (failOnMultipleInstantiations) {
+                            throw new RuntimeException(error);
+                        } else {
+                            LOGGER.error(error);
+                        }
+                    }
+                    LongAdder a = inits == null ? new LongAdder() : inits;
+                    a.increment();
+                    return a;
+                });
     }
 
     @Override
