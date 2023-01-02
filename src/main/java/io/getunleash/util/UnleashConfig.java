@@ -261,6 +261,22 @@ public class UnleashConfig {
         return this.backupFile;
     }
 
+    @Nullable
+    public String getApiKey() {
+        String auth = this.customHttpHeadersProvider.getCustomHeaders().get("Authorization");
+        if (auth == null) {
+            auth = this.customHttpHeaders.get("Authorization");
+        }
+        return auth;
+    }
+
+    public String getClientIdentifier() {
+        String api = getApiKey();
+        String appName = getAppName();
+        String instanceId = getInstanceId();
+        return String.format("apiKey:[%s] appName:[%s] instanceId:[%s]", api, appName, instanceId);
+    }
+
     public boolean isSynchronousFetchOnInitialisation() {
         return synchronousFetchOnInitialisation;
     }
