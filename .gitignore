@@ -31,6 +31,11 @@ node_modules
 .idea
 *.iml
 
+# Eclipse stuff
+.project
+.settings
+.classpath
+
 # Java
 target
 
