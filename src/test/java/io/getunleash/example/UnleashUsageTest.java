@@ -1,11 +1,11 @@
 package io.getunleash.example;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.util.UnleashConfig;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class UnleashUsageTest {
 
