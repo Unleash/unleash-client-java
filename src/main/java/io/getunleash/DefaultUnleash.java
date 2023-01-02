@@ -81,19 +81,8 @@ public class DefaultUnleash implements Unleash {
     }
 
     @Override
-    public boolean isEnabled(final String toggleName) {
-        return isEnabled(toggleName, false);
-    }
-
-    @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
         return isEnabled(toggleName, contextProvider.getContext(), defaultSetting);
-    }
-
-    @Override
-    public boolean isEnabled(
-            final String toggleName, final UnleashContext context, final boolean defaultSetting) {
-        return isEnabled(toggleName, context, (n, c) -> defaultSetting);
     }
 
     @Override
