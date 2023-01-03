@@ -3,6 +3,7 @@ package io.getunleash;
 import static java.util.Collections.emptyList;
 
 import io.getunleash.lang.Nullable;
+
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -10,33 +11,34 @@ import java.util.stream.Collectors;
 public class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;
+    private Map<String, Boolean> excludedFeatures = new HashMap<>();
     private Map<String, FeatureToggle> features = new HashMap<>();
     private Map<String, Variant> variants = new HashMap<>();
 
     @Override
     public boolean isEnabled(String toggleName, boolean defaultSetting) {
         if (enableAll) {
-            return true;
+            return excludedFeatures.getOrDefault(toggleName, true);
         } else if (disableAll) {
-            return false;
+            return excludedFeatures.getOrDefault(toggleName, false);
         } else {
             return more().getFeatureToggleDefinition(toggleName)
-                    .map(FeatureToggle::isEnabled)
-                    .orElse(defaultSetting);
+                .map(FeatureToggle::isEnabled)
+                .orElse(defaultSetting);
         }
     }
 
     @Override
     public boolean isEnabled(
-            String toggleName,
-            UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction) {
+        String toggleName,
+        UnleashContext context,
+        BiPredicate<String, UnleashContext> fallbackAction) {
         return isEnabled(toggleName, fallbackAction);
     }
 
     @Override
     public boolean isEnabled(
-            String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
+        String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
         if (!features.containsKey(toggleName)) {
             return fallbackAction.test(toggleName, UnleashContext.builder().build());
         }
@@ -80,18 +82,35 @@ public class FakeUnleash implements Unleash {
     public void enableAll() {
         disableAll = false;
         enableAll = true;
+        excludedFeatures.clear();
         features.clear();
+    }
+
+    public void enableAllExcept(String... excludedFeatures) {
+        enableAll();
+        for (String toggle : excludedFeatures) {
+            this.excludedFeatures.put(toggle, false);
+        }
     }
 
     public void disableAll() {
         disableAll = true;
         enableAll = false;
+        excludedFeatures.clear();
         features.clear();
+    }
+
+    public void disableAllExcept(String... excludedFeatures) {
+        disableAll();
+        for (String toggle : excludedFeatures) {
+            this.excludedFeatures.put(toggle, true);
+        }
     }
 
     public void resetAll() {
         disableAll = false;
         enableAll = false;
+        excludedFeatures.clear();
         features.clear();
         variants.clear();
     }
