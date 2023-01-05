@@ -20,7 +20,8 @@ public interface Unleash {
         return isEnabled(toggleName, context, (n, c) -> defaultSetting);
     }
 
-    default boolean isEnabled(String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
+    default boolean isEnabled(
+            String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
         return isEnabled(toggleName, UnleashContext.builder().build(), fallbackAction);
     }
 

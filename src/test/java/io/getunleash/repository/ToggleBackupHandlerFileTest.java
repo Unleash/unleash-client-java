@@ -2,11 +2,9 @@ package io.getunleash.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.getunleash.TestUtil;
 import io.getunleash.util.UnleashConfig;
 import java.io.*;
 import java.net.URISyntaxException;
-import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.Test;
 
 public class ToggleBackupHandlerFileTest {
@@ -115,8 +113,6 @@ public class ToggleBackupHandlerFileTest {
 
     @Test
     public void test_file_is_directory_should_not_crash() {
-        TestUtil.setLogLevel(Level.ERROR); // Mute warn messages.
-
         String backupFileIsDir = System.getProperty("java.io.tmpdir");
         UnleashConfig config =
                 UnleashConfig.builder()

@@ -41,6 +41,20 @@ UnleashConfig config = UnleashConfig.builder()
 Unleash unleash = new DefaultUnleash(config);
 ```
 
+**Note:** you should only create one unleash instance per configuration. To help detecting misconfigurations, an error message will appear if you create multiple Unleash instances from the same configuration values. If you want your application to fail in this situation you can use the constructor:
+```java
+public DefaultUnleash(
+        UnleashConfig unleashConfig,
+        IFeatureRepository featureRepository,
+        Map<String, Strategy> strategyMap,
+        UnleashContextProvider contextProvider,
+        EventDispatcher eventDispatcher,
+        UnleashMetricService metricService,
+        boolean failOnMultipleInstantiations) {
+    // ...
+}
+```
+
 ### Awesome feature toggle API
 
 It is really simple to use unleash.

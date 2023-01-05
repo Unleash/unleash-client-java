@@ -2,8 +2,12 @@ package io.getunleash;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.FeatureRepository;
@@ -16,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 class DefaultUnleashTest {
     private DefaultUnleash sut;
@@ -143,5 +148,80 @@ class DefaultUnleashTest {
         sut.isEnabled("toggle1");
 
         verify(fallback).isEnabled(any(), any(), any());
+    }
+
+    @Test
+    public void multiple_instantiations_of_the_same_config_gives_errors() {
+        ListAppender<ILoggingEvent> appender = new ListAppender();
+        appender.start();
+        Logger unleashLogger = (Logger) LoggerFactory.getLogger(DefaultUnleash.class);
+        unleashLogger.addAppender(appender);
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://test:4242")
+                        .appName("multiple_connection_logging")
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId("multiple_connection_logging")
+                        .build();
+        Unleash unleash1 = new DefaultUnleash(config);
+        // We've only instantiated the client once, so no errors should've been logged
+        assertThat(appender.list).isEmpty();
+        Unleash unleash2 = new DefaultUnleash(config);
+        // We've now instantiated the client twice, so we expect an error log line.
+        assertThat(appender.list).hasSize(1);
+        String id = config.getClientIdentifier();
+        assertThat(appender.list)
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .containsExactly(
+                        "You already have 1 clients for Unleash Configuration ["
+                                + id
+                                + "] running. Please double check your code where you are instantiating the Unleash SDK");
+        appender.list.clear();
+        Unleash unleash3 = new DefaultUnleash(config);
+        // We've now instantiated the client twice, so we expect an error log line.
+        assertThat(appender.list).hasSize(1);
+        assertThat(appender.list)
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .containsExactly(
+                        "You already have 2 clients for Unleash Configuration ["
+                                + id
+                                + "] running. Please double check your code where you are instantiating the Unleash SDK");
+    }
+
+    @Test
+    public void supports_failing_hard_on_multiple_instantiations() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://test:4242")
+                        .appName("multiple_connection_exception")
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId("multiple_connection_exception")
+                        .build();
+        String id = config.getClientIdentifier();
+        Unleash unleash1 = new DefaultUnleash(config);
+        assertThatThrownBy(
+                        () -> {
+                            Unleash unleash2 =
+                                    new DefaultUnleash(config, null, null, null, null, null, true);
+                        })
+                .isInstanceOf(RuntimeException.class)
+                .withFailMessage(
+                        "You already have 1 clients for Unleash Configuration ["
+                                + id
+                                + "] running. Please double check your code where you are instantiating the Unleash SDK");
+    }
+
+    @Test
+    public void client_identifier_handles_api_key_being_null() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://test:4242")
+                        .appName("multiple_connection")
+                        .instanceId("testing_multiple")
+                        .build();
+        String id = config.getClientIdentifier();
+        assertThat(id)
+                .isEqualTo(
+                        "apiKey:[null] appName:[multiple_connection] instanceId:[testing_multiple]");
     }
 }
