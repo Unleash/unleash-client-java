@@ -11,9 +11,9 @@ This is the Unleash Client SDK for Java. It is compatible with the [Unleash-host
 
 This section shows you how to get started quickly and explains some common configuration scenarios. For a full overview of Unleash configuration options, check out [the _Configuration options_ section](#configuration-options).
 
-### Add the Unleash client to your class path
+### Step 1: Install the Unleash Java SDK
 
-You will require unleash on your class path, pop it in to your pom:
+You need to add the Unleash SDK as a dependency for your project. Here's how you would add it to your `pom.xml` file:
 
 ```xml
 <dependency>
@@ -24,40 +24,58 @@ You will require unleash on your class path, pop it in to your pom:
 ```
 
 
-### Create a new Unleash instance
+### Step 2: Create a new Unleash instance
 
-It is easy to get a new instance of Unleash. In your app you typically *just want one instance of Unleash*, and inject that where you need it. You will typically use a dependency injection frameworks such as Spring or Guice to manage this.
+---
 
-To create a new instance of Unleash you need to pass in a config object:
+**⚠️ Important:** In almost every case, you only want a **single, shared instance of the `Unleash`  class (a *singleton*)** in your application . You would typically use a dependency injection framework (such as Spring or Guice) to inject it where you need it. Having multiple instances of the client in your application could lead to inconsistencies and performance degradation.
+
+To help you detect cases where you configure multiple instances by mistake, the SDK will print an error message if you create multiple instances with the same configuration values. You can also tell Unleash to fail when this happens by setting the constructor parameter `failOnMultipleInstantiations` to `true`
+
+---
+
+When instantiating an Unleash client, you can choose to do it either **synchronously** or **asynchronously**:
+The SDK will synchronize with the Unleash API on initialization, so it can take a few hundred milliseconds for the client to reach the correct state.
+This is usually not an issue and Unleash will do this in the background as soon as you initialize it.
+However, if it's important that you not continue execution until the SDK has synchronized, then you should use the `synchronousFetchOnInitialisation` option to block the client until it has successfully synchronized with the server.
+
+### Example configurations
+
+**💡 Tip:** Refer to the section on [configuration options](#configuration-options) for a more complete explanation of all the options.
+
+Here's two examples of how you might initialize the Unleash SDK in your applications. The examples use dummy values and are almost identical. The only difference is that the first example is asynchronous, while the second example is synchronous.
+
+**Asynchronous initialization example:**
+
 ```java
-
 UnleashConfig config = UnleashConfig.builder()
-            .appName("java-test")
-            .instanceId("instance x")
-            .unleashAPI("http://unleash.herokuapp.com/api/")
-            .apiKey("API token")
-            .build();
+        .appName("my.java-app")
+        .instanceId("your-instance-1")
+        .unleashAPI("<unleash-api-url>")
+        .customHttpHeader("Authorization", "<client-api-token>")
+        .build();
 
 Unleash unleash = new DefaultUnleash(config);
 ```
 
-**Note:** you should only create one unleash instance per configuration. To help detecting misconfigurations, an error message will appear if you create multiple Unleash instances from the same configuration values. If you want your application to fail in this situation you can use the constructor:
+
+**Synchronous initialization example:**
+
 ```java
-public DefaultUnleash(
-        UnleashConfig unleashConfig,
-        IFeatureRepository featureRepository,
-        Map<String, Strategy> strategyMap,
-        UnleashContextProvider contextProvider,
-        EventDispatcher eventDispatcher,
-        UnleashMetricService metricService,
-        boolean failOnMultipleInstantiations) {
-    // ...
-}
+UnleashConfig config = UnleashConfig.builder()
+        .appName("my.java-app")
+        .instanceId("your-instance-1")
+        .unleashAPI("<unleash-api-url>")
+        .customHttpHeader("Authorization", "<client-api-token>")
+        .synchronousFetchOnInitialization(true)
+        .build();
+
+Unleash unleash = new DefaultUnleash(config);
 ```
 
-### Awesome feature toggle API
+## Step 3: Use the feature toggle
 
-It is really simple to use unleash.
+With the SDK initialized, you can use the `isEnabled` method to check the state of your feature toggles. The method returns a boolean indicating whether a feature is enabled for the current request or not.
 
 ```java
 if(unleash.isEnabled("AwesomeFeature")) {
@@ -67,14 +85,9 @@ if(unleash.isEnabled("AwesomeFeature")) {
 }
 ```
 
-Calling `unleash.isEnabled("AwesomeFeature")` is the equivalent of calling `unleash.isEnabled("AwesomeFeature", false)`.
-Which means that it will return `false` if it cannot find the named toggle.
+The `isEnabled` method also accepts a second, boolean argument. The SDK uses this as a fallback value if it can't find the feature you're trying to check. In other words, `unleash.isEnabled("non-existing-toggle")` would usually return `false` (assuming that` "non-existing-toggle"`) doesn't exist). If you instead do  `unleash.isEnabled("non-existing-toggle", true)`, then Unleash would return `true` if it didn't find the toggle.
 
-If you want it to default to `true` instead, you can pass `true` as the second argument:
-
-```java
-unleash.isEnabled("AwesomeFeature", true)
-```
+You can also **provide an [Unleash context](https://docs.getunleash.io/reference/unleash-context)** to the `isEnabled` method. Refer to the [Unleash context](#unleash-context) section for more information about using the Unleash context in the Java SDK.
 
 ### Activation strategies
 
@@ -89,7 +102,7 @@ provided by unleash.
 - RemoteAddressStrategy
 - ApplicationHostnameStrategy
 
-Read more about the strategies in [the activation strategies documentation](https://docs.getunleash.io/user_guide/activation_strategy).
+Read more about the strategies in the [activation strategies reference documentation](https://docs.getunleash.io/reference/activation-strategies).
 
 #### Custom strategies
 You may also specify and implement your own strategy. The specification must be registered in the Unleash UI and
@@ -104,7 +117,7 @@ Unleash unleash return new DefaultUnleash(config, s1, s2);
 
 ### Unleash context
 
-In order to use some of the common activation strategies you must provide an [Unleash context](https://docs.getunleash.io/user_guide/unleash_context).
+In order to use some of the common activation strategies you must provide an [Unleash context](https://docs.getunleash.io/reference/unleash-context).
 This client SDK provides two ways of provide the unleash-context:
 
 #### 1. As part of isEnabled call
