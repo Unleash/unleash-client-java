@@ -52,7 +52,7 @@ UnleashConfig config = UnleashConfig.builder()
         .appName("my.java-app")
         .instanceId("your-instance-1")
         .unleashAPI("<unleash-api-url>")
-        .customHttpHeader("Authorization", "<client-api-token>")
+        .apiKey("<client-api-token>")
         .build();
 
 Unleash unleash = new DefaultUnleash(config);
@@ -66,7 +66,7 @@ UnleashConfig config = UnleashConfig.builder()
         .appName("my.java-app")
         .instanceId("your-instance-1")
         .unleashAPI("<unleash-api-url>")
-        .customHttpHeader("Authorization", "<client-api-token>")
+        .apiKey("<client-api-token>")
         .synchronousFetchOnInitialization(true)
         .build();
 
@@ -149,7 +149,7 @@ UnleashConfig config = new UnleashConfig.Builder()
             .appName("java-test")
             .instanceId("instance x")
             .unleashAPI("http://unleash.herokuapp.com/api/")
-            .customHttpHeader("Authorization", "API token")
+            .apiKey("<client-api-token>")
             .unleashContextProvider(contextProvider)
             .build();
 
