@@ -30,7 +30,7 @@ You need to add the Unleash SDK as a dependency for your project. Here's how you
 
 **⚠️ Important:** In almost every case, you only want a **single, shared instance of the `Unleash`  class (a *singleton*)** in your application . You would typically use a dependency injection framework (such as Spring or Guice) to inject it where you need it. Having multiple instances of the client in your application could lead to inconsistencies and performance degradation.
 
-To help you detect cases where you configure multiple instances by mistake, the SDK will print an error message if you create multiple instances with the same configuration values. You can also tell Unleash to fail when this happens by setting the constructor parameter `failOnMultipleInstantiations` to `true`
+To help you detect cases where you configure multiple instances by mistake, the SDK will print an error message if you create multiple instances with the same configuration values. You can also tell Unleash to fail when this happens by setting the constructor parameter `failOnMultipleInstantiations` to `true`.
 
 ---
 
