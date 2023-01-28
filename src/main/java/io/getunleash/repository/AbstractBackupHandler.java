@@ -25,9 +25,6 @@ public abstract class AbstractBackupHandler implements BackupHandler<FeatureColl
             return collection;
         } catch (final UnleashException ex) {
             eventDispatcher.dispatch(ex);
-        } catch (final Exception ex) {
-            eventDispatcher.dispatch(
-                new UnleashException("Failed to read collection", ex));
         }
 
         return new FeatureCollection(
@@ -43,17 +40,12 @@ public abstract class AbstractBackupHandler implements BackupHandler<FeatureColl
             eventDispatcher.dispatch(new FeatureBackupWritten(collection));
         } catch (final UnleashException ex) {
             eventDispatcher.dispatch(ex);
-        } catch (Exception e) {
-            eventDispatcher.dispatch(
-                new UnleashException(
-                    "Unleash was unable to backup feature toggles",
-                    e));
         }
     }
 
-    protected abstract FeatureCollection readFeatureCollection() throws Exception;
+    protected abstract FeatureCollection readFeatureCollection();
 
-    protected abstract void writeFeatureCollection(final FeatureCollection featureCollection) throws Exception;
+    protected abstract void writeFeatureCollection(final FeatureCollection featureCollection);
 
 
     private static class FeatureBackupRead implements UnleashEvent {

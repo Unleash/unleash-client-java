@@ -20,7 +20,7 @@ public class FeatureBackupHandlerFile extends AbstractBackupHandler {
     }
 
     @Override
-    protected final FeatureCollection readFeatureCollection() throws Exception {
+    protected final FeatureCollection readFeatureCollection() {
         LOG.info("Unleash will try to load feature toggle states from temporary backup");
         try (final FileReader reader = new FileReader(backupFile)) {
             final BufferedReader br = new BufferedReader(reader);
@@ -42,7 +42,7 @@ public class FeatureBackupHandlerFile extends AbstractBackupHandler {
     }
 
     @Override
-    protected final void writeFeatureCollection(final FeatureCollection featureCollection) throws Exception {
+    protected final void writeFeatureCollection(final FeatureCollection featureCollection) {
         try (final FileWriter writer = new FileWriter(backupFile)) {
             writer.write(JsonFeatureParser.toJsonString(featureCollection));
         } catch (IOException e) {
