@@ -18,7 +18,11 @@ public abstract class AbstractBackupHandler implements BackupHandler<FeatureColl
     @Override
     public FeatureCollection read() {
         try {
-            eventDispatcher.dispatch(new FeatureBackupRead(readFeatureCollection()));
+            final FeatureCollection collection = readFeatureCollection();
+
+            eventDispatcher.dispatch(new FeatureBackupRead(collection));
+
+            return collection;
         } catch (final UnleashException ex) {
             eventDispatcher.dispatch(ex);
         } catch (final Exception ex) {
