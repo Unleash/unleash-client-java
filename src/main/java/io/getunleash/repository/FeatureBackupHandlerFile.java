@@ -43,7 +43,7 @@ public class FeatureBackupHandlerFile extends AbstractBackupHandler {
 
     @Override
     protected final void writeFeatureCollection(final FeatureCollection featureCollection) {
-        try (final FileWriter writer = new FileWriter(backupFile)) {
+        try (FileWriter writer = new FileWriter(backupFile)) {
             writer.write(JsonFeatureParser.toJsonString(featureCollection));
         } catch (IOException e) {
             throw
