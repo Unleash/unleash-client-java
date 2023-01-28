@@ -14,7 +14,7 @@ public class FeatureBackupHandlerFile extends AbstractBackupHandler {
 
     private final String backupFile;
 
-    public FeatureBackupHandlerFile(final UnleashConfig config) {
+    public FeatureBackupHandlerFile(UnleashConfig config) {
         super(config);
         this.backupFile = config.getBackupFile();
     }
@@ -22,17 +22,17 @@ public class FeatureBackupHandlerFile extends AbstractBackupHandler {
     @Override
     protected final FeatureCollection readFeatureCollection() {
         LOG.info("Unleash will try to load feature toggle states from temporary backup");
-        try (final FileReader reader = new FileReader(backupFile)) {
-            final BufferedReader br = new BufferedReader(reader);
+        try (FileReader reader = new FileReader(backupFile)) {
+            BufferedReader br = new BufferedReader(reader);
 
             return JsonFeatureParser.fromJson(br);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             LOG.info(
                 " Unleash could not find the backup-file '"
                     + backupFile
                     + "'. \n"
                     + "This is expected behavior the first time unleash runs in a new environment.");
-        } catch (final IOException | IllegalStateException | JsonParseException e) {
+        } catch (IOException | IllegalStateException | JsonParseException e) {
             throw new UnleashException("Failed to read backup file: " + backupFile, e);
         }
 

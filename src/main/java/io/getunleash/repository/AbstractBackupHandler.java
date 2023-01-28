@@ -11,19 +11,19 @@ import java.util.Collections;
 public abstract class AbstractBackupHandler implements BackupHandler<FeatureCollection> {
     private final EventDispatcher eventDispatcher;
 
-    public AbstractBackupHandler(final UnleashConfig config) {
+    public AbstractBackupHandler(UnleashConfig config) {
         this.eventDispatcher = new EventDispatcher(config);
     }
 
     @Override
     public FeatureCollection read() {
         try {
-            final FeatureCollection collection = readFeatureCollection();
+            FeatureCollection collection = readFeatureCollection();
 
             eventDispatcher.dispatch(new FeatureBackupRead(collection));
 
             return collection;
-        } catch (final UnleashException ex) {
+        } catch (UnleashException ex) {
             eventDispatcher.dispatch(ex);
         }
 
@@ -38,14 +38,14 @@ public abstract class AbstractBackupHandler implements BackupHandler<FeatureColl
             writeFeatureCollection(collection);
 
             eventDispatcher.dispatch(new FeatureBackupWritten(collection));
-        } catch (final UnleashException ex) {
+        } catch (UnleashException ex) {
             eventDispatcher.dispatch(ex);
         }
     }
 
     protected abstract FeatureCollection readFeatureCollection();
 
-    protected abstract void writeFeatureCollection(final FeatureCollection featureCollection);
+    protected abstract void writeFeatureCollection(FeatureCollection featureCollection);
 
 
     private static class FeatureBackupRead implements UnleashEvent {
