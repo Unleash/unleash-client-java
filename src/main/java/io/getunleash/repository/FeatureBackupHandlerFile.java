@@ -50,9 +50,6 @@ public class FeatureBackupHandlerFile extends AbstractBackupHandler {
                 new UnleashException(
                     "Unleash was unable to backup feature toggles to file: " + backupFile,
                     e);
-        } catch (final IllegalStateException | JsonParseException e) {
-            throw
-                new UnleashException("Failed to read backup file: " + backupFile, e);
         }
     }
 }
