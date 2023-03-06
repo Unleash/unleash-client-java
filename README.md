@@ -67,7 +67,7 @@ UnleashConfig config = UnleashConfig.builder()
         .instanceId("your-instance-1")
         .unleashAPI("<unleash-api-url>")
         .apiKey("<client-api-token>")
-        .synchronousFetchOnInitialization(true)
+        .synchronousFetchOnInitialisation(true)
         .build();
 
 Unleash unleash = new DefaultUnleash(config);
