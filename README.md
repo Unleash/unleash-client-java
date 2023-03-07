@@ -169,6 +169,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
                 .instanceId("my-instance-1")
                 .unleashAPI(unleashAPI)
                 .apiKey("12312Random")
+                .customHttpHeader("<name>", "<value>")
                 .build();
 ```
 
