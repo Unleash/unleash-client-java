@@ -3,7 +3,6 @@ package io.getunleash;
 import static java.util.Collections.emptyList;
 
 import io.getunleash.lang.Nullable;
-
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -23,22 +22,22 @@ public class FakeUnleash implements Unleash {
             return excludedFeatures.getOrDefault(toggleName, false);
         } else {
             return more().getFeatureToggleDefinition(toggleName)
-                .map(FeatureToggle::isEnabled)
-                .orElse(defaultSetting);
+                    .map(FeatureToggle::isEnabled)
+                    .orElse(defaultSetting);
         }
     }
 
     @Override
     public boolean isEnabled(
-        String toggleName,
-        UnleashContext context,
-        BiPredicate<String, UnleashContext> fallbackAction) {
+            String toggleName,
+            UnleashContext context,
+            BiPredicate<String, UnleashContext> fallbackAction) {
         return isEnabled(toggleName, fallbackAction);
     }
 
     @Override
     public boolean isEnabled(
-        String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
+            String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
         if (!features.containsKey(toggleName)) {
             return fallbackAction.test(toggleName, UnleashContext.builder().build());
         }

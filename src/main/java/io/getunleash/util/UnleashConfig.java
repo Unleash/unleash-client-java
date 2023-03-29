@@ -5,6 +5,7 @@ import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
 import io.getunleash.CustomHttpHeadersProvider;
 import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
 import io.getunleash.UnleashContextProvider;
+import io.getunleash.UnleashException;
 import io.getunleash.event.NoOpSubscriber;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
@@ -183,6 +184,16 @@ public class UnleashConfig {
         // http.proxyUser http.proxyPassword is only consumed by Apache HTTP Client, for
         // HttpUrlConnection we have to define an Authenticator
         Authenticator.setDefault(new SystemProxyAuthenticator());
+    }
+
+    /**
+     * Fetches client features using this configuration.
+     * If the method does not throw, the configuration was able to fetch features and as such is assumed to be correct.
+     * Use upon initial building of an UnleashClient to simplify debugging and interrupting your application if client is incorrectly configured.
+     * @throws UnleashException Thrown if something went wrong when trying to fetch features. Typical errors are incorrect URLs or apiKeys
+     */
+    public void validate() throws UnleashException {
+        this.getUnleashFeatureFetcherFactory().apply(this).fetchFeatures();
     }
 
     public URI getUnleashAPI() {

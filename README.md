@@ -357,6 +357,29 @@ assertThat(fakeUnleash.getVariant("t1").getName(), is("a"));
 
 Se more in [FakeUnleashTest.java](https://github.com/Unleash/unleash-client-java/blob/main/src/test/java/io/getunleash/FakeUnleashTest.java)
 
+### Configuration validation
+**!   Note** Since v7.2.0
+
+Unleash is designed to be run as a client inside your code, great care has been taken to avoid throwing exceptions to avoid interrupting the flow of your application.
+Some users have uttered the need to have a way to ensure that their configuration is able to fetch feature toggles.
+
+v7.2.0 of this SDK adds a `validate()` method to the `UnleashConfig` class.
+This method will use the configuration to make a call to the configured Unleash server or throw an UnleashException if the call fails for any reason.
+If you're wrapping Unleash with your own library, you can use this when configuring your wrapper to ensure that your configuration is correct.
+
+```java
+UnleashConfig config = UnleashConfig.builder()
+    .appName("my-app")
+    .unleashAPI("http://unleash.org")
+    .apiKey("Authorization", "API token")
+    .build();
+try {
+    config.validate();
+} catch (UnleashException ue) {
+    LOG.error(ue);
+}
+```
+
 ## Development
 
 Build:
