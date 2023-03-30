@@ -92,7 +92,7 @@ public class FeatureRepository implements IFeatureRepository {
         }
     }
 
-    private Runnable updateFeatures(final ExceptionHandler handler) {
+    private Runnable updateFeatures(@Nullable final ExceptionHandler handler) {
         return () -> {
             try {
                 ClientFeaturesResponse response = featureFetcher.fetchFeatures();
