@@ -6,6 +6,8 @@ import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashReady;
 import io.getunleash.lang.Nullable;
+import io.getunleash.util.EventDispatcherExceptionHandler;
+import io.getunleash.util.ExceptionHandler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
@@ -75,18 +77,20 @@ public class FeatureRepository implements IFeatureRepository {
         }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
-            updateFeatures().run();
+            updateFeatures(null).run();
         }
+
+        ExceptionHandler exceptionHandler = new EventDispatcherExceptionHandler(eventDispatcher);
         if (!unleashConfig.isDisablePolling()) {
             if (unleashConfig.getFetchTogglesInterval() > 0) {
-                executor.setInterval(updateFeatures(), 0, unleashConfig.getFetchTogglesInterval());
+                executor.setInterval(updateFeatures(exceptionHandler), 0, unleashConfig.getFetchTogglesInterval());
             } else {
-                executor.scheduleOnce(updateFeatures());
+                executor.scheduleOnce(updateFeatures(exceptionHandler));
             }
         }
     }
 
-    private Runnable updateFeatures() {
+    private Runnable updateFeatures(final ExceptionHandler handler) {
         return () -> {
             try {
                 ClientFeaturesResponse response = featureFetcher.fetchFeatures();
@@ -108,7 +112,11 @@ public class FeatureRepository implements IFeatureRepository {
                     ready = true;
                 }
             } catch (UnleashException e) {
-                eventDispatcher.dispatch(e);
+                if (handler != null) {
+                    handler.handle(e);
+                } else {
+                    throw e;
+                }
             }
         };
     }

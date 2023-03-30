@@ -212,6 +212,20 @@ class DefaultUnleashTest {
     }
 
     @Test
+    public void synchronous_fetch_on_initialisation_fails_on_initialization() {
+        UnleashConfig config =
+            UnleashConfig.builder()
+                .unleashAPI("http://wrong:4242")
+                .appName("wrong_upstream")
+                .apiKey("default:development:1234567890123456")
+                .instanceId("multiple_connection_exception")
+                .synchronousFetchOnInitialisation(true)
+                .build();
+
+        assertThatThrownBy(() -> new DefaultUnleash(config));
+    }
+
+    @Test
     public void client_identifier_handles_api_key_being_null() {
         UnleashConfig config =
                 UnleashConfig.builder()
