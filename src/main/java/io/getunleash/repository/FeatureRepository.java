@@ -70,6 +70,7 @@ public class FeatureRepository implements IFeatureRepository {
         this.initCollections(executor);
     }
 
+    @SuppressWarnings("FutureReturnValueIgnored")
     private void initCollections(UnleashScheduledExecutor executor) {
         this.featureCollection = this.featureBackupHandler.read();
         if (this.featureCollection.getToggleCollection().getFeatures().isEmpty()) {
