@@ -82,10 +82,11 @@ public class FeatureRepository implements IFeatureRepository {
 
         ExceptionHandler exceptionHandler = new EventDispatcherExceptionHandler(eventDispatcher);
         if (!unleashConfig.isDisablePolling()) {
+            Runnable updateFeatures = updateFeatures(exceptionHandler);
             if (unleashConfig.getFetchTogglesInterval() > 0) {
-                executor.setInterval(updateFeatures(exceptionHandler), 0, unleashConfig.getFetchTogglesInterval());
+                executor.setInterval(updateFeatures, 0, unleashConfig.getFetchTogglesInterval());
             } else {
-                executor.scheduleOnce(updateFeatures(exceptionHandler));
+                executor.scheduleOnce(updateFeatures);
             }
         }
     }

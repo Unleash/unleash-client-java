@@ -160,11 +160,11 @@ public class FeatureToggleRepositoryTest {
     @Test
     public void should_perform_synchronous_fetch_on_initialisation_and_fail_if_invalid_upstream() {
         UnleashConfig config =
-            UnleashConfig.builder()
-                .synchronousFetchOnInitialisation(true)
-                .appName("test-sync-update")
-                .unleashAPI("http://wrong-host:8383")
-                .build();
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(true)
+                        .appName("test-sync-update")
+                        .unleashAPI("http://wrong-host:8383")
+                        .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
         BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
