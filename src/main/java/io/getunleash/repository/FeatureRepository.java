@@ -6,12 +6,11 @@ import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashReady;
 import io.getunleash.lang.Nullable;
-import io.getunleash.util.EventDispatcherExceptionHandler;
-import io.getunleash.util.ExceptionHandler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class FeatureRepository implements IFeatureRepository {
@@ -81,9 +80,8 @@ public class FeatureRepository implements IFeatureRepository {
             updateFeatures(null).run();
         }
 
-        ExceptionHandler exceptionHandler = new EventDispatcherExceptionHandler(eventDispatcher);
         if (!unleashConfig.isDisablePolling()) {
-            Runnable updateFeatures = updateFeatures(exceptionHandler);
+            Runnable updateFeatures = updateFeatures(this.eventDispatcher::dispatch);
             if (unleashConfig.getFetchTogglesInterval() > 0) {
                 executor.setInterval(updateFeatures, 0, unleashConfig.getFetchTogglesInterval());
             } else {
@@ -92,7 +90,7 @@ public class FeatureRepository implements IFeatureRepository {
         }
     }
 
-    private Runnable updateFeatures(@Nullable final ExceptionHandler handler) {
+    private Runnable updateFeatures(@Nullable final Consumer<UnleashException> handler) {
         return () -> {
             try {
                 ClientFeaturesResponse response = featureFetcher.fetchFeatures();
@@ -115,7 +113,7 @@ public class FeatureRepository implements IFeatureRepository {
                 }
             } catch (UnleashException e) {
                 if (handler != null) {
-                    handler.handle(e);
+                    handler.accept(e);
                 } else {
                     throw e;
                 }
