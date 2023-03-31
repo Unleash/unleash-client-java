@@ -1,6 +1,7 @@
 package io.getunleash.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -154,6 +155,27 @@ public class FeatureToggleRepositoryTest {
         new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
 
         verify(toggleFetcher, times(1)).fetchToggles();
+    }
+
+    @Test
+    public void should_perform_synchronous_fetch_on_initialisation_and_fail_if_invalid_upstream() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(true)
+                        .appName("test-sync-update")
+                        .unleashAPI("http://wrong-host:8383")
+                        .build();
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ToggleFetcher toggleFetcher = mock(ToggleFetcher.class);
+        BackupHandler<ToggleCollection> toggleBackupHandler = mock(BackupHandler.class);
+        when(toggleBackupHandler.read()).thenReturn(new ToggleCollection(Collections.emptyList()));
+
+        // setup fetcher
+        when(toggleFetcher.fetchToggles()).thenThrow(RuntimeException.class);
+
+        assertThatThrownBy(() -> {
+            new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
+        }).isInstanceOf(RuntimeException.class);
     }
 
     @Test

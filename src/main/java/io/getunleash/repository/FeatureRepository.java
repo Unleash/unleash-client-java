@@ -10,6 +10,7 @@ import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class FeatureRepository implements IFeatureRepository {
@@ -68,6 +69,7 @@ public class FeatureRepository implements IFeatureRepository {
         this.initCollections(executor);
     }
 
+    @SuppressWarnings("FutureReturnValueIgnored")
     private void initCollections(UnleashScheduledExecutor executor) {
         this.featureCollection = this.featureBackupHandler.read();
         if (this.featureCollection.getToggleCollection().getFeatures().isEmpty()) {
@@ -75,18 +77,20 @@ public class FeatureRepository implements IFeatureRepository {
         }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
-            updateFeatures().run();
+            updateFeatures(null).run();
         }
+
         if (!unleashConfig.isDisablePolling()) {
+            Runnable updateFeatures = updateFeatures(this.eventDispatcher::dispatch);
             if (unleashConfig.getFetchTogglesInterval() > 0) {
-                executor.setInterval(updateFeatures(), 0, unleashConfig.getFetchTogglesInterval());
+                executor.setInterval(updateFeatures, 0, unleashConfig.getFetchTogglesInterval());
             } else {
-                executor.scheduleOnce(updateFeatures());
+                executor.scheduleOnce(updateFeatures);
             }
         }
     }
 
-    private Runnable updateFeatures() {
+    private Runnable updateFeatures(@Nullable final Consumer<UnleashException> handler) {
         return () -> {
             try {
                 ClientFeaturesResponse response = featureFetcher.fetchFeatures();
@@ -108,7 +112,11 @@ public class FeatureRepository implements IFeatureRepository {
                     ready = true;
                 }
             } catch (UnleashException e) {
-                eventDispatcher.dispatch(e);
+                if (handler != null) {
+                    handler.accept(e);
+                } else {
+                    throw e;
+                }
             }
         };
     }

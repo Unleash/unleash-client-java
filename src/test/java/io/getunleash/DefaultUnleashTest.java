@@ -9,17 +9,23 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import io.getunleash.event.EventDispatcher;
+import io.getunleash.metric.MetricSender;
 import io.getunleash.metric.UnleashMetricService;
-import io.getunleash.repository.FeatureRepository;
+import io.getunleash.repository.*;
 import io.getunleash.strategy.DefaultStrategy;
 import io.getunleash.strategy.Strategy;
+import io.getunleash.util.MetricSenderFactory;
 import io.getunleash.util.UnleashConfig;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.getunleash.util.UnleashFeatureFetcherFactory;
+import io.getunleash.util.UnleashScheduledExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.slf4j.LoggerFactory;
 
 class DefaultUnleashTest {
@@ -209,6 +215,45 @@ class DefaultUnleashTest {
                         "You already have 1 clients for Unleash Configuration ["
                                 + id
                                 + "] running. Please double check your code where you are instantiating the Unleash SDK");
+    }
+
+    @Test
+    public void synchronous_fetch_on_initialisation_fails_on_initialization() {
+        UnleashConfig config =
+            UnleashConfig.builder()
+                .unleashAPI("http://wrong:4242")
+                .appName("wrong_upstream")
+                .apiKey("default:development:1234567890123456")
+                .instanceId("multiple_connection_exception")
+                .synchronousFetchOnInitialisation(true)
+                .build();
+
+        assertThatThrownBy(() -> new DefaultUnleash(config)).isInstanceOf(UnleashException.class);
+    }
+
+    @Test
+    public void asynchronous_fetch_on_initialisation_fails_silently_and_retries() throws InterruptedException {
+        FeatureFetcher fetcher = mock(FeatureFetcher.class);
+        FeatureCollection expectedResponse = new FeatureCollection();
+        FeatureToggleResponse.Status expectedStatus = FeatureToggleResponse.Status.CHANGED;
+        when(fetcher.fetchFeatures())
+            .thenThrow(UnleashException.class)
+            .thenReturn(new ClientFeaturesResponse(expectedStatus, expectedResponse));
+
+        UnleashConfig config =
+            UnleashConfig.builder()
+                .unleashAPI("http://wrong:4242")
+                .appName("wrong_upstream")
+                .apiKey("default:development:1234567890123456")
+                .instanceId("multiple_connection_exception")
+                .fetchTogglesInterval(1)
+                .unleashFeatureFetcherFactory((UnleashConfig c) -> fetcher)
+                .build();
+
+        Unleash unleash = new DefaultUnleash(config);
+        verify(fetcher, times(1)).fetchFeatures();
+        Thread.sleep(1200);
+        verify(fetcher, times(2)).fetchFeatures();
     }
 
     @Test
