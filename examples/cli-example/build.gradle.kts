@@ -13,5 +13,5 @@ repositories {
 }
 
 dependencies {
-    implementation("io.getunleash:unleash-client-java:6.0.1")
+    implementation("io.getunleash:unleash-client-java:7.1.0")
 }
