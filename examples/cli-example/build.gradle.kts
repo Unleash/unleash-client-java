@@ -14,4 +14,5 @@ repositories {
 
 dependencies {
     implementation("io.getunleash:unleash-client-java:7.1.0")
+    implementation("ch.qos.logback:logback-classic:1.4.6")
 }
