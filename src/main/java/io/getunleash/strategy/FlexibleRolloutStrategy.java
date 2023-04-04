@@ -12,7 +12,7 @@ public class FlexibleRolloutStrategy implements Strategy {
     private Supplier<String> randomGenerator;
 
     public FlexibleRolloutStrategy() {
-        this.randomGenerator = () -> Math.random() * 100 + "";
+        this.randomGenerator = () -> Math.random() * 10000 + "";
     }
 
     public FlexibleRolloutStrategy(Supplier<String> randomGenerator) {
