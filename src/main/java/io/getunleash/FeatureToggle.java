@@ -12,20 +12,31 @@ public final class FeatureToggle {
     private final boolean enabled;
     private final List<ActivationStrategy> strategies;
     @Nullable private final List<VariantDefinition> variants;
+    private final boolean impressionData;
 
     public FeatureToggle(String name, boolean enabled, List<ActivationStrategy> strategies) {
-        this(name, enabled, strategies, emptyList());
+        this(name, enabled, strategies, emptyList(), false);
     }
 
     public FeatureToggle(
             String name,
             boolean enabled,
             List<ActivationStrategy> strategies,
-            @Nullable List<VariantDefinition> variants) {
+            List<VariantDefinition> variants) {
+        this(name, enabled, strategies, variants, false);
+    }
+
+    public FeatureToggle(
+            String name,
+            boolean enabled,
+            List<ActivationStrategy> strategies,
+            @Nullable List<VariantDefinition> variants,
+            @Nullable Boolean impressionData) {
         this.name = name;
         this.enabled = enabled;
         this.strategies = strategies;
         this.variants = variants;
+        this.impressionData = impressionData != null ? impressionData : false;
     }
 
     public String getName() {
@@ -48,6 +59,11 @@ public final class FeatureToggle {
         }
     }
 
+    @Nullable
+    public boolean hasImpressionData() {
+        return impressionData;
+    }
+
     @Override
     public String toString() {
         return "FeatureToggle{"
@@ -61,6 +77,8 @@ public final class FeatureToggle {
                 + '\''
                 + ", variants='"
                 + variants
+                + ", impressionData="
+                + impressionData
                 + '\''
                 + '}';
     }

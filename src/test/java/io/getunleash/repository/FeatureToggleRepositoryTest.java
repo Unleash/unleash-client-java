@@ -173,9 +173,12 @@ public class FeatureToggleRepositoryTest {
         // setup fetcher
         when(toggleFetcher.fetchToggles()).thenThrow(RuntimeException.class);
 
-        assertThatThrownBy(() -> {
-            new FeatureToggleRepository(config, executor, toggleFetcher, toggleBackupHandler);
-        }).isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(
+                        () -> {
+                            new FeatureToggleRepository(
+                                    config, executor, toggleFetcher, toggleBackupHandler);
+                        })
+                .isInstanceOf(RuntimeException.class);
     }
 
     @Test
