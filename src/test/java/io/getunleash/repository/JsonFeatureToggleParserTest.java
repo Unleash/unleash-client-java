@@ -118,7 +118,7 @@ public class JsonFeatureToggleParserTest {
     }
 
     @Test
-    public void should_should_deserialize_impression_data() throws IOException {
+    public void should_deserialize_impression_data() throws IOException {
         Reader content = getFileReader("/unleash-repo-v2-with-impression-data.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
         ToggleCollection toggleCollection = featureCollection.getToggleCollection();
