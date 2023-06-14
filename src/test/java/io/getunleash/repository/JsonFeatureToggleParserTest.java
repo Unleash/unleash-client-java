@@ -117,6 +117,21 @@ public class JsonFeatureToggleParserTest {
                 .isNull();
     }
 
+    @Test
+    public void should_deserialize_impression_data() throws IOException {
+        Reader content = getFileReader("/unleash-repo-v2-with-impression-data.json");
+        FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
+        ToggleCollection toggleCollection = featureCollection.getToggleCollection();
+
+        assertThat(toggleCollection.getFeatures()).hasSize(3);
+        assertThat(toggleCollection.getToggle("Test.impressionDataPresent").hasImpressionData())
+                .isTrue();
+        assertThat(toggleCollection.getToggle("Test.impressionDataSetToOff").hasImpressionData())
+                .isFalse();
+        assertThat(toggleCollection.getToggle("Test.impressionDataMissing").hasImpressionData())
+                .isFalse();
+    }
+
     private Reader getFileReader(String filename) throws IOException {
         InputStream in = this.getClass().getResourceAsStream(filename);
         InputStreamReader reader = new InputStreamReader(in);
