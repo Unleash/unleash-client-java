@@ -139,12 +139,12 @@ public class DefaultUnleash implements Unleash {
         boolean enabled = checkEnabled(toggleName, context, fallbackAction);
         count(toggleName, enabled);
         eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
-        dispatchEnabledImpressionDataIfNeeded("isEnabled", toggleName, enabled, context);
+        dispatchEnabledImpressionDataIfNeeded(toggleName, enabled, context);
         return enabled;
     }
 
     private void dispatchEnabledImpressionDataIfNeeded(
-            String eventType, String toggleName, boolean enabled, UnleashContext context) {
+            String toggleName, boolean enabled, UnleashContext context) {
         FeatureToggle toggle = featureRepository.getToggle(toggleName);
         if (toggle != null && toggle.hasImpressionData()) {
             eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
