@@ -10,6 +10,22 @@ public class ImpressionEvent implements UnleashEvent {
     private boolean enabled;
     private UnleashContext context;
 
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public UnleashContext getContext() {
+        return context;
+    }
+
     public ImpressionEvent(String featureName, boolean enabled, UnleashContext context) {
         this.featureName = featureName;
         this.enabled = enabled;
