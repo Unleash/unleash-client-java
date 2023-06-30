@@ -38,4 +38,6 @@ public interface UnleashSubscriber {
     default void featuresBackedUp(FeatureCollection featureCollection) {}
 
     default void featuresBackupRestored(FeatureCollection featureCollection) {}
+
+    default void impression(ImpressionEvent impressionEvent) {}
 }
