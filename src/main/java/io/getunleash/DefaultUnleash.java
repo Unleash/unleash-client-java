@@ -3,8 +3,7 @@ package io.getunleash;
 import static io.getunleash.Variant.DISABLED_VARIANT;
 import static java.util.Optional.ofNullable;
 
-import io.getunleash.event.EventDispatcher;
-import io.getunleash.event.ToggleEvaluated;
+import io.getunleash.event.*;
 import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
@@ -140,7 +139,16 @@ public class DefaultUnleash implements Unleash {
         boolean enabled = checkEnabled(toggleName, context, fallbackAction);
         count(toggleName, enabled);
         eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
+        dispatchEnabledImpressionDataIfNeeded("isEnabled", toggleName, enabled, context);
         return enabled;
+    }
+
+    private void dispatchEnabledImpressionDataIfNeeded(
+            String eventType, String toggleName, boolean enabled, UnleashContext context) {
+        FeatureToggle toggle = featureRepository.getToggle(toggleName);
+        if (toggle != null && toggle.hasImpressionData()) {
+            eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
+        }
     }
 
     private boolean checkEnabled(
@@ -209,7 +217,17 @@ public class DefaultUnleash implements Unleash {
         metricService.countVariant(toggleName, variant.getName());
         // Should count yes/no also when getting variant.
         metricService.count(toggleName, enabled);
+        dispatchVariantImpressionDataIfNeeded(toggleName, variant.getName(), enabled, context);
         return variant;
+    }
+
+    private void dispatchVariantImpressionDataIfNeeded(
+            String toggleName, String variantName, boolean enabled, UnleashContext context) {
+        FeatureToggle toggle = featureRepository.getToggle(toggleName);
+        if (toggle != null && toggle.hasImpressionData()) {
+            eventDispatcher.dispatch(
+                    new VariantImpressionEvent(toggleName, enabled, context, variantName));
+        }
     }
 
     @Override
