@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-web")
-  implementation("io.getunleash:unleash-client-java:7.0.0")
+  implementation("io.getunleash:unleash-client-java:8.2.0")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
