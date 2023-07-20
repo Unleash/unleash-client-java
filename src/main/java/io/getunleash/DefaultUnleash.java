@@ -15,9 +15,11 @@ import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantUtil;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,11 +138,16 @@ public class DefaultUnleash implements Unleash {
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction) {
-        boolean enabled = checkEnabled(toggleName, context, fallbackAction);
-        count(toggleName, enabled);
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
-        dispatchEnabledImpressionDataIfNeeded("isEnabled", toggleName, enabled, context);
-        return enabled;
+        FeatureEvaluationResult result = checkEnabled(toggleName, context, fallbackAction);
+        count(toggleName, result.isEnabled());
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, result.isEnabled()));
+        dispatchEnabledImpressionDataIfNeeded("isEnabled", toggleName, result.isEnabled(), context);
+        return result.isEnabled();
+    }
+
+    @Override
+    public FeatureEvaluationResult evaluateFeature(String toggleName, UnleashContext context, BiPredicate<String, UnleashContext> fallbackAction) {
+        return this.checkEnabled(toggleName, context, fallbackAction);
     }
 
     private void dispatchEnabledImpressionDataIfNeeded(
@@ -151,24 +158,24 @@ public class DefaultUnleash implements Unleash {
         }
     }
 
-    private boolean checkEnabled(
+    protected FeatureEvaluationResult checkEnabled(
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction) {
         checkIfToggleMatchesNamePrefix(toggleName);
         FeatureToggle featureToggle = featureRepository.getToggle(toggleName);
-        boolean enabled;
-        UnleashContext enhancedContext = context.applyStaticFields(config);
 
+        UnleashContext enhancedContext = context.applyStaticFields(config);
+        AtomicReference<FeatureEvaluationResult> strategyResult = new AtomicReference<>(new FeatureEvaluationResult());
+        boolean enabled;
         if (featureToggle == null) {
             enabled = fallbackAction.test(toggleName, enhancedContext);
         } else if (!featureToggle.isEnabled()) {
             enabled = false;
         } else if (featureToggle.getStrategies().size() == 0) {
-            return true;
+            enabled = true;
         } else {
-            enabled =
-                    featureToggle.getStrategies().stream()
+            enabled = featureToggle.getStrategies().stream()
                             .anyMatch(
                                     strategy -> {
                                         Strategy configuredStrategy =
@@ -180,14 +187,19 @@ public class DefaultUnleash implements Unleash {
                                                     strategy.getName());
                                         }
 
-                                        return configuredStrategy.isEnabled(
-                                                strategy.getParameters(),
-                                                enhancedContext,
-                                                ConstraintMerger.mergeConstraints(
-                                                        featureRepository, strategy));
+                                        strategyResult.set(configuredStrategy.getResult(
+                                            strategy.getParameters(),
+                                            enhancedContext,
+                                            ConstraintMerger.mergeConstraints(
+                                                featureRepository, strategy),
+                                            strategy.getVariants()));
+
+                                        return strategyResult.get().isEnabled();
                                     });
+
         }
-        return enabled;
+        strategyResult.get().setEnabled(enabled);
+        return strategyResult.get();
     }
 
     private void checkIfToggleMatchesNamePrefix(String toggleName) {
@@ -209,15 +221,15 @@ public class DefaultUnleash implements Unleash {
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         FeatureToggle featureToggle = featureRepository.getToggle(toggleName);
-        boolean enabled = checkEnabled(toggleName, context, (n, c) -> false);
+        FeatureEvaluationResult result = checkEnabled(toggleName, context, (n, c) -> false);
         Variant variant =
-                enabled
+                result.isEnabled()
                         ? VariantUtil.selectVariant(featureToggle, context, defaultValue)
                         : defaultValue;
         metricService.countVariant(toggleName, variant.getName());
         // Should count yes/no also when getting variant.
-        metricService.count(toggleName, enabled);
-        dispatchVariantImpressionDataIfNeeded(toggleName, variant.getName(), enabled, context);
+        metricService.count(toggleName, result.isEnabled());
+        dispatchVariantImpressionDataIfNeeded(toggleName, variant.getName(), result.isEnabled(), context);
         return variant;
     }
 
@@ -316,17 +328,11 @@ public class DefaultUnleash implements Unleash {
             return getFeatureToggleNames().stream()
                     .map(
                             toggleName -> {
-                                boolean enabled =
+                                FeatureEvaluationResult result =
                                         checkEnabled(toggleName, context, (n, c) -> false);
-                                FeatureToggle featureToggle =
-                                        featureRepository.getToggle(toggleName);
-                                Variant variant =
-                                        enabled
-                                                ? VariantUtil.selectVariant(
-                                                        featureToggle, context, DISABLED_VARIANT)
-                                                : DISABLED_VARIANT;
 
-                                return new EvaluatedToggle(toggleName, enabled, variant);
+
+                                return new EvaluatedToggle(toggleName, result.isEnabled(), result.getVariant());
                             })
                     .collect(Collectors.toList());
         }

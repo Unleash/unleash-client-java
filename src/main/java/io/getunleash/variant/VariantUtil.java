@@ -6,13 +6,15 @@ import io.getunleash.Variant;
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.StrategyUtils;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 
 public final class VariantUtil {
-    // Utility class
+    private static final String GROUP_ID_KEY = "groupId";
     private VariantUtil() {}
+
 
     private static Predicate<VariantOverride> overrideMatchesContext(UnleashContext context) {
         return (override) -> {
@@ -111,6 +113,34 @@ public final class VariantUtil {
         }
 
         // Should not happen
+        return defaultVariant;
+    }
+
+    public static Variant selectVariantDefinition(Map<String, String> parameters, @Nullable List<VariantDefinition> variants, UnleashContext context, Variant defaultVariant) {
+        if (variants != null) {
+            int totalWeight = variants.stream().mapToInt(VariantDefinition::getWeight).sum();
+            if (totalWeight <= 0) {
+                return defaultVariant;
+            }
+            Optional<VariantDefinition> variantOverride = getOverride(variants, context);
+            if (variantOverride.isPresent()) {
+                return variantOverride.get().toVariant();
+            }
+
+            String stickiness = variants.get(0).getStickiness();
+
+            int target = StrategyUtils.getNormalizedNumber(getSeed(context, Optional.ofNullable(stickiness)), parameters.get(GROUP_ID_KEY), totalWeight);
+
+            int counter = 0;
+            for (VariantDefinition variant : variants) {
+                if (variant.getWeight() != 0) {
+                    counter += variant.getWeight();
+                    if (counter >= target) {
+                        return variant.toVariant();
+                    }
+                }
+            }
+        }
         return defaultVariant;
     }
 }

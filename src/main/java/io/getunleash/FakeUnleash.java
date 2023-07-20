@@ -3,7 +3,10 @@ package io.getunleash;
 import static java.util.Collections.emptyList;
 
 import io.getunleash.lang.Nullable;
+import io.getunleash.strategy.*;
+
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -13,6 +16,36 @@ public class FakeUnleash implements Unleash {
     private Map<String, Boolean> excludedFeatures = new HashMap<>();
     private Map<String, FeatureToggle> features = new HashMap<>();
     private Map<String, Variant> variants = new HashMap<>();
+
+    private static final List<Strategy> BUILTIN_STRATEGIES =
+        Arrays.asList(
+            new DefaultStrategy(),
+            new ApplicationHostnameStrategy(),
+            new GradualRolloutRandomStrategy(),
+            new GradualRolloutSessionIdStrategy(),
+            new GradualRolloutUserIdStrategy(),
+            new RemoteAddressStrategy(),
+            new UserWithIdStrategy(),
+            new FlexibleRolloutStrategy());
+
+    @Override
+    public FeatureEvaluationResult evaluateFeature(String toggleName, UnleashContext context, BiPredicate<String, UnleashContext> fallbackAction) {
+        AtomicReference<FeatureEvaluationResult> strategyResult = new AtomicReference<>(new FeatureEvaluationResult());
+        boolean enabled = isEnabled(toggleName, context, fallbackAction);
+        if (features.containsKey(toggleName)) {
+            enabled = features.get(toggleName).getStrategies().stream().anyMatch(s -> {
+                Optional<Strategy> strategy = BUILTIN_STRATEGIES.stream().filter(strategy1 -> strategy1.getName().equals(s.getName())).findFirst();
+                if (strategy.isPresent()) {
+                    FeatureEvaluationResult temp = strategy.get().getResult(s.getParameters(), context, s.getConstraints(), s.getVariants());
+                    strategyResult.set(temp);
+                    return strategyResult.get().isEnabled();
+                }
+                return false;
+            });
+        }
+        strategyResult.get().setEnabled(enabled);
+        return strategyResult.get();
+    }
 
     @Override
     public boolean isEnabled(String toggleName, boolean defaultSetting) {

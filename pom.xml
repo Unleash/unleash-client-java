@@ -11,7 +11,7 @@
         <version.junit5>5.9.0</version.junit5>
         <version.okhttp>4.10.0</version.okhttp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.unleash.specification>4.2.2</version.unleash.specification>
+        <version.unleash.specification>4.3.0</version.unleash.specification>
         <arguments />
         <version.jackson>2.14.0</version.jackson>
     </properties>
@@ -84,6 +84,11 @@
             <groupId>com.sangupta</groupId>
             <artifactId>murmur</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javatuples</groupId>
+            <artifactId>javatuples</artifactId>
+            <version>1.2</version>
         </dependency>
 
         <!-- Test dependencies -->

@@ -30,6 +30,10 @@ public interface Unleash {
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction);
 
+    FeatureEvaluationResult evaluateFeature(String toggleName,
+                                                       UnleashContext context,
+                                                       BiPredicate<String, UnleashContext> fallbackAction);
+
     Variant getVariant(final String toggleName, final UnleashContext context);
 
     Variant getVariant(
