@@ -1,15 +1,13 @@
 package io.getunleash;
 
 import io.getunleash.lang.Nullable;
-import io.getunleash.variant.VariantDefinition;
 
 public class FeatureEvaluationResult {
     private boolean enabled;
 
     private Variant variant;
 
-    public FeatureEvaluationResult() {
-    }
+    public FeatureEvaluationResult() {}
 
     public FeatureEvaluationResult(boolean enabled, @Nullable Variant variant) {
         this.enabled = enabled;

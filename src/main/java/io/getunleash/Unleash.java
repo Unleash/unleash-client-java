@@ -30,14 +30,20 @@ public interface Unleash {
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction);
 
-    FeatureEvaluationResult evaluateFeature(String toggleName,
-                                                       UnleashContext context,
-                                                       BiPredicate<String, UnleashContext> fallbackAction);
+    FeatureEvaluationResult evaluateFeature(
+            String toggleName,
+            UnleashContext context,
+            BiPredicate<String, UnleashContext> fallbackAction);
 
     Variant getVariant(final String toggleName, final UnleashContext context);
 
     Variant getVariant(
             final String toggleName, final UnleashContext context, final Variant defaultValue);
+
+    default FeatureEvaluationResult evaluateFeature(
+            String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
+        return evaluateFeature(toggleName, UnleashContext.builder().build(), fallbackAction);
+    }
 
     default Variant getVariant(final String toggleName) {
         return getVariant(toggleName, UnleashContext.builder().build());

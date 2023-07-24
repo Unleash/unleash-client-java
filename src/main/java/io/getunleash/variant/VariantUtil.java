@@ -13,8 +13,8 @@ import java.util.function.Predicate;
 
 public final class VariantUtil {
     private static final String GROUP_ID_KEY = "groupId";
-    private VariantUtil() {}
 
+    private VariantUtil() {}
 
     private static Predicate<VariantOverride> overrideMatchesContext(UnleashContext context) {
         return (override) -> {
@@ -45,7 +45,7 @@ public final class VariantUtil {
         };
     }
 
-    private static Optional<VariantDefinition> getOverride(
+    public static Optional<VariantDefinition> getOverride(
             List<VariantDefinition> variants, UnleashContext context) {
         return variants.stream()
                 .filter(
@@ -69,7 +69,7 @@ public final class VariantUtil {
         return "" + randSeed;
     }
 
-    private static String getSeed(UnleashContext unleashContext, Optional<String> stickiness) {
+    public static String getSeed(UnleashContext unleashContext, Optional<String> stickiness) {
         return stickiness
                 .map(s -> unleashContext.getByName(s).orElse(randomString()))
                 .orElse(getIdentifier(unleashContext));
@@ -116,11 +116,14 @@ public final class VariantUtil {
         return defaultVariant;
     }
 
-    public static Variant selectVariantDefinition(Map<String, String> parameters, @Nullable List<VariantDefinition> variants, UnleashContext context, Variant defaultVariant) {
+    public static @Nullable Variant selectVariantDefinition(
+            Map<String, String> parameters,
+            @Nullable List<VariantDefinition> variants,
+            UnleashContext context) {
         if (variants != null) {
             int totalWeight = variants.stream().mapToInt(VariantDefinition::getWeight).sum();
             if (totalWeight <= 0) {
-                return defaultVariant;
+                return null;
             }
             Optional<VariantDefinition> variantOverride = getOverride(variants, context);
             if (variantOverride.isPresent()) {
@@ -129,7 +132,11 @@ public final class VariantUtil {
 
             String stickiness = variants.get(0).getStickiness();
 
-            int target = StrategyUtils.getNormalizedNumber(getSeed(context, Optional.ofNullable(stickiness)), parameters.get(GROUP_ID_KEY), totalWeight);
+            int target =
+                    StrategyUtils.getNormalizedNumber(
+                            getSeed(context, Optional.ofNullable(stickiness)),
+                            parameters.get(GROUP_ID_KEY),
+                            totalWeight);
 
             int counter = 0;
             for (VariantDefinition variant : variants) {
@@ -141,6 +148,6 @@ public final class VariantUtil {
                 }
             }
         }
-        return defaultVariant;
+        return null;
     }
 }

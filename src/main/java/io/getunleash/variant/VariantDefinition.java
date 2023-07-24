@@ -62,7 +62,7 @@ public class VariantDefinition {
         return stickiness;
     }
 
-    Variant toVariant() {
+    public Variant toVariant() {
         return new Variant(name, payload, true, stickiness);
     }
 }

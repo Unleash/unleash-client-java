@@ -144,7 +144,7 @@ public class UnleashTest {
 
         unleash.isEnabled("test");
 
-        verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class), any());
+        verify(customStrategy, times(1)).getResult(any(), any(UnleashContext.class), any(), any());
     }
 
     @Test
@@ -441,7 +441,12 @@ public class UnleashTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test")));
         ActivationStrategy activeStrategy =
-                new ActivationStrategy("default", null, constraints, Collections.emptyList(), Collections.emptyList());
+                new ActivationStrategy(
+                        "default",
+                        null,
+                        constraints,
+                        Collections.emptyList(),
+                        Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
@@ -455,7 +460,12 @@ public class UnleashTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("dev", "prod")));
         ActivationStrategy activeStrategy =
-                new ActivationStrategy("default", null, constraints, Collections.emptyList(), Collections.emptyList());
+                new ActivationStrategy(
+                        "default",
+                        null,
+                        constraints,
+                        Collections.emptyList(),
+                        Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
@@ -533,7 +543,12 @@ public class UnleashTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("dev", "prod")));
         ActivationStrategy activeStrategy =
-            new ActivationStrategy("default", null, constraints, Collections.emptyList(), Collections.emptyList());
+                new ActivationStrategy(
+                        "default",
+                        null,
+                        constraints,
+                        Collections.emptyList(),
+                        Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
