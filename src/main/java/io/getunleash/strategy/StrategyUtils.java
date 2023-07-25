@@ -40,9 +40,6 @@ public final class StrategyUtils {
     }
 
     public static int getNormalizedNumber(String identifier, String groupId, int normalizer) {
-        System.out.println("identifier: " + identifier);
-        System.out.println("groupId: " + groupId);
-        System.out.println("normalizer: " + normalizer);
         byte[] value = (groupId + ':' + identifier).getBytes();
         long hash = Murmur3.hash_x86_32(value, value.length, 0);
         return (int) (hash % normalizer) + 1;
