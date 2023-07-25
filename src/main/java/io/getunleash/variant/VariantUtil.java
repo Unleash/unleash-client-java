@@ -42,7 +42,7 @@ public final class VariantUtil {
         };
     }
 
-    public static Optional<VariantDefinition> getOverride(
+    private static Optional<VariantDefinition> getOverride(
             List<VariantDefinition> variants, UnleashContext context) {
         return variants.stream()
                 .filter(
@@ -66,7 +66,7 @@ public final class VariantUtil {
         return "" + randSeed;
     }
 
-    public static String getSeed(UnleashContext unleashContext, Optional<String> stickiness) {
+    private static String getSeed(UnleashContext unleashContext, Optional<String> stickiness) {
         return stickiness
                 .map(s -> unleashContext.getByName(s).orElse(randomString()))
                 .orElse(getIdentifier(unleashContext));
