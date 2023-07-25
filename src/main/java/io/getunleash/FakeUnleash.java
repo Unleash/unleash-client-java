@@ -4,11 +4,8 @@ import static java.util.Collections.emptyList;
 
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.*;
-import io.getunleash.util.ConstraintMerger;
 import io.getunleash.variant.VariantUtil;
-
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -53,36 +50,40 @@ public class FakeUnleash implements Unleash {
                                                                                                 .getName()))
                                                         .findFirst();
 
-                                        return strategy.map(value -> value.isEnabled(s.getParameters(), context, s.getConstraints())).orElse(false);
-                                    }).findFirst();
+                                        return strategy.map(
+                                                        value ->
+                                                                value.isEnabled(
+                                                                        s.getParameters(),
+                                                                        context,
+                                                                        s.getConstraints()))
+                                                .orElse(false);
+                                    })
+                            .findFirst();
         }
         FeatureEvaluationResult result = new FeatureEvaluationResult(enabled, null);
         if (enabledStrategy.isPresent()) {
             Optional<Strategy> strategy =
-                BUILTIN_STRATEGIES.stream()
-                    .filter(
-                        strategy1 ->
-                            strategy1
-                                .getName()
-                                .equals(strategy1.getName()))
-                    .findFirst();
+                    BUILTIN_STRATEGIES.stream()
+                            .filter(strategy1 -> strategy1.getName().equals(strategy1.getName()))
+                            .findFirst();
 
             Strategy configuredStrategy = strategy.get();
             result =
-                configuredStrategy.getResult(
-                    enabledStrategy.get().getParameters(),
-                    context,
-                    enabledStrategy.get().getConstraints(),
-                    enabledStrategy.get().getVariants());
+                    configuredStrategy.getResult(
+                            enabledStrategy.get().getParameters(),
+                            context,
+                            enabledStrategy.get().getConstraints(),
+                            enabledStrategy.get().getVariants());
         }
 
         Variant variant = result.isEnabled() ? result.getVariant() : null;
         // If strategy variant is null, look for a variant in the featureToggle
         if (variant == null && defaultVariant != null) {
             variant =
-                result.isEnabled()
-                    ? VariantUtil.selectVariant(features.get(toggleName), context, defaultVariant)
-                    : defaultVariant;
+                    result.isEnabled()
+                            ? VariantUtil.selectVariant(
+                                    features.get(toggleName), context, defaultVariant)
+                            : defaultVariant;
         }
         result.setVariant(variant);
 
