@@ -4,6 +4,9 @@ import static java.util.Collections.emptyList;
 
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.*;
+import io.getunleash.util.ConstraintMerger;
+import io.getunleash.variant.VariantUtil;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
@@ -30,14 +33,14 @@ public class FakeUnleash implements Unleash {
     private FeatureEvaluationResult getFeatureEvaluationResult(
             String toggleName,
             UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction) {
-        AtomicReference<FeatureEvaluationResult> strategyResult =
-                new AtomicReference<>(new FeatureEvaluationResult());
+            BiPredicate<String, UnleashContext> fallbackAction,
+            @Nullable Variant defaultVariant) {
+        Optional<ActivationStrategy> enabledStrategy = Optional.empty();
         boolean enabled = isEnabled(toggleName, context, fallbackAction);
         if (features.containsKey(toggleName)) {
-            enabled =
+            enabledStrategy =
                     features.get(toggleName).getStrategies().stream()
-                            .anyMatch(
+                            .filter(
                                     s -> {
                                         Optional<Strategy> strategy =
                                                 BUILTIN_STRATEGIES.stream()
@@ -49,22 +52,41 @@ public class FakeUnleash implements Unleash {
                                                                                         s
                                                                                                 .getName()))
                                                         .findFirst();
-                                        if (strategy.isPresent()) {
-                                            FeatureEvaluationResult temp =
-                                                    strategy.get()
-                                                            .getResult(
-                                                                    s.getParameters(),
-                                                                    context,
-                                                                    s.getConstraints(),
-                                                                    s.getVariants());
-                                            strategyResult.set(temp);
-                                            return strategyResult.get().isEnabled();
-                                        }
-                                        return false;
-                                    });
+
+                                        return strategy.map(value -> value.isEnabled(s.getParameters(), context, s.getConstraints())).orElse(false);
+                                    }).findFirst();
         }
-        strategyResult.get().setEnabled(enabled);
-        return strategyResult.get();
+        FeatureEvaluationResult result = new FeatureEvaluationResult(enabled, null);
+        if (enabledStrategy.isPresent()) {
+            Optional<Strategy> strategy =
+                BUILTIN_STRATEGIES.stream()
+                    .filter(
+                        strategy1 ->
+                            strategy1
+                                .getName()
+                                .equals(strategy1.getName()))
+                    .findFirst();
+
+            Strategy configuredStrategy = strategy.get();
+            result =
+                configuredStrategy.getResult(
+                    enabledStrategy.get().getParameters(),
+                    context,
+                    enabledStrategy.get().getConstraints(),
+                    enabledStrategy.get().getVariants());
+        }
+
+        Variant variant = result.isEnabled() ? result.getVariant() : null;
+        // If strategy variant is null, look for a variant in the featureToggle
+        if (variant == null && defaultVariant != null) {
+            variant =
+                result.isEnabled()
+                    ? VariantUtil.selectVariant(features.get(toggleName), context, defaultVariant)
+                    : defaultVariant;
+        }
+        result.setVariant(variant);
+
+        return result;
     }
 
     @Override
