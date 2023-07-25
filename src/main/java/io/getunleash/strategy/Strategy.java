@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface Strategy {
+
     String getName();
 
     boolean isEnabled(Map<String, String> parameters);
@@ -21,9 +22,8 @@ public interface Strategy {
             @Nullable List<VariantDefinition> variants) {
         return new FeatureEvaluationResult(
                 isEnabled(parameters, unleashContext, constraints),
-                VariantUtil.selectVariantDefinition(parameters, variants, unleashContext));
+                VariantUtil.selectVariant(parameters, variants, unleashContext));
     }
-    ;
 
     default boolean isEnabled(Map<String, String> parameters, UnleashContext unleashContext) {
         return isEnabled(parameters);

@@ -152,7 +152,7 @@ class DefaultUnleashTest {
 
         sut.isEnabled("toggle1");
 
-        verify(fallback).getResult(any(), any(), any(), any());
+        verify(fallback).isEnabled(any(), any());
     }
 
     @Test

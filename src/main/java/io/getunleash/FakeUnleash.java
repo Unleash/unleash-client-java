@@ -27,8 +27,7 @@ public class FakeUnleash implements Unleash {
                     new UserWithIdStrategy(),
                     new FlexibleRolloutStrategy());
 
-    @Override
-    public FeatureEvaluationResult evaluateFeature(
+    private FeatureEvaluationResult getFeatureEvaluationResult(
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction) {
