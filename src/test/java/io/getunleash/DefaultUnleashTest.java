@@ -85,7 +85,11 @@ class DefaultUnleashTest {
         Constraint semverConstraint = new Constraint("version", Operator.SEMVER_EQ, semVer);
         ActivationStrategy withMissingSegment =
                 new ActivationStrategy(
-                        "default", Collections.emptyMap(), asList(semverConstraint), asList(404));
+                        "default",
+                        Collections.emptyMap(),
+                        asList(semverConstraint),
+                        asList(404),
+                        Collections.emptyList());
         when(featureRepository.getToggle(toggleName))
                 .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
         when(featureRepository.getSegment(404)).thenReturn(Segment.DENY_SEGMENT);
@@ -103,7 +107,8 @@ class DefaultUnleashTest {
                         "default",
                         Collections.emptyMap(),
                         asList(semverConstraint),
-                        asList(404, 1));
+                        asList(404, 1),
+                        Collections.emptyList());
         when(featureRepository.getToggle(toggleName))
                 .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
         when(featureRepository.getSegment(1))
@@ -147,7 +152,7 @@ class DefaultUnleashTest {
 
         sut.isEnabled("toggle1");
 
-        verify(fallback).isEnabled(any(), any(), any());
+        verify(fallback).isEnabled(any(), any());
     }
 
     @Test

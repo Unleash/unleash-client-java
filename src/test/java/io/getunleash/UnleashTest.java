@@ -144,7 +144,7 @@ public class UnleashTest {
 
         unleash.isEnabled("test");
 
-        verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class), any());
+        verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class));
     }
 
     @Test
@@ -441,7 +441,12 @@ public class UnleashTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test")));
         ActivationStrategy activeStrategy =
-                new ActivationStrategy("default", null, constraints, Collections.emptyList());
+                new ActivationStrategy(
+                        "default",
+                        null,
+                        constraints,
+                        Collections.emptyList(),
+                        Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
@@ -455,7 +460,12 @@ public class UnleashTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("dev", "prod")));
         ActivationStrategy activeStrategy =
-                new ActivationStrategy("default", null, constraints, Collections.emptyList());
+                new ActivationStrategy(
+                        "default",
+                        null,
+                        constraints,
+                        Collections.emptyList(),
+                        Collections.emptyList());
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
@@ -526,6 +536,25 @@ public class UnleashTest {
 
         when(contextProvider.getContext()).thenReturn(context);
         assertThat(unleash.isEnabled("Test.variants")).isFalse();
+    }
+
+    @Test
+    public void should_be_disabled_with_strategy_variants() {
+        List<Constraint> constraints = new ArrayList<>();
+        constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("dev", "prod")));
+        ActivationStrategy activeStrategy =
+                new ActivationStrategy(
+                        "default",
+                        null,
+                        constraints,
+                        Collections.emptyList(),
+                        Collections.emptyList());
+
+        FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(unleash.isEnabled("test")).isFalse();
     }
 
     private List<VariantDefinition> getTestVariants() {

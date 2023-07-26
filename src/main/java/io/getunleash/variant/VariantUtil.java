@@ -5,13 +5,12 @@ import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.StrategyUtils;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Predicate;
 
 public final class VariantUtil {
-    // Utility class
+    static final String GROUP_ID_KEY = "groupId";
+
     private VariantUtil() {}
 
     private static Predicate<VariantOverride> overrideMatchesContext(UnleashContext context) {
@@ -78,39 +77,54 @@ public final class VariantUtil {
         if (featureToggle == null) {
             return defaultVariant;
         }
-        List<VariantDefinition> variants = featureToggle.getVariants();
-        int totalWeight = variants.stream().mapToInt(VariantDefinition::getWeight).sum();
-        if (totalWeight == 0) {
-            return defaultVariant;
-        }
 
-        Optional<VariantDefinition> variantOverride = getOverride(variants, context);
-        if (variantOverride.isPresent()) {
-            return variantOverride.get().toVariant();
-        }
-        Optional<String> customStickiness =
-                variants.stream()
-                        .filter(
-                                f ->
-                                        f.getStickiness() != null
-                                                && !"default".equals(f.getStickiness()))
-                        .map(VariantDefinition::getStickiness)
-                        .findFirst();
-        int target =
-                StrategyUtils.getNormalizedNumber(
-                        getSeed(context, customStickiness), featureToggle.getName(), totalWeight);
+        Variant variant =
+                selectVariant(
+                        Collections.singletonMap("groupId", featureToggle.getName()),
+                        featureToggle.getVariants(),
+                        context);
 
-        int counter = 0;
-        for (final VariantDefinition definition : featureToggle.getVariants()) {
-            if (definition.getWeight() != 0) {
-                counter += definition.getWeight();
-                if (counter >= target) {
-                    return definition.toVariant();
+        return variant != null ? variant : defaultVariant;
+    }
+
+    public static @Nullable Variant selectVariant(
+            Map<String, String> parameters,
+            @Nullable List<VariantDefinition> variants,
+            UnleashContext context) {
+        if (variants != null) {
+            int totalWeight = variants.stream().mapToInt(VariantDefinition::getWeight).sum();
+            if (totalWeight <= 0) {
+                return null;
+            }
+            Optional<VariantDefinition> variantOverride = getOverride(variants, context);
+            if (variantOverride.isPresent()) {
+                return variantOverride.get().toVariant();
+            }
+
+            Optional<String> customStickiness =
+                    variants.stream()
+                            .filter(
+                                    f ->
+                                            f.getStickiness() != null
+                                                    && !"default".equals(f.getStickiness()))
+                            .map(VariantDefinition::getStickiness)
+                            .findFirst();
+            int target =
+                    StrategyUtils.getNormalizedNumber(
+                            getSeed(context, customStickiness),
+                            parameters.get(GROUP_ID_KEY),
+                            totalWeight);
+
+            int counter = 0;
+            for (VariantDefinition variant : variants) {
+                if (variant.getWeight() != 0) {
+                    counter += variant.getWeight();
+                    if (counter >= target) {
+                        return variant.toVariant();
+                    }
                 }
             }
         }
-
-        // Should not happen
-        return defaultVariant;
+        return null;
     }
 }
