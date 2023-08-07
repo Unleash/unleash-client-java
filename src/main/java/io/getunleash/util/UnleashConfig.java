@@ -13,6 +13,7 @@ import io.getunleash.repository.HttpFeatureFetcher;
 import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.Strategy;
 import java.io.File;
+import java.math.BigInteger;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
@@ -21,10 +22,11 @@ import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class UnleashConfig {
 
@@ -271,10 +273,17 @@ public class UnleashConfig {
     }
 
     public String getClientIdentifier() {
-        String api = getApiKey();
-        String appName = getAppName();
-        String instanceId = getInstanceId();
-        return String.format("apiKey:[%s] appName:[%s] instanceId:[%s]", api, appName, instanceId);
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            if (getApiKey() != null) {
+                md.update(getApiKey().getBytes(StandardCharsets.UTF_8));
+            }
+            md.update(getAppName().getBytes(StandardCharsets.UTF_8));
+            md.update(getInstanceId().getBytes(StandardCharsets.UTF_8));
+            return new BigInteger(1, md.digest()).toString(16);
+        } catch (NoSuchAlgorithmException nse) {
+            throw new IllegalStateException("Could not build hash for client", nse);
+        }
     }
 
     public boolean isSynchronousFetchOnInitialisation() {
@@ -420,7 +429,7 @@ public class UnleashConfig {
 
         private static String getHostname() {
             String hostName = System.getProperty("hostname");
-            if (hostName == null || hostName.length() == 0) {
+            if (hostName == null || hostName.isEmpty()) {
                 try {
                     hostName = InetAddress.getLocalHost().getHostName();
                 } catch (UnknownHostException e) {

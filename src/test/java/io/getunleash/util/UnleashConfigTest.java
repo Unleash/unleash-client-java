@@ -3,6 +3,7 @@ package io.getunleash.util;
 import static io.getunleash.util.UnleashConfig.UNLEASH_APP_NAME_HEADER;
 import static io.getunleash.util.UnleashConfig.UNLEASH_INSTANCE_ID_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -345,5 +346,39 @@ public class UnleashConfigTest {
         assertThat(passwordAuthentication.getUserName()).isEqualTo(proxyUser);
         assertThat(new String(passwordAuthentication.getPassword())).isEqualTo(proxyPassword);
         assertThat(config.isProxyAuthenticationByJvmProperties()).isEqualTo(false);
+    }
+
+    @Test
+    public void clientIdentifierIsDeterministic() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .apiKey("someapikey")
+                        .appName("test-app")
+                        .instanceId("myinstance")
+                        .unleashAPI("http://localhost:4242")
+                        .build();
+        assertThat(config.getClientIdentifier()).isEqualTo(config.getClientIdentifier());
+    }
+
+    @Test
+    public void clientIdentifierWithoutApiKeyShouldNotThrowException() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test-app")
+                        .instanceId("myiunstance")
+                        .unleashAPI("http://localhost:4242")
+                        .build();
+        assertDoesNotThrow(config::getClientIdentifier);
+    }
+
+    @Test
+    public void clientIdentifierWithoutInstanceIdStillWorks() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .apiKey("someapikey")
+                        .appName("test-app")
+                        .unleashAPI("http://localhost:4242")
+                        .build();
+        assertDoesNotThrow(config::getClientIdentifier);
     }
 }

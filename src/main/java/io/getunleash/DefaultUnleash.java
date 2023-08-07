@@ -100,14 +100,16 @@ public class DefaultUnleash implements Unleash {
         this.eventDispatcher = eventDispatcher;
         this.metricService = metricService;
         metricService.register(strategyMap.keySet());
-        this.initCounts.compute(
+        initCounts.compute(
                 config.getClientIdentifier(),
                 (key, inits) -> {
                     if (inits != null) {
                         String error =
                                 String.format(
-                                        "You already have %d clients for Unleash Configuration [%s] running. Please double check your code where you are instantiating the Unleash SDK",
-                                        inits.sum(), key);
+                                        "You already have %d clients for AppName [%s] with instanceId: [%s] running. Please double check your code where you are instantiating the Unleash SDK",
+                                        inits.sum(),
+                                        unleashConfig.getAppName(),
+                                        unleashConfig.getInstanceId());
                         if (failOnMultipleInstantiations) {
                             throw new RuntimeException(error);
                         } else {
