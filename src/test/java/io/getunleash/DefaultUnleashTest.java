@@ -161,12 +161,14 @@ class DefaultUnleashTest {
         appender.start();
         Logger unleashLogger = (Logger) LoggerFactory.getLogger(DefaultUnleash.class);
         unleashLogger.addAppender(appender);
+        String appName = "multiple_connection_logging";
+        String instanceId = "multiple_connection_instance_id";
         UnleashConfig config =
                 UnleashConfig.builder()
                         .unleashAPI("http://test:4242")
-                        .appName("multiple_connection_logging")
+                        .appName(appName)
                         .apiKey("default:development:1234567890123456")
-                        .instanceId("multiple_connection_logging")
+                        .instanceId(instanceId)
                         .build();
         Unleash unleash1 = new DefaultUnleash(config);
         // We've only instantiated the client once, so no errors should've been logged
@@ -178,8 +180,10 @@ class DefaultUnleashTest {
         assertThat(appender.list)
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .containsExactly(
-                        "You already have 1 clients for Unleash Configuration ["
-                                + id
+                        "You already have 1 clients for AppName ["
+                                + appName
+                                + "] with instanceId: ["
+                                + instanceId
                                 + "] running. Please double check your code where you are instantiating the Unleash SDK");
         appender.list.clear();
         Unleash unleash3 = new DefaultUnleash(config);
@@ -188,8 +192,10 @@ class DefaultUnleashTest {
         assertThat(appender.list)
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .containsExactly(
-                        "You already have 2 clients for Unleash Configuration ["
-                                + id
+                        "You already have 2 clients for AppName ["
+                                + appName
+                                + "] with instanceId: ["
+                                + instanceId
                                 + "] running. Please double check your code where you are instantiating the Unleash SDK");
     }
 
@@ -266,7 +272,6 @@ class DefaultUnleashTest {
                         .build();
         String id = config.getClientIdentifier();
         assertThat(id)
-                .isEqualTo(
-                        "apiKey:[null] appName:[multiple_connection] instanceId:[testing_multiple]");
+                .isEqualTo("f83eb743f4c8dc41294aafb96f454763e5a90b96db8b7040ddc505d636bdb243");
     }
 }
