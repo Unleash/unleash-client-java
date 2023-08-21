@@ -6,6 +6,9 @@ on:
       version:
         description: What version would you like to use?
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
