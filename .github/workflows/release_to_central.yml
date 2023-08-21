@@ -12,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         name: Checkout code
+        with:
+          token: ${{ secrets.GH_PUSH_TOKEN }}
       - name: Setup Java and Maven Central Repo
         uses: actions/setup-java@v3
         with:
