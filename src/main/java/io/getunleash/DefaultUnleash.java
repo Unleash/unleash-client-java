@@ -202,7 +202,7 @@ public class DefaultUnleash implements Unleash {
                 }
             }
         }
-        return new FeatureEvaluationResult(enabled, null);
+        return new FeatureEvaluationResult(enabled, defaultVariant);
     }
 
     private void checkIfToggleMatchesNamePrefix(String toggleName) {
