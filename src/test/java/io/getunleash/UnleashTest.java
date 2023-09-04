@@ -1,6 +1,7 @@
 package io.getunleash;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -129,6 +130,7 @@ public class UnleashTest {
         // custom strategy
         Strategy customStrategy = mock(Strategy.class);
         when(customStrategy.getName()).thenReturn("custom");
+        when(customStrategy.getResult(anyMap(), any(), anyList(), anyList())).thenCallRealMethod();
 
         // register custom strategy
         UnleashConfig config =
@@ -144,7 +146,7 @@ public class UnleashTest {
 
         unleash.isEnabled("test");
 
-        verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class));
+        verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class), anyList());
     }
 
     @Test
@@ -158,6 +160,45 @@ public class UnleashTest {
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
         assertThat(unleash.isEnabled("test")).isTrue();
+    }
+
+    @Test
+    public void shouldSupportMultipleRolloutStrategies() {
+        Map<String, String> rollout100percent = new HashMap<>();
+        rollout100percent.put("rollout", "100");
+        rollout100percent.put("stickiness", "default");
+        rollout100percent.put("groupId", "rollout");
+
+        Constraint user6Constraint = new Constraint("userId", Operator.IN, singletonList("6"));
+        Constraint user9Constraint = new Constraint("userId", Operator.IN, singletonList("9"));
+
+        ActivationStrategy strategy1 =
+                new ActivationStrategy(
+                        "flexibleRollout",
+                        rollout100percent,
+                        singletonList(user6Constraint),
+                        null,
+                        null);
+        ActivationStrategy strategy2 =
+                new ActivationStrategy(
+                        "flexibleRollout",
+                        rollout100percent,
+                        singletonList(user9Constraint),
+                        null,
+                        null);
+
+        FeatureToggle featureToggle = new FeatureToggle("test", true, asList(strategy1, strategy2));
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("1").build()))
+                .isFalse();
+        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("6").build()))
+                .isTrue();
+        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("7").build()))
+                .isFalse();
+        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("9").build()))
+                .isTrue();
     }
 
     @Test

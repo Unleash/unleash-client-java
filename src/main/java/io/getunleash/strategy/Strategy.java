@@ -20,9 +20,10 @@ public interface Strategy {
             UnleashContext unleashContext,
             List<Constraint> constraints,
             @Nullable List<VariantDefinition> variants) {
+        boolean enabled = isEnabled(parameters, unleashContext, constraints);
         return new FeatureEvaluationResult(
-                isEnabled(parameters, unleashContext, constraints),
-                VariantUtil.selectVariant(parameters, variants, unleashContext));
+                enabled,
+                enabled ? VariantUtil.selectVariant(parameters, variants, unleashContext) : null);
     }
 
     default boolean isEnabled(Map<String, String> parameters, UnleashContext unleashContext) {
