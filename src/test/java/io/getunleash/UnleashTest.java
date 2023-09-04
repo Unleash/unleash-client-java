@@ -163,7 +163,7 @@ public class UnleashTest {
     }
 
     @Test
-    public void should_support_multiple_rollout_strategies() {
+    public void shouldSupportMultipleRolloutStrategies() {
         Map<String, String> rollout100percent = new HashMap<>();
         rollout100percent.put("rollout", "100");
         rollout100percent.put("stickiness", "default");
