@@ -163,13 +163,12 @@ public class DefaultUnleash implements Unleash {
         FeatureToggle featureToggle = featureRepository.getToggle(toggleName);
 
         UnleashContext enhancedContext = context.applyStaticFields(config);
-        boolean enabled = false;
         if (featureToggle == null) {
-            enabled = fallbackAction.test(toggleName, enhancedContext);
+            return new FeatureEvaluationResult(fallbackAction.test(toggleName, enhancedContext), defaultVariant);
         } else if (!featureToggle.isEnabled()) {
-            enabled = false;
+            return new FeatureEvaluationResult(false, defaultVariant);
         } else if (featureToggle.getStrategies().size() == 0) {
-            enabled = true;
+            return new FeatureEvaluationResult(true, VariantUtil.selectVariant(featureToggle, context, defaultVariant));
         } else {
             for (ActivationStrategy strategy : featureToggle.getStrategies()) {
                 Strategy configuredStrategy = getStrategy(strategy.getName());
@@ -197,9 +196,8 @@ public class DefaultUnleash implements Unleash {
                     return result;
                 }
             }
+            return new FeatureEvaluationResult(false, defaultVariant);
         }
-
-        return new FeatureEvaluationResult(enabled, enabled?VariantUtil.selectVariant(featureToggle, context, defaultVariant):defaultVariant);
     }
 
     private void checkIfToggleMatchesNamePrefix(String toggleName) {
