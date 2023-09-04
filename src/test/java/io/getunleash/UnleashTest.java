@@ -172,18 +172,33 @@ public class UnleashTest {
         Constraint user6Constraint = new Constraint("userId", Operator.IN, singletonList("6"));
         Constraint user9Constraint = new Constraint("userId", Operator.IN, singletonList("9"));
 
-        ActivationStrategy strategy1 = new ActivationStrategy("flexibleRollout", rollout100percent, singletonList(user6Constraint), null, null);
-        ActivationStrategy strategy2 = new ActivationStrategy("flexibleRollout", rollout100percent, singletonList(user9Constraint), null, null);
+        ActivationStrategy strategy1 =
+                new ActivationStrategy(
+                        "flexibleRollout",
+                        rollout100percent,
+                        singletonList(user6Constraint),
+                        null,
+                        null);
+        ActivationStrategy strategy2 =
+                new ActivationStrategy(
+                        "flexibleRollout",
+                        rollout100percent,
+                        singletonList(user9Constraint),
+                        null,
+                        null);
 
-        FeatureToggle featureToggle =
-            new FeatureToggle("test", true, asList(strategy1, strategy2));
+        FeatureToggle featureToggle = new FeatureToggle("test", true, asList(strategy1, strategy2));
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
-        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("1").build())).isFalse();
-        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("6").build())).isTrue();
-        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("7").build())).isFalse();
-        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("9").build())).isTrue();
+        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("1").build()))
+                .isFalse();
+        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("6").build()))
+                .isTrue();
+        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("7").build()))
+                .isFalse();
+        assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("9").build()))
+                .isTrue();
     }
 
     @Test

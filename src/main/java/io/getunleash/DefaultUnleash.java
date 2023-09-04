@@ -171,38 +171,35 @@ public class DefaultUnleash implements Unleash {
         } else if (featureToggle.getStrategies().size() == 0) {
             enabled = true;
         } else {
-            for (ActivationStrategy strategy: featureToggle.getStrategies()) {
-                Strategy configuredStrategy =
-                    getStrategy(strategy.getName());
+            for (ActivationStrategy strategy : featureToggle.getStrategies()) {
+                Strategy configuredStrategy = getStrategy(strategy.getName());
                 if (configuredStrategy == UNKNOWN_STRATEGY) {
                     LOGGER.warn(
-                        "Unable to find matching strategy for toggle:{} strategy:{}",
-                        toggleName,
-                        strategy.getName());
+                            "Unable to find matching strategy for toggle:{} strategy:{}",
+                            toggleName,
+                            strategy.getName());
                 }
 
-                FeatureEvaluationResult result = configuredStrategy.getResult(
-                    strategy.getParameters(),
-                    enhancedContext,
-                    ConstraintMerger.mergeConstraints(
-                        featureRepository, strategy),
-                    strategy.getVariants());
+                FeatureEvaluationResult result =
+                        configuredStrategy.getResult(
+                                strategy.getParameters(),
+                                enhancedContext,
+                                ConstraintMerger.mergeConstraints(featureRepository, strategy),
+                                strategy.getVariants());
 
                 if (result.isEnabled()) {
-                    Variant variant = result.isEnabled() ? result.getVariant() : null;
+                    Variant variant = result.getVariant();
                     // If strategy variant is null, look for a variant in the featureToggle
-                    if (variant == null && defaultVariant != null) {
-                        variant =
-                            result.isEnabled()
-                                ? VariantUtil.selectVariant(featureToggle, context, defaultVariant)
-                                : defaultVariant;
+                    if (variant == null) {
+                        variant = VariantUtil.selectVariant(featureToggle, context, defaultVariant);
                     }
                     result.setVariant(variant);
                     return result;
                 }
             }
         }
-        return new FeatureEvaluationResult(enabled, defaultVariant);
+
+        return new FeatureEvaluationResult(enabled, enabled?VariantUtil.selectVariant(featureToggle, context, defaultVariant):defaultVariant);
     }
 
     private void checkIfToggleMatchesNamePrefix(String toggleName) {
