@@ -164,11 +164,13 @@ public class DefaultUnleash implements Unleash {
 
         UnleashContext enhancedContext = context.applyStaticFields(config);
         if (featureToggle == null) {
-            return new FeatureEvaluationResult(fallbackAction.test(toggleName, enhancedContext), defaultVariant);
+            return new FeatureEvaluationResult(
+                    fallbackAction.test(toggleName, enhancedContext), defaultVariant);
         } else if (!featureToggle.isEnabled()) {
             return new FeatureEvaluationResult(false, defaultVariant);
         } else if (featureToggle.getStrategies().size() == 0) {
-            return new FeatureEvaluationResult(true, VariantUtil.selectVariant(featureToggle, context, defaultVariant));
+            return new FeatureEvaluationResult(
+                    true, VariantUtil.selectVariant(featureToggle, context, defaultVariant));
         } else {
             for (ActivationStrategy strategy : featureToggle.getStrategies()) {
                 Strategy configuredStrategy = getStrategy(strategy.getName());
