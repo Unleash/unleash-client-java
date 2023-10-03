@@ -484,3 +484,7 @@ UnleashConfig config = UnleashConfig.builder()
 
 Unleash unleash = new DefaultUnleash(config);
 ```
+
+### Other information
+
+- Check out our guide for more information on how to build and scale [feature flag](https://docs.getunleash.io/topics/feature-flags/feature-flag-best-practices) systems
