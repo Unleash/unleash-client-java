@@ -136,17 +136,17 @@ public class DefaultUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(
-        String toggleName,
-        UnleashContext context,
-        BiPredicate<String, UnleashContext> fallbackAction) {
+            String toggleName,
+            UnleashContext context,
+            BiPredicate<String, UnleashContext> fallbackAction) {
         return isEnabled(toggleName, context, fallbackAction, false);
     }
 
     public boolean isEnabled(
-        String toggleName,
-        UnleashContext context,
-        BiPredicate<String, UnleashContext> fallbackAction,
-        boolean isParent) {
+            String toggleName,
+            UnleashContext context,
+            BiPredicate<String, UnleashContext> fallbackAction,
+            boolean isParent) {
         FeatureEvaluationResult result =
                 getFeatureEvaluationResult(toggleName, context, fallbackAction, null);
         if (!isParent) {
@@ -249,12 +249,18 @@ public class DefaultUnleash implements Unleash {
                                     if (!parent.getVariants().isEmpty()) {
                                         return parent.getVariants()
                                                 .contains(
-                                                        getVariant(parent.feature, context, DISABLED_VARIANT, true)
+                                                        getVariant(
+                                                                        parent.feature,
+                                                                        context,
+                                                                        DISABLED_VARIANT,
+                                                                        true)
                                                                 .getName());
                                     }
-                                    return isEnabled(parent.getFeature(), context, fallbackAction, true);
+                                    return isEnabled(
+                                            parent.getFeature(), context, fallbackAction, true);
                                 } else {
-                                    return !isEnabled(parent.getFeature(), context, fallbackAction, true);
+                                    return !isEnabled(
+                                            parent.getFeature(), context, fallbackAction, true);
                                 }
                             });
         }
@@ -281,8 +287,8 @@ public class DefaultUnleash implements Unleash {
         return getVariant(toggleName, context, defaultValue, false);
     }
 
-
-    private Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue, boolean isParent) {
+    private Variant getVariant(
+            String toggleName, UnleashContext context, Variant defaultValue, boolean isParent) {
         FeatureEvaluationResult result =
                 getFeatureEvaluationResult(toggleName, context, (n, c) -> false, defaultValue);
         Variant variant = result.getVariant();
