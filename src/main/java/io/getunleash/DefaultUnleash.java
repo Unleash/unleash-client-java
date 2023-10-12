@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,37 +169,86 @@ public class DefaultUnleash implements Unleash {
                     fallbackAction.test(toggleName, enhancedContext), defaultVariant);
         } else if (!featureToggle.isEnabled()) {
             return new FeatureEvaluationResult(false, defaultVariant);
-        } else if (featureToggle.getStrategies().size() == 0) {
+        } else if (featureToggle.getStrategies().isEmpty()) {
             return new FeatureEvaluationResult(
                     true, VariantUtil.selectVariant(featureToggle, context, defaultVariant));
         } else {
-            for (ActivationStrategy strategy : featureToggle.getStrategies()) {
-                Strategy configuredStrategy = getStrategy(strategy.getName());
-                if (configuredStrategy == UNKNOWN_STRATEGY) {
-                    LOGGER.warn(
-                            "Unable to find matching strategy for toggle:{} strategy:{}",
-                            toggleName,
-                            strategy.getName());
-                }
-
-                FeatureEvaluationResult result =
-                        configuredStrategy.getResult(
-                                strategy.getParameters(),
-                                enhancedContext,
-                                ConstraintMerger.mergeConstraints(featureRepository, strategy),
-                                strategy.getVariants());
-
-                if (result.isEnabled()) {
-                    Variant variant = result.getVariant();
-                    // If strategy variant is null, look for a variant in the featureToggle
-                    if (variant == null) {
-                        variant = VariantUtil.selectVariant(featureToggle, context, defaultVariant);
+            // Dependent toggles, no point in evaluating child strategies if our dependencies are
+            // not satisfied
+            if (isParentDependencySatisfied(featureToggle, context, fallbackAction)) {
+                for (ActivationStrategy strategy : featureToggle.getStrategies()) {
+                    Strategy configuredStrategy = getStrategy(strategy.getName());
+                    if (configuredStrategy == UNKNOWN_STRATEGY) {
+                        LOGGER.warn(
+                                "Unable to find matching strategy for toggle:{} strategy:{}",
+                                toggleName,
+                                strategy.getName());
                     }
-                    result.setVariant(variant);
-                    return result;
+
+                    FeatureEvaluationResult result =
+                            configuredStrategy.getResult(
+                                    strategy.getParameters(),
+                                    enhancedContext,
+                                    ConstraintMerger.mergeConstraints(featureRepository, strategy),
+                                    strategy.getVariants());
+
+                    if (result.isEnabled()) {
+                        Variant variant = result.getVariant();
+                        // If strategy variant is null, look for a variant in the featureToggle
+                        if (variant == null) {
+                            variant =
+                                    VariantUtil.selectVariant(
+                                            featureToggle, context, defaultVariant);
+                        }
+                        result.setVariant(variant);
+                        return result;
+                    }
                 }
             }
             return new FeatureEvaluationResult(false, defaultVariant);
+        }
+    }
+
+    //
+    // Checks a feature's dependencies (if it has any
+    private boolean isParentDependencySatisfied(
+            @Nonnull FeatureToggle featureToggle,
+            @Nonnull UnleashContext context,
+            BiPredicate<String, UnleashContext> fallbackAction) {
+        if (!featureToggle.hasDependencies()) {
+            return true;
+        } else {
+            return featureToggle.getDependencies().stream()
+                    .allMatch(
+                            parent -> {
+                                FeatureToggle parentToggle =
+                                        featureRepository.getToggle(parent.getFeature());
+                                if (parentToggle == null) {
+                                    LOGGER.warn(
+                                            "Missing dependency [{}] for toggle: [{}]",
+                                            parent.getFeature(),
+                                            featureToggle.getName());
+                                    return false;
+                                }
+                                if (!parentToggle.getDependencies().isEmpty()) {
+                                    LOGGER.warn(
+                                            "[{}] depends on feature [{}] which also depends on something. We don't currently support more than one level of dependency resolution",
+                                            featureToggle.getName(),
+                                            parent.getFeature());
+                                    return false;
+                                }
+                                if (parent.isEnabled()) {
+                                    if (!parent.getVariants().isEmpty()) {
+                                        return parent.getVariants()
+                                                .contains(
+                                                        getVariant(parent.feature, context)
+                                                                .getName());
+                                    }
+                                    return isEnabled(parent.getFeature(), context, fallbackAction);
+                                } else {
+                                    return !isEnabled(parent.getFeature(), context, fallbackAction);
+                                }
+                            });
         }
     }
 

@@ -14,10 +14,7 @@ import io.getunleash.repository.*;
 import io.getunleash.strategy.DefaultStrategy;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -275,4 +272,18 @@ class DefaultUnleashTest {
         assertThat(id)
                 .isEqualTo("f83eb743f4c8dc41294aafb96f454763e5a90b96db8b7040ddc505d636bdb243");
     }
+
+    /*    @Test
+    public child_yields_a_disabled_variant_if_the_parents_variant_does_not_match_the_required_one() {
+        FeatureFetcher fetcher = mock(FeatureFetcher.class);
+        HashMap<String, String> childParameters = new HashMap<>();
+        childParameters.put("rollout", "100");
+        childParameters.put("stickiness", "default");
+        childParameters.put("groupId", "groupId");
+        FeatureToggle child = new FeatureToggle("parent.non.matching.variant.child.enabled", true, Collections.singletonList(new ActivationStrategy("flexibleRollout", childParameters)), Collections.singletonList(new VariantDefinition("child.variant", 1, new Payload("string", "variantValue"), Collections.emptyList())), false, Collections.singletonList(new FeatureDependency("parent.with.variant", true, asList("nonmatching.variant"))))
+        FeatureToggle parent = new FeatureToggle("parent.with.variant", true, Arrays.asList)
+
+        FeatureCollection expectedResponse = new FeatureCollection();
+        expectedResponse.add
+    }*/
 }

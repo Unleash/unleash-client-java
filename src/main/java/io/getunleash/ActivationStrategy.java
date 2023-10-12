@@ -2,6 +2,8 @@ package io.getunleash;
 
 import io.getunleash.lang.Nullable;
 import io.getunleash.variant.VariantDefinition;
+
+import javax.annotation.Nonnull;
 import java.util.*;
 
 public final class ActivationStrategy {
@@ -49,7 +51,9 @@ public final class ActivationStrategy {
         return constraints;
     }
 
+    @Nonnull
     public List<VariantDefinition> getVariants() {
-        return variants;
+
+            return variants;
     }
 }

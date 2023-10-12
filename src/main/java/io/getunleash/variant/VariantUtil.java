@@ -5,7 +5,9 @@ import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.StrategyUtils;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 
 public final class VariantUtil {
