@@ -209,8 +209,6 @@ public class DefaultUnleash implements Unleash {
         }
     }
 
-    //
-    // Checks a feature's dependencies (if it has any
     private boolean isParentDependencySatisfied(
             @Nonnull FeatureToggle featureToggle,
             @Nonnull UnleashContext context,
