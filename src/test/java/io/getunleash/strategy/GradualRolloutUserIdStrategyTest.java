@@ -98,7 +98,7 @@ public class GradualRolloutUserIdStrategyTest {
     public void should_be_enabled_above_minimum_percentage() {
         String userId = "1574576830";
         String groupId = "";
-        int minimumPercentage = StrategyUtils.getNormalizedNumber(userId, groupId);
+        int minimumPercentage = StrategyUtils.getNormalizedNumber(userId, groupId, 0);
 
         UnleashContext context = UnleashContext.builder().userId(userId).build();
 

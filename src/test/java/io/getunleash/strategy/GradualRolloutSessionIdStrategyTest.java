@@ -106,7 +106,7 @@ public class GradualRolloutSessionIdStrategyTest {
     public void should_be_enabled_above_minimum_percentage() {
         String sessionId = "1574576830";
         String groupId = "";
-        int minimumPercentage = StrategyUtils.getNormalizedNumber(sessionId, groupId);
+        int minimumPercentage = StrategyUtils.getNormalizedNumber(sessionId, groupId, 0);
 
         UnleashContext context = UnleashContext.builder().sessionId(sessionId).build();
 

@@ -35,13 +35,13 @@ public final class StrategyUtils {
      * @param groupId
      * @return
      */
-    public static int getNormalizedNumber(String identifier, String groupId) {
-        return getNormalizedNumber(identifier, groupId, ONE_HUNDRED);
+    public static int getNormalizedNumber(String identifier, String groupId, long seed) {
+        return getNormalizedNumber(identifier, groupId, ONE_HUNDRED, seed);
     }
 
-    public static int getNormalizedNumber(String identifier, String groupId, int normalizer) {
+    public static int getNormalizedNumber(String identifier, String groupId, int normalizer, long seed) {
         byte[] value = (groupId + ':' + identifier).getBytes();
-        long hash = Murmur3.hash_x86_32(value, value.length, 0);
+        long hash = Murmur3.hash_x86_32(value, value.length, seed);
         return (int) (hash % normalizer) + 1;
     }
 

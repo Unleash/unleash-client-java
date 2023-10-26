@@ -42,7 +42,7 @@ public final class GradualRolloutUserIdStrategy implements Strategy {
         final int percentage = StrategyUtils.getPercentage(parameters.get(PERCENTAGE));
         final String groupId = parameters.getOrDefault(GROUP_ID, "");
 
-        final int normalizedUserId = StrategyUtils.getNormalizedNumber(userId.get(), groupId);
+        final int normalizedUserId = StrategyUtils.getNormalizedNumber(userId.get(), groupId, 0);
 
         return percentage > 0 && normalizedUserId <= percentage;
     }
