@@ -29,13 +29,11 @@ public class StrategyUtilsTest {
     @Test
     public void selecting_ten_percent_of_users_and_then_finding_variants_should_still_have_variants_evenly_distributed() {
         int ones = 0, twos = 0, threes = 0, loopSize = 500000, selectionSize = 0;
-        Map<Integer, Integer> variantCounts = new HashMap<>();
         for (int i = 0; i < loopSize; i++) {
             String id = UUID.randomUUID().toString();
             int featureRollout = StrategyUtils.getNormalizedNumber(id, "feature.name.that.is.quite.long", 0);
             if (featureRollout < 11) {
                 int variantGroup = StrategyUtils.getNormalizedNumber(id, "feature.name.that.is.quite.long", 1000, VariantUtil.VARIANT_NORMALIZATION_SEED);
-                variantCounts.compute(variantGroup, (k, v) -> { if (v == null) { return 1; } else { return v+1; }});
                 if(variantGroup <= 333) {
                     ones++;
                 } else if (variantGroup <= 666) {
