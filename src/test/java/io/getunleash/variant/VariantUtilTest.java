@@ -11,9 +11,8 @@ import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -81,7 +80,7 @@ public class VariantUtilTest {
                 new FeatureToggle(
                         "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
-        UnleashContext context = UnleashContext.builder().userId("163").build();
+        UnleashContext context = UnleashContext.builder().userId("80").build();
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
@@ -98,7 +97,7 @@ public class VariantUtilTest {
                 new FeatureToggle(
                         "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
-        UnleashContext context = UnleashContext.builder().userId("40").build();
+        UnleashContext context = UnleashContext.builder().userId("163").build();
 
         Variant variant = VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT);
 
@@ -233,7 +232,7 @@ public class VariantUtilTest {
                 new FeatureToggle(
                         "test.variants", true, asList(defaultStrategy), asList(v1, v2, v3));
 
-        UnleashContext context = UnleashContext.builder().userId("40").build();
+        UnleashContext context = UnleashContext.builder().userId("163;").build();
         List<Variant> results =
                 IntStream.range(0, 500)
                         .mapToObj(i -> VariantUtil.selectVariant(toggle, context, DISABLED_VARIANT))
@@ -242,5 +241,49 @@ public class VariantUtilTest {
                 .allSatisfy(
                         (Consumer<Variant>)
                                 variant -> assertThat(variant.getName()).isEqualTo(v3.getName()));
+    }
+
+    @Test
+    public void custom_stickiness_variants() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("rollout", "100");
+        parameters.put("stickiness", "customField");
+        parameters.put("groupId", "Feature.flexible.rollout.custom.stickiness_100");
+        ActivationStrategy flexibleRollout = new ActivationStrategy("flexibleRollout", parameters);
+        List<VariantDefinition> variants = new ArrayList<>();
+        variants.add(new VariantDefinition("blue", 25, new Payload("string", "val1"), Collections.emptyList(), "customField"));
+        variants.add(new VariantDefinition("red", 25, new Payload("string", "val1"), Collections.emptyList(), "customField"));
+        variants.add(new VariantDefinition("green", 25, new Payload("string", "val1"), Collections.emptyList(), "customField"));
+        variants.add(new VariantDefinition("yellow", 25, new Payload("string", "val1"), Collections.emptyList(), "customField"));
+        FeatureToggle toggle = new FeatureToggle("Feature.flexible.rollout.custom.stickiness_100", true, asList(flexibleRollout), variants);
+        Variant variant = VariantUtil.selectVariant(toggle, UnleashContext.builder().addProperty("customField", "528").build(), DISABLED_VARIANT);
+        assertThat(variant.getName()).isEqualTo("red");
+    }
+
+    @Test
+    public void feature_variants_variant_b_client_spec_tests() {
+        List<VariantDefinition> variants = new ArrayList<>();
+        variants.add(new VariantDefinition("variant1", 1, new Payload("string", "val1"), Collections.emptyList()));
+        variants.add(new VariantDefinition("variant2", 1, new Payload("string", "val1"), Collections.emptyList()));
+        FeatureToggle toggle = new FeatureToggle("Feature.Variants.B", true, Collections.emptyList(), variants);
+        Variant variantUser2 = VariantUtil.selectVariant(toggle, UnleashContext.builder().userId("2").build(), DISABLED_VARIANT);
+        assertThat(variantUser2.getName()).isEqualTo("variant2");
+        Variant variantUser0 = VariantUtil.selectVariant(toggle, UnleashContext.builder().userId("0").build(), DISABLED_VARIANT);
+        assertThat(variantUser0.getName()).isEqualTo("variant1");
+    }
+
+    @Test
+    public void feature_variants_variant_c_client_spec_tests() {
+        List<VariantDefinition> variants = new ArrayList<>();
+        variants.add(new VariantDefinition("variant1", 33, new Payload("string", "val1"), Collections.emptyList()));
+        variants.add(new VariantDefinition("variant2", 33, new Payload("string", "val1"), Collections.emptyList()));
+        variants.add(new VariantDefinition("variant3", 33, new Payload("string", "val1"), Collections.emptyList()));
+        FeatureToggle toggle = new FeatureToggle("Feature.Variants.C", true, Collections.emptyList(), variants);
+        Variant variantUser269 = VariantUtil.selectVariant(toggle, UnleashContext.builder().userId("269").build(), DISABLED_VARIANT);
+        assertThat(variantUser269.getName()).isEqualTo("variant1");
+        Variant variantUser320 = VariantUtil.selectVariant(toggle, UnleashContext.builder().userId("268").build(), DISABLED_VARIANT);
+        assertThat(variantUser320.getName()).isEqualTo("variant2");
+        Variant variantUser729 = VariantUtil.selectVariant(toggle, UnleashContext.builder().userId("569").build(), DISABLED_VARIANT);
+        assertThat(variantUser729.getName()).isEqualTo("variant3");
     }
 }

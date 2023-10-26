@@ -5,7 +5,6 @@ import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.StrategyUtils;
-
 import java.util.*;
 import java.util.List;
 import java.util.function.Predicate;
@@ -119,10 +118,11 @@ public final class VariantUtil {
                     StrategyUtils.getNormalizedNumber(
                             getSeed(context, customStickiness),
                             parameters.get(GROUP_ID_KEY),
-                            totalWeight, VARIANT_NORMALIZATION_SEED);
+                            totalWeight,
+                            VARIANT_NORMALIZATION_SEED);
 
             int counter = 0;
-            for (VariantDefinition variant : variants) {
+l            for (VariantDefinition variant : variants) {
                 if (variant.getWeight() != 0) {
                     counter += variant.getWeight();
                     if (counter >= target) {
