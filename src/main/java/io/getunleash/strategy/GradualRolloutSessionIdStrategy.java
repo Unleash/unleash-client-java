@@ -42,7 +42,8 @@ public final class GradualRolloutSessionIdStrategy implements Strategy {
         final int percentage = StrategyUtils.getPercentage(parameters.get(PERCENTAGE));
         final String groupId = parameters.getOrDefault(GROUP_ID, "");
 
-        final int normalizedSessionId = StrategyUtils.getNormalizedNumber(sessionId.get(), groupId);
+        final int normalizedSessionId =
+                StrategyUtils.getNormalizedNumber(sessionId.get(), groupId, 0);
 
         return percentage > 0 && normalizedSessionId <= percentage;
     }

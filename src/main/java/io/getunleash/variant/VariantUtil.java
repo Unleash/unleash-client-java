@@ -5,13 +5,16 @@ import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.StrategyUtils;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Predicate;
 
 public final class VariantUtil {
     static final String GROUP_ID_KEY = "groupId";
+    // To avoid using the same seed for gradual rollout and variant selection.
+    // This caused an unfortunate bias since we'd already excluded x % of the hash results.
+    // This is the 5.000.001st prime.
+    public static final Long VARIANT_NORMALIZATION_SEED = 86028157L;
 
     private VariantUtil() {}
 
@@ -115,7 +118,8 @@ public final class VariantUtil {
                     StrategyUtils.getNormalizedNumber(
                             getSeed(context, customStickiness),
                             parameters.get(GROUP_ID_KEY),
-                            totalWeight);
+                            totalWeight,
+                            VARIANT_NORMALIZATION_SEED);
 
             int counter = 0;
             for (VariantDefinition variant : variants) {

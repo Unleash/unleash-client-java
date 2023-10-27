@@ -55,7 +55,7 @@ public class FlexibleRolloutStrategy implements Strategy {
         final String groupId = parameters.getOrDefault(GROUP_ID, "");
 
         return stickinessId
-                .map(stick -> StrategyUtils.getNormalizedNumber(stick, groupId))
+                .map(stick -> StrategyUtils.getNormalizedNumber(stick, groupId, 0))
                 .map(norm -> percentage > 0 && norm <= percentage)
                 .orElse(false);
     }

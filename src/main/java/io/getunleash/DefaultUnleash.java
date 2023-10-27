@@ -245,7 +245,10 @@ public class DefaultUnleash implements Unleash {
                                             parent.getFeature());
                                     return false;
                                 }
-                                if (parent.isEnabled()) {
+                                boolean parentSatisfied =
+                                        isEnabled(
+                                                parent.getFeature(), context, fallbackAction, true);
+                                if (parentSatisfied) {
                                     if (!parent.getVariants().isEmpty()) {
                                         return parent.getVariants()
                                                 .contains(
@@ -255,12 +258,11 @@ public class DefaultUnleash implements Unleash {
                                                                         DISABLED_VARIANT,
                                                                         true)
                                                                 .getName());
+                                    } else {
+                                        return parent.isEnabled();
                                     }
-                                    return isEnabled(
-                                            parent.getFeature(), context, fallbackAction, true);
                                 } else {
-                                    return !isEnabled(
-                                            parent.getFeature(), context, fallbackAction, true);
+                                    return !parent.isEnabled();
                                 }
                             });
         }
