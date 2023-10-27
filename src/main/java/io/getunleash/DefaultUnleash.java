@@ -245,10 +245,10 @@ public class DefaultUnleash implements Unleash {
                                             parent.getFeature());
                                     return false;
                                 }
-                                boolean parentEvaluation =
+                                boolean parentSatisfied =
                                         isEnabled(
                                                 parent.getFeature(), context, fallbackAction, true);
-                                if (parentEvaluation) {
+                                if (parentSatisfied) {
                                     if (!parent.getVariants().isEmpty()) {
                                         return parent.getVariants()
                                                 .contains(
