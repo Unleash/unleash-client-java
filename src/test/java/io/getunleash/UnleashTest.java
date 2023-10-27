@@ -377,11 +377,11 @@ public class UnleashTest {
 
     @Test
     public void get_second_variant() {
-        UnleashContext context = UnleashContext.builder().userId("111").build();
+        UnleashContext context = UnleashContext.builder().userId("5").build();
 
         // Set up a toggleName using UserWithIdStrategy
         Map<String, String> params = new HashMap<>();
-        params.put("userIds", "123, 111, 121, 13");
+        params.put("userIds", "123, 5, 121, 13");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());
@@ -457,12 +457,12 @@ public class UnleashTest {
     @Test
     public void get_second_variant_with_context_provider() {
 
-        UnleashContext context = UnleashContext.builder().userId("111").build();
+        UnleashContext context = UnleashContext.builder().userId("5").build();
         when(contextProvider.getContext()).thenReturn(context);
 
         // Set up a toggleName using UserWithIdStrategy
         Map<String, String> params = new HashMap<>();
-        params.put("userIds", "123, 111, 121");
+        params.put("userIds", "123, 5, 121");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());

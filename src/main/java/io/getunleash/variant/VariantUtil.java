@@ -122,7 +122,7 @@ public final class VariantUtil {
                             VARIANT_NORMALIZATION_SEED);
 
             int counter = 0;
-l            for (VariantDefinition variant : variants) {
+            for (VariantDefinition variant : variants) {
                 if (variant.getWeight() != 0) {
                     counter += variant.getWeight();
                     if (counter >= target) {

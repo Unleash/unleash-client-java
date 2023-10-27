@@ -1,5 +1,6 @@
 package io.getunleash;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -145,5 +146,34 @@ public class DependentFeatureToggleTest {
         Variant variant = sut.getVariant("child", UnleashContext.builder().userId("7").build());
         assertThat(variant).isNotNull();
         verify(eventDispatcher, times(2)).dispatch(any(VariantImpressionEvent.class));
+    }
+
+    @Test
+    public void
+            child_is_disabled_if_the_parent_is_disabled_even_if_the_childs_expected_variant_is_the_disabled_variant() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("rollout", "100");
+        parameters.put("stickiness", "default");
+        parameters.put("groupId", "groupId");
+        String parentName = "parent.disabled";
+        FeatureToggle parent =
+                new FeatureToggle(
+                        parentName,
+                        false,
+                        singletonList(new ActivationStrategy("default", new HashMap<>())));
+        String childName = "parent.disabled.child.expects.disabled.variant";
+        FeatureToggle child =
+                new FeatureToggle(
+                        childName,
+                        true,
+                        singletonList(new ActivationStrategy("flexibleRollout", parameters)),
+                        emptyList(),
+                        false,
+                        singletonList(
+                                new FeatureDependency(
+                                        parentName, null, singletonList("disabled"))));
+        when(featureRepository.getToggle(childName)).thenReturn(child);
+        when(featureRepository.getToggle(parentName)).thenReturn(parent);
+        assertThat(sut.isEnabled(childName, UnleashContext.builder().build())).isFalse();
     }
 }
