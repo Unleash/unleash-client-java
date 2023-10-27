@@ -19,6 +19,7 @@ public class ToggleBootstrapFileProvider implements ToggleBootstrapProvider {
     public ToggleBootstrapFileProvider() {
         this.path = getBootstrapFile();
     }
+
     /**
      * Accepts path to file to read either as constructor parameter or as environment variable in
      * "UNLEASH_BOOTSTRAP_FILE"
