@@ -528,9 +528,7 @@ public class UnleashConfig {
             return this;
         }
 
-        /***
-         * Don't poll for feature toggle updates
-         */
+        /** * Don't poll for feature toggle updates */
         public Builder disablePolling() {
             this.disablePolling = true;
             return this;
