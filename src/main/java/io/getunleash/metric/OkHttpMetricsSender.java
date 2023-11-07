@@ -60,19 +60,21 @@ public class OkHttpMetricsSender implements MetricSender {
     }
 
     @Override
-    public void registerClient(ClientRegistration registration) {
+    public int registerClient(ClientRegistration registration) {
         if (!config.isDisableMetrics()) {
             try {
-                post(clientRegistrationUrl, registration);
+                int statusCode = post(clientRegistrationUrl, registration);
                 eventDispatcher.dispatch(registration);
+                return statusCode;
             } catch (UnleashException ex) {
                 eventDispatcher.dispatch(ex);
             }
         }
+        return -1;
     }
 
     @Override
-    public void sendMetrics(ClientMetrics metrics) {
+    public int sendMetrics(ClientMetrics metrics) {
         if (!config.isDisableMetrics()) {
             try {
                 post(clientMetricsUrl, metrics);
@@ -81,6 +83,7 @@ public class OkHttpMetricsSender implements MetricSender {
                 eventDispatcher.dispatch(ex);
             }
         }
+        return -1;
     }
 
     private int post(HttpUrl url, Object o) {

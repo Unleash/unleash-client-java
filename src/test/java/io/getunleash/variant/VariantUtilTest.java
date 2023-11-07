@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import com.sangupta.murmur.Murmur3;
 import io.getunleash.ActivationStrategy;
 import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashContext;
@@ -410,4 +411,6 @@ public class VariantUtilTest {
                         toggle, UnleashContext.builder().userId("10").build(), DISABLED_VARIANT);
         assertThat(variantUser10.getName()).isEqualTo("variant2");
     }
+
+
 }

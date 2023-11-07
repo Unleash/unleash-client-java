@@ -13,7 +13,7 @@ public class FeatureToggleResponse implements UnleashEvent {
     public enum Status {
         NOT_CHANGED,
         CHANGED,
-        UNAVAILABLE
+        UNAVAILABLE,
     }
 
     private final Status status;
