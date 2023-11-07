@@ -108,7 +108,6 @@ public class FeatureRepository implements IFeatureRepository {
     }
 
     private void updateFeaturesInternal(@Nullable final Consumer<UnleashException> handler) {
-        LOGGER.info("Interval: {}. Failures: {}", interval.get(), failures.get());
         if (interval.get() <= 0L) {
             try {
                 ClientFeaturesResponse response = featureFetcher.fetchFeatures();
