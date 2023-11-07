@@ -8,18 +8,16 @@ import io.getunleash.event.UnleashReady;
 import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FeatureRepository implements IFeatureRepository {
-    private final Integer maxInterval; // Set to 20 times our polling interval, so with our default of 15 seconds, the longest interval will be 5 minutes.
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureRepository.class);
     private final UnleashConfig unleashConfig;
     private final BackupHandler<FeatureCollection> featureBackupHandler;
@@ -32,52 +30,74 @@ public class FeatureRepository implements IFeatureRepository {
 
     private AtomicInteger failures = new AtomicInteger(0);
     private AtomicInteger interval = new AtomicInteger(0);
+    private final Integer maxInterval;
 
     public FeatureRepository(UnleashConfig unleashConfig) {
         this(unleashConfig, new FeatureBackupHandlerFile(unleashConfig));
     }
 
     public FeatureRepository(
-        UnleashConfig unleashConfig,
-        final BackupHandler<FeatureCollection> featureBackupHandler) {
+            UnleashConfig unleashConfig,
+            final BackupHandler<FeatureCollection> featureBackupHandler) {
         this.unleashConfig = unleashConfig;
         this.featureBackupHandler = featureBackupHandler;
         this.featureFetcher = unleashConfig.getUnleashFeatureFetcherFactory().apply(unleashConfig);
         this.featureBootstrapHandler = new FeatureBootstrapHandler(unleashConfig);
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-        this.maxInterval = Integer.max(20, 300 / Integer.max(Long.valueOf(unleashConfig.getFetchTogglesInterval()).intValue(), 1));
+        this.maxInterval =
+                Integer.max(
+                        20,
+                        300
+                                / Integer.max(
+                                        Long.valueOf(unleashConfig.getFetchTogglesInterval())
+                                                .intValue(),
+                                        1));
 
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
     protected FeatureRepository(
-        UnleashConfig unleashConfig,
-        BackupHandler<FeatureCollection> featureBackupHandler,
-        EventDispatcher eventDispatcher,
-        FeatureFetcher featureFetcher,
-        FeatureBootstrapHandler featureBootstrapHandler) {
+            UnleashConfig unleashConfig,
+            BackupHandler<FeatureCollection> featureBackupHandler,
+            EventDispatcher eventDispatcher,
+            FeatureFetcher featureFetcher,
+            FeatureBootstrapHandler featureBootstrapHandler) {
 
         this.unleashConfig = unleashConfig;
         this.featureBackupHandler = featureBackupHandler;
         this.featureFetcher = featureFetcher;
         this.featureBootstrapHandler = featureBootstrapHandler;
         this.eventDispatcher = eventDispatcher;
-        this.maxInterval = Integer.max(20, 300 / Integer.max(Long.valueOf(unleashConfig.getFetchTogglesInterval()).intValue(), 1));
+        this.maxInterval =
+                Integer.max(
+                        20,
+                        300
+                                / Integer.max(
+                                        Long.valueOf(unleashConfig.getFetchTogglesInterval())
+                                                .intValue(),
+                                        1));
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
     protected FeatureRepository(
-        UnleashConfig unleashConfig,
-        FeatureBackupHandlerFile featureBackupHandler,
-        UnleashScheduledExecutor executor,
-        FeatureFetcher featureFetcher,
-        FeatureBootstrapHandler featureBootstrapHandler) {
+            UnleashConfig unleashConfig,
+            FeatureBackupHandlerFile featureBackupHandler,
+            UnleashScheduledExecutor executor,
+            FeatureFetcher featureFetcher,
+            FeatureBootstrapHandler featureBootstrapHandler) {
         this.unleashConfig = unleashConfig;
         this.featureBackupHandler = featureBackupHandler;
         this.featureFetcher = featureFetcher;
         this.featureBootstrapHandler = featureBootstrapHandler;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-        this.maxInterval = Integer.max(20, 300 / Integer.max(Long.valueOf(unleashConfig.getFetchTogglesInterval()).intValue(), 1));
+        this.maxInterval =
+                Integer.max(
+                        20,
+                        300
+                                / Integer.max(
+                                        Long.valueOf(unleashConfig.getFetchTogglesInterval())
+                                                .intValue(),
+                                        1));
         this.initCollections(executor);
     }
 
@@ -115,25 +135,23 @@ public class FeatureRepository implements IFeatureRepository {
                 if (response.getStatus() == ClientFeaturesResponse.Status.CHANGED) {
                     SegmentCollection segmentCollection = response.getSegmentCollection();
                     featureCollection =
-                        new FeatureCollection(
-                            response.getToggleCollection(),
-                            segmentCollection != null
-                                ? segmentCollection
-                                : new SegmentCollection(Collections.emptyList()));
+                            new FeatureCollection(
+                                    response.getToggleCollection(),
+                                    segmentCollection != null
+                                            ? segmentCollection
+                                            : new SegmentCollection(Collections.emptyList()));
 
                     featureBackupHandler.write(featureCollection);
                 } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
                     handleHttpErrorCodes(response.getHttpStatusCode());
                     return;
                 }
-
-                interval.set(Math.max(failures.decrementAndGet(),0));
+                interval.set(Math.max(failures.decrementAndGet(), 0));
                 if (!ready) {
                     eventDispatcher.dispatch(new UnleashReady());
                     ready = true;
                 }
             } catch (UnleashException e) {
-                interval.set(Math.min(failures.incrementAndGet(), maxInterval));
                 if (handler != null) {
                     handler.accept(e);
                 } else {
@@ -149,17 +167,30 @@ public class FeatureRepository implements IFeatureRepository {
         if (responseCode == 404) {
             interval.set(maxInterval);
             failures.incrementAndGet();
-            LOGGER.error("Server said that the API at {} does not exist. Backing off to {} times our poll interval to avoid overloading server", unleashConfig.getUnleashAPI(), maxInterval);
+            LOGGER.error(
+                    "Server said that the API at {} does not exist. Backing off to {} times our poll interval to avoid overloading server",
+                    unleashConfig.getUnleashAPI(),
+                    maxInterval);
         } else if (responseCode == 429) {
             interval.set(Math.min(failures.incrementAndGet(), maxInterval));
-            LOGGER.info("Client was RATE LIMITED for the {} time. Further backing off. Current backoff at {} times our poll interval", failures.get(), interval.get());
-        } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
+            LOGGER.info(
+                    "Client was RATE LIMITED for the {} time. Further backing off. Current backoff at {} times our poll interval",
+                    failures.get(),
+                    interval.get());
+        } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
+                || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
             failures.incrementAndGet();
             interval.set(maxInterval);
-            LOGGER.error("Client failed to authenticate to the Unleash API at {}. Backing off to {} times our poll interval to avoid overloading server", unleashConfig.getUnleashAPI(), maxInterval);
+            LOGGER.error(
+                    "Client failed to authenticate to the Unleash API at {}. Backing off to {} times our poll interval to avoid overloading server",
+                    unleashConfig.getUnleashAPI(),
+                    maxInterval);
         } else if (responseCode >= 500) {
             interval.set(Math.min(failures.incrementAndGet(), maxInterval));
-            LOGGER.info("Server failed with a {} status code. Backing off. Current backoff at {} times our poll interval", responseCode, interval.get());
+            LOGGER.info(
+                    "Server failed with a {} status code. Backing off. Current backoff at {} times our poll interval",
+                    responseCode,
+                    interval.get());
         }
     }
 
@@ -171,8 +202,8 @@ public class FeatureRepository implements IFeatureRepository {
     @Override
     public List<String> getFeatureNames() {
         return featureCollection.getToggleCollection().getFeatures().stream()
-            .map(FeatureToggle::getName)
-            .collect(Collectors.toList());
+                .map(FeatureToggle::getName)
+                .collect(Collectors.toList());
     }
 
     @Override

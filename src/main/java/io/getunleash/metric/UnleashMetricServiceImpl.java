@@ -2,14 +2,13 @@ package io.getunleash.metric;
 
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.HttpURLConnection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UnleashMetricServiceImpl implements UnleashMetricService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UnleashMetricServiceImpl.class);
@@ -38,7 +37,14 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
         this.started = LocalDateTime.now(ZoneId.of("UTC"));
         this.unleashConfig = unleashConfig;
         this.metricSender = metricSender;
-        this.maxInterval = Integer.max(20, 300 / Integer.max(Long.valueOf(unleashConfig.getSendMetricsInterval()).intValue(), 1));
+        this.maxInterval =
+                Integer.max(
+                        20,
+                        300
+                                / Integer.max(
+                                        Long.valueOf(unleashConfig.getSendMetricsInterval())
+                                                .intValue(),
+                                        1));
         long metricsInterval = unleashConfig.getSendMetricsInterval();
         executor.setInterval(sendMetrics(), metricsInterval, metricsInterval);
     }
@@ -86,17 +92,30 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
         if (responseCode == 404) {
             interval.set(maxInterval);
             failures.incrementAndGet();
-            LOGGER.error("Server said that the Metrics receiving endpoint at {} does not exist. Backing off to {} times our poll interval to avoid overloading server", unleashConfig.getUnleashURLs().getClientMetricsURL(), maxInterval);
+            LOGGER.error(
+                    "Server said that the Metrics receiving endpoint at {} does not exist. Backing off to {} times our poll interval to avoid overloading server",
+                    unleashConfig.getUnleashURLs().getClientMetricsURL(),
+                    maxInterval);
         } else if (responseCode == 429) {
             interval.set(Math.min(failures.incrementAndGet(), maxInterval));
-            LOGGER.info("Client Metrics was RATE LIMITED for the {}. time. Further backing off. Current backoff at {} times our metrics post interval", failures.get(), interval.get());
-        } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
+            LOGGER.info(
+                    "Client Metrics was RATE LIMITED for the {}. time. Further backing off. Current backoff at {} times our metrics post interval",
+                    failures.get(),
+                    interval.get());
+        } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
+                || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
             failures.incrementAndGet();
             interval.set(maxInterval);
-            LOGGER.error("Client was not authorized to post metrics to the Unleash API at {}. Backing off to {} times our poll interval to avoid overloading server", unleashConfig.getUnleashURLs().getClientMetricsURL(), maxInterval);
+            LOGGER.error(
+                    "Client was not authorized to post metrics to the Unleash API at {}. Backing off to {} times our poll interval to avoid overloading server",
+                    unleashConfig.getUnleashURLs().getClientMetricsURL(),
+                    maxInterval);
         } else if (responseCode >= 500) {
             interval.set(Math.min(failures.incrementAndGet(), maxInterval));
-            LOGGER.info("Server failed with a {} status code. Backing off. Current backoff at {} times our poll interval", responseCode, interval.get());
+            LOGGER.info(
+                    "Server failed with a {} status code. Backing off. Current backoff at {} times our poll interval",
+                    responseCode,
+                    interval.get());
         }
     }
 
