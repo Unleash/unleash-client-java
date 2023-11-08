@@ -122,7 +122,6 @@ public class FeatureRepository implements IFeatureRepository {
         }
     }
 
-    //
     private Runnable updateFeatures(@Nullable final Consumer<UnleashException> handler) {
         return () -> updateFeaturesInternal(handler);
     }
