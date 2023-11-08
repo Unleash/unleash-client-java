@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 public class FeatureRepositoryTest {
-
     FeatureBackupHandlerFile backupHandler;
 
     FeatureBootstrapHandler bootstrapHandler;
@@ -291,6 +290,336 @@ public class FeatureRepositoryTest {
         new FeatureRepository(
                 config, backupHandler, new EventDispatcher(config), fetcher, bootstrapHandler);
         verify(toggleBootstrapProvider, times(0)).read();
+    }
+
+    @Test
+    public void should_increase_to_max_interval_when_denied()
+            throws URISyntaxException, IOException {
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        File file =
+                new File(getClass().getClassLoader().getResource("unleash-repo-v2.json").toURI());
+        ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
+        when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(false)
+                        .appName("test-sync-update")
+                        .scheduledExecutor(executor)
+                        .unleashAPI("http://localhost:8080")
+                        .build();
+        when(backupHandler.read())
+                .thenReturn(
+                        populatedFeatureCollection(
+                                Arrays.asList(
+                                        new Segment(
+                                                1,
+                                                "some-name",
+                                                Arrays.asList(
+                                                        new Constraint(
+                                                                "some-context",
+                                                                Operator.IN,
+                                                                "some-value")))),
+                                new FeatureToggle(
+                                        "toggleFeatureName1",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null))),
+                                new FeatureToggle(
+                                        "toggleFeatureName2",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null)))));
+        when(fetcher.fetchFeatures())
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 403))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
+
+        FeatureRepository featureRepository =
+                new FeatureRepository(
+                        config,
+                        backupHandler,
+                        new EventDispatcher(config),
+                        fetcher,
+                        bootstrapHandler);
+        verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        assertThat(featureRepository.getSkips()).isEqualTo(30);
+        for (int i = 0; i < 30; i++) {
+            runnableArgumentCaptor.getValue().run();
+        }
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getFailures()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+    }
+
+    @Test
+    public void should_increase_to_max_interval_when_not_found()
+            throws URISyntaxException, IOException {
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        File file =
+                new File(getClass().getClassLoader().getResource("unleash-repo-v2.json").toURI());
+        ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
+        when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(false)
+                        .appName("test-sync-update")
+                        .scheduledExecutor(executor)
+                        .unleashAPI("http://localhost:8080")
+                        .build();
+        when(backupHandler.read())
+                .thenReturn(
+                        populatedFeatureCollection(
+                                Arrays.asList(
+                                        new Segment(
+                                                1,
+                                                "some-name",
+                                                Arrays.asList(
+                                                        new Constraint(
+                                                                "some-context",
+                                                                Operator.IN,
+                                                                "some-value")))),
+                                new FeatureToggle(
+                                        "toggleFeatureName1",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null))),
+                                new FeatureToggle(
+                                        "toggleFeatureName2",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null)))));
+        when(fetcher.fetchFeatures())
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 404))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
+
+        FeatureRepository featureRepository =
+                new FeatureRepository(
+                        config,
+                        backupHandler,
+                        new EventDispatcher(config),
+                        fetcher,
+                        bootstrapHandler);
+        verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        assertThat(featureRepository.getSkips()).isEqualTo(30);
+        for (int i = 0; i < 30; i++) {
+            runnableArgumentCaptor.getValue().run();
+        }
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getFailures()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+    }
+
+    @Test
+    public void should_incrementally_increase_interval_as_we_receive_too_many_requests()
+            throws URISyntaxException, IOException {
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        File file =
+                new File(getClass().getClassLoader().getResource("unleash-repo-v2.json").toURI());
+        ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
+        when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(false)
+                        .appName("test-sync-update")
+                        .scheduledExecutor(executor)
+                        .unleashAPI("http://localhost:8080")
+                        .build();
+        when(backupHandler.read())
+                .thenReturn(
+                        populatedFeatureCollection(
+                                Arrays.asList(
+                                        new Segment(
+                                                1,
+                                                "some-name",
+                                                Arrays.asList(
+                                                        new Constraint(
+                                                                "some-context",
+                                                                Operator.IN,
+                                                                "some-value")))),
+                                new FeatureToggle(
+                                        "toggleFeatureName1",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null))),
+                                new FeatureToggle(
+                                        "toggleFeatureName2",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null)))));
+        FeatureRepository featureRepository =
+                new FeatureRepository(
+                        config,
+                        backupHandler,
+                        new EventDispatcher(config),
+                        fetcher,
+                        bootstrapHandler);
+        verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
+        when(fetcher.fetchFeatures())
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 429))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 429))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 429))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
+        runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(3);
+        assertThat(featureRepository.getFailures()).isEqualTo(3);
+        runnableArgumentCaptor.getValue().run();
+        runnableArgumentCaptor.getValue().run();
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(3);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runnableArgumentCaptor.getValue().run();
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(0);
+    }
+
+    @Test
+    public void server_errors_should_incrementally_increase_interval()
+            throws URISyntaxException, IOException {
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        File file =
+                new File(getClass().getClassLoader().getResource("unleash-repo-v2.json").toURI());
+        ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
+        when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(false)
+                        .appName("test-sync-update")
+                        .scheduledExecutor(executor)
+                        .unleashAPI("http://localhost:8080")
+                        .build();
+        when(backupHandler.read())
+                .thenReturn(
+                        populatedFeatureCollection(
+                                Arrays.asList(
+                                        new Segment(
+                                                1,
+                                                "some-name",
+                                                Arrays.asList(
+                                                        new Constraint(
+                                                                "some-context",
+                                                                Operator.IN,
+                                                                "some-value")))),
+                                new FeatureToggle(
+                                        "toggleFeatureName1",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null))),
+                                new FeatureToggle(
+                                        "toggleFeatureName2",
+                                        true,
+                                        Collections.singletonList(
+                                                new ActivationStrategy("custom", null)))));
+        FeatureRepository featureRepository =
+                new FeatureRepository(
+                        config,
+                        backupHandler,
+                        new EventDispatcher(config),
+                        fetcher,
+                        bootstrapHandler);
+        verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
+        when(fetcher.fetchFeatures())
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 500))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 502))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 503))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
+                .thenReturn(
+                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
+        runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(3);
+        assertThat(featureRepository.getFailures()).isEqualTo(3);
+        runnableArgumentCaptor.getValue().run();
+        runnableArgumentCaptor.getValue().run();
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(3);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runnableArgumentCaptor.getValue().run();
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runnableArgumentCaptor.getValue().run();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(0);
     }
 
     private String fileToString(File f) throws IOException {

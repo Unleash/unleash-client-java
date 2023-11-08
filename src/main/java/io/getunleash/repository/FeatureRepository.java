@@ -6,20 +6,25 @@ import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashReady;
 import io.getunleash.lang.Nullable;
+import io.getunleash.util.Throttler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FeatureRepository implements IFeatureRepository {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureRepository.class);
     private final UnleashConfig unleashConfig;
     private final BackupHandler<FeatureCollection> featureBackupHandler;
     private final FeatureBootstrapHandler featureBootstrapHandler;
     private final FeatureFetcher featureFetcher;
     private final EventDispatcher eventDispatcher;
+
+    private final Throttler throttler;
 
     private FeatureCollection featureCollection;
     private boolean ready;
@@ -36,7 +41,11 @@ public class FeatureRepository implements IFeatureRepository {
         this.featureFetcher = unleashConfig.getUnleashFeatureFetcherFactory().apply(unleashConfig);
         this.featureBootstrapHandler = new FeatureBootstrapHandler(unleashConfig);
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-
+        this.throttler =
+                new Throttler(
+                        (int) unleashConfig.getFetchTogglesInterval(),
+                        300,
+                        unleashConfig.getUnleashURLs().getFetchTogglesURL());
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
@@ -46,12 +55,16 @@ public class FeatureRepository implements IFeatureRepository {
             EventDispatcher eventDispatcher,
             FeatureFetcher featureFetcher,
             FeatureBootstrapHandler featureBootstrapHandler) {
-
         this.unleashConfig = unleashConfig;
         this.featureBackupHandler = featureBackupHandler;
         this.featureFetcher = featureFetcher;
         this.featureBootstrapHandler = featureBootstrapHandler;
         this.eventDispatcher = eventDispatcher;
+        this.throttler =
+                new Throttler(
+                        (int) unleashConfig.getFetchTogglesInterval(),
+                        300,
+                        unleashConfig.getUnleashURLs().getFetchTogglesURL());
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
@@ -66,6 +79,11 @@ public class FeatureRepository implements IFeatureRepository {
         this.featureFetcher = featureFetcher;
         this.featureBootstrapHandler = featureBootstrapHandler;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
+        this.throttler =
+                new Throttler(
+                        (int) unleashConfig.getFetchTogglesInterval(),
+                        300,
+                        unleashConfig.getUnleashURLs().getFetchTogglesURL());
         this.initCollections(executor);
     }
 
@@ -90,33 +108,44 @@ public class FeatureRepository implements IFeatureRepository {
         }
     }
 
+    private Integer calculateMaxSkips(int fetchTogglesInterval) {
+        return Integer.max(20, 300 / Integer.max(fetchTogglesInterval, 1));
+    }
+
     private Runnable updateFeatures(@Nullable final Consumer<UnleashException> handler) {
         return () -> {
-            try {
-                ClientFeaturesResponse response = featureFetcher.fetchFeatures();
-                eventDispatcher.dispatch(response);
-                if (response.getStatus() == ClientFeaturesResponse.Status.CHANGED) {
-                    SegmentCollection segmentCollection = response.getSegmentCollection();
-                    featureCollection =
-                            new FeatureCollection(
-                                    response.getToggleCollection(),
-                                    segmentCollection != null
-                                            ? segmentCollection
-                                            : new SegmentCollection(Collections.emptyList()));
+            if (throttler.performAction()) {
+                try {
+                    ClientFeaturesResponse response = featureFetcher.fetchFeatures();
+                    eventDispatcher.dispatch(response);
+                    if (response.getStatus() == ClientFeaturesResponse.Status.CHANGED) {
+                        SegmentCollection segmentCollection = response.getSegmentCollection();
+                        featureCollection =
+                                new FeatureCollection(
+                                        response.getToggleCollection(),
+                                        segmentCollection != null
+                                                ? segmentCollection
+                                                : new SegmentCollection(Collections.emptyList()));
 
-                    featureBackupHandler.write(featureCollection);
+                        featureBackupHandler.write(featureCollection);
+                    } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
+                        throttler.handleHttpErrorCodes(response.getHttpStatusCode());
+                        return;
+                    }
+                    throttler.decrementFailureCountAndResetSkips();
+                    if (!ready) {
+                        eventDispatcher.dispatch(new UnleashReady());
+                        ready = true;
+                    }
+                } catch (UnleashException e) {
+                    if (handler != null) {
+                        handler.accept(e);
+                    } else {
+                        throw e;
+                    }
                 }
-
-                if (!ready) {
-                    eventDispatcher.dispatch(new UnleashReady());
-                    ready = true;
-                }
-            } catch (UnleashException e) {
-                if (handler != null) {
-                    handler.accept(e);
-                } else {
-                    throw e;
-                }
+            } else {
+                throttler.skipped(); // We didn't do anything this iteration, just reduce the count
             }
         };
     }
@@ -136,5 +165,13 @@ public class FeatureRepository implements IFeatureRepository {
     @Override
     public Segment getSegment(Integer id) {
         return featureCollection.getSegmentCollection().getSegment(id);
+    }
+
+    public Integer getFailures() {
+        return this.throttler.getFailures();
+    }
+
+    public Integer getSkips() {
+        return this.throttler.getSkips();
     }
 }

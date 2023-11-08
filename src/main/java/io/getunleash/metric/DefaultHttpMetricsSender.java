@@ -37,26 +37,32 @@ public class DefaultHttpMetricsSender implements MetricSender {
                         .create();
     }
 
-    public void registerClient(ClientRegistration registration) {
+    public int registerClient(ClientRegistration registration) {
         if (!unleashConfig.isDisableMetrics()) {
             try {
-                post(clientRegistrationURL, registration);
+                int statusCode = post(clientRegistrationURL, registration);
                 eventDispatcher.dispatch(registration);
+                return statusCode;
             } catch (UnleashException ex) {
                 eventDispatcher.dispatch(ex);
+                return -1;
             }
         }
+        return -1;
     }
 
-    public void sendMetrics(ClientMetrics metrics) {
+    public int sendMetrics(ClientMetrics metrics) {
         if (!unleashConfig.isDisableMetrics()) {
             try {
-                post(clientMetricsURL, metrics);
+                int statusCode = post(clientMetricsURL, metrics);
                 eventDispatcher.dispatch(metrics);
+                return statusCode;
             } catch (UnleashException ex) {
                 eventDispatcher.dispatch(ex);
+                return -1;
             }
         }
+        return -1;
     }
 
     private int post(URL url, Object o) throws UnleashException {

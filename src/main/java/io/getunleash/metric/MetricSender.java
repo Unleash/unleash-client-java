@@ -1,7 +1,7 @@
 package io.getunleash.metric;
 
 public interface MetricSender {
-    void registerClient(ClientRegistration registration);
+    int registerClient(ClientRegistration registration);
 
-    void sendMetrics(ClientMetrics metrics);
+    int sendMetrics(ClientMetrics metrics);
 }

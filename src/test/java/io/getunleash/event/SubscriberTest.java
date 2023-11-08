@@ -1,7 +1,8 @@
 package io.getunleash.event;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static io.getunleash.repository.FeatureToggleResponse.Status.UNAVAILABLE;
+import static io.getunleash.repository.FeatureToggleResponse.Status.CHANGED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
@@ -44,19 +45,29 @@ public class SubscriberTest {
     }
 
     @Test
-    void subscriberAreNotified() {
+    void subscribersAreNotified() {
+        serverMock.stubFor(post("/client/register").willReturn(ok()));
+        serverMock.stubFor(post("/client/metrics").willReturn(ok()));
+        serverMock.stubFor(
+                get("/client/features")
+                        .willReturn(
+                                ok().withHeader("Content-Type", "application/json")
+                                        .withBody("{\"features\": [], \"version\": 2 }")));
         Unleash unleash = new DefaultUnleash(unleashConfig);
 
         unleash.isEnabled("myFeature");
         unleash.isEnabled("myFeature");
         unleash.isEnabled("myFeature");
 
-        assertThat(testSubscriber.togglesFetchedCounter).isEqualTo(2); // one forced, one scheduled
-        assertThat(testSubscriber.status).isEqualTo(UNAVAILABLE);
+        assertThat(testSubscriber.togglesFetchedCounter)
+                .isEqualTo(
+                        2); // Server successfully returns, we call synchronous fetch and schedule
+        // once, so 2 calls.
+        assertThat(testSubscriber.status).isEqualTo(CHANGED);
         assertThat(testSubscriber.toggleEvaluatedCounter).isEqualTo(3);
         assertThat(testSubscriber.toggleName).isEqualTo("myFeature");
         assertThat(testSubscriber.toggleEnabled).isFalse();
-        assertThat(testSubscriber.errors).hasSize(2);
+        assertThat(testSubscriber.errors).isEmpty();
 
         //        assertThat(testSubscriber.events).filteredOn(e -> e instanceof
         // ToggleBootstrapHandler.ToggleBootstrapRead).hasSize(1);

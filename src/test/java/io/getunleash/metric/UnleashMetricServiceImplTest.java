@@ -196,4 +196,220 @@ public class UnleashMetricServiceImplTest {
         assertThat(bucket.getToggles().get("someToggle").getYes()).isEqualTo(0l);
         assertThat(bucket.getToggles().get("someToggle").getNo()).isEqualTo(0l);
     }
+
+    @Test
+    public void should_backoff_when_told_to_by_429_code() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test")
+                        .sendMetricsInterval(10)
+                        .unleashAPI("http://unleash.com")
+                        .build();
+
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+
+        UnleashMetricServiceImpl unleashMetricService =
+                new UnleashMetricServiceImpl(config, sender, executor);
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v2");
+        unleashMetricService.countVariant("someToggle", "disabled");
+
+        // Call the sendMetricsCallback
+        ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
+        verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
+
+        when(sender.sendMetrics(any(ClientMetrics.class)))
+                .thenReturn(429)
+                .thenReturn(429)
+                .thenReturn(429)
+                .thenReturn(200)
+                .thenReturn(200)
+                .thenReturn(200)
+                .thenReturn(200);
+
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(1);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(2);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(2);
+        sendMetricsCallback.getValue().run(); // NO-OP because interval > 0
+        sendMetricsCallback.getValue().run(); // NO-OP because interval > 0
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(2);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(3);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(3);
+        sendMetricsCallback.getValue().run();
+        sendMetricsCallback.getValue().run();
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(3);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(2);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(2);
+        sendMetricsCallback.getValue().run();
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(2);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(1);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(0);
+    }
+
+    @Test
+    public void server_errors_should_also_incrementally_backoff() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test")
+                        .sendMetricsInterval(10)
+                        .unleashAPI("http://unleash.com")
+                        .build();
+
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+
+        UnleashMetricServiceImpl unleashMetricService =
+                new UnleashMetricServiceImpl(config, sender, executor);
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v2");
+        unleashMetricService.countVariant("someToggle", "disabled");
+
+        // Call the sendMetricsCallback
+        ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
+        verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
+        when(sender.sendMetrics(any(ClientMetrics.class)))
+                .thenReturn(500)
+                .thenReturn(502)
+                .thenReturn(503)
+                .thenReturn(304)
+                .thenReturn(304)
+                .thenReturn(304)
+                .thenReturn(304);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(1);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(2);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(2);
+        sendMetricsCallback.getValue().run(); // NO-OP because interval > 0
+        sendMetricsCallback.getValue().run(); // NO-OP because interval > 0
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(2);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(3);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(3);
+        sendMetricsCallback.getValue().run();
+        sendMetricsCallback.getValue().run();
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(3);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(2);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(2);
+        sendMetricsCallback.getValue().run();
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(2);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(1);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(0);
+    }
+
+    @Test
+    public void failure_to_authenticate_immediately_increases_interval_to_max() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test")
+                        .sendMetricsInterval(10)
+                        .unleashAPI("http://unleash.com")
+                        .build();
+
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+
+        UnleashMetricServiceImpl unleashMetricService =
+                new UnleashMetricServiceImpl(config, sender, executor);
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v2");
+        unleashMetricService.countVariant("someToggle", "disabled");
+
+        // Call the sendMetricsCallback
+        ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
+        verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
+        when(sender.sendMetrics(any(ClientMetrics.class))).thenReturn(403).thenReturn(200);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(30);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        for (int i = 0; i < 30; i++) {
+            sendMetricsCallback.getValue().run();
+        }
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getFailures()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+    }
+
+    @Test
+    public void url_not_found_immediately_increases_interval_to_max() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test")
+                        .sendMetricsInterval(10)
+                        .unleashAPI("http://unleash.com")
+                        .build();
+
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+
+        UnleashMetricServiceImpl unleashMetricService =
+                new UnleashMetricServiceImpl(config, sender, executor);
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v1");
+        unleashMetricService.countVariant("someToggle", "v2");
+        unleashMetricService.countVariant("someToggle", "disabled");
+
+        // Call the sendMetricsCallback
+        ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
+        verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
+        when(sender.sendMetrics(any(ClientMetrics.class))).thenReturn(404).thenReturn(200);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getSkips()).isEqualTo(30);
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        for (int i = 0; i < 30; i++) {
+            sendMetricsCallback.getValue().run();
+        }
+        assertThat(unleashMetricService.getFailures()).isEqualTo(1);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+        sendMetricsCallback.getValue().run();
+        assertThat(unleashMetricService.getFailures()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+    }
 }

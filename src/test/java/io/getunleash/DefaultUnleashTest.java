@@ -243,7 +243,6 @@ class DefaultUnleashTest {
         when(fetcher.fetchFeatures())
                 .thenThrow(UnleashException.class)
                 .thenReturn(new ClientFeaturesResponse(expectedStatus, expectedResponse));
-
         UnleashConfig config =
                 UnleashConfig.builder()
                         .unleashAPI("http://wrong:4242")
