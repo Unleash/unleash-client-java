@@ -67,8 +67,7 @@ public class Throttler {
                     "Server said that the endpoint at {} does not exist. Backing off to {} times our poll interval (of {} seconds) to avoid overloading server",
                     this.target,
                     maxSkips,
-                this.intervalLength
-                );
+                    this.intervalLength);
         } else if (responseCode == 429) {
             increaseSkipCount();
             LOGGER.info(
@@ -83,7 +82,7 @@ public class Throttler {
                     "Client was not authorized to talk to the Unleash API at {}. Backing off to {} times our poll interval (of {} seconds) to avoid overloading server",
                     this.target,
                     maxSkips,
-                this.intervalLength);
+                    this.intervalLength);
         } else if (responseCode >= 500) {
             increaseSkipCount();
             LOGGER.info(
