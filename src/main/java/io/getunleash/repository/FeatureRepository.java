@@ -113,43 +113,41 @@ public class FeatureRepository implements IFeatureRepository {
     }
 
     private Runnable updateFeatures(@Nullable final Consumer<UnleashException> handler) {
-        return () -> updateFeaturesInternal(handler);
-    }
+        return () -> {
+            if (throttler.performAction()) {
+                try {
+                    ClientFeaturesResponse response = featureFetcher.fetchFeatures();
+                    eventDispatcher.dispatch(response);
+                    if (response.getStatus() == ClientFeaturesResponse.Status.CHANGED) {
+                        SegmentCollection segmentCollection = response.getSegmentCollection();
+                        featureCollection =
+                                new FeatureCollection(
+                                        response.getToggleCollection(),
+                                        segmentCollection != null
+                                                ? segmentCollection
+                                                : new SegmentCollection(Collections.emptyList()));
 
-    private void updateFeaturesInternal(@Nullable final Consumer<UnleashException> handler) {
-        if (throttler.performAction()) {
-            try {
-                ClientFeaturesResponse response = featureFetcher.fetchFeatures();
-                eventDispatcher.dispatch(response);
-                if (response.getStatus() == ClientFeaturesResponse.Status.CHANGED) {
-                    SegmentCollection segmentCollection = response.getSegmentCollection();
-                    featureCollection =
-                            new FeatureCollection(
-                                    response.getToggleCollection(),
-                                    segmentCollection != null
-                                            ? segmentCollection
-                                            : new SegmentCollection(Collections.emptyList()));
-
-                    featureBackupHandler.write(featureCollection);
-                } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
-                    throttler.handleHttpErrorCodes(response.getHttpStatusCode());
-                    return;
+                        featureBackupHandler.write(featureCollection);
+                    } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
+                        throttler.handleHttpErrorCodes(response.getHttpStatusCode());
+                        return;
+                    }
+                    throttler.decrementFailureCountAndResetSkips();
+                    if (!ready) {
+                        eventDispatcher.dispatch(new UnleashReady());
+                        ready = true;
+                    }
+                } catch (UnleashException e) {
+                    if (handler != null) {
+                        handler.accept(e);
+                    } else {
+                        throw e;
+                    }
                 }
-                throttler.decrementFailureCountAndResetSkips();
-                if (!ready) {
-                    eventDispatcher.dispatch(new UnleashReady());
-                    ready = true;
-                }
-            } catch (UnleashException e) {
-                if (handler != null) {
-                    handler.accept(e);
-                } else {
-                    throw e;
-                }
+            } else {
+                throttler.skipped(); // We didn't do anything this iteration, just reduce the count
             }
-        } else {
-            throttler.skipped(); // We didn't do anything this iteration, just reduce the count
-        }
+        };
     }
 
     @Override
