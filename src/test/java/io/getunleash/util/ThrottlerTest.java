@@ -1,17 +1,17 @@
 package io.getunleash.util;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class ThrottlerTest {
 
     @Test
     public void shouldNeverDecrementFailuresOrSkipsBelowZero() throws MalformedURLException {
-        Throttler throttler = new Throttler(10, 300, URI.create("https://localhost:1500/api").toURL());
+        Throttler throttler =
+                new Throttler(10, 300, URI.create("https://localhost:1500/api").toURL());
         throttler.decrementFailureCountAndResetSkips();
         throttler.decrementFailureCountAndResetSkips();
         throttler.decrementFailureCountAndResetSkips();
@@ -23,7 +23,8 @@ class ThrottlerTest {
 
     @Test
     public void setToMaxShouldReduceDownEventually() throws MalformedURLException {
-        Throttler throttler = new Throttler(150, 300,URI.create("https://localhost:1500/api").toURL());
+        Throttler throttler =
+                new Throttler(150, 300, URI.create("https://localhost:1500/api").toURL());
         throttler.handleHttpErrorCodes(404);
         assertThat(throttler.getSkips()).isEqualTo(2);
         assertThat(throttler.getFailures()).isEqualTo(1);
@@ -40,9 +41,11 @@ class ThrottlerTest {
         assertThat(throttler.getSkips()).isEqualTo(0);
         assertThat(throttler.getFailures()).isEqualTo(0);
     }
+
     @Test
     public void handleIntermittentFailures() throws MalformedURLException {
-        Throttler throttler = new Throttler(50, 300, URI.create("https://localhost:1500/api").toURL());
+        Throttler throttler =
+                new Throttler(50, 300, URI.create("https://localhost:1500/api").toURL());
         throttler.handleHttpErrorCodes(429);
         throttler.handleHttpErrorCodes(429);
         throttler.handleHttpErrorCodes(503);
@@ -64,6 +67,5 @@ class ThrottlerTest {
         throttler.decrementFailureCountAndResetSkips();
         assertThat(throttler.getSkips()).isEqualTo(0);
         assertThat(throttler.getFailures()).isEqualTo(0);
-
     }
 }
