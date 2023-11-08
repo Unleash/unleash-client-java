@@ -61,7 +61,15 @@ public class Throttler {
     }
 
     public void handleHttpErrorCodes(int responseCode) {
-        if (responseCode == 404) {
+        if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
+            maximizeSkips();
+            LOGGER.error(
+                "Client was not authorized to talk to the Unleash API at {}. Backing off to {} times our poll interval (of {} seconds) to avoid overloading server",
+                this.target,
+                maxSkips,
+                this.intervalLength);
+        }
+        if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
             maximizeSkips();
             LOGGER.error(
                     "Server said that the endpoint at {} does not exist. Backing off to {} times our poll interval (of {} seconds) to avoid overloading server",
@@ -75,15 +83,7 @@ public class Throttler {
                     failures.get(),
                     skips.get(),
                     this.intervalLength);
-        } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
-                || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
-            maximizeSkips();
-            LOGGER.error(
-                    "Client was not authorized to talk to the Unleash API at {}. Backing off to {} times our poll interval (of {} seconds) to avoid overloading server",
-                    this.target,
-                    maxSkips,
-                    this.intervalLength);
-        } else if (responseCode >= 500) {
+        } else if (responseCode >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
             increaseSkipCount();
             LOGGER.info(
                     "Server failed with a {} status code. Backing off. Current backoff at {} times our poll interval (of {} seconds)",
