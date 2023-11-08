@@ -21,8 +21,8 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
     private volatile MetricsBucket currentMetricsBucket;
 
     private final int maxInterval;
-    private AtomicInteger failures = new AtomicInteger();
-    private AtomicInteger interval = new AtomicInteger();
+    private final AtomicInteger failures = new AtomicInteger();
+    private final AtomicInteger interval = new AtomicInteger();
 
     public UnleashMetricServiceImpl(
             UnleashConfig unleashConfig, UnleashScheduledExecutor executor) {
