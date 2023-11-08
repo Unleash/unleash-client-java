@@ -42,8 +42,7 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
                         20,
                         300
                                 / Integer.max(
-                                        Long.valueOf(unleashConfig.getSendMetricsInterval())
-                                                .intValue(),
+                                        (int) unleashConfig.getSendMetricsInterval(),
                                         1));
         long metricsInterval = unleashConfig.getSendMetricsInterval();
         executor.setInterval(sendMetrics(), metricsInterval, metricsInterval);
