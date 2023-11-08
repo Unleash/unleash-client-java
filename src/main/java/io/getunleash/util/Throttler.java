@@ -30,7 +30,9 @@ public class Throttler {
      * immediately after a sequence of errors.
      */
     public void decrementFailureCountAndResetSkips() {
-        skips.set(Math.max(failures.decrementAndGet(), 0));
+        if (failures.get() > 0) {
+            skips.set(Math.max(failures.decrementAndGet(), 0));
+        }
     }
 
     /**
@@ -61,13 +63,14 @@ public class Throttler {
     }
 
     public void handleHttpErrorCodes(int responseCode) {
-        if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
+        if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
+                || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
             maximizeSkips();
             LOGGER.error(
-                "Client was not authorized to talk to the Unleash API at {}. Backing off to {} times our poll interval (of {} seconds) to avoid overloading server",
-                this.target,
-                maxSkips,
-                this.intervalLength);
+                    "Client was not authorized to talk to the Unleash API at {}. Backing off to {} times our poll interval (of {} seconds) to avoid overloading server",
+                    this.target,
+                    maxSkips,
+                    this.intervalLength);
         }
         if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
             maximizeSkips();
