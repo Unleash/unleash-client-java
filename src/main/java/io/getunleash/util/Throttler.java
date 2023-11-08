@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 public class Throttler {
     private static final Logger LOGGER = LoggerFactory.getLogger(Throttler.class);
     private final int maxSkips;
+
+    private final int intervalLength;
     private final AtomicInteger skips = new AtomicInteger(0);
     private final AtomicInteger failures = new AtomicInteger(0);
 
@@ -19,6 +21,7 @@ public class Throttler {
     public Throttler(int intervalLengthSeconds, int longestAcceptableIntervalSeconds, URL target) {
         this.maxSkips = max(longestAcceptableIntervalSeconds / max(intervalLengthSeconds, 1), 1);
         this.target = target;
+        this.intervalLength = intervalLengthSeconds;
     }
 
     /**
@@ -61,28 +64,33 @@ public class Throttler {
         if (responseCode == 404) {
             maximizeSkips();
             LOGGER.error(
-                    "Server said that the receiving endpoint at {} does not exist. Backing off to {} times our poll interval to avoid overloading server",
+                    "Server said that the endpoint at {} does not exist. Backing off to {} times our poll interval (of {} seconds) to avoid overloading server",
                     this.target,
-                    maxSkips);
+                    maxSkips,
+                this.intervalLength
+                );
         } else if (responseCode == 429) {
             increaseSkipCount();
             LOGGER.info(
-                    "RATE LIMITED for the {}. time. Further backing off. Current backoff at {} times our metrics post interval",
+                    "RATE LIMITED for the {}. time. Further backing off. Current backoff at {} times our interval (of {} seconds)",
                     failures.get(),
-                    skips.get());
+                    skips.get(),
+                    this.intervalLength);
         } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
                 || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
             maximizeSkips();
             LOGGER.error(
-                    "Client was not authorized to post the Unleash API at {}. Backing off to {} times our poll interval to avoid overloading server",
+                    "Client was not authorized to talk to the Unleash API at {}. Backing off to {} times our poll interval (of {} seconds) to avoid overloading server",
                     this.target,
-                    maxSkips);
+                    maxSkips,
+                this.intervalLength);
         } else if (responseCode >= 500) {
             increaseSkipCount();
             LOGGER.info(
-                    "Server failed with a {} status code. Backing off. Current backoff at {} times our poll interval",
+                    "Server failed with a {} status code. Backing off. Current backoff at {} times our poll interval (of {} seconds)",
                     responseCode,
-                    skips.get());
+                    skips.get(),
+                    this.intervalLength);
         }
     }
 
