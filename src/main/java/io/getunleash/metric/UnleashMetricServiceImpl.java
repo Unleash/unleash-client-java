@@ -20,9 +20,9 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
     // mutable
     private volatile MetricsBucket currentMetricsBucket;
 
-    private final int maxInterval;
+    private final int maxSkips;
     private final AtomicInteger failures = new AtomicInteger();
-    private final AtomicInteger interval = new AtomicInteger();
+    private final AtomicInteger skips = new AtomicInteger();
 
     public UnleashMetricServiceImpl(
             UnleashConfig unleashConfig, UnleashScheduledExecutor executor) {
@@ -37,13 +37,8 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
         this.started = LocalDateTime.now(ZoneId.of("UTC"));
         this.unleashConfig = unleashConfig;
         this.metricSender = metricSender;
-        this.maxInterval =
-                Integer.max(
-                        20,
-                        300
-                                / Integer.max(
-                                        (int) unleashConfig.getSendMetricsInterval(),
-                                        1));
+        this.maxSkips =
+                Integer.max(20, 300 / Integer.max((int) unleashConfig.getSendMetricsInterval(), 1));
         long metricsInterval = unleashConfig.getSendMetricsInterval();
         executor.setInterval(sendMetrics(), metricsInterval, metricsInterval);
     }
@@ -67,59 +62,83 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
 
     private Runnable sendMetrics() {
         return () -> {
-            if (interval.get() == 0) {
+            if (skips.get() == 0) {
                 MetricsBucket metricsBucket = this.currentMetricsBucket;
                 this.currentMetricsBucket = new MetricsBucket();
                 metricsBucket.end();
                 ClientMetrics metrics = new ClientMetrics(unleashConfig, metricsBucket);
                 int statusCode = metricSender.sendMetrics(metrics);
                 if (statusCode >= 200 && statusCode < 400) {
-                    if (failures.get() > 0) {
-                        interval.set(Integer.max(failures.decrementAndGet(), 0));
-                    }
+                    decrementFailureCountAndResetSkips();
                 }
                 if (statusCode >= 400) {
                     handleHttpErrorCodes(statusCode);
                 }
             } else {
-                interval.decrementAndGet();
+                skips.decrementAndGet();
             }
         };
     }
 
+    /**
+     * We've had one successful call, so if we had 10 failures in a row, this will reduce the skips
+     * down to 9, so that we gradually start polling more often, instead of doing max load
+     * immediately after a sequence of errors.
+     */
+    private void decrementFailureCountAndResetSkips() {
+        skips.set(Math.max(failures.decrementAndGet(), 0));
+    }
+
+    /**
+     * We've gotten the message to back off (usually a 429 or a 50x). If we have successive
+     * failures, failure count here will be incremented higher and higher which will handle
+     * increasing our backoff, since we set the skip count to the failure count after every reset
+     */
+    private void increaseSkipCount() {
+        skips.set(Math.min(failures.incrementAndGet(), maxSkips));
+    }
+
+    /**
+     * We've received an error code that we don't expect to change, which means we've already logged
+     * an ERROR. To avoid hammering the server that just told us we did something wrong and to avoid
+     * flooding the logs, we'll increase our skip count to maximum
+     */
+    private void maximizeSkips() {
+        skips.set(maxSkips);
+        failures.incrementAndGet();
+    }
+
     private void handleHttpErrorCodes(int responseCode) {
         if (responseCode == 404) {
-            interval.set(maxInterval);
-            failures.incrementAndGet();
+            maximizeSkips();
             LOGGER.error(
                     "Server said that the Metrics receiving endpoint at {} does not exist. Backing off to {} times our poll interval to avoid overloading server",
                     unleashConfig.getUnleashURLs().getClientMetricsURL(),
-                    maxInterval);
+                    maxSkips);
         } else if (responseCode == 429) {
-            interval.set(Math.min(failures.incrementAndGet(), maxInterval));
+            increaseSkipCount();
             LOGGER.info(
                     "Client Metrics was RATE LIMITED for the {}. time. Further backing off. Current backoff at {} times our metrics post interval",
                     failures.get(),
-                    interval.get());
+                    skips.get());
         } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
                 || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
-            failures.incrementAndGet();
-            interval.set(maxInterval);
+            maximizeSkips();
             LOGGER.error(
                     "Client was not authorized to post metrics to the Unleash API at {}. Backing off to {} times our poll interval to avoid overloading server",
                     unleashConfig.getUnleashURLs().getClientMetricsURL(),
-                    maxInterval);
+                    maxSkips);
         } else if (responseCode >= 500) {
-            interval.set(Math.min(failures.incrementAndGet(), maxInterval));
+            increaseSkipCount();
             LOGGER.info(
                     "Server failed with a {} status code. Backing off. Current backoff at {} times our poll interval",
                     responseCode,
-                    interval.get());
+                    skips.get());
         }
     }
 
-    protected int getInterval() {
-        return this.interval.get();
+    protected int getSkips() {
+        return this.skips.get();
     }
 
     protected int getFailures() {

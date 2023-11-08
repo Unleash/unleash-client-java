@@ -29,8 +29,8 @@ public class FeatureRepository implements IFeatureRepository {
     private boolean ready;
 
     private AtomicInteger failures = new AtomicInteger(0);
-    private AtomicInteger interval = new AtomicInteger(0);
-    private final Integer maxInterval;
+    private AtomicInteger skips = new AtomicInteger(0);
+    private final Integer maxSkips;
 
     public FeatureRepository(UnleashConfig unleashConfig) {
         this(unleashConfig, new FeatureBackupHandlerFile(unleashConfig));
@@ -44,15 +44,7 @@ public class FeatureRepository implements IFeatureRepository {
         this.featureFetcher = unleashConfig.getUnleashFeatureFetcherFactory().apply(unleashConfig);
         this.featureBootstrapHandler = new FeatureBootstrapHandler(unleashConfig);
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-        this.maxInterval =
-                Integer.max(
-                        20,
-                        300
-                                / Integer.max(
-                                        Long.valueOf(unleashConfig.getFetchTogglesInterval())
-                                                .intValue(),
-                                        1));
-
+        this.maxSkips = this.calculateMaxSkips((int) unleashConfig.getFetchTogglesInterval());
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
@@ -68,14 +60,7 @@ public class FeatureRepository implements IFeatureRepository {
         this.featureFetcher = featureFetcher;
         this.featureBootstrapHandler = featureBootstrapHandler;
         this.eventDispatcher = eventDispatcher;
-        this.maxInterval =
-                Integer.max(
-                        20,
-                        300
-                                / Integer.max(
-                                        Long.valueOf(unleashConfig.getFetchTogglesInterval())
-                                                .intValue(),
-                                        1));
+        this.maxSkips = this.calculateMaxSkips((int) unleashConfig.getFetchTogglesInterval());
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
@@ -90,14 +75,7 @@ public class FeatureRepository implements IFeatureRepository {
         this.featureFetcher = featureFetcher;
         this.featureBootstrapHandler = featureBootstrapHandler;
         this.eventDispatcher = new EventDispatcher(unleashConfig);
-        this.maxInterval =
-                Integer.max(
-                        20,
-                        300
-                                / Integer.max(
-                                        Long.valueOf(unleashConfig.getFetchTogglesInterval())
-                                                .intValue(),
-                                        1));
+        this.maxSkips = this.calculateMaxSkips((int) unleashConfig.getFetchTogglesInterval());
         this.initCollections(executor);
     }
 
@@ -122,12 +100,16 @@ public class FeatureRepository implements IFeatureRepository {
         }
     }
 
+    private Integer calculateMaxSkips(int fetchTogglesInterval) {
+        return Integer.max(20, 300 / Integer.max(fetchTogglesInterval, 1));
+    }
+
     private Runnable updateFeatures(@Nullable final Consumer<UnleashException> handler) {
         return () -> updateFeaturesInternal(handler);
     }
 
     private void updateFeaturesInternal(@Nullable final Consumer<UnleashException> handler) {
-        if (interval.get() <= 0L) {
+        if (skips.get() <= 0L) {
             try {
                 ClientFeaturesResponse response = featureFetcher.fetchFeatures();
                 eventDispatcher.dispatch(response);
@@ -145,7 +127,7 @@ public class FeatureRepository implements IFeatureRepository {
                     handleHttpErrorCodes(response.getHttpStatusCode());
                     return;
                 }
-                interval.set(Math.max(failures.decrementAndGet(), 0));
+                decrementFailureCountAndResetSkips();
                 if (!ready) {
                     eventDispatcher.dispatch(new UnleashReady());
                     ready = true;
@@ -158,38 +140,64 @@ public class FeatureRepository implements IFeatureRepository {
                 }
             }
         } else {
-            interval.decrementAndGet();
+            skips.decrementAndGet(); // We didn't do anything this iteration, just reduce the count
         }
+    }
+
+    /**
+     * We've had one successful call, so if we had 10 failures in a row, this will reduce the skips
+     * down to 9, so that we gradually start polling more often, instead of doing max load
+     * immediately after a sequence of errors.
+     */
+    private void decrementFailureCountAndResetSkips() {
+        skips.set(Math.max(failures.decrementAndGet(), 0));
+    }
+
+    /**
+     * We've gotten the message to back off (usually a 429 or a 50x). If we have successive
+     * failures, failure count here will be incremented higher and higher which will handle
+     * increasing our backoff, since we set the skip count to the failure count after every reset
+     */
+    private void increaseSkipCount() {
+        skips.set(Math.min(failures.incrementAndGet(), maxSkips));
+    }
+
+    /**
+     * We've received an error code that we don't expect to change, which means we've already logged
+     * an ERROR. To avoid hammering the server that just told us we did something wrong and to avoid
+     * flooding the logs, we'll increase our skip count to maximum
+     */
+    private void maximizeSkips() {
+        skips.set(maxSkips);
+        failures.incrementAndGet();
     }
 
     private void handleHttpErrorCodes(int responseCode) {
         if (responseCode == 404) {
-            interval.set(maxInterval);
-            failures.incrementAndGet();
+            maximizeSkips();
             LOGGER.error(
                     "Server said that the API at {} does not exist. Backing off to {} times our poll interval to avoid overloading server",
                     unleashConfig.getUnleashAPI(),
-                    maxInterval);
+                    maxSkips);
         } else if (responseCode == 429) {
-            interval.set(Math.min(failures.incrementAndGet(), maxInterval));
+            increaseSkipCount();
             LOGGER.info(
-                    "Client was RATE LIMITED for the {} time. Further backing off. Current backoff at {} times our poll interval",
+                    "Client was RATE LIMITED for the {}. time. Further backing off. Current backoff at {} times our poll interval",
                     failures.get(),
-                    interval.get());
+                    skips.get());
         } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
                 || responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
-            failures.incrementAndGet();
-            interval.set(maxInterval);
+            maximizeSkips();
             LOGGER.error(
                     "Client failed to authenticate to the Unleash API at {}. Backing off to {} times our poll interval to avoid overloading server",
                     unleashConfig.getUnleashAPI(),
-                    maxInterval);
+                    maxSkips);
         } else if (responseCode >= 500) {
-            interval.set(Math.min(failures.incrementAndGet(), maxInterval));
+            increaseSkipCount();
             LOGGER.info(
                     "Server failed with a {} status code. Backing off. Current backoff at {} times our poll interval",
                     responseCode,
-                    interval.get());
+                    skips.get());
         }
     }
 
@@ -214,7 +222,7 @@ public class FeatureRepository implements IFeatureRepository {
         return failures.get();
     }
 
-    public Integer getInterval() {
-        return interval.get();
+    public Integer getSkips() {
+        return skips.get();
     }
 }

@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -347,15 +346,15 @@ public class FeatureRepositoryTest {
         verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
         runnableArgumentCaptor.getValue().run();
         assertThat(featureRepository.getFailures()).isEqualTo(1);
-        assertThat(featureRepository.getInterval()).isEqualTo(30);
+        assertThat(featureRepository.getSkips()).isEqualTo(30);
         for (int i = 0; i < 30; i++) {
             runnableArgumentCaptor.getValue().run();
         }
         assertThat(featureRepository.getFailures()).isEqualTo(1);
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         runnableArgumentCaptor.getValue().run();
         assertThat(featureRepository.getFailures()).isEqualTo(0);
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
     }
 
     @Test
@@ -412,15 +411,15 @@ public class FeatureRepositoryTest {
         verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
         runnableArgumentCaptor.getValue().run();
         assertThat(featureRepository.getFailures()).isEqualTo(1);
-        assertThat(featureRepository.getInterval()).isEqualTo(30);
+        assertThat(featureRepository.getSkips()).isEqualTo(30);
         for (int i = 0; i < 30; i++) {
             runnableArgumentCaptor.getValue().run();
         }
         assertThat(featureRepository.getFailures()).isEqualTo(1);
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         runnableArgumentCaptor.getValue().run();
         assertThat(featureRepository.getFailures()).isEqualTo(0);
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
     }
 
     @Test
@@ -485,41 +484,41 @@ public class FeatureRepositoryTest {
                 .thenReturn(
                         new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(1);
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(2);
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
         assertThat(featureRepository.getFailures()).isEqualTo(2);
         runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
         runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(2);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(3);
+        assertThat(featureRepository.getSkips()).isEqualTo(3);
         assertThat(featureRepository.getFailures()).isEqualTo(3);
         runnableArgumentCaptor.getValue().run();
         runnableArgumentCaptor.getValue().run();
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(3);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(2);
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
         assertThat(featureRepository.getFailures()).isEqualTo(2);
         runnableArgumentCaptor.getValue().run();
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(2);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(1);
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(0);
     }
 
@@ -585,41 +584,41 @@ public class FeatureRepositoryTest {
                 .thenReturn(
                         new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(1);
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(2);
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
         assertThat(featureRepository.getFailures()).isEqualTo(2);
         runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
         runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(2);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(3);
+        assertThat(featureRepository.getSkips()).isEqualTo(3);
         assertThat(featureRepository.getFailures()).isEqualTo(3);
         runnableArgumentCaptor.getValue().run();
         runnableArgumentCaptor.getValue().run();
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(3);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(2);
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
         assertThat(featureRepository.getFailures()).isEqualTo(2);
         runnableArgumentCaptor.getValue().run();
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(2);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(1);
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
         runnableArgumentCaptor.getValue().run();
-        assertThat(featureRepository.getInterval()).isEqualTo(0);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(0);
     }
 

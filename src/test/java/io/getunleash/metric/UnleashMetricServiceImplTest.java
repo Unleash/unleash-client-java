@@ -231,41 +231,41 @@ public class UnleashMetricServiceImplTest {
                 .thenReturn(200);
 
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(1);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(1);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(2);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(2);
         assertThat(unleashMetricService.getFailures()).isEqualTo(2);
         sendMetricsCallback.getValue().run(); // NO-OP because interval > 0
         sendMetricsCallback.getValue().run(); // NO-OP because interval > 0
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(2);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(3);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(3);
         assertThat(unleashMetricService.getFailures()).isEqualTo(3);
         sendMetricsCallback.getValue().run();
         sendMetricsCallback.getValue().run();
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(3);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(2);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(2);
         assertThat(unleashMetricService.getFailures()).isEqualTo(2);
         sendMetricsCallback.getValue().run();
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(2);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(1);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(1);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(0);
     }
 
@@ -301,41 +301,41 @@ public class UnleashMetricServiceImplTest {
                 .thenReturn(304)
                 .thenReturn(304);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(1);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(1);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(2);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(2);
         assertThat(unleashMetricService.getFailures()).isEqualTo(2);
         sendMetricsCallback.getValue().run(); // NO-OP because interval > 0
         sendMetricsCallback.getValue().run(); // NO-OP because interval > 0
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(2);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(3);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(3);
         assertThat(unleashMetricService.getFailures()).isEqualTo(3);
         sendMetricsCallback.getValue().run();
         sendMetricsCallback.getValue().run();
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(3);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(2);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(2);
         assertThat(unleashMetricService.getFailures()).isEqualTo(2);
         sendMetricsCallback.getValue().run();
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(2);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(1);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(1);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         assertThat(unleashMetricService.getFailures()).isEqualTo(0);
     }
 
@@ -364,16 +364,16 @@ public class UnleashMetricServiceImplTest {
         verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
         when(sender.sendMetrics(any(ClientMetrics.class))).thenReturn(403).thenReturn(200);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(30);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(30);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         for (int i = 0; i < 30; i++) {
             sendMetricsCallback.getValue().run();
         }
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         sendMetricsCallback.getValue().run();
         assertThat(unleashMetricService.getFailures()).isEqualTo(0);
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
     }
 
     @Test
@@ -401,15 +401,15 @@ public class UnleashMetricServiceImplTest {
         verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
         when(sender.sendMetrics(any(ClientMetrics.class))).thenReturn(404).thenReturn(200);
         sendMetricsCallback.getValue().run();
-        assertThat(unleashMetricService.getInterval()).isEqualTo(30);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(30);
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
         for (int i = 0; i < 30; i++) {
             sendMetricsCallback.getValue().run();
         }
         assertThat(unleashMetricService.getFailures()).isEqualTo(1);
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
         sendMetricsCallback.getValue().run();
         assertThat(unleashMetricService.getFailures()).isEqualTo(0);
-        assertThat(unleashMetricService.getInterval()).isEqualTo(0);
+        assertThat(unleashMetricService.getSkips()).isEqualTo(0);
     }
 }
