@@ -76,6 +76,7 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
                 FeatureCollection features =
                         JsonFeatureParser.fromJson(
                                 Objects.requireNonNull(response.body()).charStream());
+                // TODO is this being used? Or HttpFeatureFetcher took over?
                 return new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.CHANGED,
                         features.getToggleCollection(),

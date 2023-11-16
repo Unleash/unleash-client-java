@@ -1,6 +1,7 @@
 package io.getunleash.repository;
 
 import io.getunleash.UnleashException;
+import io.getunleash.engine.YggdrasilInvalidInputException;
 import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,7 +60,16 @@ public class HttpFeatureFetcher implements FeatureFetcher {
                             new InputStreamReader(
                                     (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
+
+                // TODO: Do we need to map from JSON to Java objects and back to JSON? This is just a shortcut to validate
                 FeatureCollection features = JsonFeatureParser.fromJson(reader);
+                this.config.unleashEngine().ifPresent(engine -> {
+                    try {
+                        engine.takeState(JsonFeatureParser.toJsonString(features));
+                    } catch (YggdrasilInvalidInputException e) {
+                        LOG.error("Failed to take state", e);
+                    }
+                });
                 return new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.CHANGED,
                         features.getToggleCollection(),

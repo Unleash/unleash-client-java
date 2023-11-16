@@ -145,12 +145,13 @@ class DefaultUnleashTest {
 
         ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
         FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
-        when(featureRepository.getToggle("toggle1")).thenReturn(toggle);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
+        new UnleashEngineStateHandler(unleashConfigWithFallback.unleashEngine()).setState(toggle);
 
         sut.isEnabled("toggle1");
 
-        verify(fallback).isEnabled(any(), any(), anyList());
+        // PR-comment: constraints are no longer managed by the SDK but by Yggdrasil, so we removed the third parameter
+        verify(fallback).isEnabled(any(), any());
     }
 
     @Test

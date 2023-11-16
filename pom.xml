@@ -56,6 +56,13 @@
 
     <dependencies>
         <dependency>
+            <artifactId>unleash-engine</artifactId>
+            <groupId>io.getunleash</groupId>
+            <scope>system</scope>
+            <version>*</version>
+            <systemPath>/home/gaston/projects/yggdrasil/java-engine/build/libs/unleash-engine-all.jar</systemPath>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>

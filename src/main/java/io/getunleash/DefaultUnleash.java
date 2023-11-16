@@ -3,22 +3,30 @@ package io.getunleash;
 import static io.getunleash.Variant.DISABLED_VARIANT;
 import static java.util.Optional.ofNullable;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getunleash.engine.*;
 import io.getunleash.event.*;
 import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
+import io.getunleash.repository.ClientFeaturesResponse;
 import io.getunleash.repository.FeatureRepository;
 import io.getunleash.repository.IFeatureRepository;
 import io.getunleash.strategy.*;
 import io.getunleash.util.ConstraintMerger;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantUtil;
+
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +47,7 @@ public class DefaultUnleash implements Unleash {
 
     public static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
+    private final UnleashEngine unleashEngine;
     private final UnleashMetricService metricService;
     private final IFeatureRepository featureRepository;
     private final Map<String, Strategy> strategyMap;
@@ -94,6 +103,11 @@ public class DefaultUnleash implements Unleash {
             EventDispatcher eventDispatcher,
             UnleashMetricService metricService,
             boolean failOnMultipleInstantiations) {
+
+        this.unleashEngine = new UnleashEngine(strategyMap.values().stream().map(this::asIStrategy)
+            .collect(Collectors.toList()), Optional.ofNullable(unleashConfig.getFallbackStrategy()).map(this::asIStrategy).orElse(null));
+        unleashConfig.setUnleashEngine(unleashEngine);
+
         this.config = unleashConfig;
         this.featureRepository = featureRepository;
         this.strategyMap = strategyMap;
@@ -123,9 +137,64 @@ public class DefaultUnleash implements Unleash {
                 });
     }
 
+    @NotNull
+    private IStrategy asIStrategy(Strategy s) {
+        return new IStrategy() {
+            @Override
+            public String getName() {
+                return s.getName();
+            }
+
+            @Override
+            public boolean isEnabled(Map<String, String> map, Context context) {
+                return s.isEnabled(map, adapt(context));
+            }
+        };
+    }
+
+    private UnleashContext adapt(Context context) {
+        ZonedDateTime currentTime = ZonedDateTime.now();
+        if (context.getCurrentTime() != null) {
+            try {
+                currentTime = ZonedDateTime.parse(context.getCurrentTime());
+            } catch (DateTimeParseException e){
+                LOGGER.warn("Unable to parse current time from context: {}, using current time instead", context.getCurrentTime());
+            }
+
+        }
+
+        return new UnleashContext(
+            context.getAppName(),
+            context.getEnvironment(),
+            context.getUserId(),
+            context.getSessionId(),
+            context.getRemoteAddress(),
+            currentTime,
+            context.getProperties()
+        ).applyStaticFields(config);
+    }
+
+    private Context adapt(UnleashContext context) {
+        Context mapped = new Context();
+        mapped.setAppName(context.getAppName().orElse(null));
+        mapped.setEnvironment(context.getEnvironment().orElse(null));
+        mapped.setUserId(context.getUserId().orElse(null));
+        mapped.setSessionId(context.getSessionId().orElse(null));
+        mapped.setRemoteAddress(context.getRemoteAddress().orElse(null));
+        mapped.setProperties(context.getProperties());
+        mapped.setCurrentTime(context.getCurrentTime().map(ZonedDateTime::toString).orElse(null));
+        return mapped;
+    }
+
     @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
-        return isEnabled(toggleName, contextProvider.getContext(), defaultSetting);
+        try {
+            UnleashContext enhancedContext = contextProvider.getContext().applyStaticFields(config);
+            return Optional.ofNullable(unleashEngine.isEnabled(toggleName, adapt(enhancedContext))).orElse(defaultSetting);
+        } catch (YggdrasilInvalidInputException | YggdrasilError e) {
+            throw new RuntimeException(e);
+        }
+        //return isEnabled(toggleName, contextProvider.getContext(), defaultSetting);
     }
 
     @Override

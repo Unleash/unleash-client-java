@@ -5,6 +5,7 @@ import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
 import io.getunleash.CustomHttpHeadersProvider;
 import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
 import io.getunleash.UnleashContextProvider;
+import io.getunleash.engine.UnleashEngine;
 import io.getunleash.event.NoOpSubscriber;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
@@ -72,6 +73,8 @@ public class UnleashConfig {
     @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
     @Nullable private final Proxy proxy;
 
+    private final UnleashEngineReference unleashEngineReference;
+
     private UnleashConfig(
             @Nullable URI unleashAPI,
             Map<String, String> customHttpHeaders,
@@ -101,7 +104,8 @@ public class UnleashConfig {
             @Nullable Strategy fallbackStrategy,
             @Nullable ToggleBootstrapProvider unleashBootstrapProvider,
             @Nullable Proxy proxy,
-            @Nullable Authenticator proxyAuthenticator) {
+            @Nullable Authenticator proxyAuthenticator
+    ) {
 
         if (appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -165,6 +169,7 @@ public class UnleashConfig {
         this.metricSenderFactory = metricSenderFactory;
         this.clientSpecificationVersion =
                 UnleashProperties.getProperty("client.specification.version");
+        this.unleashEngineReference = new UnleashEngineReference();
     }
 
     public static Builder builder() {
@@ -185,6 +190,14 @@ public class UnleashConfig {
         // http.proxyUser http.proxyPassword is only consumed by Apache HTTP Client, for
         // HttpUrlConnection we have to define an Authenticator
         Authenticator.setDefault(new SystemProxyAuthenticator());
+    }
+
+    public void setUnleashEngine(UnleashEngine engine) {
+        this.unleashEngineReference.set(engine);
+    }
+
+    public Optional<UnleashEngine> unleashEngine() {
+        return this.unleashEngineReference.get();
     }
 
     public URI getUnleashAPI() {
