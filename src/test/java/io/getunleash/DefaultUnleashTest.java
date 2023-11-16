@@ -87,9 +87,10 @@ class DefaultUnleashTest {
                         asList(semverConstraint),
                         asList(404),
                         Collections.emptyList());
-        when(featureRepository.getToggle(toggleName))
-                .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
-        when(featureRepository.getSegment(404)).thenReturn(Segment.DENY_SEGMENT);
+        new UnleashEngineStateHandler(sut).setState(
+            Collections.singletonList(new FeatureToggle(toggleName, true, asList(withMissingSegment))),
+            Collections.singletonList(Segment.DENY_SEGMENT));
+
         when(contextProvider.getContext())
                 .thenReturn(UnleashContext.builder().addProperty("version", semVer).build());
         assertThat(sut.isEnabled(toggleName)).isFalse();
@@ -106,18 +107,18 @@ class DefaultUnleashTest {
                         asList(semverConstraint),
                         asList(404, 1),
                         Collections.emptyList());
-        when(featureRepository.getToggle(toggleName))
-                .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
-        when(featureRepository.getSegment(1))
-                .thenReturn(
-                        new Segment(
-                                1,
-                                "always true",
-                                asList(
-                                        new Constraint(
-                                                "always_true",
-                                                Operator.NOT_IN,
-                                                Collections.EMPTY_LIST))));
+        new UnleashEngineStateHandler(sut).setState(
+            Collections.singletonList(new FeatureToggle(toggleName, true, asList(withMissingSegment))),
+            Collections.singletonList(new Segment(
+                1,
+                "always true",
+                asList(
+                    new Constraint(
+                        "always_true",
+                        Operator.NOT_IN,
+                        Collections.EMPTY_LIST)))));
+
+
         when(contextProvider.getContext())
                 .thenReturn(UnleashContext.builder().addProperty("version", "1.2.2").build());
         assertThat(sut.isEnabled(toggleName)).isFalse();
@@ -145,8 +146,8 @@ class DefaultUnleashTest {
 
         ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
         FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
-        when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
         new UnleashEngineStateHandler(sut).setState(toggle);
+        when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
         sut.isEnabled("toggle1");
 

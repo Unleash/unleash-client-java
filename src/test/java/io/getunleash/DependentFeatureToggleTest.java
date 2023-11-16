@@ -175,8 +175,7 @@ public class DependentFeatureToggleTest {
                         singletonList(
                                 new FeatureDependency(
                                         parentName, null, singletonList("disabled"))));
-        when(featureRepository.getToggle(childName)).thenReturn(child);
-        when(featureRepository.getToggle(parentName)).thenReturn(parent);
+        new UnleashEngineStateHandler(sut).setState(child, parent);
         assertThat(sut.isEnabled(childName, UnleashContext.builder().build())).isFalse();
     }
 }

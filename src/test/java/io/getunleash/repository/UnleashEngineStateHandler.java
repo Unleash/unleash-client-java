@@ -2,12 +2,14 @@ package io.getunleash.repository;
 
 import io.getunleash.DefaultUnleash;
 import io.getunleash.FeatureToggle;
+import io.getunleash.Segment;
 import io.getunleash.engine.UnleashEngine;
 import io.getunleash.engine.YggdrasilInvalidInputException;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class UnleashEngineStateHandler {
     private final UnleashEngine unleashEngine;
@@ -29,6 +31,14 @@ public class UnleashEngineStateHandler {
         FeatureCollection madeUp = new FeatureCollection(
             new ToggleCollection(Arrays.asList(featureToggles)),
             new SegmentCollection(Collections.emptyList())
+        );
+        setState(madeUp);
+    }
+
+    public void setState(List<FeatureToggle> featureToggles, List<Segment> segments) {
+        FeatureCollection madeUp = new FeatureCollection(
+            new ToggleCollection(featureToggles),
+            new SegmentCollection(segments)
         );
         setState(madeUp);
     }

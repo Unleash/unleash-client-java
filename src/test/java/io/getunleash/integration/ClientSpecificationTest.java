@@ -129,7 +129,7 @@ public class ClientSpecificationTest {
                 UnleashConfig.builder()
                         .appName(testDefinition.getName())
                         .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
-                        .synchronousFetchOnInitialisation(false)
+                        .synchronousFetchOnInitialisation(true)
                         .backupFile(backupFile)
                         .build();
 

@@ -155,7 +155,6 @@ public class UnleashTest {
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy1, activeStrategy));
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
         stateHandler.setState(featureToggle);
 
         assertThat(unleash.isEnabled("test")).isTrue();
@@ -490,7 +489,6 @@ public class UnleashTest {
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
         stateHandler.setState(featureToggle);
 
         assertThat(unleash.isEnabled("test")).isTrue();

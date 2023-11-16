@@ -1,7 +1,6 @@
 package io.getunleash.repository;
 
 import io.getunleash.UnleashException;
-import io.getunleash.engine.YggdrasilInvalidInputException;
 import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
 import java.io.IOException;

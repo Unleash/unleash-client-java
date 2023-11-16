@@ -1,5 +1,7 @@
 package io.getunleash.util;
 
+import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
+
 import io.getunleash.CustomHttpHeadersProvider;
 import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
 import io.getunleash.UnleashContextProvider;
@@ -10,19 +12,21 @@ import io.getunleash.metric.DefaultHttpMetricsSender;
 import io.getunleash.repository.HttpFeatureFetcher;
 import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.Strategy;
-
 import java.io.File;
 import java.math.BigInteger;
-import java.net.*;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
+import java.util.*;
 
 public class UnleashConfig {
 
@@ -97,8 +101,7 @@ public class UnleashConfig {
             @Nullable Strategy fallbackStrategy,
             @Nullable ToggleBootstrapProvider unleashBootstrapProvider,
             @Nullable Proxy proxy,
-            @Nullable Authenticator proxyAuthenticator
-    ) {
+            @Nullable Authenticator proxyAuthenticator) {
 
         if (appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
