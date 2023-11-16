@@ -60,8 +60,6 @@ public class HttpFeatureFetcher implements FeatureFetcher {
                             new InputStreamReader(
                                     (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
-
-                // TODO: Do we need to map from JSON to Java objects and back to JSON? This is just a shortcut to validate
                 FeatureCollection features = JsonFeatureParser.fromJson(reader);
                 this.config.unleashEngine().ifPresent(engine -> {
                     try {

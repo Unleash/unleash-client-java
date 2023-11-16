@@ -10,6 +10,7 @@ import io.getunleash.event.IsEnabledImpressionEvent;
 import io.getunleash.event.VariantImpressionEvent;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.FeatureRepository;
+import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.strategy.DefaultStrategy;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
@@ -26,6 +27,7 @@ public class DependentFeatureToggleTest {
     private UnleashContextProvider contextProvider;
     private EventDispatcher eventDispatcher;
     private UnleashMetricService metricService;
+    private UnleashEngineStateHandler stateHandler;
 
     @BeforeEach
     public void setup() {
@@ -46,6 +48,7 @@ public class DependentFeatureToggleTest {
                         contextProvider,
                         eventDispatcher,
                         metricService);
+        stateHandler = new UnleashEngineStateHandler(unleashConfig.unleashEngine());
     }
 
     @Test
@@ -65,8 +68,9 @@ public class DependentFeatureToggleTest {
                         singletonList(new ActivationStrategy("default", null)),
                         Collections.emptyList(),
                         false);
-        when(featureRepository.getToggle("child")).thenReturn(child);
-        when(featureRepository.getToggle("parent")).thenReturn(parent);
+
+        stateHandler.setState(child, parent);
+
         boolean enabled = sut.isEnabled("child", UnleashContext.builder().userId("7").build());
         assertThat(enabled).isTrue();
         verify(metricService).count("child", true);
@@ -91,15 +95,15 @@ public class DependentFeatureToggleTest {
                         singletonList(new ActivationStrategy("default", null)),
                         singletonList(new VariantDefinition("first", 1, null, null, null)),
                         false);
-        when(featureRepository.getToggle("child")).thenReturn(child);
-        when(featureRepository.getToggle("parent")).thenReturn(parent);
+        stateHandler.setState(child, parent);
+
         Variant variant = sut.getVariant("child", UnleashContext.builder().userId("7").build());
         assertThat(variant).isNotNull();
         verify(metricService).countVariant("child", "childVariant");
         verify(metricService, never()).countVariant("parent", "first");
     }
 
-    @Test
+    @Test // TODO is this a bug in Yggdrasil for parent-child relationship?
     public void should_trigger_impression_event_for_parent_toggle_when_checking_child_toggle() {
         FeatureToggle child =
                 new FeatureToggle(
@@ -116,8 +120,7 @@ public class DependentFeatureToggleTest {
                         singletonList(new ActivationStrategy("default", null)),
                         Collections.emptyList(),
                         true);
-        when(featureRepository.getToggle("child")).thenReturn(child);
-        when(featureRepository.getToggle("parent")).thenReturn(parent);
+        stateHandler.setState(child, parent);
         boolean enabled = sut.isEnabled("child", UnleashContext.builder().userId("7").build());
         assertThat(enabled).isTrue();
         verify(eventDispatcher).dispatch(any(IsEnabledImpressionEvent.class));
@@ -141,10 +144,10 @@ public class DependentFeatureToggleTest {
                         singletonList(new ActivationStrategy("default", null)),
                         singletonList(new VariantDefinition("first", 1, null, null, null)),
                         true);
-        when(featureRepository.getToggle("child")).thenReturn(child);
-        when(featureRepository.getToggle("parent")).thenReturn(parent);
+        stateHandler.setState(child, parent);
         Variant variant = sut.getVariant("child", UnleashContext.builder().userId("7").build());
         assertThat(variant).isNotNull();
+        // TODO should this be 1? Now the SDK doesn't know whether about the parent/child relationship and the Engine will be checked only once
         verify(eventDispatcher, times(2)).dispatch(any(VariantImpressionEvent.class));
     }
 

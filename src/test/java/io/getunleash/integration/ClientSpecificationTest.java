@@ -17,6 +17,7 @@ import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
+import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.strategy.constraints.DateParser;
 import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
@@ -128,11 +129,14 @@ public class ClientSpecificationTest {
                 UnleashConfig.builder()
                         .appName(testDefinition.getName())
                         .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
-                        .synchronousFetchOnInitialisation(true)
+                        .synchronousFetchOnInitialisation(false)
                         .backupFile(backupFile)
                         .build();
 
-        return new DefaultUnleash(config);
+        DefaultUnleash defaultUnleash = new DefaultUnleash(config);
+        new UnleashEngineStateHandler(config.unleashEngine())
+                .setState(testDefinition.getState().toString());
+        return defaultUnleash;
     }
 
     private void mockUnleashAPI(TestDefinition definition) {

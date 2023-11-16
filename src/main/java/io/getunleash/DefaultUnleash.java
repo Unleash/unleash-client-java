@@ -1,34 +1,33 @@
 package io.getunleash;
 
-import static io.getunleash.Variant.DISABLED_VARIANT;
-import static java.util.Optional.ofNullable;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.engine.*;
-import io.getunleash.event.*;
+import io.getunleash.event.EventDispatcher;
+import io.getunleash.event.IsEnabledImpressionEvent;
+import io.getunleash.event.ToggleEvaluated;
+import io.getunleash.event.VariantImpressionEvent;
 import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
-import io.getunleash.repository.ClientFeaturesResponse;
 import io.getunleash.repository.FeatureRepository;
 import io.getunleash.repository.IFeatureRepository;
 import io.getunleash.strategy.*;
-import io.getunleash.util.ConstraintMerger;
 import io.getunleash.util.UnleashConfig;
-import io.getunleash.variant.VariantUtil;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static io.getunleash.Variant.DISABLED_VARIANT;
+import static java.util.Optional.ofNullable;
 
 public class DefaultUnleash implements Unleash {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
@@ -50,7 +49,6 @@ public class DefaultUnleash implements Unleash {
     private final UnleashEngine unleashEngine;
     private final UnleashMetricService metricService;
     private final IFeatureRepository featureRepository;
-    private final Map<String, Strategy> strategyMap;
     private final UnleashContextProvider contextProvider;
     private final EventDispatcher eventDispatcher;
     private final UnleashConfig config;
@@ -110,7 +108,6 @@ public class DefaultUnleash implements Unleash {
 
         this.config = unleashConfig;
         this.featureRepository = featureRepository;
-        this.strategyMap = strategyMap;
         this.contextProvider = contextProvider;
         this.eventDispatcher = eventDispatcher;
         this.metricService = metricService;
@@ -182,19 +179,13 @@ public class DefaultUnleash implements Unleash {
         mapped.setSessionId(context.getSessionId().orElse(null));
         mapped.setRemoteAddress(context.getRemoteAddress().orElse(null));
         mapped.setProperties(context.getProperties());
-        mapped.setCurrentTime(context.getCurrentTime().map(ZonedDateTime::toString).orElse(null));
+        mapped.setCurrentTime(DateTimeFormatter.ISO_DATE_TIME.format(context.getCurrentTime().orElse(ZonedDateTime.now())));
         return mapped;
     }
 
     @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
-        try {
-            UnleashContext enhancedContext = contextProvider.getContext().applyStaticFields(config);
-            return Optional.ofNullable(unleashEngine.isEnabled(toggleName, adapt(enhancedContext))).orElse(defaultSetting);
-        } catch (YggdrasilInvalidInputException | YggdrasilError e) {
-            throw new RuntimeException(e);
-        }
-        //return isEnabled(toggleName, contextProvider.getContext(), defaultSetting);
+        return isEnabled(toggleName, contextProvider.getContext(), defaultSetting);
     }
 
     @Override
@@ -228,9 +219,12 @@ public class DefaultUnleash implements Unleash {
 
     private void dispatchEnabledImpressionDataIfNeeded(
             String eventType, String toggleName, boolean enabled, UnleashContext context) {
-        FeatureToggle toggle = featureRepository.getToggle(toggleName);
-        if (toggle != null && toggle.hasImpressionData()) {
-            eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
+        try {
+            if (this.unleashEngine.shouldEmitImpressionEvent(toggleName)) {
+                eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
+            }
+        } catch (YggdrasilError e) {
+            LOGGER.warn("Unable to check if impression event should be emitted", e);
         }
     }
 
@@ -239,113 +233,30 @@ public class DefaultUnleash implements Unleash {
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction,
             @Nullable Variant defaultVariant) {
-        checkIfToggleMatchesNamePrefix(toggleName);
-        FeatureToggle featureToggle = featureRepository.getToggle(toggleName);
-
         UnleashContext enhancedContext = context.applyStaticFields(config);
-        if (featureToggle == null) {
-            return new FeatureEvaluationResult(
-                    fallbackAction.test(toggleName, enhancedContext), defaultVariant);
-        } else if (!featureToggle.isEnabled()) {
-            return new FeatureEvaluationResult(false, defaultVariant);
-        } else if (featureToggle.getStrategies().isEmpty()) {
-            return new FeatureEvaluationResult(
-                    true, VariantUtil.selectVariant(featureToggle, context, defaultVariant));
-        } else {
-            // Dependent toggles, no point in evaluating child strategies if our dependencies are
-            // not satisfied
-            if (isParentDependencySatisfied(featureToggle, context, fallbackAction)) {
-                for (ActivationStrategy strategy : featureToggle.getStrategies()) {
-                    Strategy configuredStrategy = getStrategy(strategy.getName());
-                    if (configuredStrategy == UNKNOWN_STRATEGY) {
-                        LOGGER.warn(
-                                "Unable to find matching strategy for toggle:{} strategy:{}",
-                                toggleName,
-                                strategy.getName());
-                    }
-
-                    FeatureEvaluationResult result =
-                            configuredStrategy.getResult(
-                                    strategy.getParameters(),
-                                    enhancedContext,
-                                    ConstraintMerger.mergeConstraints(featureRepository, strategy),
-                                    strategy.getVariants());
-
-                    if (result.isEnabled()) {
-                        Variant variant = result.getVariant();
-                        // If strategy variant is null, look for a variant in the featureToggle
-                        if (variant == null) {
-                            variant =
-                                    VariantUtil.selectVariant(
-                                            featureToggle, context, defaultVariant);
-                        }
-                        result.setVariant(variant);
-                        return result;
-                    }
-                }
+        try {
+            VariantDef variantResponse = this.unleashEngine.getVariant(toggleName, adapt(enhancedContext));
+            if (variantResponse != null) {
+                return new FeatureEvaluationResult(variantResponse.isEnabled(),
+                    new Variant(variantResponse.getName(), adapt(variantResponse.getPayload()), variantResponse.isEnabled()));
             }
-            return new FeatureEvaluationResult(false, defaultVariant);
+
+            Boolean isEnabled = this.unleashEngine.isEnabled(toggleName, adapt(enhancedContext));
+            if (isEnabled != null) {
+                return new FeatureEvaluationResult(isEnabled, defaultVariant);
+            }
+
+            return new FeatureEvaluationResult(fallbackAction.test(toggleName, enhancedContext), defaultVariant);
+
+        } catch (YggdrasilInvalidInputException | YggdrasilError e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private boolean isParentDependencySatisfied(
-            @Nonnull FeatureToggle featureToggle,
-            @Nonnull UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction) {
-        if (!featureToggle.hasDependencies()) {
-            return true;
-        } else {
-            return featureToggle.getDependencies().stream()
-                    .allMatch(
-                            parent -> {
-                                FeatureToggle parentToggle =
-                                        featureRepository.getToggle(parent.getFeature());
-                                if (parentToggle == null) {
-                                    LOGGER.warn(
-                                            "Missing dependency [{}] for toggle: [{}]",
-                                            parent.getFeature(),
-                                            featureToggle.getName());
-                                    return false;
-                                }
-                                if (!parentToggle.getDependencies().isEmpty()) {
-                                    LOGGER.warn(
-                                            "[{}] depends on feature [{}] which also depends on something. We don't currently support more than one level of dependency resolution",
-                                            featureToggle.getName(),
-                                            parent.getFeature());
-                                    return false;
-                                }
-                                boolean parentSatisfied =
-                                        isEnabled(
-                                                parent.getFeature(), context, fallbackAction, true);
-                                if (parentSatisfied) {
-                                    if (!parent.getVariants().isEmpty()) {
-                                        return parent.getVariants()
-                                                .contains(
-                                                        getVariant(
-                                                                        parent.feature,
-                                                                        context,
-                                                                        DISABLED_VARIANT,
-                                                                        true)
-                                                                .getName());
-                                    } else {
-                                        return parent.isEnabled();
-                                    }
-                                } else {
-                                    return !parent.isEnabled();
-                                }
-                            });
-        }
-    }
-
-    private void checkIfToggleMatchesNamePrefix(String toggleName) {
-        if (config.getNamePrefix() != null) {
-            if (!toggleName.startsWith(config.getNamePrefix())) {
-                LOGGER.warn(
-                        "Toggle [{}] doesnt start with configured name prefix of [{}] so it will always be disabled",
-                        toggleName,
-                        config.getNamePrefix());
-            }
-        }
+    private @Nullable io.getunleash.variant.Payload adapt(@Nullable Payload payload) {
+        return Optional.ofNullable(payload).map(p ->
+            new io.getunleash.variant.Payload(p.getType(), p.getValue())
+        ).orElse(null);
     }
 
     @Override
@@ -375,10 +286,13 @@ public class DefaultUnleash implements Unleash {
 
     private void dispatchVariantImpressionDataIfNeeded(
             String toggleName, String variantName, boolean enabled, UnleashContext context) {
-        FeatureToggle toggle = featureRepository.getToggle(toggleName);
-        if (toggle != null && toggle.hasImpressionData()) {
-            eventDispatcher.dispatch(
-                    new VariantImpressionEvent(toggleName, enabled, context, variantName));
+        try {
+            if (unleashEngine.shouldEmitImpressionEvent(toggleName)) {
+                eventDispatcher.dispatch(
+                        new VariantImpressionEvent(toggleName, enabled, context, variantName));
+            }
+        } catch (YggdrasilError e) {
+            LOGGER.warn("Unable to check if impression event should be emitted", e);
         }
     }
 
@@ -430,10 +344,6 @@ public class DefaultUnleash implements Unleash {
         }
 
         return map;
-    }
-
-    private Strategy getStrategy(String strategy) {
-        return strategyMap.getOrDefault(strategy, config.getFallbackStrategy());
     }
 
     @Override

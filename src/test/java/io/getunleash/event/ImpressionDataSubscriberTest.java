@@ -9,6 +9,7 @@ import io.getunleash.FeatureToggle;
 import io.getunleash.SynchronousTestExecutor;
 import io.getunleash.Unleash;
 import io.getunleash.repository.FeatureRepository;
+import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.VariantDefinition;
 import java.util.ArrayList;
@@ -20,10 +21,9 @@ public class ImpressionDataSubscriberTest {
 
     private ImpressionTestSubscriber testSubscriber = new ImpressionTestSubscriber();
 
-    private FeatureRepository toggleRepository;
-
     private UnleashConfig unleashConfig;
 
+    private UnleashEngineStateHandler stateHandler;
     private Unleash unleash;
 
     @BeforeEach
@@ -37,17 +37,15 @@ public class ImpressionDataSubscriberTest {
                         .subscriber(testSubscriber)
                         .scheduledExecutor(new SynchronousTestExecutor())
                         .build();
-        toggleRepository = mock(FeatureRepository.class);
-        unleash = new DefaultUnleash(unleashConfig, toggleRepository);
+        unleash = new DefaultUnleash(unleashConfig);
+        stateHandler = new UnleashEngineStateHandler(unleashConfig.unleashEngine());
     }
 
     @Test
     public void noEventsIfImpressionDataIsNotEnabled() {
         String featureWithoutImpressionDataEnabled = "feature.with.no.impressionData";
-        when(toggleRepository.getToggle(featureWithoutImpressionDataEnabled))
-                .thenReturn(
-                        new FeatureToggle(
-                                featureWithoutImpressionDataEnabled, true, new ArrayList<>()));
+        stateHandler.setState(new FeatureToggle(
+            featureWithoutImpressionDataEnabled, true, new ArrayList<>()));
         unleash.isEnabled(featureWithoutImpressionDataEnabled);
         assertThat(testSubscriber.isEnabledImpressions).isEqualTo(0);
         assertThat(testSubscriber.variantImpressions).isEqualTo(0);
@@ -56,14 +54,12 @@ public class ImpressionDataSubscriberTest {
     @Test
     public void isEnabledEventWhenImpressionDataIsEnabled() {
         String featureWithImpressionData = "feature.with.impressionData";
-        when(toggleRepository.getToggle(featureWithImpressionData))
-                .thenReturn(
-                        new FeatureToggle(
-                                featureWithImpressionData,
-                                true,
-                                new ArrayList<>(),
-                                new ArrayList<>(),
-                                true));
+        new UnleashEngineStateHandler(unleashConfig.unleashEngine()).setState(new FeatureToggle(
+            featureWithImpressionData,
+            true,
+            new ArrayList<>(),
+            new ArrayList<>(),
+            true));
         unleash.isEnabled(featureWithImpressionData);
         assertThat(testSubscriber.isEnabledImpressions).isEqualTo(1);
         assertThat(testSubscriber.variantImpressions).isEqualTo(0);
@@ -75,14 +71,12 @@ public class ImpressionDataSubscriberTest {
         VariantDefinition def = new VariantDefinition("blue", 1000, null, null);
         List<VariantDefinition> variants = new ArrayList<>();
         variants.add(def);
-        when(toggleRepository.getToggle(featureWithImpressionData))
-                .thenReturn(
-                        new FeatureToggle(
-                                featureWithImpressionData,
-                                true,
-                                new ArrayList<>(),
-                                variants,
-                                true));
+        stateHandler.setState(new FeatureToggle(
+            featureWithImpressionData,
+            true,
+            new ArrayList<>(),
+            variants,
+            true));
         unleash.getVariant(featureWithImpressionData);
         assertThat(testSubscriber.isEnabledImpressions).isEqualTo(0);
         assertThat(testSubscriber.variantImpressions).isEqualTo(1);
