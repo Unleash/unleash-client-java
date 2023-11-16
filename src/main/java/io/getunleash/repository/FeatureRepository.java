@@ -9,7 +9,9 @@ import io.getunleash.lang.Nullable;
 import io.getunleash.util.Throttler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
+
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -23,6 +25,8 @@ public class FeatureRepository implements IFeatureRepository {
     private final FeatureBootstrapHandler featureBootstrapHandler;
     private final FeatureFetcher featureFetcher;
     private final EventDispatcher eventDispatcher;
+
+    private List<Consumer<FeatureCollection>> consumers = new LinkedList<>();
 
     private final Throttler throttler;
 
@@ -112,6 +116,10 @@ public class FeatureRepository implements IFeatureRepository {
         return Integer.max(20, 300 / Integer.max(fetchTogglesInterval, 1));
     }
 
+    public void addConsumer(Consumer<FeatureCollection> consumer) {
+        this.consumers.add(consumer);
+    }
+
     private Runnable updateFeatures(@Nullable final Consumer<UnleashException> handler) {
         return () -> {
             if (throttler.performAction()) {
@@ -127,6 +135,15 @@ public class FeatureRepository implements IFeatureRepository {
                                                 ? segmentCollection
                                                 : new SegmentCollection(Collections.emptyList()));
 
+                        consumers.forEach(
+                                consumer -> {
+                                    try {
+                                        consumer.accept(featureCollection);
+                                    } catch (Exception e) {
+                                        LOGGER.error("Error when calling consumer {}", consumer, e);
+                                    }
+                                });
+                        // Note: this could be a consumer as well, but we need to differentiate it to be able to read from the backup
                         featureBackupHandler.write(featureCollection);
                     } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
                         throttler.handleHttpErrorCodes(response.getHttpStatusCode());

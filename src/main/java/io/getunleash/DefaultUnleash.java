@@ -10,13 +10,12 @@ import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
 import io.getunleash.repository.FeatureRepository;
 import io.getunleash.repository.IFeatureRepository;
+import io.getunleash.repository.JsonFeatureParser;
 import io.getunleash.strategy.*;
 import io.getunleash.util.UnleashConfig;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -102,9 +101,17 @@ public class DefaultUnleash implements Unleash {
             UnleashMetricService metricService,
             boolean failOnMultipleInstantiations) {
 
-        this.unleashEngine = new UnleashEngine(strategyMap.values().stream().map(this::asIStrategy)
-            .collect(Collectors.toList()), Optional.ofNullable(unleashConfig.getFallbackStrategy()).map(this::asIStrategy).orElse(null));
-        unleashConfig.setUnleashEngine(unleashEngine);
+        this.unleashEngine = new UnleashEngine(
+            strategyMap.values().stream().map(this::asIStrategy).collect(Collectors.toList()),
+            Optional.ofNullable(unleashConfig.getFallbackStrategy()).map(this::asIStrategy).orElse(null)
+        );
+        featureRepository.addConsumer(featureCollection -> {
+            try {
+                this.unleashEngine.takeState(JsonFeatureParser.toJsonString(featureCollection));
+            } catch (YggdrasilInvalidInputException e) {
+                LOGGER.error("Unable to update features", e);
+            }
+        });
 
         this.config = unleashConfig;
         this.featureRepository = featureRepository;

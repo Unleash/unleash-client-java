@@ -146,7 +146,7 @@ class DefaultUnleashTest {
         ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
         FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
-        new UnleashEngineStateHandler(unleashConfigWithFallback.unleashEngine()).setState(toggle);
+        new UnleashEngineStateHandler(sut).setState(toggle);
 
         sut.isEnabled("toggle1");
 

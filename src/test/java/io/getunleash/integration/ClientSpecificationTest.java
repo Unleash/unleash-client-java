@@ -134,7 +134,7 @@ public class ClientSpecificationTest {
                         .build();
 
         DefaultUnleash defaultUnleash = new DefaultUnleash(config);
-        new UnleashEngineStateHandler(config.unleashEngine())
+        new UnleashEngineStateHandler(defaultUnleash)
                 .setState(testDefinition.getState().toString());
         return defaultUnleash;
     }

@@ -48,7 +48,7 @@ public class UnleashTest {
                         .build();
 
         unleash = new DefaultUnleash(config, toggleRepository, new UserWithIdStrategy());
-        stateHandler = new UnleashEngineStateHandler(config.unleashEngine());
+        stateHandler = new UnleashEngineStateHandler((DefaultUnleash) unleash);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class UnleashTest {
                         .unleashAPI("http://localhost:4242/api/")
                         .build();
         unleash = new DefaultUnleash(config, toggleRepository, customStrategy);
-        new UnleashEngineStateHandler(config.unleashEngine()).setState(new FeatureToggle(
+        new UnleashEngineStateHandler((DefaultUnleash) unleash).setState(new FeatureToggle(
             "test", true, asList(new ActivationStrategy("custom", null))));
         unleash.isEnabled("test");
 
@@ -558,7 +558,7 @@ public class UnleashTest {
         FeatureCollection featureCollection = backupHandler.read();
 
         Unleash overrideUnleash = new DefaultUnleash(config);
-        new UnleashEngineStateHandler(config.unleashEngine()).setState(featureCollection);
+        new UnleashEngineStateHandler((DefaultUnleash) overrideUnleash).setState(featureCollection);
 
         UnleashContext context =
                 UnleashContext.builder()

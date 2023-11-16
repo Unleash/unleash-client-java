@@ -38,7 +38,7 @@ public class ImpressionDataSubscriberTest {
                         .scheduledExecutor(new SynchronousTestExecutor())
                         .build();
         unleash = new DefaultUnleash(unleashConfig);
-        stateHandler = new UnleashEngineStateHandler(unleashConfig.unleashEngine());
+        stateHandler = new UnleashEngineStateHandler((DefaultUnleash) unleash);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class ImpressionDataSubscriberTest {
     @Test
     public void isEnabledEventWhenImpressionDataIsEnabled() {
         String featureWithImpressionData = "feature.with.impressionData";
-        new UnleashEngineStateHandler(unleashConfig.unleashEngine()).setState(new FeatureToggle(
+        new UnleashEngineStateHandler((DefaultUnleash) unleash).setState(new FeatureToggle(
             featureWithImpressionData,
             true,
             new ArrayList<>(),

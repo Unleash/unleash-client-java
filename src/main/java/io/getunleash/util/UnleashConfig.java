@@ -1,11 +1,8 @@
 package io.getunleash.util;
 
-import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
-
 import io.getunleash.CustomHttpHeadersProvider;
 import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
 import io.getunleash.UnleashContextProvider;
-import io.getunleash.engine.UnleashEngine;
 import io.getunleash.event.NoOpSubscriber;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
@@ -13,21 +10,19 @@ import io.getunleash.metric.DefaultHttpMetricsSender;
 import io.getunleash.repository.HttpFeatureFetcher;
 import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.Strategy;
+
 import java.io.File;
 import java.math.BigInteger;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
-import java.net.Proxy;
-import java.net.URI;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
 
 public class UnleashConfig {
 
@@ -72,8 +67,6 @@ public class UnleashConfig {
     @Nullable private final Strategy fallbackStrategy;
     @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
     @Nullable private final Proxy proxy;
-
-    private final UnleashEngineReference unleashEngineReference;
 
     private UnleashConfig(
             @Nullable URI unleashAPI,
@@ -169,7 +162,6 @@ public class UnleashConfig {
         this.metricSenderFactory = metricSenderFactory;
         this.clientSpecificationVersion =
                 UnleashProperties.getProperty("client.specification.version");
-        this.unleashEngineReference = new UnleashEngineReference();
     }
 
     public static Builder builder() {
@@ -190,14 +182,6 @@ public class UnleashConfig {
         // http.proxyUser http.proxyPassword is only consumed by Apache HTTP Client, for
         // HttpUrlConnection we have to define an Authenticator
         Authenticator.setDefault(new SystemProxyAuthenticator());
-    }
-
-    public void setUnleashEngine(UnleashEngine engine) {
-        this.unleashEngineReference.set(engine);
-    }
-
-    public Optional<UnleashEngine> unleashEngine() {
-        return this.unleashEngineReference.get();
     }
 
     public URI getUnleashAPI() {

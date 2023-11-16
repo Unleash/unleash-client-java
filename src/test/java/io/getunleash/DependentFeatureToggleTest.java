@@ -48,7 +48,7 @@ public class DependentFeatureToggleTest {
                         contextProvider,
                         eventDispatcher,
                         metricService);
-        stateHandler = new UnleashEngineStateHandler(unleashConfig.unleashEngine());
+        stateHandler = new UnleashEngineStateHandler(sut);
     }
 
     @Test

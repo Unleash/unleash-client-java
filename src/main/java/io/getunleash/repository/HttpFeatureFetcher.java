@@ -61,13 +61,6 @@ public class HttpFeatureFetcher implements FeatureFetcher {
                                     (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
                 FeatureCollection features = JsonFeatureParser.fromJson(reader);
-                this.config.unleashEngine().ifPresent(engine -> {
-                    try {
-                        engine.takeState(JsonFeatureParser.toJsonString(features));
-                    } catch (YggdrasilInvalidInputException e) {
-                        LOG.error("Failed to take state", e);
-                    }
-                });
                 return new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.CHANGED,
                         features.getToggleCollection(),
