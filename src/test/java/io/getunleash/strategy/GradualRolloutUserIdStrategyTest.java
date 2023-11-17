@@ -204,11 +204,14 @@ public class GradualRolloutUserIdStrategyTest {
             Long userId = getRandomLoginId();
             UnleashContext context = UnleashContext.builder().userId(userId.toString()).build();
 
-            GradualRolloutUserIdStrategy gradualRolloutStrategy =
-                    new GradualRolloutUserIdStrategy();
 
             Map<String, String> params = buildParams(percentage, "");
-            boolean enabled = gradualRolloutStrategy.isEnabled(params, context);
+            stateHandler.setState(new FeatureToggle(
+                "test",
+                true,
+                ImmutableList.of(new ActivationStrategy("gradualRolloutUserId", params))
+            ));
+            boolean enabled = engine.isEnabled("test", context);
             if (enabled) {
                 numberOfEnabledUsers++;
             }
@@ -218,8 +221,8 @@ public class GradualRolloutUserIdStrategyTest {
 
     private Map<String, String> buildParams(int percentage, String groupId) {
         Map<String, String> params = new HashMap();
-        params.put(GradualRolloutUserIdStrategy.PERCENTAGE, String.valueOf(percentage));
-        params.put(GradualRolloutUserIdStrategy.GROUP_ID, groupId);
+        params.put("percentage", String.valueOf(percentage));
+        params.put("groupId", groupId);
 
         return params;
     }

@@ -181,11 +181,14 @@ public class GradualRolloutSessionIdStrategyTest {
             UnleashContext context =
                     UnleashContext.builder().sessionId(sessionId.toString()).build();
 
-            GradualRolloutSessionIdStrategy gradualRolloutStrategy =
-                    new GradualRolloutSessionIdStrategy();
 
             Map<String, String> params = buildParams(percentage, "");
-            boolean enabled = gradualRolloutStrategy.isEnabled(params, context);
+            stateHandler.setState(new FeatureToggle(
+                "test",
+                true,
+                ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
+            ));
+            boolean enabled = engine.isEnabled("test", context);
             if (enabled) {
                 numberOfEnabledUsers++;
             }
@@ -195,8 +198,8 @@ public class GradualRolloutSessionIdStrategyTest {
 
     private Map<String, String> buildParams(int percentage, String groupId) {
         Map<String, String> params = new HashMap();
-        params.put(GradualRolloutSessionIdStrategy.PERCENTAGE, String.valueOf(percentage));
-        params.put(GradualRolloutSessionIdStrategy.GROUP_ID, groupId);
+        params.put("percentage", String.valueOf(percentage));
+        params.put("groupId", groupId);
 
         return params;
     }
