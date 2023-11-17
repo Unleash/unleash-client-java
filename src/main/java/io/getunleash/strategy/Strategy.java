@@ -15,9 +15,7 @@ public interface Strategy {
 
     boolean isEnabled(Map<String, String> parameters);
 
-    /**
-     * @deprecated don't use this method, currently only accessible from tests
-     */
+    /** @deprecated don't use this method, currently only accessible from tests */
     @Deprecated
     default FeatureEvaluationResult getResult(
             Map<String, String> parameters,
@@ -34,9 +32,7 @@ public interface Strategy {
         return isEnabled(parameters);
     }
 
-    /**
-     * @deprecated constraint validation should be delegated to Yggdrasil
-     */
+    /** @deprecated constraint validation should be delegated to Yggdrasil */
     @Deprecated
     default boolean isEnabled(
             Map<String, String> parameters,
