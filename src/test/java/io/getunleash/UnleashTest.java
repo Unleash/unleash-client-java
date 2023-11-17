@@ -514,13 +514,11 @@ public class UnleashTest {
     }
 
     @Test
-    @Disabled // TODO: Fix this test. Rust panicked at 'called `Result::unwrap()`
-    // Note, when there's a panicked exception, the engine stops working. Should we handle this gracefully?
     public void should_handle_complex_segment_chains() {
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName("test")
-                        .unleashAPI("http://http://unleash.org")
+                        .unleashAPI("http://unleash.org")
                         .backupFile(
                                 getClass().getResource("/unleash-repo-v2-advanced.json").getFile())
                         .build();
@@ -532,7 +530,7 @@ public class UnleashTest {
         UnleashContext context =
                 UnleashContext.builder()
                         .addProperty("wins", "6")
-                        .addProperty("dateLastWin", "2022-06-01T12:00:00")
+                        .addProperty("dateLastWin", "2022-06-01T12:00:00.000Z")
                         .addProperty("followers", "1500")
                         .addProperty("single", "true")
                         .addProperty("catOrDog", "cat")
@@ -561,7 +559,7 @@ public class UnleashTest {
         UnleashContext context =
                 UnleashContext.builder()
                         .addProperty("wins", "4")
-                        .addProperty("dateLastWin", "2022-06-01T12:00:00")
+                        .addProperty("dateLastWin", "2022-06-01T12:00:00.000Z")
                         .addProperty("followers", "900")
                         .addProperty("single", "false")
                         .addProperty("catOrDog", "dog")

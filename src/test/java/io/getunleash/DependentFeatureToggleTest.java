@@ -123,7 +123,8 @@ public class DependentFeatureToggleTest {
         stateHandler.setState(child, parent);
         boolean enabled = sut.isEnabled("child", UnleashContext.builder().userId("7").build());
         assertThat(enabled).isTrue();
-        verify(eventDispatcher).dispatch(any(IsEnabledImpressionEvent.class));
+        // if child does not have impression event enabled, even if the parent has them, we're not triggering impression event
+        verify(eventDispatcher, never()).dispatch(any(IsEnabledImpressionEvent.class));
     }
 
     @Test

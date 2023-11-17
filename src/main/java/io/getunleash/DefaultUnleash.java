@@ -206,19 +206,9 @@ public class DefaultUnleash implements Unleash {
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction) {
-        return isEnabled(toggleName, context, fallbackAction, false);
-    }
-
-    public boolean isEnabled(
-            String toggleName,
-            UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction,
-            boolean isParent) {
         FeatureEvaluationResult result =
                 getFeatureEvaluationResult(toggleName, context, fallbackAction, null);
-        if (!isParent) {
-            count(toggleName, result.isEnabled());
-        }
+        count(toggleName, result.isEnabled());
         eventDispatcher.dispatch(new ToggleEvaluated(toggleName, result.isEnabled()));
         dispatchEnabledImpressionDataIfNeeded(toggleName, result.isEnabled(), context);
         return result.isEnabled();
