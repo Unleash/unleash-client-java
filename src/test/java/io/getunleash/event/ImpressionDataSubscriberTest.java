@@ -32,7 +32,6 @@ public class ImpressionDataSubscriberTest {
                 new UnleashConfig.Builder()
                         .appName(SubscriberTest.class.getSimpleName())
                         .instanceId(SubscriberTest.class.getSimpleName())
-                        .synchronousFetchOnInitialisation(true)
                         .unleashAPI("http://localhost:4242/api")
                         .subscriber(testSubscriber)
                         .scheduledExecutor(new SynchronousTestExecutor())

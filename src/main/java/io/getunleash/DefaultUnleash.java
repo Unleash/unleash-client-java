@@ -220,12 +220,12 @@ public class DefaultUnleash implements Unleash {
             count(toggleName, result.isEnabled());
         }
         eventDispatcher.dispatch(new ToggleEvaluated(toggleName, result.isEnabled()));
-        dispatchEnabledImpressionDataIfNeeded("isEnabled", toggleName, result.isEnabled(), context);
+        dispatchEnabledImpressionDataIfNeeded(toggleName, result.isEnabled(), context);
         return result.isEnabled();
     }
 
     private void dispatchEnabledImpressionDataIfNeeded(
-            String eventType, String toggleName, boolean enabled, UnleashContext context) {
+            String toggleName, boolean enabled, UnleashContext context) {
         try {
             if (this.unleashEngine.shouldEmitImpressionEvent(toggleName)) {
                 eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
@@ -273,19 +273,12 @@ public class DefaultUnleash implements Unleash {
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
-        return getVariant(toggleName, context, defaultValue, false);
-    }
-
-    private Variant getVariant(
-            String toggleName, UnleashContext context, Variant defaultValue, boolean isParent) {
         FeatureEvaluationResult result =
                 getFeatureEvaluationResult(toggleName, context, (n, c) -> false, defaultValue);
         Variant variant = result.getVariant();
-        if (!isParent) {
-            metricService.countVariant(toggleName, variant.getName());
-            // Should count yes/no also when getting variant.
-            metricService.count(toggleName, result.isEnabled());
-        }
+        metricService.countVariant(toggleName, variant.getName());
+        // Should count yes/no also when getting variant.
+        metricService.count(toggleName, result.isEnabled());
         dispatchVariantImpressionDataIfNeeded(
                 toggleName, variant.getName(), result.isEnabled(), context);
         return variant;
