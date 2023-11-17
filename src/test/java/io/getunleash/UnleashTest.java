@@ -11,7 +11,6 @@ import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.*;
 import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.strategy.Strategy;
-import io.getunleash.strategy.UserWithIdStrategy;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import io.getunleash.variant.Payload;
@@ -46,7 +45,7 @@ public class UnleashTest {
                         .unleashContextProvider(contextProvider)
                         .build();
 
-        unleash = new DefaultUnleash(config, toggleRepository, new UserWithIdStrategy());
+        unleash = new DefaultUnleash(config, toggleRepository);
         stateHandler = new UnleashEngineStateHandler((DefaultUnleash) unleash);
     }
 

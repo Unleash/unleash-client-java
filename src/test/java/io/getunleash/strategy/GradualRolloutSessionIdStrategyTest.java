@@ -3,13 +3,20 @@ package io.getunleash.strategy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import io.getunleash.UnleashContext;
+import io.getunleash.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import io.getunleash.repository.UnleashEngineStateHandler;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -22,56 +29,72 @@ public class GradualRolloutSessionIdStrategyTest {
     Random rand = new Random(SEED);
     List<Integer> percentages;
 
-    @BeforeEach
-    public void init() {
-        percentages =
-                ImmutableList.<Integer>builder()
-                        .add(1)
-                        .add(2)
-                        .add(5)
-                        .add(10)
-                        .add(25)
-                        .add(50)
-                        .add(90)
-                        .add(99)
-                        .add(100)
-                        .build();
-    }
+    private DefaultUnleash engine;
+    private UnleashEngineStateHandler stateHandler;
 
-    @Test
-    public void should_have_a_name() {
-        GradualRolloutSessionIdStrategy gradualRolloutStrategy =
-                new GradualRolloutSessionIdStrategy();
-        assertThat(gradualRolloutStrategy.getName()).isEqualTo("gradualRolloutSessionId");
+    @BeforeEach
+    void setUp() {
+        percentages =
+            ImmutableList.<Integer>builder()
+                .add(1)
+                .add(2)
+                .add(5)
+                .add(10)
+                .add(25)
+                .add(50)
+                .add(90)
+                .add(99)
+                .add(100)
+                .build();
+
+        UnleashConfig config =
+            new UnleashConfig.Builder()
+                .appName("test")
+                .unleashAPI("http://localhost:4242/api/")
+                .environment("test")
+                .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                .build();
+
+
+        engine = new DefaultUnleash(config);
+        stateHandler = new UnleashEngineStateHandler(engine);
     }
 
     @Test
     public void should_require_context() {
-        GradualRolloutSessionIdStrategy gradualRolloutStrategy =
-                new GradualRolloutSessionIdStrategy();
-        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>())).isFalse();
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", new HashMap<>()))
+        ));
+        assertThat(engine.isEnabled("test")).isFalse();
     }
 
     @Test
     public void should_be_disabled_when_missing_user_id() {
         UnleashContext context = UnleashContext.builder().build();
-        GradualRolloutSessionIdStrategy gradualRolloutStrategy =
-                new GradualRolloutSessionIdStrategy();
-
-        assertThat(gradualRolloutStrategy.isEnabled(new HashMap<>(), context)).isFalse();
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", new HashMap<>()))
+        ));
+        assertThat(engine.isEnabled("test", context)).isFalse();
     }
 
     @Test
     public void should_have_same_result_for_multiple_executions() {
         UnleashContext context = UnleashContext.builder().sessionId("1574576830").build();
-        GradualRolloutSessionIdStrategy gradualRolloutStrategy =
-                new GradualRolloutSessionIdStrategy();
 
         Map<String, String> params = buildParams(1, "innfinn");
-        boolean firstRunResult = gradualRolloutStrategy.isEnabled(params, context);
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
+        ));
 
+        boolean firstRunResult = engine.isEnabled("test", context);
         for (int i = 0; i < 10; i++) {
-            boolean subsequentRunResult = gradualRolloutStrategy.isEnabled(params, context);
+            boolean subsequentRunResult = engine.isEnabled("test", context);
             assertThat(firstRunResult)
                     .isEqualTo(subsequentRunResult)
                     .withFailMessage("loginId should return same result when unchanged parameters");
@@ -81,11 +104,14 @@ public class GradualRolloutSessionIdStrategyTest {
     @Test
     public void should_be_enabled_when_using_100percent_rollout() {
         UnleashContext context = UnleashContext.builder().sessionId("1574576830").build();
-        GradualRolloutSessionIdStrategy gradualRolloutStrategy =
-                new GradualRolloutSessionIdStrategy();
 
         Map<String, String> params = buildParams(100, "innfinn");
-        boolean result = gradualRolloutStrategy.isEnabled(params, context);
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
+        ));
+        boolean result = engine.isEnabled("test", context);
 
         assertThat(result).isTrue();
     }
@@ -93,11 +119,14 @@ public class GradualRolloutSessionIdStrategyTest {
     @Test
     public void should_not_be_enabled_when_0percent_rollout() {
         UnleashContext context = UnleashContext.builder().sessionId("1574576830").build();
-        GradualRolloutSessionIdStrategy gradualRolloutStrategy =
-                new GradualRolloutSessionIdStrategy();
 
         Map<String, String> params = buildParams(0, "innfinn");
-        boolean actual = gradualRolloutStrategy.isEnabled(params, context);
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
+        ));
+        boolean actual = engine.isEnabled("test", context);
 
         assertFalse(actual, "should not be enabled when 0% rollout");
     }
@@ -110,12 +139,16 @@ public class GradualRolloutSessionIdStrategyTest {
 
         UnleashContext context = UnleashContext.builder().sessionId(sessionId).build();
 
-        GradualRolloutSessionIdStrategy gradualRolloutStrategy =
-                new GradualRolloutSessionIdStrategy();
 
         for (int p = minimumPercentage; p <= 100; p++) {
             Map<String, String> params = buildParams(p, groupId);
-            boolean actual = gradualRolloutStrategy.isEnabled(params, context);
+            // Ok, we're going to stress the setting the state
+            stateHandler.setState(new FeatureToggle(
+                "test",
+                true,
+                ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
+            ));
+            boolean actual = engine.isEnabled("test", context);
             assertTrue(actual, "should be enabled when " + p + "% rollout");
         }
     }

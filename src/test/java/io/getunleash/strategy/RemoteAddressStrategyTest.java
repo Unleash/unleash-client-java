@@ -1,20 +1,20 @@
 package io.getunleash.strategy;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.google.common.collect.ImmutableList;
-import io.getunleash.UnleashContext;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import io.getunleash.*;
+import io.getunleash.repository.UnleashEngineStateHandler;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.*;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class RemoteAddressStrategyTest {
     private static final String FIRST_IPV4 = "127.0.0.1";
@@ -34,8 +34,6 @@ class RemoteAddressStrategyTest {
 
     private static final List<String> ALL =
             ImmutableList.<String>builder().addAll(ALL_IPV4).addAll(ALL_IPV6).build();
-
-    private RemoteAddressStrategy strategy;
 
     static Stream<Arguments> data() {
         return Stream.of(
@@ -72,23 +70,33 @@ class RemoteAddressStrategyTest {
                 Arguments.of(FIRST_IPV6, String.join(".", ALL), false));
     }
 
-    @BeforeEach
-    void setUp() {
-        strategy = new RemoteAddressStrategy();
-    }
-
-    @Test
-    void should_have_a_name() {
-        assertThat(strategy.getName()).isEqualTo("remoteAddress");
-    }
-
     @ParameterizedTest
     @MethodSource("data")
     void test_all_combinations(String actualIp, String parameterString, boolean expected) {
-        UnleashContext context = UnleashContext.builder().remoteAddress(actualIp).build();
+        UnleashContextProvider contextProvider = mock(UnleashContextProvider.class);
+        when(contextProvider.getContext()).thenReturn(UnleashContext.builder().remoteAddress(actualIp).build());
+
+        UnleashConfig config =
+            new UnleashConfig.Builder()
+                .appName("test")
+                .unleashAPI("http://localhost:4242/api/")
+                .environment("test")
+                .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                .unleashContextProvider(contextProvider)
+                .build();
+
+
         Map<String, String> parameters = setupParameterMap(parameterString);
 
-        assertThat(strategy.isEnabled(parameters, context)).isEqualTo(expected);
+        DefaultUnleash engine = new DefaultUnleash(config);
+        new UnleashEngineStateHandler(engine).setState(new FeatureToggle(
+                "test",
+                true,
+                ImmutableList.of(new ActivationStrategy("remoteAddress", parameters)),
+                Collections.emptyList()
+        ));
+
+        assertThat(engine.isEnabled("test")).isEqualTo(expected);
     }
 
     private Map<String, String> setupParameterMap(String ipString) {
@@ -97,7 +105,7 @@ class RemoteAddressStrategyTest {
         }
 
         Map<String, String> parameters = new HashMap<>();
-        parameters.put(RemoteAddressStrategy.PARAM, ipString);
+        parameters.put("IPs", ipString);
         return parameters;
     }
 }

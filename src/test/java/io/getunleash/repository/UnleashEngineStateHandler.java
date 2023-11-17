@@ -47,7 +47,6 @@ public class UnleashEngineStateHandler {
 
     public void setState(String raw) {
         try {
-
             this.unleashEngine.takeState(raw);
         } catch (YggdrasilInvalidInputException e) {
             throw new RuntimeException(e);

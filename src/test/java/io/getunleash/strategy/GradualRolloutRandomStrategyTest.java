@@ -1,30 +1,51 @@
 package io.getunleash.strategy;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import org.junit.jupiter.api.BeforeAll;
+import com.google.common.collect.ImmutableList;
+import io.getunleash.*;
+import io.getunleash.repository.UnleashEngineStateHandler;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public final class GradualRolloutRandomStrategyTest {
+    private DefaultUnleash engine;
+    private UnleashEngineStateHandler stateHandler;
 
-    private static GradualRolloutRandomStrategy gradualRolloutRandomStrategy;
+    @BeforeEach
+    void setUp() {
+        UnleashConfig config =
+            new UnleashConfig.Builder()
+                .appName("test")
+                .unleashAPI("http://localhost:4242/api/")
+                .environment("test")
+                .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                .build();
 
-    @BeforeAll
-    public static void setUp() {
-        long seed = new Random().nextLong();
-        System.out.println("GradualRolloutRandomStrategyTest running with seed: " + seed);
-        gradualRolloutRandomStrategy = new GradualRolloutRandomStrategy(seed);
+
+        engine = new DefaultUnleash(config);
+        stateHandler = new UnleashEngineStateHandler(engine);
     }
 
     @Test
     public void should_not_be_enabled_when_percentage_not_set() {
         final Map<String, String> parameters = new HashMap<>();
 
-        final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutRandom", parameters))
+        ));
+        final boolean enabled = engine.isEnabled("test");
 
         assertFalse(enabled);
     }
@@ -38,7 +59,13 @@ public final class GradualRolloutRandomStrategyTest {
                     }
                 };
 
-        final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutRandom", parameters)),
+            Collections.emptyList()
+        ));
+        final boolean enabled = engine.isEnabled("test");
 
         assertFalse(enabled);
     }
@@ -52,7 +79,13 @@ public final class GradualRolloutRandomStrategyTest {
                     }
                 };
 
-        final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutRandom", parameters)),
+            Collections.emptyList()
+        ));
+        final boolean enabled = engine.isEnabled("test");
 
         assertFalse(enabled);
     }
@@ -66,8 +99,15 @@ public final class GradualRolloutRandomStrategyTest {
                     }
                 };
 
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutRandom", parameters)),
+            Collections.emptyList()
+        ));
+
         for (int i = 0; i < 1000; i++) {
-            final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
+            final boolean enabled = engine.isEnabled("test");
             assertFalse(enabled);
         }
     }
@@ -81,8 +121,14 @@ public final class GradualRolloutRandomStrategyTest {
                     }
                 };
 
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutRandom", parameters)),
+            Collections.emptyList()
+        ));
         for (int i = 0; i <= 100; i++) {
-            final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
+            final boolean enabled = engine.isEnabled("test");
             assertTrue(enabled, "Should be enabled for p=" + i);
         }
     }
@@ -103,8 +149,14 @@ public final class GradualRolloutRandomStrategyTest {
         int rounds = 20000;
         int countEnabled = 0;
 
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("gradualRolloutRandom", parameters)),
+            Collections.emptyList()
+        ));
         for (int i = 0; i < rounds; i++) {
-            final boolean enabled = gradualRolloutRandomStrategy.isEnabled(parameters);
+            final boolean enabled = engine.isEnabled("test");
             if (enabled) {
                 countEnabled = countEnabled + 1;
             }
