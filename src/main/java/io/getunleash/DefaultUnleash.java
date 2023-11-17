@@ -32,18 +32,6 @@ public class DefaultUnleash implements Unleash {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
 
     private static ConcurrentHashMap<String, LongAdder> initCounts = new ConcurrentHashMap<>();
-    private static final List<Strategy> BUILTIN_STRATEGIES =
-            Arrays.asList(
-                    new DefaultStrategy(),
-                    new ApplicationHostnameStrategy(),
-                    new GradualRolloutRandomStrategy(),
-                    new GradualRolloutSessionIdStrategy(),
-                    new GradualRolloutUserIdStrategy(),
-                    new RemoteAddressStrategy(),
-                    new UserWithIdStrategy(),
-                    new FlexibleRolloutStrategy());
-
-    public static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
     private final UnleashEngine unleashEngine;
     private final UnleashMetricService metricService;
@@ -340,8 +328,6 @@ public class DefaultUnleash implements Unleash {
 
     private static Map<String, Strategy> buildStrategyMap(@Nullable Strategy[] strategies) {
         Map<String, Strategy> map = new HashMap<>();
-
-        BUILTIN_STRATEGIES.forEach(strategy -> map.put(strategy.getName(), strategy));
 
         if (strategies != null) {
             for (Strategy strategy : strategies) {

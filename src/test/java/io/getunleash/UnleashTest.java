@@ -130,7 +130,6 @@ public class UnleashTest {
         // custom strategy
         Strategy customStrategy = mock(Strategy.class);
         when(customStrategy.getName()).thenReturn("custom");
-        when(customStrategy.getResult(anyMap(), any(), anyList(), anyList())).thenCallRealMethod();
 
         // register custom strategy
         UnleashConfig config =

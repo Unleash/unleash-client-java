@@ -131,7 +131,6 @@ class DefaultUnleashTest {
     @Test
     public void should_allow_fallback_strategy() {
         Strategy fallback = mock(Strategy.class);
-        when(fallback.getResult(anyMap(), any(), anyList(), anyList())).thenCallRealMethod();
 
         UnleashConfig unleashConfigWithFallback =
                 UnleashConfig.builder()
