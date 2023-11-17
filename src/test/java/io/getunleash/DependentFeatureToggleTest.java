@@ -123,7 +123,8 @@ public class DependentFeatureToggleTest {
         stateHandler.setState(child, parent);
         boolean enabled = sut.isEnabled("child", UnleashContext.builder().userId("7").build());
         assertThat(enabled).isTrue();
-        // if child does not have impression event enabled, even if the parent has them, we're not triggering impression event
+        // if child does not have impression event enabled, even if the parent has them, we're not
+        // triggering impression event
         verify(eventDispatcher, never()).dispatch(any(IsEnabledImpressionEvent.class));
     }
 
@@ -148,8 +149,7 @@ public class DependentFeatureToggleTest {
         stateHandler.setState(child, parent);
         Variant variant = sut.getVariant("child", UnleashContext.builder().userId("7").build());
         assertThat(variant).isNotNull();
-        // TODO should this be 1? Now the SDK doesn't know whether about the parent/child relationship and the Engine will be checked only once
-        verify(eventDispatcher, times(2)).dispatch(any(VariantImpressionEvent.class));
+        verify(eventDispatcher, times(1)).dispatch(any(VariantImpressionEvent.class));
     }
 
     @Test

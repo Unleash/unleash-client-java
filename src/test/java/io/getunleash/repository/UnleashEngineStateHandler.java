@@ -5,7 +5,6 @@ import io.getunleash.FeatureToggle;
 import io.getunleash.Segment;
 import io.getunleash.engine.UnleashEngine;
 import io.getunleash.engine.YggdrasilInvalidInputException;
-
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,19 +26,18 @@ public class UnleashEngineStateHandler {
         }
     }
 
-    public void setState(FeatureToggle ...featureToggles) {
-        FeatureCollection madeUp = new FeatureCollection(
-            new ToggleCollection(Arrays.asList(featureToggles)),
-            new SegmentCollection(Collections.emptyList())
-        );
+    public void setState(FeatureToggle... featureToggles) {
+        FeatureCollection madeUp =
+                new FeatureCollection(
+                        new ToggleCollection(Arrays.asList(featureToggles)),
+                        new SegmentCollection(Collections.emptyList()));
         setState(madeUp);
     }
 
     public void setState(List<FeatureToggle> featureToggles, List<Segment> segments) {
-        FeatureCollection madeUp = new FeatureCollection(
-            new ToggleCollection(featureToggles),
-            new SegmentCollection(segments)
-        );
+        FeatureCollection madeUp =
+                new FeatureCollection(
+                        new ToggleCollection(featureToggles), new SegmentCollection(segments));
         setState(madeUp);
     }
 

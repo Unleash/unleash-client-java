@@ -9,7 +9,6 @@ import io.getunleash.lang.Nullable;
 import io.getunleash.util.Throttler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -143,7 +142,8 @@ public class FeatureRepository implements IFeatureRepository {
                                         LOGGER.error("Error when calling consumer {}", consumer, e);
                                     }
                                 });
-                        // Note: this could be a consumer as well, but we need to differentiate it to be able to read from the backup
+                        // Note: this could be a consumer as well, but we need to differentiate it
+                        // to be able to read from the backup
                         featureBackupHandler.write(featureCollection);
                     } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
                         throttler.handleHttpErrorCodes(response.getHttpStatusCode());

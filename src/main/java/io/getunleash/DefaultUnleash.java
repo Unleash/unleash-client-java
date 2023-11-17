@@ -1,5 +1,8 @@
 package io.getunleash;
 
+import static io.getunleash.Variant.DISABLED_VARIANT;
+import static java.util.Optional.ofNullable;
+
 import io.getunleash.engine.*;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.IsEnabledImpressionEvent;
@@ -13,9 +16,6 @@ import io.getunleash.repository.IFeatureRepository;
 import io.getunleash.repository.JsonFeatureParser;
 import io.getunleash.strategy.*;
 import io.getunleash.util.UnleashConfig;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -24,9 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
-
-import static io.getunleash.Variant.DISABLED_VARIANT;
-import static java.util.Optional.ofNullable;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultUnleash implements Unleash {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
@@ -101,17 +101,23 @@ public class DefaultUnleash implements Unleash {
             UnleashMetricService metricService,
             boolean failOnMultipleInstantiations) {
 
-        this.unleashEngine = new UnleashEngine(
-            strategyMap.values().stream().map(this::asIStrategy).collect(Collectors.toList()),
-            Optional.ofNullable(unleashConfig.getFallbackStrategy()).map(this::asIStrategy).orElse(null)
-        );
-        featureRepository.addConsumer(featureCollection -> {
-            try {
-                this.unleashEngine.takeState(JsonFeatureParser.toJsonString(featureCollection));
-            } catch (YggdrasilInvalidInputException e) {
-                LOGGER.error("Unable to update features", e);
-            }
-        });
+        this.unleashEngine =
+                new UnleashEngine(
+                        strategyMap.values().stream()
+                                .map(this::asIStrategy)
+                                .collect(Collectors.toList()),
+                        Optional.ofNullable(unleashConfig.getFallbackStrategy())
+                                .map(this::asIStrategy)
+                                .orElse(null));
+        featureRepository.addConsumer(
+                featureCollection -> {
+                    try {
+                        this.unleashEngine.takeState(
+                                JsonFeatureParser.toJsonString(featureCollection));
+                    } catch (YggdrasilInvalidInputException e) {
+                        LOGGER.error("Unable to update features", e);
+                    }
+                });
 
         this.config = unleashConfig;
         this.featureRepository = featureRepository;
@@ -161,21 +167,22 @@ public class DefaultUnleash implements Unleash {
         if (context.getCurrentTime() != null) {
             try {
                 currentTime = ZonedDateTime.parse(context.getCurrentTime());
-            } catch (DateTimeParseException e){
-                LOGGER.warn("Unable to parse current time from context: {}, using current time instead", context.getCurrentTime());
+            } catch (DateTimeParseException e) {
+                LOGGER.warn(
+                        "Unable to parse current time from context: {}, using current time instead",
+                        context.getCurrentTime());
             }
-
         }
 
         return new UnleashContext(
-            context.getAppName(),
-            context.getEnvironment(),
-            context.getUserId(),
-            context.getSessionId(),
-            context.getRemoteAddress(),
-            currentTime,
-            context.getProperties()
-        ).applyStaticFields(config);
+                        context.getAppName(),
+                        context.getEnvironment(),
+                        context.getUserId(),
+                        context.getSessionId(),
+                        context.getRemoteAddress(),
+                        currentTime,
+                        context.getProperties())
+                .applyStaticFields(config);
     }
 
     private Context adapt(UnleashContext context) {
@@ -186,7 +193,9 @@ public class DefaultUnleash implements Unleash {
         mapped.setSessionId(context.getSessionId().orElse(null));
         mapped.setRemoteAddress(context.getRemoteAddress().orElse(null));
         mapped.setProperties(context.getProperties());
-        mapped.setCurrentTime(DateTimeFormatter.ISO_DATE_TIME.format(context.getCurrentTime().orElse(ZonedDateTime.now())));
+        mapped.setCurrentTime(
+                DateTimeFormatter.ISO_DATE_TIME.format(
+                        context.getCurrentTime().orElse(ZonedDateTime.now())));
         return mapped;
     }
 
@@ -218,7 +227,8 @@ public class DefaultUnleash implements Unleash {
             String toggleName, boolean enabled, UnleashContext context) {
         try {
             if (this.unleashEngine.shouldEmitImpressionEvent(toggleName)) {
-                eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
+                eventDispatcher.dispatch(
+                        new IsEnabledImpressionEvent(toggleName, enabled, context));
             }
         } catch (YggdrasilError e) {
             LOGGER.warn("Unable to check if impression event should be emitted", e);
@@ -232,10 +242,15 @@ public class DefaultUnleash implements Unleash {
             @Nullable Variant defaultVariant) {
         UnleashContext enhancedContext = context.applyStaticFields(config);
         try {
-            VariantDef variantResponse = this.unleashEngine.getVariant(toggleName, adapt(enhancedContext));
+            VariantDef variantResponse =
+                    this.unleashEngine.getVariant(toggleName, adapt(enhancedContext));
             if (variantResponse != null) {
-                return new FeatureEvaluationResult(variantResponse.isEnabled(),
-                    new Variant(variantResponse.getName(), adapt(variantResponse.getPayload()), variantResponse.isEnabled()));
+                return new FeatureEvaluationResult(
+                        variantResponse.isEnabled(),
+                        new Variant(
+                                variantResponse.getName(),
+                                adapt(variantResponse.getPayload()),
+                                variantResponse.isEnabled()));
             }
 
             Boolean isEnabled = this.unleashEngine.isEnabled(toggleName, adapt(enhancedContext));
@@ -243,7 +258,8 @@ public class DefaultUnleash implements Unleash {
                 return new FeatureEvaluationResult(isEnabled, defaultVariant);
             }
 
-            return new FeatureEvaluationResult(fallbackAction.test(toggleName, enhancedContext), defaultVariant);
+            return new FeatureEvaluationResult(
+                    fallbackAction.test(toggleName, enhancedContext), defaultVariant);
 
         } catch (YggdrasilInvalidInputException | YggdrasilError e) {
             throw new RuntimeException(e);
@@ -251,9 +267,9 @@ public class DefaultUnleash implements Unleash {
     }
 
     private @Nullable io.getunleash.variant.Payload adapt(@Nullable Payload payload) {
-        return Optional.ofNullable(payload).map(p ->
-            new io.getunleash.variant.Payload(p.getType(), p.getValue())
-        ).orElse(null);
+        return Optional.ofNullable(payload)
+                .map(p -> new io.getunleash.variant.Payload(p.getType(), p.getValue()))
+                .orElse(null);
     }
 
     @Override

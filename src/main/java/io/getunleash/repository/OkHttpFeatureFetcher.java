@@ -76,7 +76,6 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
                 FeatureCollection features =
                         JsonFeatureParser.fromJson(
                                 Objects.requireNonNull(response.body()).charStream());
-
                 return new ClientFeaturesResponse(
                         ClientFeaturesResponse.Status.CHANGED,
                         features.getToggleCollection(),

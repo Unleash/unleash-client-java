@@ -87,9 +87,11 @@ class DefaultUnleashTest {
                         asList(semverConstraint),
                         asList(404),
                         Collections.emptyList());
-        new UnleashEngineStateHandler(sut).setState(
-            Collections.singletonList(new FeatureToggle(toggleName, true, asList(withMissingSegment))),
-            Collections.singletonList(Segment.DENY_SEGMENT));
+        new UnleashEngineStateHandler(sut)
+                .setState(
+                        Collections.singletonList(
+                                new FeatureToggle(toggleName, true, asList(withMissingSegment))),
+                        Collections.singletonList(Segment.DENY_SEGMENT));
 
         when(contextProvider.getContext())
                 .thenReturn(UnleashContext.builder().addProperty("version", semVer).build());
@@ -107,17 +109,19 @@ class DefaultUnleashTest {
                         asList(semverConstraint),
                         asList(404, 1),
                         Collections.emptyList());
-        new UnleashEngineStateHandler(sut).setState(
-            Collections.singletonList(new FeatureToggle(toggleName, true, asList(withMissingSegment))),
-            Collections.singletonList(new Segment(
-                1,
-                "always true",
-                asList(
-                    new Constraint(
-                        "always_true",
-                        Operator.NOT_IN,
-                        Collections.EMPTY_LIST)))));
-
+        new UnleashEngineStateHandler(sut)
+                .setState(
+                        Collections.singletonList(
+                                new FeatureToggle(toggleName, true, asList(withMissingSegment))),
+                        Collections.singletonList(
+                                new Segment(
+                                        1,
+                                        "always true",
+                                        asList(
+                                                new Constraint(
+                                                        "always_true",
+                                                        Operator.NOT_IN,
+                                                        Collections.EMPTY_LIST)))));
 
         when(contextProvider.getContext())
                 .thenReturn(UnleashContext.builder().addProperty("version", "1.2.2").build());
@@ -151,7 +155,8 @@ class DefaultUnleashTest {
 
         sut.isEnabled("toggle1");
 
-        // PR-comment: constraints are no longer managed by the SDK but by Yggdrasil, so we removed the third parameter
+        // PR-comment: constraints are no longer managed by the SDK but by Yggdrasil, so we removed
+        // the third parameter
         verify(fallback).isEnabled(any(), any());
     }
 

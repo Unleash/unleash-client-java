@@ -59,8 +59,8 @@
             <artifactId>unleash-engine</artifactId>
             <groupId>io.getunleash</groupId>
             <scope>system</scope>
-            <version>*</version>
-            <systemPath>/home/gaston/projects/yggdrasil/java-engine/build/libs/unleash-engine-all.jar</systemPath>
+            <version>0.0.1-SNAPSHOT</version>
+            <systemPath>${project.basedir}/unleash-engine-all.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

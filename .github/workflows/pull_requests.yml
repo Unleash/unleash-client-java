@@ -18,4 +18,6 @@ jobs:
           cache: 'maven'
           distribution: 'temurin'
       - name: Build, test, coverage
+        env:
+          YGGDRASIL_LIB_PATH: .
         run: ./mvnw clean test jacoco:report coveralls:report
