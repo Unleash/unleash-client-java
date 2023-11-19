@@ -1,16 +1,44 @@
 package io.getunleash.strategy;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.google.common.collect.ImmutableList;
+import io.getunleash.ActivationStrategy;
+import io.getunleash.DefaultUnleash;
+import io.getunleash.FeatureToggle;
+import io.getunleash.repository.UnleashEngineStateHandler;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class ApplicationHostnameStrategyTest {
+
+    private DefaultUnleash engine;
+    private UnleashEngineStateHandler stateHandler;
+
+    @BeforeEach
+    void init() {
+        UnleashConfig config =
+            new UnleashConfig.Builder()
+                .appName("test")
+                .unleashAPI("http://localhost:4242/api/")
+                .environment("test")
+                .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                .build();
+
+
+        engine = new DefaultUnleash(config);
+        stateHandler = new UnleashEngineStateHandler(engine);
+    }
 
     @AfterEach
     public void remove_hostname_property() {
@@ -19,33 +47,45 @@ public class ApplicationHostnameStrategyTest {
 
     @Test
     public void should_be_disabled_if_no_HostNames_in_params() {
-        Strategy strategy = new ApplicationHostnameStrategy();
         Map<String, String> params = new HashMap<>();
         params.put("hostNames", null);
 
-        assertFalse(strategy.isEnabled(params));
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
+        ));
+        assertFalse(engine.isEnabled("test"));
     }
 
     @Test
     public void should_be_disabled_if_hostname_not_in_list() {
-        Strategy strategy = new ApplicationHostnameStrategy();
-
         Map<String, String> params = new HashMap<>();
         params.put("hostNames", "MegaHost,MiniHost, happyHost");
 
-        assertFalse(strategy.isEnabled(params));
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
+        ));
+        assertFalse(engine.isEnabled("test"));
     }
 
     @Test
     public void should_be_enabled_for_hostName() {
         String hostName = "my-super-host";
         System.setProperty("hostname", hostName);
-
-        Strategy strategy = new ApplicationHostnameStrategy();
+        // TODO when creating the context, somehow it has to read the hostname. Implementation from SDK strategy https://github.com/Unleash/unleash-client-java/blob/061277bd31293170e28deac4ec750add3a03374b/src/main/java/io/getunleash/strategy/ApplicationHostnameStrategy.java#L18-L28
 
         Map<String, String> params = new HashMap<>();
         params.put("hostNames", "MegaHost," + hostName + ",MiniHost, happyHost");
-        assertTrue(strategy.isEnabled(params));
+
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
+        ));
+        assertTrue(engine.isEnabled("test"));
     }
 
     @Test
@@ -53,12 +93,15 @@ public class ApplicationHostnameStrategyTest {
         String hostName = "my-super-host";
         System.setProperty("hostname", hostName);
 
-        Strategy strategy = new ApplicationHostnameStrategy();
-
         Map<String, String> params = new HashMap<>();
 
         params.put("hostNames", "MegaHost," + hostName.toUpperCase() + ",MiniHost, happyHost");
-        assertTrue(strategy.isEnabled(params));
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
+        ));
+        assertTrue(engine.isEnabled("test"));
     }
 
     @Test
@@ -66,12 +109,15 @@ public class ApplicationHostnameStrategyTest {
         String hostName = "my-super-host";
         System.setProperty("hostname", hostName);
 
-        Strategy strategy = new ApplicationHostnameStrategy();
-
         Map<String, String> params = new HashMap<>();
 
         params.put("hostNames", "MegaHost, MiniHost, SuperhostOne");
-        assertFalse(strategy.isEnabled(params));
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
+        ));
+        assertFalse(engine.isEnabled("test"));
     }
 
     @Test
@@ -79,11 +125,14 @@ public class ApplicationHostnameStrategyTest {
         String hostName = InetAddress.getLocalHost().getHostName();
         System.setProperty("hostname", hostName);
 
-        Strategy strategy = new ApplicationHostnameStrategy();
-
         Map<String, String> params = new HashMap<>();
         params.put("hostNames", "MegaHost," + hostName + ",MiniHost, happyHost");
-        assertTrue(strategy.isEnabled(params));
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
+        ));
+        assertTrue(engine.isEnabled("test"));
     }
 
     @Test
@@ -91,16 +140,23 @@ public class ApplicationHostnameStrategyTest {
         String hostName = "super-wiEred-host";
         System.setProperty("hostname", hostName);
 
-        Strategy strategy = new ApplicationHostnameStrategy();
-
         Map<String, String> params = new HashMap<>();
         params.put("hostNames", "MegaHost," + hostName + ",MiniHost, happyHost");
-        assertTrue(strategy.isEnabled(params));
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
+        ));
+        assertTrue(engine.isEnabled("test"));
     }
 
     @Test
     public void null_test() {
-        Strategy strategy = new ApplicationHostnameStrategy();
-        assertFalse(strategy.isEnabled(new HashMap<>()));
+        stateHandler.setState(new FeatureToggle(
+            "test",
+            true,
+            ImmutableList.of(new ActivationStrategy("applicationHostname", new HashMap<>()))
+        ));
+        assertFalse(engine.isEnabled("test"));
     }
 }

@@ -103,6 +103,7 @@ public class UnleashContext {
         if (!this.appName.isPresent()) {
             builder.appName(config.getAppName());
         }
+
         return builder.build();
     }
 
