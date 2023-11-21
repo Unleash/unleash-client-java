@@ -325,22 +325,20 @@ public class FeatureRepositoryTest {
                         bootstrapHandler);
 
         runner.assertThatFetchesAndReceives(UNAVAILABLE, 429);
+        // client is not ready don't count errors or skips
         assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(0);
 
         runner.assertThatFetchesAndReceives(UNAVAILABLE, 429);
-        verify(fetcher, times(2)).fetchFeatures();
         // client is not ready don't count errors or skips
         assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(0);
 
         // this changes the client to ready
         runner.assertThatFetchesAndReceives(CHANGED, 200);
-        verify(fetcher, times(3)).fetchFeatures();
         assertThat(featureRepository.getSkips()).isEqualTo(0);
 
         runner.assertThatFetchesAndReceives(UNAVAILABLE, 429);
-        verify(fetcher, times(4)).fetchFeatures();
         assertThat(featureRepository.getSkips()).isEqualTo(1);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
 
