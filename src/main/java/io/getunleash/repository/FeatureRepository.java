@@ -110,10 +110,6 @@ public class FeatureRepository implements IFeatureRepository {
         }
     }
 
-    private Integer calculateMaxSkips(int fetchTogglesInterval) {
-        return Integer.max(20, 300 / Integer.max(fetchTogglesInterval, 1));
-    }
-
     private Runnable updateFeatures(final Consumer<UnleashException> handler) {
         return () -> {
             if (throttler.performAction()) {
