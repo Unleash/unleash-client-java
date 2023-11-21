@@ -1,5 +1,6 @@
 package io.getunleash.repository;
 
+import static io.getunleash.repository.FeatureToggleResponse.Status.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -118,7 +119,7 @@ public class FeatureRepositoryTest {
                                 Arrays.asList(new ActivationStrategy("custom", null))));
         ClientFeaturesResponse response =
                 new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.CHANGED, featureCollection);
+                        CHANGED, featureCollection);
 
         FeatureRepository featureRepository =
                 new FeatureRepository(config, backupHandler, executor, fetcher, bootstrapHandler);
@@ -176,7 +177,7 @@ public class FeatureRepositoryTest {
         FeatureCollection featureCollection = populatedFeatureCollection(null);
         ClientFeaturesResponse response =
                 new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.CHANGED, featureCollection);
+                        CHANGED, featureCollection);
         when(fetcher.fetchFeatures()).thenReturn(response);
 
         new FeatureRepository(
@@ -200,7 +201,7 @@ public class FeatureRepositoryTest {
         FeatureCollection featureCollection = populatedFeatureCollection(null);
         ClientFeaturesResponse response =
                 new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.CHANGED, featureCollection);
+                        CHANGED, featureCollection);
 
         when(fetcher.fetchFeatures()).thenReturn(response);
 
@@ -332,9 +333,9 @@ public class FeatureRepositoryTest {
                                                 new ActivationStrategy("custom", null)))));
         when(fetcher.fetchFeatures())
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 403))
+                        new ClientFeaturesResponse(UNAVAILABLE, 403))
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
+                        new ClientFeaturesResponse(NOT_CHANGED, 304));
 
         FeatureRepository featureRepository =
                 new FeatureRepository(
@@ -397,9 +398,9 @@ public class FeatureRepositoryTest {
                                                 new ActivationStrategy("custom", null)))));
         when(fetcher.fetchFeatures())
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 404))
+                        new ClientFeaturesResponse(UNAVAILABLE, 404))
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
+                        new ClientFeaturesResponse(NOT_CHANGED, 304));
 
         FeatureRepository featureRepository =
                 new FeatureRepository(
@@ -468,30 +469,40 @@ public class FeatureRepositoryTest {
                         fetcher,
                         bootstrapHandler);
         verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
-        when(fetcher.fetchFeatures())
-                .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 429))
-                .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 429))
-                .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 429))
-                .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
-                .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
-                .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
-                .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
-        runnableArgumentCaptor.getValue().run();
+
+        // if client is not ready don't count errors
+        withResponse(UNAVAILABLE, 429, runnableArgumentCaptor);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+
+        // this changes the client to ready
+        withResponse(CHANGED, 200, runnableArgumentCaptor);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+
+        withResponse(UNAVAILABLE, 429, runnableArgumentCaptor);
         assertThat(featureRepository.getSkips()).isEqualTo(1);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
-        runnableArgumentCaptor.getValue().run();
+
+        withResponse(UNAVAILABLE, 429, runnableArgumentCaptor);
         assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
-        runnableArgumentCaptor.getValue().run();
+
+        withResponse(UNAVAILABLE, 429, runnableArgumentCaptor);
         assertThat(featureRepository.getSkips()).isEqualTo(2);
         assertThat(featureRepository.getFailures()).isEqualTo(2);
+
+        when(fetcher.fetchFeatures())
+            .thenReturn(
+                new ClientFeaturesResponse(UNAVAILABLE, 429))
+            .thenReturn(
+                new ClientFeaturesResponse(NOT_CHANGED, 304))
+            .thenReturn(
+                new ClientFeaturesResponse(NOT_CHANGED, 304))
+            .thenReturn(
+                new ClientFeaturesResponse(NOT_CHANGED, 304))
+            .thenReturn(
+                new ClientFeaturesResponse(NOT_CHANGED, 304));
+
+        //withResponse(NOT_CHANGED, 304, runnableArgumentCaptor);
         runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
         runnableArgumentCaptor.getValue().run(); // NO-OP because interval > 0
         assertThat(featureRepository.getSkips()).isEqualTo(0);
@@ -520,6 +531,12 @@ public class FeatureRepositoryTest {
         runnableArgumentCaptor.getValue().run();
         assertThat(featureRepository.getSkips()).isEqualTo(0);
         assertThat(featureRepository.getFailures()).isEqualTo(0);
+    }
+
+    private void withResponse(FeatureToggleResponse.Status status, int statusCode, ArgumentCaptor<Runnable> runnableArgumentCaptor) {
+        when(fetcher.fetchFeatures())
+            .thenReturn(new ClientFeaturesResponse(status, statusCode));
+        runnableArgumentCaptor.getValue().run();
     }
 
     @Test
@@ -570,19 +587,19 @@ public class FeatureRepositoryTest {
         verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
         when(fetcher.fetchFeatures())
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 500))
+                        new ClientFeaturesResponse(UNAVAILABLE, 500))
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 502))
+                        new ClientFeaturesResponse(UNAVAILABLE, 502))
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.UNAVAILABLE, 503))
+                        new ClientFeaturesResponse(UNAVAILABLE, 503))
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
+                        new ClientFeaturesResponse(NOT_CHANGED, 304))
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
+                        new ClientFeaturesResponse(NOT_CHANGED, 304))
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304))
+                        new ClientFeaturesResponse(NOT_CHANGED, 304))
                 .thenReturn(
-                        new ClientFeaturesResponse(FeatureToggleResponse.Status.NOT_CHANGED, 304));
+                        new ClientFeaturesResponse(NOT_CHANGED, 304));
         runnableArgumentCaptor.getValue().run();
         assertThat(featureRepository.getSkips()).isEqualTo(1);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
