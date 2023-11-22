@@ -95,7 +95,9 @@ public class FeatureRepository implements IFeatureRepository {
         }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
-            updateFeatures(null).run();
+            updateFeatures(e -> {
+                throw e;
+            }).run();
         }
 
         if (!unleashConfig.isDisablePolling()) {
@@ -108,11 +110,7 @@ public class FeatureRepository implements IFeatureRepository {
         }
     }
 
-    private Integer calculateMaxSkips(int fetchTogglesInterval) {
-        return Integer.max(20, 300 / Integer.max(fetchTogglesInterval, 1));
-    }
-
-    private Runnable updateFeatures(@Nullable final Consumer<UnleashException> handler) {
+    private Runnable updateFeatures(final Consumer<UnleashException> handler) {
         return () -> {
             if (throttler.performAction()) {
                 try {
@@ -129,7 +127,12 @@ public class FeatureRepository implements IFeatureRepository {
 
                         featureBackupHandler.write(featureCollection);
                     } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
-                        throttler.handleHttpErrorCodes(response.getHttpStatusCode());
+                        if (!ready && unleashConfig.isSynchronousFetchOnInitialisation()) {
+                            throw new UnleashException(String.format("Could not initialize Unleash, got response code %d", response.getHttpStatusCode()), null);
+                        }
+                        if (ready) {
+                            throttler.handleHttpErrorCodes(response.getHttpStatusCode());
+                        }
                         return;
                     }
                     throttler.decrementFailureCountAndResetSkips();
@@ -138,11 +141,7 @@ public class FeatureRepository implements IFeatureRepository {
                         ready = true;
                     }
                 } catch (UnleashException e) {
-                    if (handler != null) {
-                        handler.accept(e);
-                    } else {
-                        throw e;
-                    }
+                    handler.accept(e);
                 }
             } else {
                 throttler.skipped(); // We didn't do anything this iteration, just reduce the count
