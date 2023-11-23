@@ -27,6 +27,8 @@ import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
 class DefaultUnleashTest {
@@ -254,9 +256,10 @@ class DefaultUnleashTest {
         assertThat(readySubscriber.ready).isFalse();
     }
 
-    @Test
-    public void synchronous_fetch_on_initialisation_fails_on_non_200_response() throws URISyntaxException {
-        mockUnleashAPI(401);
+    @ParameterizedTest
+    @ValueSource(ints = {401, 403, 404, 500})
+    public void synchronous_fetch_on_initialisation_fails_on_non_200_response(int code) throws URISyntaxException {
+        mockUnleashAPI(code);
         IsReadyTestSubscriber readySubscriber = new IsReadyTestSubscriber();
         UnleashConfig config =
             UnleashConfig.builder()
