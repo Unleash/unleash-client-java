@@ -30,13 +30,13 @@ public interface Unleash {
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction);
 
-    Variant getVariant(final String toggleName, final UnleashContext context);
+    Variant getVariant(final String toggleName, final UnleashContext context, final boolean featureEnabled);
 
     Variant getVariant(
             final String toggleName, final UnleashContext context, final Variant defaultValue);
 
-    default Variant getVariant(final String toggleName) {
-        return getVariant(toggleName, UnleashContext.builder().build());
+    default Variant getVariant(final String toggleName, final boolean featureEnabled) {
+        return getVariant(toggleName, UnleashContext.builder().build(), featureEnabled);
     }
 
     default Variant getVariant(final String toggleName, final Variant defaultValue) {

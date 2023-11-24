@@ -6,33 +6,41 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class Variant {
-    public static final Variant DISABLED_VARIANT = new Variant("disabled", (String) null, false);
+
+    public static Variant disabledVariant(boolean featureEnabled) {
+        return new Variant("disabled", (String) null, false, featureEnabled);
+    }
 
     private final String name;
     @Nullable private final Payload payload;
     private final boolean enabled;
     @Nullable private final String stickiness;
 
-    public Variant(String name, @Nullable Payload payload, boolean enabled) {
-        this(name, payload, enabled, null);
+    private final boolean featureEnabled;
+
+
+    public Variant(String name, @Nullable Payload payload, boolean enabled, boolean featureEnabled) {
+        this(name, payload, enabled, null, featureEnabled);
     }
 
-    public Variant(String name, @Nullable Payload payload, boolean enabled, String stickiness) {
+    public Variant(String name, @Nullable Payload payload, boolean enabled, String stickiness, boolean featureEnabled) {
         this.name = name;
         this.payload = payload;
         this.enabled = enabled;
         this.stickiness = stickiness;
+        this.featureEnabled = featureEnabled;
     }
 
-    public Variant(String name, @Nullable String payload, boolean enabled) {
-        this(name, payload, enabled, null);
+    public Variant(String name, @Nullable String payload, boolean enabled, boolean featureEnabled) {
+        this(name, payload, enabled, null, featureEnabled);
     }
 
-    public Variant(String name, @Nullable String payload, boolean enabled, String stickiness) {
+    public Variant(String name, @Nullable String payload, boolean enabled, String stickiness, boolean featureEnabled) {
         this.name = name;
         this.payload = new Payload("string", payload);
         this.enabled = enabled;
         this.stickiness = stickiness;
+        this.featureEnabled = featureEnabled;
     }
 
     public String getName() {
@@ -45,6 +53,10 @@ public class Variant {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public boolean isFeatureEnabled() {
+        return featureEnabled;
     }
 
     @Nullable
@@ -63,6 +75,8 @@ public class Variant {
                 + '\''
                 + ", enabled="
                 + enabled
+                + ", featureEnabled="
+                + featureEnabled
                 + '}';
     }
 
@@ -72,6 +86,7 @@ public class Variant {
         if (o == null || getClass() != o.getClass()) return false;
         Variant variant = (Variant) o;
         return enabled == variant.enabled
+                && featureEnabled == variant.featureEnabled
                 && Objects.equals(name, variant.name)
                 && Objects.equals(payload, variant.payload);
     }

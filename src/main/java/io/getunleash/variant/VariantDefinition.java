@@ -63,6 +63,6 @@ public class VariantDefinition {
     }
 
     Variant toVariant() {
-        return new Variant(name, payload, true, stickiness);
+        return new Variant(name, payload, true, stickiness, true);
     }
 }

@@ -1,6 +1,5 @@
 package io.getunleash;
 
-import static io.getunleash.Variant.DISABLED_VARIANT;
 import static java.util.Optional.ofNullable;
 
 import io.getunleash.event.*;
@@ -255,7 +254,7 @@ public class DefaultUnleash implements Unleash {
                                                         getVariant(
                                                                         parent.feature,
                                                                         context,
-                                                                        DISABLED_VARIANT,
+                                                                        Variant.disabledVariant(true),
                                                                         true)
                                                                 .getName());
                                     } else {
@@ -280,8 +279,8 @@ public class DefaultUnleash implements Unleash {
     }
 
     @Override
-    public Variant getVariant(String toggleName, UnleashContext context) {
-        return getVariant(toggleName, context, DISABLED_VARIANT);
+    public Variant getVariant(String toggleName, UnleashContext context, boolean featureEnabled) {
+        return getVariant(toggleName, context, Variant.disabledVariant(featureEnabled));
     }
 
     @Override
