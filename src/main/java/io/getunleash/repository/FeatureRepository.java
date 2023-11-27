@@ -95,9 +95,15 @@ public class FeatureRepository implements IFeatureRepository {
         }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
-            updateFeatures(e -> {
-                throw e;
-            }).run();
+            if (this.unleashConfig.getStartupExceptionHandler() != null) {
+                updateFeatures(this.unleashConfig.getStartupExceptionHandler()).run();
+            } else {
+                updateFeatures(
+                                e -> {
+                                    throw e;
+                                })
+                        .run();
+            }
         }
 
         if (!unleashConfig.isDisablePolling()) {
@@ -128,7 +134,11 @@ public class FeatureRepository implements IFeatureRepository {
                         featureBackupHandler.write(featureCollection);
                     } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
                         if (!ready && unleashConfig.isSynchronousFetchOnInitialisation()) {
-                            throw new UnleashException(String.format("Could not initialize Unleash, got response code %d", response.getHttpStatusCode()), null);
+                            throw new UnleashException(
+                                    String.format(
+                                            "Could not initialize Unleash, got response code %d",
+                                            response.getHttpStatusCode()),
+                                    null);
                         }
                         if (ready) {
                             throttler.handleHttpErrorCodes(response.getHttpStatusCode());

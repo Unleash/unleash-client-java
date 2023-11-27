@@ -14,13 +14,11 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashReady;
 import io.getunleash.event.UnleashSubscriber;
-import io.getunleash.integration.TestDefinition;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.*;
 import io.getunleash.strategy.DefaultStrategy;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -40,10 +38,10 @@ class DefaultUnleashTest {
 
     @RegisterExtension
     static WireMockExtension serverMock =
-        WireMockExtension.newInstance()
-            .configureStaticDsl(true)
-            .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
-            .build();
+            WireMockExtension.newInstance()
+                    .configureStaticDsl(true)
+                    .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
+                    .build();
 
     @BeforeEach
     public void setup() {
@@ -258,49 +256,51 @@ class DefaultUnleashTest {
 
     @ParameterizedTest
     @ValueSource(ints = {401, 403, 404, 500})
-    public void synchronous_fetch_on_initialisation_fails_on_non_200_response(int code) throws URISyntaxException {
+    public void synchronous_fetch_on_initialisation_fails_on_non_200_response(int code)
+            throws URISyntaxException {
         mockUnleashAPI(code);
         IsReadyTestSubscriber readySubscriber = new IsReadyTestSubscriber();
         UnleashConfig config =
-            UnleashConfig.builder()
-                .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
-                .appName("wrong_upstream")
-                .apiKey("default:development:1234567890123456")
-                .instanceId("non-200")
-                .synchronousFetchOnInitialisation(true)
-                .subscriber(readySubscriber)
-                .build();
+                UnleashConfig.builder()
+                        .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
+                        .appName("wrong_upstream")
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId("non-200")
+                        .synchronousFetchOnInitialisation(true)
+                        .subscriber(readySubscriber)
+                        .build();
 
         assertThatThrownBy(() -> new DefaultUnleash(config)).isInstanceOf(UnleashException.class);
         assertThat(readySubscriber.ready).isFalse();
     }
 
     @Test
-    public void synchronous_fetch_on_initialisation_switches_to_ready_on_200() throws URISyntaxException {
+    public void synchronous_fetch_on_initialisation_switches_to_ready_on_200()
+            throws URISyntaxException {
         mockUnleashAPI(200);
         IsReadyTestSubscriber readySubscriber = new IsReadyTestSubscriber();
         UnleashConfig config =
-            UnleashConfig.builder()
-                .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
-                .appName("wrong_upstream")
-                .apiKey("default:development:1234567890123456")
-                .instanceId("with-success-response")
-                .synchronousFetchOnInitialisation(true)
-                .subscriber(readySubscriber)
-                .build();
+                UnleashConfig.builder()
+                        .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
+                        .appName("wrong_upstream")
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId("with-success-response")
+                        .synchronousFetchOnInitialisation(true)
+                        .subscriber(readySubscriber)
+                        .build();
         new DefaultUnleash(config);
         assertThat(readySubscriber.ready).isTrue();
     }
 
     private void mockUnleashAPI(int featuresStatusCode) {
         stubFor(
-            get(urlEqualTo("/api/client/features"))
-                .withHeader("Accept", equalTo("application/json"))
-                .willReturn(
-                    aResponse()
-                        .withStatus(featuresStatusCode)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{\"features\": []}")));
+                get(urlEqualTo("/api/client/features"))
+                        .withHeader("Accept", equalTo("application/json"))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(featuresStatusCode)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody("{\"features\": []}")));
         stubFor(post(urlEqualTo("/api/client/register")).willReturn(aResponse().withStatus(200)));
     }
 
@@ -344,6 +344,7 @@ class DefaultUnleashTest {
 
     private static class IsReadyTestSubscriber implements UnleashSubscriber {
         public boolean ready = false;
+
         public void onReady(UnleashReady unleashReady) {
             this.ready = true;
         }

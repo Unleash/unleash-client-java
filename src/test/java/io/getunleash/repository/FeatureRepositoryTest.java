@@ -1,17 +1,15 @@
 package io.getunleash.repository;
 
+import static io.getunleash.repository.FeatureToggleResponse.Status.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import io.getunleash.*;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -21,11 +19,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static io.getunleash.repository.FeatureToggleResponse.Status.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 
 public class FeatureRepositoryTest {
     FeatureBackupHandlerFile backupHandler;
@@ -106,14 +106,14 @@ public class FeatureRepositoryTest {
 
         when(backupHandler.read()).thenReturn(simpleFeatureCollection(false));
 
-
         FeatureRepository featureRepository =
                 new FeatureRepository(config, backupHandler, executor, fetcher, bootstrapHandler);
         // run the toggleName fetcher callback
         verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
         verify(fetcher, times(0)).fetchFeatures();
 
-        ClientFeaturesResponse response = new ClientFeaturesResponse(CHANGED, simpleFeatureCollection(true));
+        ClientFeaturesResponse response =
+                new ClientFeaturesResponse(CHANGED, simpleFeatureCollection(true));
         when(fetcher.fetchFeatures()).thenReturn(response);
         runnableArgumentCaptor.getValue().run();
 
@@ -184,9 +184,7 @@ public class FeatureRepositoryTest {
         when(backupHandler.read()).thenReturn(new FeatureCollection());
 
         FeatureCollection featureCollection = populatedFeatureCollection(null);
-        ClientFeaturesResponse response =
-                new ClientFeaturesResponse(
-                        CHANGED, featureCollection);
+        ClientFeaturesResponse response = new ClientFeaturesResponse(CHANGED, featureCollection);
 
         when(fetcher.fetchFeatures()).thenReturn(response);
 
@@ -250,13 +248,33 @@ public class FeatureRepositoryTest {
 
         when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
 
-        when(backupHandler.read())
-                .thenReturn(
-                    getFeatureCollection());
+        when(backupHandler.read()).thenReturn(getFeatureCollection());
 
         new FeatureRepository(
                 config, backupHandler, new EventDispatcher(config), fetcher, bootstrapHandler);
         verify(toggleBootstrapProvider, times(0)).read();
+    }
+
+    @Test
+    public void shouldCallStartupExceptionHandlerIfStartupFails() {
+        ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        AtomicBoolean failed = new AtomicBoolean(false);
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(true)
+                        .startupExceptionHandler(
+                                (e) -> {
+                                    failed.set(true);
+                                })
+                        .appName("test-sync-update")
+                        .scheduledExecutor(executor)
+                        .unleashAPI("http://localhost:8080")
+                        .toggleBootstrapProvider(toggleBootstrapProvider)
+                        .build();
+
+        Unleash unleash = new DefaultUnleash(config);
+        assertThat(failed).isTrue();
     }
 
     @ParameterizedTest
@@ -460,35 +478,31 @@ public class FeatureRepositoryTest {
     @NotNull
     private FeatureCollection simpleFeatureCollection(boolean enabled) {
         return populatedFeatureCollection(
-            null,
-            new FeatureToggle(
-                "toggleFetcherCalled",
-                enabled,
-                Arrays.asList(new ActivationStrategy("custom", null))));
+                null,
+                new FeatureToggle(
+                        "toggleFetcherCalled",
+                        enabled,
+                        Arrays.asList(new ActivationStrategy("custom", null))));
     }
 
     @NotNull
     private FeatureCollection getFeatureCollection() {
         return populatedFeatureCollection(
-            Arrays.asList(
-                new Segment(
-                    1,
-                    "some-name",
-                    Arrays.asList(
-                        new Constraint(
-                            "some-context",
-                            Operator.IN,
-                            "some-value")))),
-            new FeatureToggle(
-                "toggleFeatureName1",
-                true,
-                Collections.singletonList(
-                    new ActivationStrategy("custom", null))),
-            new FeatureToggle(
-                "toggleFeatureName2",
-                true,
-                Collections.singletonList(
-                    new ActivationStrategy("custom", null))));
+                Arrays.asList(
+                        new Segment(
+                                1,
+                                "some-name",
+                                Arrays.asList(
+                                        new Constraint(
+                                                "some-context", Operator.IN, "some-value")))),
+                new FeatureToggle(
+                        "toggleFeatureName1",
+                        true,
+                        Collections.singletonList(new ActivationStrategy("custom", null))),
+                new FeatureToggle(
+                        "toggleFeatureName2",
+                        true,
+                        Collections.singletonList(new ActivationStrategy("custom", null))));
     }
 
     private class TestRunner {
@@ -506,15 +520,17 @@ public class FeatureRepositoryTest {
 
         private void ensureInitialized() {
             if (!initialized) {
-                verify(executor).setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
+                verify(executor)
+                        .setInterval(runnableArgumentCaptor.capture(), anyLong(), anyLong());
                 initialized = true;
             }
         }
 
-        public void assertThatFetchesAndReceives(FeatureToggleResponse.Status status, int statusCode) {
+        public void assertThatFetchesAndReceives(
+                FeatureToggleResponse.Status status, int statusCode) {
             ensureInitialized();
             when(fetcher.fetchFeatures())
-                .thenReturn(new ClientFeaturesResponse(status, statusCode));
+                    .thenReturn(new ClientFeaturesResponse(status, statusCode));
             runnableArgumentCaptor.getValue().run();
             verify(fetcher, times(++count)).fetchFeatures();
         }
