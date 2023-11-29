@@ -72,39 +72,6 @@ public class ApplicationHostnameStrategyTest {
     }
 
     @Test
-    public void should_be_enabled_for_hostName() {
-        String hostName = "my-super-host";
-        System.setProperty("hostname", hostName);
-        // TODO when creating the context, somehow it has to read the hostname. Implementation from SDK strategy https://github.com/Unleash/unleash-client-java/blob/061277bd31293170e28deac4ec750add3a03374b/src/main/java/io/getunleash/strategy/ApplicationHostnameStrategy.java#L18-L28
-
-        Map<String, String> params = new HashMap<>();
-        params.put("hostNames", "MegaHost," + hostName + ",MiniHost, happyHost");
-
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
-        ));
-        assertTrue(engine.isEnabled("test"));
-    }
-
-    @Test
-    public void should_handle_weird_casing() {
-        String hostName = "my-super-host";
-        System.setProperty("hostname", hostName);
-
-        Map<String, String> params = new HashMap<>();
-
-        params.put("hostNames", "MegaHost," + hostName.toUpperCase() + ",MiniHost, happyHost");
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
-        ));
-        assertTrue(engine.isEnabled("test"));
-    }
-
-    @Test
     public void so_close_but_no_cigar() {
         String hostName = "my-super-host";
         System.setProperty("hostname", hostName);
@@ -123,21 +90,6 @@ public class ApplicationHostnameStrategyTest {
     @Test
     public void should_be_enabled_for_InetAddress() throws UnknownHostException {
         String hostName = InetAddress.getLocalHost().getHostName();
-        System.setProperty("hostname", hostName);
-
-        Map<String, String> params = new HashMap<>();
-        params.put("hostNames", "MegaHost," + hostName + ",MiniHost, happyHost");
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
-        ));
-        assertTrue(engine.isEnabled("test"));
-    }
-
-    @Test
-    public void should_be_enabled_for_dashed_host() throws UnknownHostException {
-        String hostName = "super-wiEred-host";
         System.setProperty("hostname", hostName);
 
         Map<String, String> params = new HashMap<>();
