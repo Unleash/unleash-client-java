@@ -1,20 +1,19 @@
 package io.getunleash.strategy;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.ImmutableList;
 import io.getunleash.*;
 import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
+import java.util.*;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.*;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class RemoteAddressStrategyTest {
     private static final String FIRST_IPV4 = "127.0.0.1";
@@ -74,27 +73,29 @@ class RemoteAddressStrategyTest {
     @MethodSource("data")
     void test_all_combinations(String actualIp, String parameterString, boolean expected) {
         UnleashContextProvider contextProvider = mock(UnleashContextProvider.class);
-        when(contextProvider.getContext()).thenReturn(UnleashContext.builder().remoteAddress(actualIp).build());
+        when(contextProvider.getContext())
+                .thenReturn(UnleashContext.builder().remoteAddress(actualIp).build());
 
         UnleashConfig config =
-            new UnleashConfig.Builder()
-                .appName("test")
-                .unleashAPI("http://localhost:4242/api/")
-                .environment("test")
-                .scheduledExecutor(mock(UnleashScheduledExecutor.class))
-                .unleashContextProvider(contextProvider)
-                .build();
-
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .unleashAPI("http://localhost:4242/api/")
+                        .environment("test")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                        .unleashContextProvider(contextProvider)
+                        .build();
 
         Map<String, String> parameters = setupParameterMap(parameterString);
 
         DefaultUnleash engine = new DefaultUnleash(config);
-        new UnleashEngineStateHandler(engine).setState(new FeatureToggle(
-                "test",
-                true,
-                ImmutableList.of(new ActivationStrategy("remoteAddress", parameters)),
-                Collections.emptyList()
-        ));
+        new UnleashEngineStateHandler(engine)
+                .setState(
+                        new FeatureToggle(
+                                "test",
+                                true,
+                                ImmutableList.of(
+                                        new ActivationStrategy("remoteAddress", parameters)),
+                                Collections.emptyList()));
 
         assertThat(engine.isEnabled("test")).isEqualTo(expected);
     }

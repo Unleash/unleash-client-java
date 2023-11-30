@@ -6,16 +6,14 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import io.getunleash.*;
-
+import io.getunleash.repository.UnleashEngineStateHandler;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.getunleash.repository.UnleashEngineStateHandler;
-import io.getunleash.util.UnleashConfig;
-import io.getunleash.util.UnleashScheduledExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -42,14 +40,13 @@ class StrategyTest {
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
         UnleashConfig config =
-            new UnleashConfig.Builder()
-                .appName("test")
-                .unleashAPI("http://localhost:4242/api/")
-                .environment("test")
-                .scheduledExecutor(mock(UnleashScheduledExecutor.class))
-                .unleashContextProvider(contextProvider)
-                .build();
-
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .unleashAPI("http://localhost:4242/api/")
+                        .environment("test")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                        .unleashContextProvider(contextProvider)
+                        .build();
 
         engine = new DefaultUnleash(config, new AlwaysEnabled());
         stateHandler = new UnleashEngineStateHandler(engine);
@@ -60,11 +57,13 @@ class StrategyTest {
         Map parameters = new HashMap<String, String>();
         UnleashContext context = UnleashContext.builder().build();
         List<Constraint> constraints = new ArrayList<>();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("enabled", parameters, constraints, null, null))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy(
+                                        "enabled", parameters, constraints, null, null))));
 
         boolean result = engine.isEnabled("test", context);
         assertTrue(result);
@@ -76,11 +75,13 @@ class StrategyTest {
         UnleashContext context = UnleashContext.builder().build();
         List<Constraint> constraints = null;
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("enabled", parameters, constraints, null, null))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy(
+                                        "enabled", parameters, constraints, null, null))));
 
         boolean result = engine.isEnabled("test", context);
         assertTrue(result);
@@ -93,11 +94,13 @@ class StrategyTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("prod")));
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("enabled", parameters, constraints, null, null))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy(
+                                        "enabled", parameters, constraints, null, null))));
 
         boolean result = engine.isEnabled("test", context);
         assertFalse(result);
@@ -110,11 +113,13 @@ class StrategyTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.IN, Arrays.asList("test", "prod")));
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("enabled", parameters, constraints, null, null))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy(
+                                        "enabled", parameters, constraints, null, null))));
 
         boolean result = engine.isEnabled("test", context);
         assertTrue(result);
@@ -127,11 +132,13 @@ class StrategyTest {
         List<Constraint> constraints = new ArrayList<>();
         constraints.add(new Constraint("environment", Operator.NOT_IN, Arrays.asList("prod")));
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("enabled", parameters, constraints, null, null))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy(
+                                        "enabled", parameters, constraints, null, null))));
 
         boolean result = engine.isEnabled("test", context);
         assertTrue(result);
@@ -151,11 +158,13 @@ class StrategyTest {
         constraints.add(new Constraint("userId", Operator.IN, Arrays.asList("123")));
         constraints.add(new Constraint("customerId", Operator.IN, Arrays.asList("red", "blue")));
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("enabled", parameters, constraints, null, null))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy(
+                                        "enabled", parameters, constraints, null, null))));
 
         boolean result = engine.isEnabled("test", context);
         assertTrue(result);
@@ -175,11 +184,13 @@ class StrategyTest {
         constraints.add(new Constraint("userId", Operator.IN, Arrays.asList("123")));
         constraints.add(new Constraint("customerId", Operator.IN, Arrays.asList("red", "blue")));
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("enabled", parameters, constraints, null, null))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy(
+                                        "enabled", parameters, constraints, null, null))));
 
         boolean result = engine.isEnabled("test", context);
         assertFalse(result);

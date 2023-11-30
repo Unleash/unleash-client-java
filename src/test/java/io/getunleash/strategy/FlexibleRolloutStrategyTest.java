@@ -1,20 +1,19 @@
 package io.getunleash.strategy;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.ImmutableList;
 import io.getunleash.*;
 import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 class FlexibleRolloutStrategyTest {
 
@@ -24,13 +23,12 @@ class FlexibleRolloutStrategyTest {
     @BeforeEach
     void init() {
         UnleashConfig config =
-            new UnleashConfig.Builder()
-                .appName("test")
-                .unleashAPI("http://localhost:4242/api/")
-                .environment("test")
-                .scheduledExecutor(mock(UnleashScheduledExecutor.class))
-                .build();
-
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .unleashAPI("http://localhost:4242/api/")
+                        .environment("test")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                        .build();
 
         engine = new DefaultUnleash(config);
         stateHandler = new UnleashEngineStateHandler(engine);
@@ -38,11 +36,12 @@ class FlexibleRolloutStrategyTest {
 
     @Test
     public void should_always_be_false() {
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", new HashMap<>()))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy("flexibleRollout", new HashMap<>()))));
         assertFalse(engine.isEnabled("test"));
     }
 
@@ -54,11 +53,11 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Demo");
 
         UnleashContext context = UnleashContext.builder().userId("61").build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertFalse(engine.isEnabled("test", context));
     }
 
@@ -70,11 +69,11 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Demo");
 
         UnleashContext context = UnleashContext.builder().userId("61").build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertTrue(engine.isEnabled("test", context));
     }
 
@@ -86,11 +85,11 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Demo");
 
         UnleashContext context = UnleashContext.builder().userId("61").build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertTrue(engine.isEnabled("test", context));
     }
 
@@ -102,11 +101,11 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Demo");
 
         UnleashContext context = UnleashContext.builder().build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertFalse(engine.isEnabled("test", context));
     }
 
@@ -118,11 +117,11 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Demo");
 
         UnleashContext context = UnleashContext.builder().sessionId("61").build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertTrue(engine.isEnabled("test", context));
     }
 
@@ -134,16 +133,18 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Demo");
 
         UnleashContext context = UnleashContext.builder().sessionId("61").build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertTrue(engine.isEnabled("test", context));
     }
 
     @Test
-    @Disabled // TODO we can't inject a random generator into the strategy it can be done providing a custom strategy though in which case we should keep the strategy classes around but it can't override the existing flexibleRollout
+    @Disabled // TODO we can't inject a random generator into the strategy it can be done providing
+    // a custom strategy though in which case we should keep the strategy classes around
+    // but it can't override the existing flexibleRollout
     public void should_be_enabled_for_rollout_10_and_randomId_61_and_stickiness_default() {
         Map<String, String> params = new HashMap<>();
         params.put("rollout", "10");
@@ -151,16 +152,18 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Demo");
 
         UnleashContext context = UnleashContext.builder().build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertTrue(engine.isEnabled("test", context));
     }
 
     @Test
-    @Disabled // TODO we can't inject a random generator into the strategy it can be done providing a custom strategy though in which case we should keep the strategy classes around but it can't override the existing flexibleRollout
+    @Disabled // TODO we can't inject a random generator into the strategy it can be done providing
+    // a custom strategy though in which case we should keep the strategy classes around
+    // but it can't override the existing flexibleRollout
     public void should_be_enabled_for_rollout_10_and_randomId_61_and_stickiness_random() {
         Map<String, String> params = new HashMap<>();
         params.put("rollout", "10");
@@ -168,11 +171,11 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Demo");
 
         UnleashContext context = UnleashContext.builder().build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertTrue(engine.isEnabled("test", context));
     }
 
@@ -184,11 +187,11 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Demo");
 
         UnleashContext context = UnleashContext.builder().build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertFalse(engine.isEnabled("test", context));
     }
 
@@ -200,11 +203,11 @@ class FlexibleRolloutStrategyTest {
         params.put("groupId", "Feature.flexible.rollout.custom.stickiness_50");
         UnleashContext context = UnleashContext.builder().addProperty("customField", "402").build();
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertFalse(engine.isEnabled("test", context));
     }
 
@@ -215,11 +218,11 @@ class FlexibleRolloutStrategyTest {
         params.put("stickiness", "customField");
         params.put("groupId", "Feature.flexible.rollout.custom.stickiness_50");
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
 
         UnleashContext context = UnleashContext.builder().addProperty("customField", "388").build();
         assertTrue(engine.isEnabled("test", context));
@@ -234,11 +237,11 @@ class FlexibleRolloutStrategyTest {
         params.put("stickiness", "customField");
         params.put("groupId", "Feature.flexible.rollout.custom.stickiness_50");
         UnleashContext context = UnleashContext.builder().build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("flexibleRollout", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("flexibleRollout", params))));
         assertFalse(engine.isEnabled("test", context));
     }
 }

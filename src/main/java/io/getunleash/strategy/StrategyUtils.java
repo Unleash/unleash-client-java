@@ -18,5 +18,4 @@ public final class StrategyUtils {
         long hash = Murmur3.hash_x86_32(value, value.length, seed);
         return (int) (hash % ONE_HUNDRED) + 1;
     }
-
 }

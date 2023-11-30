@@ -1,7 +1,6 @@
 package io.getunleash.strategy;
 
 import io.getunleash.UnleashContext;
-
 import java.util.Map;
 
 public interface Strategy {
@@ -13,5 +12,4 @@ public interface Strategy {
     default boolean isEnabled(Map<String, String> parameters, UnleashContext unleashContext) {
         return isEnabled(parameters);
     }
-
 }

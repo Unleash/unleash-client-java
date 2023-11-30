@@ -4,19 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import io.getunleash.*;
-
+import io.getunleash.repository.UnleashEngineStateHandler;
+import io.getunleash.util.UnleashConfig;
+import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import io.getunleash.repository.UnleashEngineStateHandler;
-import io.getunleash.util.UnleashConfig;
-import io.getunleash.util.UnleashScheduledExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -35,26 +32,25 @@ public class GradualRolloutSessionIdStrategyTest {
     @BeforeEach
     void setUp() {
         percentages =
-            ImmutableList.<Integer>builder()
-                .add(1)
-                .add(2)
-                .add(5)
-                .add(10)
-                .add(25)
-                .add(50)
-                .add(90)
-                .add(99)
-                .add(100)
-                .build();
+                ImmutableList.<Integer>builder()
+                        .add(1)
+                        .add(2)
+                        .add(5)
+                        .add(10)
+                        .add(25)
+                        .add(50)
+                        .add(90)
+                        .add(99)
+                        .add(100)
+                        .build();
 
         UnleashConfig config =
-            new UnleashConfig.Builder()
-                .appName("test")
-                .unleashAPI("http://localhost:4242/api/")
-                .environment("test")
-                .scheduledExecutor(mock(UnleashScheduledExecutor.class))
-                .build();
-
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .unleashAPI("http://localhost:4242/api/")
+                        .environment("test")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                        .build();
 
         engine = new DefaultUnleash(config);
         stateHandler = new UnleashEngineStateHandler(engine);
@@ -62,22 +58,26 @@ public class GradualRolloutSessionIdStrategyTest {
 
     @Test
     public void should_require_context() {
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", new HashMap<>()))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy(
+                                        "gradualRolloutSessionId", new HashMap<>()))));
         assertThat(engine.isEnabled("test")).isFalse();
     }
 
     @Test
     public void should_be_disabled_when_missing_user_id() {
         UnleashContext context = UnleashContext.builder().build();
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", new HashMap<>()))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy(
+                                        "gradualRolloutSessionId", new HashMap<>()))));
         assertThat(engine.isEnabled("test", context)).isFalse();
     }
 
@@ -86,11 +86,12 @@ public class GradualRolloutSessionIdStrategyTest {
         UnleashContext context = UnleashContext.builder().sessionId("1574576830").build();
 
         Map<String, String> params = buildParams(1, "innfinn");
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy("gradualRolloutSessionId", params))));
 
         boolean firstRunResult = engine.isEnabled("test", context);
         for (int i = 0; i < 10; i++) {
@@ -106,11 +107,12 @@ public class GradualRolloutSessionIdStrategyTest {
         UnleashContext context = UnleashContext.builder().sessionId("1574576830").build();
 
         Map<String, String> params = buildParams(100, "innfinn");
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy("gradualRolloutSessionId", params))));
         boolean result = engine.isEnabled("test", context);
 
         assertThat(result).isTrue();
@@ -121,11 +123,12 @@ public class GradualRolloutSessionIdStrategyTest {
         UnleashContext context = UnleashContext.builder().sessionId("1574576830").build();
 
         Map<String, String> params = buildParams(0, "innfinn");
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy("gradualRolloutSessionId", params))));
         boolean actual = engine.isEnabled("test", context);
 
         assertFalse(actual, "should not be enabled when 0% rollout");
@@ -139,15 +142,15 @@ public class GradualRolloutSessionIdStrategyTest {
 
         UnleashContext context = UnleashContext.builder().sessionId(sessionId).build();
 
-
         for (int p = minimumPercentage; p <= 100; p++) {
             Map<String, String> params = buildParams(p, groupId);
             // Ok, we're going to stress the setting the state
-            stateHandler.setState(new FeatureToggle(
-                "test",
-                true,
-                ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
-            ));
+            stateHandler.setState(
+                    new FeatureToggle(
+                            "test",
+                            true,
+                            ImmutableList.of(
+                                    new ActivationStrategy("gradualRolloutSessionId", params))));
             boolean actual = engine.isEnabled("test", context);
             assertTrue(actual, "should be enabled when " + p + "% rollout");
         }
@@ -181,13 +184,13 @@ public class GradualRolloutSessionIdStrategyTest {
             UnleashContext context =
                     UnleashContext.builder().sessionId(sessionId.toString()).build();
 
-
             Map<String, String> params = buildParams(percentage, "");
-            stateHandler.setState(new FeatureToggle(
-                "test",
-                true,
-                ImmutableList.of(new ActivationStrategy("gradualRolloutSessionId", params))
-            ));
+            stateHandler.setState(
+                    new FeatureToggle(
+                            "test",
+                            true,
+                            ImmutableList.of(
+                                    new ActivationStrategy("gradualRolloutSessionId", params))));
             boolean enabled = engine.isEnabled("test", context);
             if (enabled) {
                 numberOfEnabledUsers++;

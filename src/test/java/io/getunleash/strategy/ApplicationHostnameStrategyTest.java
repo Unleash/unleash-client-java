@@ -1,5 +1,9 @@
 package io.getunleash.strategy;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.ImmutableList;
 import io.getunleash.ActivationStrategy;
 import io.getunleash.DefaultUnleash;
@@ -7,18 +11,13 @@ import io.getunleash.FeatureToggle;
 import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ApplicationHostnameStrategyTest {
 
@@ -28,13 +27,12 @@ public class ApplicationHostnameStrategyTest {
     @BeforeEach
     void init() {
         UnleashConfig config =
-            new UnleashConfig.Builder()
-                .appName("test")
-                .unleashAPI("http://localhost:4242/api/")
-                .environment("test")
-                .scheduledExecutor(mock(UnleashScheduledExecutor.class))
-                .build();
-
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .unleashAPI("http://localhost:4242/api/")
+                        .environment("test")
+                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
+                        .build();
 
         engine = new DefaultUnleash(config);
         stateHandler = new UnleashEngineStateHandler(engine);
@@ -50,11 +48,11 @@ public class ApplicationHostnameStrategyTest {
         Map<String, String> params = new HashMap<>();
         params.put("hostNames", null);
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("applicationHostname", params))));
         assertFalse(engine.isEnabled("test"));
     }
 
@@ -63,11 +61,11 @@ public class ApplicationHostnameStrategyTest {
         Map<String, String> params = new HashMap<>();
         params.put("hostNames", "MegaHost,MiniHost, happyHost");
 
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("applicationHostname", params))));
         assertFalse(engine.isEnabled("test"));
     }
 
@@ -79,11 +77,11 @@ public class ApplicationHostnameStrategyTest {
         Map<String, String> params = new HashMap<>();
 
         params.put("hostNames", "MegaHost, MiniHost, SuperhostOne");
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("applicationHostname", params))));
         assertFalse(engine.isEnabled("test"));
     }
 
@@ -94,21 +92,22 @@ public class ApplicationHostnameStrategyTest {
 
         Map<String, String> params = new HashMap<>();
         params.put("hostNames", "MegaHost," + hostName + ",MiniHost, happyHost");
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("applicationHostname", params))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(new ActivationStrategy("applicationHostname", params))));
         assertTrue(engine.isEnabled("test"));
     }
 
     @Test
     public void null_test() {
-        stateHandler.setState(new FeatureToggle(
-            "test",
-            true,
-            ImmutableList.of(new ActivationStrategy("applicationHostname", new HashMap<>()))
-        ));
+        stateHandler.setState(
+                new FeatureToggle(
+                        "test",
+                        true,
+                        ImmutableList.of(
+                                new ActivationStrategy("applicationHostname", new HashMap<>()))));
         assertFalse(engine.isEnabled("test"));
     }
 }
