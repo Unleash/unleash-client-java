@@ -18,7 +18,7 @@ import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
 import io.getunleash.repository.UnleashEngineStateHandler;
-import io.getunleash.strategy.constraints.DateParser;
+import io.getunleash.util.DateParser;
 import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
 import java.io.File;

@@ -1,4 +1,4 @@
-package io.getunleash.strategy.constraints;
+package io.getunleash.util;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
