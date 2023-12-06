@@ -43,6 +43,19 @@ public interface Unleash {
         return getVariant(toggleName, UnleashContext.builder().build(), defaultValue);
     }
 
+    Variant deprecatedGetVariant(final String toggleName, final UnleashContext context);
+
+    Variant deprecatedGetVariant(
+            final String toggleName, final UnleashContext context, final Variant defaultValue);
+
+    default Variant deprecatedGetVariant(final String toggleName) {
+        return deprecatedGetVariant(toggleName, UnleashContext.builder().build());
+    }
+
+    default Variant deprecatedGetVariant(final String toggleName, final Variant defaultValue) {
+        return deprecatedGetVariant(toggleName, UnleashContext.builder().build(), defaultValue);
+    }
+
     /**
      * Use more().getFeatureToggleNames() instead
      *

@@ -219,6 +219,60 @@ public class DefaultUnleash implements Unleash {
         }
     }
 
+      private FeatureEvaluationResult deprecatedGetFeatureEvaluationResult(
+            String toggleName,
+            UnleashContext context,
+            BiPredicate<String, UnleashContext> fallbackAction,
+            @Nullable Variant defaultVariant) {
+        checkIfToggleMatchesNamePrefix(toggleName);
+        FeatureToggle featureToggle = featureRepository.getToggle(toggleName);
+
+        UnleashContext enhancedContext = context.applyStaticFields(config);
+        if (featureToggle == null) {
+            return new FeatureEvaluationResult(
+                    fallbackAction.test(toggleName, enhancedContext), defaultVariant);
+        } else if (!featureToggle.isEnabled()) {
+            return new FeatureEvaluationResult(false, defaultVariant);
+        } else if (featureToggle.getStrategies().isEmpty()) {
+            return new FeatureEvaluationResult(
+                    true, VariantUtil.selectDeprecatedVariantHashingAlgo(featureToggle, context, defaultVariant));
+        } else {
+            // Dependent toggles, no point in evaluating child strategies if our dependencies are
+            // not satisfied
+            if (isParentDependencySatisfied(featureToggle, context, fallbackAction)) {
+                for (ActivationStrategy strategy : featureToggle.getStrategies()) {
+                    Strategy configuredStrategy = getStrategy(strategy.getName());
+                    if (configuredStrategy == UNKNOWN_STRATEGY) {
+                        LOGGER.warn(
+                                "Unable to find matching strategy for toggle:{} strategy:{}",
+                                toggleName,
+                                strategy.getName());
+                    }
+
+                    FeatureEvaluationResult result =
+                            configuredStrategy.getDeprecatedHashingAlgoResult(
+                                    strategy.getParameters(),
+                                    enhancedContext,
+                                    ConstraintMerger.mergeConstraints(featureRepository, strategy),
+                                    strategy.getVariants());
+
+                    if (result.isEnabled()) {
+                        Variant variant = result.getVariant();
+                        // If strategy variant is null, look for a variant in the featureToggle
+                        if (variant == null) {
+                            variant =
+                                    VariantUtil.selectDeprecatedVariantHashingAlgo(
+                                            featureToggle, context, defaultVariant);
+                        }
+                        result.setVariant(variant);
+                        return result;
+                    }
+                }
+            }
+            return new FeatureEvaluationResult(false, defaultVariant);
+        }
+    }
+
     private boolean isParentDependencySatisfied(
             @Nonnull FeatureToggle featureToggle,
             @Nonnull UnleashContext context,
@@ -321,6 +375,41 @@ public class DefaultUnleash implements Unleash {
     @Override
     public Variant getVariant(String toggleName, Variant defaultValue) {
         return getVariant(toggleName, contextProvider.getContext(), defaultValue);
+    }
+
+    @Override
+    public Variant deprecatedGetVariant(String toggleName, UnleashContext context) {
+        return deprecatedGetVariant(toggleName, context, DISABLED_VARIANT);
+    }
+
+    @Override
+    public Variant deprecatedGetVariant(String toggleName, UnleashContext context, Variant defaultValue) {
+        return deprecatedGetVariant(toggleName, context, defaultValue, false);
+    }
+
+    private Variant deprecatedGetVariant(
+            String toggleName, UnleashContext context, Variant defaultValue, boolean isParent) {
+        FeatureEvaluationResult result =
+                deprecatedGetFeatureEvaluationResult(toggleName, context, (n, c) -> false, defaultValue);
+        Variant variant = result.getVariant();
+        if (!isParent) {
+            metricService.countVariant(toggleName, variant.getName());
+            // Should count yes/no also when getting variant.
+            metricService.count(toggleName, result.isEnabled());
+        }
+        dispatchVariantImpressionDataIfNeeded(
+                toggleName, variant.getName(), result.isEnabled(), context);
+        return variant;
+    }
+
+    @Override
+    public Variant deprecatedGetVariant(String toggleName) {
+        return deprecatedGetVariant(toggleName, contextProvider.getContext());
+    }
+
+    @Override
+    public Variant deprecatedGetVariant(String toggleName, Variant defaultValue) {
+        return deprecatedGetVariant(toggleName, contextProvider.getContext(), defaultValue);
     }
 
     /**
