@@ -386,11 +386,26 @@ public class DefaultUnleash implements Unleash {
         return getVariant(toggleName, contextProvider.getContext(), defaultValue);
     }
 
+    /**
+     * Uses the old, statistically broken Variant seed for finding the correct variant
+     * @deprecated
+     * @param toggleName
+     * @param context
+     * @return
+     */
     @Override
     public Variant deprecatedGetVariant(String toggleName, UnleashContext context) {
         return deprecatedGetVariant(toggleName, context, DISABLED_VARIANT);
     }
 
+    /**
+     * Uses the old, statistically broken Variant seed for finding the correct variant
+     * @deprecated
+     * @param toggleName
+     * @param context
+     * @param defaultValue
+     * @return
+     */
     @Override
     public Variant deprecatedGetVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         return deprecatedGetVariant(toggleName, context, defaultValue, false);
@@ -411,11 +426,24 @@ public class DefaultUnleash implements Unleash {
         return variant;
     }
 
+    /**
+     * Uses the old, statistically broken Variant seed for finding the correct variant
+     * @deprecated
+     * @param toggleName
+     * @return
+     */
     @Override
     public Variant deprecatedGetVariant(String toggleName) {
         return deprecatedGetVariant(toggleName, contextProvider.getContext());
     }
 
+    /**
+     * Uses the old, statistically broken Variant seed for finding the correct variant
+     * @deprecated
+     * @param toggleName
+     * @param defaultValue
+     * @return
+     */
     @Override
     public Variant deprecatedGetVariant(String toggleName, Variant defaultValue) {
         return deprecatedGetVariant(toggleName, contextProvider.getContext(), defaultValue);
