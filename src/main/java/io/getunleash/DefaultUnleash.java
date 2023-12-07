@@ -219,6 +219,15 @@ public class DefaultUnleash implements Unleash {
         }
     }
 
+    /**
+     * Uses the old, statistically broken Variant seed for finding the correct variant
+     * @deprecated
+     * @param toggleName Name of the toggle
+     * @param context The UnleashContext
+     * @param fallbackAction What to do if we fail to find the toggle
+     * @param defaultVariant If we can't resolve a variant, what are we returning
+     * @return A wrapper containing whether the feature was enabled as well which Variant was selected
+     */
       private FeatureEvaluationResult deprecatedGetFeatureEvaluationResult(
             String toggleName,
             UnleashContext context,

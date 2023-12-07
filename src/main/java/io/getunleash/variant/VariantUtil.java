@@ -134,7 +134,15 @@ public final class VariantUtil {
         return null;
     }
 
-        public static @Nullable Variant selectDeprecatedVariantHashingAlgo(
+    /**
+     * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     * @deprecated
+     * @param parameters
+     * @param variants
+     * @param context
+     * @return
+     */
+    public static @Nullable Variant selectDeprecatedVariantHashingAlgo(
             Map<String, String> parameters,
             @Nullable List<VariantDefinition> variants,
             UnleashContext context) {
@@ -174,5 +182,29 @@ public final class VariantUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     * @deprecated
+     * @param featureToggle
+     * @param context
+     * @param defaultVariant
+     * @return
+     */
+    public static @Nullable Variant selectDeprecatedVariantHashingAlgo(
+        FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant
+    ) {
+        if (featureToggle == null) {
+            return defaultVariant;
+        }
+
+        Variant variant =
+            selectDeprecatedVariantHashingAlgo(
+                Collections.singletonMap("groupId", featureToggle.getName()),
+                featureToggle.getVariants(),
+                context);
+
+        return variant != null ? variant : defaultVariant;
     }
 }

@@ -106,6 +106,16 @@ public class FakeUnleash implements Unleash {
         }
     }
 
+    @Override
+    public Variant deprecatedGetVariant(String toggleName, UnleashContext context) {
+        return null;
+    }
+
+    @Override
+    public Variant deprecatedGetVariant(String toggleName, UnleashContext context, Variant defaultValue) {
+        return null;
+    }
+
     public void resetAll() {
         disableAll = false;
         enableAll = false;

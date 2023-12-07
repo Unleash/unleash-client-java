@@ -27,6 +27,15 @@ public interface Strategy {
     }
 
 
+    /**
+     * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     * @deprecated
+     * @param parameters
+     * @param unleashContext
+     * @param constraints
+     * @param variants
+     * @return
+     */
     default FeatureEvaluationResult getDeprecatedHashingAlgoResult(
             Map<String, String> parameters,
             UnleashContext unleashContext,
