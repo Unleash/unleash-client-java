@@ -133,4 +133,78 @@ public final class VariantUtil {
         }
         return null;
     }
+
+    /**
+     * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     * @deprecated
+     * @param parameters
+     * @param variants
+     * @param context
+     * @return
+     */
+    public static @Nullable Variant selectDeprecatedVariantHashingAlgo(
+            Map<String, String> parameters,
+            @Nullable List<VariantDefinition> variants,
+            UnleashContext context) {
+        if (variants != null) {
+            int totalWeight = variants.stream().mapToInt(VariantDefinition::getWeight).sum();
+            if (totalWeight <= 0) {
+                return null;
+            }
+            Optional<VariantDefinition> variantOverride = getOverride(variants, context);
+            if (variantOverride.isPresent()) {
+                return variantOverride.get().toVariant();
+            }
+
+            Optional<String> customStickiness =
+                    variants.stream()
+                            .filter(
+                                    f ->
+                                            f.getStickiness() != null
+                                                    && !"default".equals(f.getStickiness()))
+                            .map(VariantDefinition::getStickiness)
+                            .findFirst();
+            int target =
+                    StrategyUtils.getNormalizedNumber(
+                            getSeed(context, customStickiness),
+                            parameters.get(GROUP_ID_KEY),
+                            totalWeight,
+                            0);
+
+            int counter = 0;
+            for (VariantDefinition variant : variants) {
+                if (variant.getWeight() != 0) {
+                    counter += variant.getWeight();
+                    if (counter >= target) {
+                        return variant.toVariant();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     * @deprecated
+     * @param featureToggle
+     * @param context
+     * @param defaultVariant
+     * @return
+     */
+    public static @Nullable Variant selectDeprecatedVariantHashingAlgo(
+        FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant
+    ) {
+        if (featureToggle == null) {
+            return defaultVariant;
+        }
+
+        Variant variant =
+            selectDeprecatedVariantHashingAlgo(
+                Collections.singletonMap("groupId", featureToggle.getName()),
+                featureToggle.getVariants(),
+                context);
+
+        return variant != null ? variant : defaultVariant;
+    }
 }

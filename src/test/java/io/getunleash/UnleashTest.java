@@ -431,6 +431,8 @@ public class UnleashTest {
         assertThat(result.isEnabled()).isTrue();
     }
 
+
+
     @Test
     public void get_first_variant_with_context_provider() {
 
@@ -475,6 +477,36 @@ public class UnleashTest {
         assertThat(result.getName()).isEqualTo("to");
         assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("to");
         assertThat(result.isEnabled()).isTrue();
+    }
+
+    @Test
+    public void get_second_variant_with_context_provider_and_deprecated_algorithm() {
+
+        UnleashContext context = UnleashContext.builder().userId("5").build();
+        when(contextProvider.getContext()).thenReturn(context);
+
+        // Set up a toggleName using UserWithIdStrategy
+        Map<String, String> params = new HashMap<>();
+        params.put("userIds", "123, 5, 121");
+        ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
+        FeatureToggle featureToggle =
+            new FeatureToggle("test", true, asList(strategy), getTestVariantsForDeprecatedHash());
+
+        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+
+        final Variant result = unleash.deprecatedGetVariant("test");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("en");
+        assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("en");
+        assertThat(result.isEnabled()).isTrue();
+
+        final Variant newHash = unleash.getVariant("test");
+        assertThat(newHash).isNotNull();
+        assertThat(newHash.getName()).isEqualTo("to");
+        assertThat(newHash.getPayload().map(Payload::getValue).get()).isEqualTo("to");
+        assertThat(newHash.isEnabled()).isTrue();
+
     }
 
     @Test
@@ -604,5 +636,12 @@ public class UnleashTest {
                         "en", 50, new Payload("string", "en"), Collections.emptyList()),
                 new VariantDefinition(
                         "to", 50, new Payload("string", "to"), Collections.emptyList()));
+    }
+
+    private List<VariantDefinition> getTestVariantsForDeprecatedHash() {
+        return asList(
+            new VariantDefinition("en", 65, new Payload("string", "en"), Collections.emptyList()),
+            new VariantDefinition("to", 35, new Payload("string", "to"), Collections.emptyList())
+        );
     }
 }

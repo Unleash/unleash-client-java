@@ -26,6 +26,27 @@ public interface Strategy {
                 enabled ? VariantUtil.selectVariant(parameters, variants, unleashContext) : null);
     }
 
+
+    /**
+     * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     * @deprecated
+     * @param parameters
+     * @param unleashContext
+     * @param constraints
+     * @param variants
+     * @return
+     */
+    default FeatureEvaluationResult getDeprecatedHashingAlgoResult(
+            Map<String, String> parameters,
+            UnleashContext unleashContext,
+            List<Constraint> constraints,
+            @Nullable List<VariantDefinition> variants) {
+        boolean enabled = isEnabled(parameters, unleashContext, constraints);
+        return new FeatureEvaluationResult(
+                enabled,
+                enabled ? VariantUtil.selectDeprecatedVariantHashingAlgo(parameters, variants, unleashContext) : null);
+    }
+
     default boolean isEnabled(Map<String, String> parameters, UnleashContext unleashContext) {
         return isEnabled(parameters);
     }
