@@ -431,8 +431,6 @@ public class UnleashTest {
         assertThat(result.isEnabled()).isTrue();
     }
 
-
-
     @Test
     public void get_first_variant_with_context_provider() {
 
@@ -490,7 +488,8 @@ public class UnleashTest {
         params.put("userIds", "123, 5, 121");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle =
-            new FeatureToggle("test", true, asList(strategy), getTestVariantsForDeprecatedHash());
+                new FeatureToggle(
+                        "test", true, asList(strategy), getTestVariantsForDeprecatedHash());
 
         when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
 
@@ -506,7 +505,6 @@ public class UnleashTest {
         assertThat(newHash.getName()).isEqualTo("to");
         assertThat(newHash.getPayload().map(Payload::getValue).get()).isEqualTo("to");
         assertThat(newHash.isEnabled()).isTrue();
-
     }
 
     @Test
@@ -640,8 +638,9 @@ public class UnleashTest {
 
     private List<VariantDefinition> getTestVariantsForDeprecatedHash() {
         return asList(
-            new VariantDefinition("en", 65, new Payload("string", "en"), Collections.emptyList()),
-            new VariantDefinition("to", 35, new Payload("string", "to"), Collections.emptyList())
-        );
+                new VariantDefinition(
+                        "en", 65, new Payload("string", "en"), Collections.emptyList()),
+                new VariantDefinition(
+                        "to", 35, new Payload("string", "to"), Collections.emptyList()));
     }
 }

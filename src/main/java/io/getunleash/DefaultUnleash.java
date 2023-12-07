@@ -221,14 +221,16 @@ public class DefaultUnleash implements Unleash {
 
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
+     *
      * @deprecated
      * @param toggleName Name of the toggle
      * @param context The UnleashContext
      * @param fallbackAction What to do if we fail to find the toggle
      * @param defaultVariant If we can't resolve a variant, what are we returning
-     * @return A wrapper containing whether the feature was enabled as well which Variant was selected
+     * @return A wrapper containing whether the feature was enabled as well which Variant was
+     *     selected
      */
-      private FeatureEvaluationResult deprecatedGetFeatureEvaluationResult(
+    private FeatureEvaluationResult deprecatedGetFeatureEvaluationResult(
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction,
@@ -244,7 +246,9 @@ public class DefaultUnleash implements Unleash {
             return new FeatureEvaluationResult(false, defaultVariant);
         } else if (featureToggle.getStrategies().isEmpty()) {
             return new FeatureEvaluationResult(
-                    true, VariantUtil.selectDeprecatedVariantHashingAlgo(featureToggle, context, defaultVariant));
+                    true,
+                    VariantUtil.selectDeprecatedVariantHashingAlgo(
+                            featureToggle, context, defaultVariant));
         } else {
             // Dependent toggles, no point in evaluating child strategies if our dependencies are
             // not satisfied
@@ -388,6 +392,7 @@ public class DefaultUnleash implements Unleash {
 
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
+     *
      * @deprecated
      * @param toggleName
      * @param context
@@ -400,6 +405,7 @@ public class DefaultUnleash implements Unleash {
 
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
+     *
      * @deprecated
      * @param toggleName
      * @param context
@@ -407,14 +413,16 @@ public class DefaultUnleash implements Unleash {
      * @return
      */
     @Override
-    public Variant deprecatedGetVariant(String toggleName, UnleashContext context, Variant defaultValue) {
+    public Variant deprecatedGetVariant(
+            String toggleName, UnleashContext context, Variant defaultValue) {
         return deprecatedGetVariant(toggleName, context, defaultValue, false);
     }
 
     private Variant deprecatedGetVariant(
             String toggleName, UnleashContext context, Variant defaultValue, boolean isParent) {
         FeatureEvaluationResult result =
-                deprecatedGetFeatureEvaluationResult(toggleName, context, (n, c) -> false, defaultValue);
+                deprecatedGetFeatureEvaluationResult(
+                        toggleName, context, (n, c) -> false, defaultValue);
         Variant variant = result.getVariant();
         if (!isParent) {
             metricService.countVariant(toggleName, variant.getName());
@@ -428,6 +436,7 @@ public class DefaultUnleash implements Unleash {
 
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
+     *
      * @deprecated
      * @param toggleName
      * @return
@@ -439,6 +448,7 @@ public class DefaultUnleash implements Unleash {
 
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
+     *
      * @deprecated
      * @param toggleName
      * @param defaultValue

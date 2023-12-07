@@ -136,6 +136,7 @@ public final class VariantUtil {
 
     /**
      * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     *
      * @deprecated
      * @param parameters
      * @param variants
@@ -186,6 +187,7 @@ public final class VariantUtil {
 
     /**
      * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     *
      * @deprecated
      * @param featureToggle
      * @param context
@@ -193,17 +195,16 @@ public final class VariantUtil {
      * @return
      */
     public static @Nullable Variant selectDeprecatedVariantHashingAlgo(
-        FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant
-    ) {
+            FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant) {
         if (featureToggle == null) {
             return defaultVariant;
         }
 
         Variant variant =
-            selectDeprecatedVariantHashingAlgo(
-                Collections.singletonMap("groupId", featureToggle.getName()),
-                featureToggle.getVariants(),
-                context);
+                selectDeprecatedVariantHashingAlgo(
+                        Collections.singletonMap("groupId", featureToggle.getName()),
+                        featureToggle.getVariants(),
+                        context);
 
         return variant != null ? variant : defaultVariant;
     }
