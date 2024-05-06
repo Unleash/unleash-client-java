@@ -58,12 +58,13 @@ public class StringConstraintOperator implements ConstraintOperator {
             List<String> values, Optional<String> contextValue, boolean caseInsensitive) {
         return contextValue
                 .map(
-                    actualContextValue ->
+                        actualContextValue ->
                                 values.stream()
                                         .anyMatch(
-                                            value -> {
+                                                value -> {
                                                     if (caseInsensitive) {
-                                                        return actualContextValue.toLowerCase(comparisonLocale)
+                                                        return actualContextValue
+                                                                .toLowerCase(comparisonLocale)
                                                                 .startsWith(
                                                                         value.toLowerCase(
                                                                                 comparisonLocale));

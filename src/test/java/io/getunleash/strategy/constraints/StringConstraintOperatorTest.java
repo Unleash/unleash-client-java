@@ -215,21 +215,52 @@ class StringConstraintOperatorTest {
     @Test
     public void startsWithShouldMatchCorrectlyWhenCaseSensitive() {
         Strategy strategy = new DefaultStrategy();
-        List<Constraint> constraintList = Collections.singletonList(new Constraint("email", Operator.STR_STARTS_WITH, Collections.singletonList("testuser"), false, false));
+        List<Constraint> constraintList =
+                Collections.singletonList(
+                        new Constraint(
+                                "email",
+                                Operator.STR_STARTS_WITH,
+                                Collections.singletonList("testuser"),
+                                false,
+                                false));
         Map<String, String> parameters = new HashMap<>();
-        UnleashContext ctx = UnleashContext.builder().environment("dev").addProperty("email", "TESTUSER@getunleash.io").build();
+        UnleashContext ctx =
+                UnleashContext.builder()
+                        .environment("dev")
+                        .addProperty("email", "TESTUSER@getunleash.io")
+                        .build();
         assertThat(strategy.isEnabled(parameters, ctx, constraintList)).isFalse();
-        UnleashContext ctx2 = UnleashContext.builder().environment("dev").addProperty("email", "testuser@getunleash.io").build();
+        UnleashContext ctx2 =
+                UnleashContext.builder()
+                        .environment("dev")
+                        .addProperty("email", "testuser@getunleash.io")
+                        .build();
         assertThat(strategy.isEnabled(parameters, ctx2, constraintList)).isTrue();
     }
+
     @Test
     public void startsWithShouldMatchCorrectlyWhenCaseInsensitive() {
         Strategy strategy = new DefaultStrategy();
-        List<Constraint> constraintList = Collections.singletonList(new Constraint("email", Operator.STR_STARTS_WITH, Collections.singletonList("testuser"), false, true));
+        List<Constraint> constraintList =
+                Collections.singletonList(
+                        new Constraint(
+                                "email",
+                                Operator.STR_STARTS_WITH,
+                                Collections.singletonList("testuser"),
+                                false,
+                                true));
         Map<String, String> parameters = new HashMap<>();
-        UnleashContext ctx = UnleashContext.builder().environment("dev").addProperty("email", "TESTUSER@getunleash.io").build();
+        UnleashContext ctx =
+                UnleashContext.builder()
+                        .environment("dev")
+                        .addProperty("email", "TESTUSER@getunleash.io")
+                        .build();
         assertThat(strategy.isEnabled(parameters, ctx, constraintList)).isTrue();
-        UnleashContext ctx2 = UnleashContext.builder().environment("dev").addProperty("email", "testuser@getunleash.io").build();
+        UnleashContext ctx2 =
+                UnleashContext.builder()
+                        .environment("dev")
+                        .addProperty("email", "testuser@getunleash.io")
+                        .build();
         assertThat(strategy.isEnabled(parameters, ctx2, constraintList)).isTrue();
     }
 }
