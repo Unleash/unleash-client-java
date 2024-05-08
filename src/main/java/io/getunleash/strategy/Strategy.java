@@ -21,9 +21,13 @@ public interface Strategy {
             List<Constraint> constraints,
             @Nullable List<VariantDefinition> variants) {
         boolean enabled = isEnabled(parameters, unleashContext, constraints);
+        String strategyStickiness = getStickiness(parameters);
         return new FeatureEvaluationResult(
                 enabled,
-                enabled ? VariantUtil.selectVariant(parameters, variants, unleashContext) : null);
+                enabled
+                        ? VariantUtil.selectVariant(
+                                parameters, variants, unleashContext, strategyStickiness)
+                        : null);
     }
 
     /**
@@ -60,5 +64,12 @@ public interface Strategy {
             List<Constraint> constraints) {
         return ConstraintUtil.validate(constraints, unleashContext)
                 && isEnabled(parameters, unleashContext);
+    }
+
+    default String getStickiness(@Nullable Map<String, String> parameters) {
+        if (parameters != null) {
+            return parameters.getOrDefault("stickiness", "default");
+        }
+        return null;
     }
 }
