@@ -38,7 +38,8 @@ public class FakeUnleash implements Unleash {
     @Override
     public boolean isEnabled(
             String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
-        if ((!enableAll && !disableAll || excludedFeatures.containsKey(toggleName)) && !features.containsKey(toggleName)) {
+        if ((!enableAll && !disableAll || excludedFeatures.containsKey(toggleName))
+                && !features.containsKey(toggleName)) {
             return fallbackAction.test(toggleName, UnleashContext.builder().build());
         }
         return isEnabled(toggleName);
