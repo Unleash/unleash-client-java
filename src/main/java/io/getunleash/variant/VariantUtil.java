@@ -95,7 +95,8 @@ public final class VariantUtil {
     public static @Nullable Variant selectVariant(
             Map<String, String> parameters,
             @Nullable List<VariantDefinition> variants,
-            UnleashContext context) {
+            UnleashContext context,
+            @Nullable String strategyStickiness) {
         if (variants != null) {
             int totalWeight = variants.stream().mapToInt(VariantDefinition::getWeight).sum();
             if (totalWeight <= 0) {
@@ -106,7 +107,7 @@ public final class VariantUtil {
                 return variantOverride.get().toVariant();
             }
 
-            Optional<String> customStickiness =
+            Optional<String> variantCustomStickiness =
                     variants.stream()
                             .filter(
                                     f ->
@@ -114,6 +115,14 @@ public final class VariantUtil {
                                                     && !"default".equals(f.getStickiness()))
                             .map(VariantDefinition::getStickiness)
                             .findFirst();
+            Optional<String> customStickiness;
+            if (!variantCustomStickiness.isPresent()) {
+                customStickiness =
+                        Optional.ofNullable(strategyStickiness)
+                                .filter(stickiness -> !stickiness.equalsIgnoreCase("default"));
+            } else {
+                customStickiness = variantCustomStickiness;
+            }
             int target =
                     StrategyUtils.getNormalizedNumber(
                             getSeed(context, customStickiness),
@@ -132,6 +141,13 @@ public final class VariantUtil {
             }
         }
         return null;
+    }
+
+    public static @Nullable Variant selectVariant(
+            Map<String, String> parameters,
+            @Nullable List<VariantDefinition> variants,
+            UnleashContext context) {
+        return selectVariant(parameters, variants, context, null);
     }
 
     /**
