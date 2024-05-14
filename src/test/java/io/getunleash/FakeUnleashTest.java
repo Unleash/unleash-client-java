@@ -179,4 +179,32 @@ public class FakeUnleashTest {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.more().countVariant("toggleName", "variantName");
     }
+
+    @Test
+    public void
+            if_all_is_enabled_should_return_true_even_if_feature_does_not_exist_and_fallback_returns_false() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.enableAll();
+        assertThat(fakeUnleash.isEnabled("my.non.existing.feature", (name, context) -> false))
+                .isTrue();
+    }
+
+    @Test
+    public void
+            if_all_is_disabled_should_return_false_even_if_feature_does_not_exist_and_fallback_returns_true() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.disableAll();
+        assertThat(fakeUnleash.isEnabled("my.non.existing.feature", (name, context) -> true))
+                .isFalse();
+    }
+
+    @Test
+    public void all_enabled_and_exclusion_toggle_returns_expected_result() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.enableAllExcept("my.feature.that.should.be.disabled");
+        assertThat(
+                        fakeUnleash.isEnabled(
+                                "my.feature.that.should.be.disabled", (name, context) -> false))
+                .isFalse();
+    }
 }
