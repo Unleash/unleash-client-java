@@ -12,8 +12,8 @@ public class ClientMetrics implements UnleashEvent {
     private final MetricsBucket bucket;
     private final String environment;
     private final String specVersion;
-    private final String platformName;
-    private final String platformVersion;
+    @Nullable private final String platformName;
+    @Nullable private final String platformVersion;
     @Nullable private final String yggdrasilVersion;
 
     ClientMetrics(UnleashConfig config, MetricsBucket bucket) {
@@ -22,8 +22,8 @@ public class ClientMetrics implements UnleashEvent {
         this.instanceId = config.getInstanceId();
         this.bucket = bucket;
         this.specVersion = config.getClientSpecificationVersion();
-        this.platformName = System.getProperty("java.vm.name", "JRE");
-        this.platformVersion = System.getProperty("java.vm.version", "1.8");
+        this.platformName = System.getProperty("java.vm.name");
+        this.platformVersion = System.getProperty("java.version");
         this.yggdrasilVersion = null;
     }
 
@@ -47,10 +47,12 @@ public class ClientMetrics implements UnleashEvent {
         return specVersion;
     }
 
+    @Nullable
     public String getPlatformName() {
         return platformName;
     }
 
+    @Nullable
     public String getPlatformVersion() {
         return platformVersion;
     }

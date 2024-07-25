@@ -15,8 +15,8 @@ public class ClientRegistration implements UnleashEvent {
     private final LocalDateTime started;
     private final long interval;
     private final String environment;
-    private final String platformName;
-    private final String platformVersion;
+    @Nullable private final String platformName;
+    @Nullable private final String platformVersion;
     @Nullable private final String yggdrasilVersion;
     private final String specVersion;
 
@@ -29,8 +29,8 @@ public class ClientRegistration implements UnleashEvent {
         this.strategies = strategies;
         this.interval = config.getSendMetricsInterval();
         this.specVersion = config.getClientSpecificationVersion();
-        this.platformName = System.getProperty("java.vm.name", "JRE");
-        this.platformVersion = System.getProperty("java.vm.version", "1.8");
+        this.platformName = System.getProperty("java.vm.name");
+        this.platformVersion = System.getProperty("java.version");
         this.yggdrasilVersion = null;
     }
 
@@ -62,10 +62,12 @@ public class ClientRegistration implements UnleashEvent {
         return environment;
     }
 
+    @Nullable
     public String getPlatformName() {
         return platformName;
     }
 
+    @Nullable
     public String getPlatformVersion() {
         return platformVersion;
     }
