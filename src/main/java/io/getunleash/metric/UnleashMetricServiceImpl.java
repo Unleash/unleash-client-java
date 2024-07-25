@@ -13,7 +13,6 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UnleashMetricServiceImpl.class);
     private final LocalDateTime started;
     private final UnleashConfig unleashConfig;
-
     private final MetricSender metricSender;
 
     // mutable
@@ -40,6 +39,7 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
                         300,
                         unleashConfig.getUnleashURLs().getClientMetricsURL());
         long metricsInterval = unleashConfig.getSendMetricsInterval();
+
         executor.setInterval(sendMetrics(), metricsInterval, metricsInterval);
     }
 
