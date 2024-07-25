@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -411,5 +412,50 @@ public class UnleashMetricServiceImplTest {
         sendMetricsCallback.getValue().run();
         assertThat(unleashMetricService.getFailures()).isEqualTo(0);
         assertThat(unleashMetricService.getSkips()).isEqualTo(0);
+    }
+
+    @Test
+    public void should_add_new_metrics_data_to_bucket() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test")
+                        .sendMetricsInterval(10)
+                        .unleashAPI("http://unleash.com")
+                        .build();
+
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+
+        UnleashMetricService unleashMetricService =
+                new UnleashMetricServiceImpl(config, sender, executor);
+
+        ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
+        verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
+
+        sendMetricsCallback.getValue().run();
+        ArgumentCaptor<ClientMetrics> metricsSent = ArgumentCaptor.forClass(ClientMetrics.class);
+        verify(sender, times(1)).sendMetrics(metricsSent.capture());
+        ClientMetrics metrics = metricsSent.getValue();
+        assertThat(metrics.getSpecVersion()).isNotEmpty();
+        assertThat(metrics.getYggdrasilVersion()).isNull();
+        assertThat(metrics.getPlatformName()).isNotEmpty();
+        assertThat(metrics.getPlatformVersion()).isNotEmpty();
+    }
+
+    @Test
+    public void client_registration_also_includes_new_metrics_metadata() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test")
+                        .sendMetricsInterval(10)
+                        .unleashAPI("http://unleash.com")
+                        .build();
+        Set<String> strategies = new HashSet<>();
+        strategies.add("default");
+        ClientRegistration reg = new ClientRegistration(config, LocalDateTime.now(), strategies);
+        assertThat(reg.getPlatformName()).isNotEmpty();
+        assertThat(reg.getPlatformVersion()).isNotEmpty();
+        assertThat(reg.getSpecVersion()).isEqualTo(config.getClientSpecificationVersion());
+        assertThat(reg.getYggdrasilVersion()).isNull();
     }
 }

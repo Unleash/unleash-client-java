@@ -2,6 +2,7 @@ package io.getunleash.metric;
 
 import io.getunleash.event.UnleashEvent;
 import io.getunleash.event.UnleashSubscriber;
+import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -14,6 +15,10 @@ public class ClientRegistration implements UnleashEvent {
     private final LocalDateTime started;
     private final long interval;
     private final String environment;
+    @Nullable private final String platformName;
+    @Nullable private final String platformVersion;
+    @Nullable private final String yggdrasilVersion;
+    private final String specVersion;
 
     ClientRegistration(UnleashConfig config, LocalDateTime started, Set<String> strategies) {
         this.environment = config.getEnvironment();
@@ -23,6 +28,10 @@ public class ClientRegistration implements UnleashEvent {
         this.started = started;
         this.strategies = strategies;
         this.interval = config.getSendMetricsInterval();
+        this.specVersion = config.getClientSpecificationVersion();
+        this.platformName = System.getProperty("java.vm.name");
+        this.platformVersion = System.getProperty("java.version");
+        this.yggdrasilVersion = null;
     }
 
     public String getAppName() {
@@ -51,6 +60,24 @@ public class ClientRegistration implements UnleashEvent {
 
     public String getEnvironment() {
         return environment;
+    }
+
+    @Nullable
+    public String getPlatformName() {
+        return platformName;
+    }
+
+    @Nullable
+    public String getPlatformVersion() {
+        return platformVersion;
+    }
+
+    public @Nullable String getYggdrasilVersion() {
+        return yggdrasilVersion;
+    }
+
+    public String getSpecVersion() {
+        return specVersion;
     }
 
     @Override
