@@ -176,4 +176,30 @@ public class DependentFeatureToggleTest {
         when(featureRepository.getToggle(parentName)).thenReturn(parent);
         assertThat(sut.isEnabled(childName, UnleashContext.builder().build())).isFalse();
     }
+
+    @Test
+    public void childIsDisabledWhenChildDoesNotHaveStrategiesAndParentIsDisabled() {
+        FeatureToggle parent =
+                new FeatureToggle(
+                        "parent", false, singletonList(new ActivationStrategy("default", null)));
+        FeatureDependency childDependsOnParent = new FeatureDependency("parant", true, emptyList());
+        FeatureToggle child =
+                new FeatureToggle(
+                        "child",
+                        true,
+                        emptyList(),
+                        emptyList(),
+                        true,
+                        singletonList(childDependsOnParent));
+        when(featureRepository.getToggle("child")).thenReturn(child);
+        when(featureRepository.getToggle("parent")).thenReturn(parent);
+        assertThat(sut.isEnabled("child", UnleashContext.builder().build())).isFalse();
+    }
+
+    @Test
+    public void shouldBeEnabledWhenMissingStrategies() {
+        FeatureToggle c = new FeatureToggle("c", true, emptyList());
+        when(featureRepository.getToggle("c")).thenReturn(c);
+        assertThat(sut.isEnabled("c", UnleashContext.builder().build())).isTrue();
+    }
 }
