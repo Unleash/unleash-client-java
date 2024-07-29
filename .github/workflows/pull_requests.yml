@@ -1,13 +1,12 @@
 on:
   pull_request:
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [8,11,17]
+        version: [8, 11, 17]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -15,7 +14,25 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.version }}
-          cache: 'maven'
-          distribution: 'temurin'
+          cache: "maven"
+          distribution: "temurin"
       - name: Build, test, coverage
-        run: ./mvnw clean test jacoco:report coveralls:report
+        run: ./mvnw clean test jacoco:report
+      - name: Coveralls parallel
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          allow-empty: true
+          flag-name: run-jvm-${{ join(matrix.*, '-') }}
+          parallel: true
+          base-path: src/main/java
+  finish:
+    needs: build
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@v2
+        with:
+          parallel-finished: true
+          carryforward: run-jvm-8,run-jvm-11,run-jvm-17
