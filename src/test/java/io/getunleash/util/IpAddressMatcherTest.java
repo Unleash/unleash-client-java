@@ -19,9 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-/**
- * @author Luke Taylor
- */
+/** @author Luke Taylor */
 class IpAddressMatcherTest {
     private final IpAddressMatcher v6matcher = new IpAddressMatcher("fe80::21f:5bff:fe33:bd68");
     private final IpAddressMatcher v4matcher = new IpAddressMatcher("192.168.1.104");
