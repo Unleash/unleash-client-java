@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [8, 11, 17]
+        version: [ 8, 11, 17 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,6 +31,11 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Coveralls Finished
         uses: coverallsapp/github-action@v2
         with:
