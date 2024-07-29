@@ -179,56 +179,53 @@ public class DefaultUnleash implements Unleash {
                     fallbackAction.test(toggleName, enhancedContext), defaultVariant);
         } else if (!featureToggle.isEnabled()) {
             return new FeatureEvaluationResult(false, defaultVariant);
-        } else if (featureToggle.getStrategies().isEmpty()) {
-            return new FeatureEvaluationResult(
-                    true, VariantUtil.selectVariant(featureToggle, context, defaultVariant));
-        } else {
+        } else if (isParentDependencySatisfied(featureToggle, context, fallbackAction)) {
             // Dependent toggles, no point in evaluating child strategies if our dependencies are
             // not satisfied
-            if (isParentDependencySatisfied(featureToggle, context, fallbackAction)) {
-                for (ActivationStrategy strategy : featureToggle.getStrategies()) {
-                    Strategy configuredStrategy = getStrategy(strategy.getName());
-                    if (configuredStrategy == UNKNOWN_STRATEGY) {
-                        LOGGER.warn(
-                                "Unable to find matching strategy for toggle:{} strategy:{}",
-                                toggleName,
-                                strategy.getName());
-                    }
+            if (featureToggle.getStrategies().isEmpty()) {
+                return new FeatureEvaluationResult(
+                        true, VariantUtil.selectVariant(featureToggle, context, defaultVariant));
+            }
+            for (ActivationStrategy strategy : featureToggle.getStrategies()) {
+                Strategy configuredStrategy = getStrategy(strategy.getName());
+                if (configuredStrategy == UNKNOWN_STRATEGY) {
+                    LOGGER.warn(
+                            "Unable to find matching strategy for toggle:{} strategy:{}",
+                            toggleName,
+                            strategy.getName());
+                }
 
-                    FeatureEvaluationResult result =
-                            configuredStrategy.getResult(
-                                    strategy.getParameters(),
-                                    enhancedContext,
-                                    ConstraintMerger.mergeConstraints(featureRepository, strategy),
-                                    strategy.getVariants());
+                FeatureEvaluationResult result =
+                        configuredStrategy.getResult(
+                                strategy.getParameters(),
+                                enhancedContext,
+                                ConstraintMerger.mergeConstraints(featureRepository, strategy),
+                                strategy.getVariants());
 
-                    if (result.isEnabled()) {
-                        Variant variant = result.getVariant();
-                        // If strategy variant is null, look for a variant in the featureToggle
-                        if (variant == null) {
-                            variant =
-                                    VariantUtil.selectVariant(
-                                            featureToggle, context, defaultVariant);
-                        }
-                        result.setVariant(variant);
-                        return result;
+                if (result.isEnabled()) {
+                    Variant variant = result.getVariant();
+                    // If strategy variant is null, look for a variant in the featureToggle
+                    if (variant == null) {
+                        variant = VariantUtil.selectVariant(featureToggle, context, defaultVariant);
                     }
+                    result.setVariant(variant);
+                    return result;
                 }
             }
-            return new FeatureEvaluationResult(false, defaultVariant);
         }
+        return new FeatureEvaluationResult(false, defaultVariant);
     }
 
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
      *
-     * @deprecated
      * @param toggleName Name of the toggle
      * @param context The UnleashContext
      * @param fallbackAction What to do if we fail to find the toggle
      * @param defaultVariant If we can't resolve a variant, what are we returning
      * @return A wrapper containing whether the feature was enabled as well which Variant was
      *     selected
+     * @deprecated
      */
     private FeatureEvaluationResult deprecatedGetFeatureEvaluationResult(
             String toggleName,
@@ -244,46 +241,43 @@ public class DefaultUnleash implements Unleash {
                     fallbackAction.test(toggleName, enhancedContext), defaultVariant);
         } else if (!featureToggle.isEnabled()) {
             return new FeatureEvaluationResult(false, defaultVariant);
-        } else if (featureToggle.getStrategies().isEmpty()) {
-            return new FeatureEvaluationResult(
-                    true,
-                    VariantUtil.selectDeprecatedVariantHashingAlgo(
-                            featureToggle, context, defaultVariant));
-        } else {
-            // Dependent toggles, no point in evaluating child strategies if our dependencies are
-            // not satisfied
-            if (isParentDependencySatisfied(featureToggle, context, fallbackAction)) {
-                for (ActivationStrategy strategy : featureToggle.getStrategies()) {
-                    Strategy configuredStrategy = getStrategy(strategy.getName());
-                    if (configuredStrategy == UNKNOWN_STRATEGY) {
-                        LOGGER.warn(
-                                "Unable to find matching strategy for toggle:{} strategy:{}",
-                                toggleName,
-                                strategy.getName());
-                    }
+        } else if (isParentDependencySatisfied(featureToggle, context, fallbackAction)) {
+            if (featureToggle.getStrategies().isEmpty()) {
+                return new FeatureEvaluationResult(
+                        true,
+                        VariantUtil.selectDeprecatedVariantHashingAlgo(
+                                featureToggle, context, defaultVariant));
+            }
+            for (ActivationStrategy strategy : featureToggle.getStrategies()) {
+                Strategy configuredStrategy = getStrategy(strategy.getName());
+                if (configuredStrategy == UNKNOWN_STRATEGY) {
+                    LOGGER.warn(
+                            "Unable to find matching strategy for toggle:{} strategy:{}",
+                            toggleName,
+                            strategy.getName());
+                }
 
-                    FeatureEvaluationResult result =
-                            configuredStrategy.getDeprecatedHashingAlgoResult(
-                                    strategy.getParameters(),
-                                    enhancedContext,
-                                    ConstraintMerger.mergeConstraints(featureRepository, strategy),
-                                    strategy.getVariants());
+                FeatureEvaluationResult result =
+                        configuredStrategy.getDeprecatedHashingAlgoResult(
+                                strategy.getParameters(),
+                                enhancedContext,
+                                ConstraintMerger.mergeConstraints(featureRepository, strategy),
+                                strategy.getVariants());
 
-                    if (result.isEnabled()) {
-                        Variant variant = result.getVariant();
-                        // If strategy variant is null, look for a variant in the featureToggle
-                        if (variant == null) {
-                            variant =
-                                    VariantUtil.selectDeprecatedVariantHashingAlgo(
-                                            featureToggle, context, defaultVariant);
-                        }
-                        result.setVariant(variant);
-                        return result;
+                if (result.isEnabled()) {
+                    Variant variant = result.getVariant();
+                    // If strategy variant is null, look for a variant in the featureToggle
+                    if (variant == null) {
+                        variant =
+                                VariantUtil.selectDeprecatedVariantHashingAlgo(
+                                        featureToggle, context, defaultVariant);
                     }
+                    result.setVariant(variant);
+                    return result;
                 }
             }
-            return new FeatureEvaluationResult(false, defaultVariant);
         }
+        return new FeatureEvaluationResult(false, defaultVariant);
     }
 
     private boolean isParentDependencySatisfied(
@@ -393,10 +387,10 @@ public class DefaultUnleash implements Unleash {
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
      *
-     * @deprecated
      * @param toggleName
      * @param context
      * @return
+     * @deprecated
      */
     @Override
     public Variant deprecatedGetVariant(String toggleName, UnleashContext context) {
@@ -406,11 +400,11 @@ public class DefaultUnleash implements Unleash {
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
      *
-     * @deprecated
      * @param toggleName
      * @param context
      * @param defaultValue
      * @return
+     * @deprecated
      */
     @Override
     public Variant deprecatedGetVariant(
@@ -437,9 +431,9 @@ public class DefaultUnleash implements Unleash {
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
      *
-     * @deprecated
      * @param toggleName
      * @return
+     * @deprecated
      */
     @Override
     public Variant deprecatedGetVariant(String toggleName) {
@@ -449,10 +443,10 @@ public class DefaultUnleash implements Unleash {
     /**
      * Uses the old, statistically broken Variant seed for finding the correct variant
      *
-     * @deprecated
      * @param toggleName
      * @param defaultValue
      * @return
+     * @deprecated
      */
     @Override
     public Variant deprecatedGetVariant(String toggleName, Variant defaultValue) {
