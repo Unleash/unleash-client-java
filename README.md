@@ -13,8 +13,9 @@ This section shows you how to get started quickly and explains some common confi
 
 ### Step 1: Install the Unleash Java SDK
 
-You need to add the Unleash SDK as a dependency for your project. Here's how you would add it to your `pom.xml` file:
+You need to add the Unleash SDK as a dependency for your project. Here's how you would add it to your `pom.xml` and `build.gradle` file:
 
+**pom.xml**
 ```xml
 <dependency>
     <groupId>io.getunleash</groupId>
@@ -22,7 +23,10 @@ You need to add the Unleash SDK as a dependency for your project. Here's how you
     <version>Latest version here</version>
 </dependency>
 ```
-
+**build.gradle**
+```gradle
+ implementation("io.getunleash:unleash-client-java:$unleashedVersion")
+```
 
 ### Step 2: Create a new Unleash instance
 
