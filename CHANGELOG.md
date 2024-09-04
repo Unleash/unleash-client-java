@@ -1,5 +1,7 @@
 # Changelog
 
+**Note:** Since 6.0.1 onwards, we moved the changelog into the release notes of each version. You will find hte details here https://github.com/Unleash/unleash-client-java/releases
+
 ## 6.0.1
 - Make connect and read timeouts configurable for both toggle fetching and metrics posting
 ## 6.0.0
