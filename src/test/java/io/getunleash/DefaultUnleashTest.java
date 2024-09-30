@@ -22,11 +22,15 @@ import io.getunleash.util.UnleashConfig;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.function.Supplier;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.slf4j.LoggerFactory;
 
 class DefaultUnleashTest {
@@ -138,6 +142,41 @@ class DefaultUnleashTest {
         when(contextProvider.getContext())
                 .thenReturn(UnleashContext.builder().addProperty("version", "1.2.2").build());
         assertThat(sut.isEnabled(toggleName)).isFalse();
+    }
+
+    class VersionFetcher {
+        public String getVersion() {
+            return "1.3.7";
+        }
+    }
+    @Test
+    public void should_merge_context_with_context_provider_data() {
+
+        String toggleName = "context-provided-property";
+        String requiredMinimumVersion = "1.2.2";
+        Constraint semverConstraint = new Constraint("version", Operator.SEMVER_GT, requiredMinimumVersion);
+        Constraint userConstraint = new Constraint("userId", Operator.IN, asList("123", "456"));
+        VersionFetcher versionFetcher = spy(new VersionFetcher());
+        ActivationStrategy activationStrategy =
+            new ActivationStrategy(
+                "default",
+                Collections.emptyMap(),
+                asList(semverConstraint, userConstraint),
+                Collections.emptyList(),
+                Collections.emptyList());
+        when(featureRepository.getToggle(toggleName))
+            .thenReturn(new FeatureToggle(toggleName, true, Collections.singletonList(activationStrategy)));
+        when(contextProvider.getContext())
+            .thenAnswer((Answer<UnleashContext>) invocationOnMock ->
+                UnleashContext.builder()
+                    .userId("123")
+                    .addProperty("version", versionFetcher.getVersion())
+                    .build()
+            );
+
+        verify(versionFetcher, times(0)).getVersion();
+        assertThat(sut.isEnabled(toggleName)).isTrue();
+        verify(versionFetcher, times(1)).getVersion();
     }
 
     @Test
