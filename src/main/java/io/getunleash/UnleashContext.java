@@ -129,7 +129,7 @@ public class UnleashContext {
             context.sessionId.ifPresent(val -> this.sessionId = val);
             context.remoteAddress.ifPresent(val -> this.remoteAddress = val);
             context.currentTime.ifPresent(val -> this.currentTime = val);
-            context.properties.forEach(this.properties::put);
+            this.properties.putAll(context.properties);
         }
 
         public Builder appName(String appName) {
@@ -173,7 +173,26 @@ public class UnleashContext {
         }
 
         public Builder addProperty(String name, String value) {
-            properties.put(name, value);
+            switch (name) {
+                case "environment":
+                    this.environment = value;
+                    break;
+                case "appName":
+                    this.appName = value;
+                    break;
+                case "userId":
+                    this.userId = value;
+                    break;
+                case "sessionId":
+                    this.sessionId = value;
+                    break;
+                case "remoteAddress":
+                    this.remoteAddress = value;
+                    break;
+                default:
+                    this.properties.put(name, value);
+            }
+
             return this;
         }
 
