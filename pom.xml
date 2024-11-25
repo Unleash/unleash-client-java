@@ -56,11 +56,10 @@
 
     <dependencies>
         <dependency>
-            <artifactId>unleash-engine</artifactId>
             <groupId>io.getunleash</groupId>
-            <scope>system</scope>
-            <version>0.0.1-SNAPSHOT</version>
-            <systemPath>${project.basedir}/unleash-engine-all.jar</systemPath>
+            <artifactId>yggdrasil-engine</artifactId>
+            <version>0.1.0-alpha.6</version>
+            <classifier>x86_64-linux</classifier>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
