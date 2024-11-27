@@ -100,9 +100,10 @@ public class UnleashMetricServiceImplTest {
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+        UnleashEngine engine = new UnleashEngine();
 
         UnleashMetricService unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor, null);
+                new UnleashMetricServiceImpl(config, sender, executor, engine);
 
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
         verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
