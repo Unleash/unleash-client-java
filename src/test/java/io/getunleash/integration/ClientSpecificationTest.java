@@ -120,7 +120,8 @@ public class ClientSpecificationTest {
     private Unleash setupUnleash(TestDefinition testDefinition) throws URISyntaxException {
         mockUnleashAPI(testDefinition);
 
-        // Required because the client is available before it may have had the chance to talk with
+        // Required because the client is available before it may have had the chance to
+        // talk with
         // the API
         String backupFile = writeUnleashBackup(testDefinition);
 
@@ -194,7 +195,8 @@ public class ClientSpecificationTest {
                         + definition.getName()
                         + ".json";
 
-        // TODO: we can probably drop this after introduction of `synchronousFetchOnInitialisation`.
+        // TODO: we can probably drop this after introduction of
+        // `synchronousFetchOnInitialisation`.
         try (FileWriter writer = new FileWriter(backupFile)) {
             writer.write(definition.getState().toString());
         } catch (IOException e) {

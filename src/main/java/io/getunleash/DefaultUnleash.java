@@ -246,7 +246,7 @@ public class DefaultUnleash implements Unleash {
     private @Nullable io.getunleash.variant.Payload adapt(@Nullable Payload payload) {
         return Optional.ofNullable(payload)
                 .map(p -> new io.getunleash.variant.Payload(p.getType(), p.getValue()))
-                .orElse(null);
+                .orElse(new io.getunleash.variant.Payload("string", null));
     }
 
     @Override
@@ -262,9 +262,7 @@ public class DefaultUnleash implements Unleash {
             Context adaptedContext = adapt(enhancedContext);
 
             Variant variant =
-                    adapt(
-                            this.unleashEngine.getVariant(toggleName, adaptedContext),
-                            defaultValue);
+                    adapt(this.unleashEngine.getVariant(toggleName, adaptedContext), defaultValue);
 
             Boolean enabled = this.unleashEngine.isEnabled(toggleName, adaptedContext);
 
