@@ -164,15 +164,5 @@ public class FakeUnleash implements Unleash {
                                             getVariant(toggleName)))
                     .collect(Collectors.toList());
         }
-
-        @Override
-        public void count(String toggleName, boolean enabled) {
-            // Nothing to count
-        }
-
-        @Override
-        public void countVariant(String toggleName, String variantName) {
-            // Nothing to count
-        }
     }
 }

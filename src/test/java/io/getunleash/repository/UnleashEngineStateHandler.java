@@ -3,8 +3,7 @@ package io.getunleash.repository;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.FeatureToggle;
 import io.getunleash.Segment;
-import io.getunleash.engine.UnleashEngine;
-import io.getunleash.engine.YggdrasilInvalidInputException;
+import io.getunleash.engine.*;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,9 +44,16 @@ public class UnleashEngineStateHandler {
         setState(JsonFeatureParser.toJsonString(madeUp));
     }
 
+    public MetricsBucket captureMetrics() {
+        try {
+            return this.unleashEngine.getMetrics();
+        } catch (YggdrasilError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void setState(String raw) {
         try {
-
             this.unleashEngine.takeState(raw);
         } catch (YggdrasilInvalidInputException e) {
             throw new RuntimeException(e);

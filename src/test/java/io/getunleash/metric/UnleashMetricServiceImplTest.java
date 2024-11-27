@@ -3,6 +3,8 @@ package io.getunleash.metric;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+import io.getunleash.engine.MetricsBucket;
+import io.getunleash.engine.UnleashEngine;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.HashSet;
@@ -22,7 +24,8 @@ public class UnleashMetricServiceImplTest {
                         .unleashAPI("http://unleash.com")
                         .build();
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-        UnleashMetricService unleashMetricService = new UnleashMetricServiceImpl(config, executor);
+        UnleashMetricService unleashMetricService =
+                new UnleashMetricServiceImpl(config, executor, null);
 
         verify(executor, times(1)).setInterval(any(Runnable.class), eq(interval), eq(interval));
     }
@@ -41,7 +44,7 @@ public class UnleashMetricServiceImplTest {
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
 
         UnleashMetricService unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor);
+                new UnleashMetricServiceImpl(config, sender, executor, null);
         Set<String> strategies = new HashSet<>();
         strategies.add("default");
         strategies.add("custom");
@@ -73,7 +76,7 @@ public class UnleashMetricServiceImplTest {
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
 
         UnleashMetricService unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor);
+                new UnleashMetricServiceImpl(config, sender, executor, null);
         Set<String> strategies = new HashSet<>();
         strategies.add("default");
         strategies.add("custom");
@@ -99,7 +102,7 @@ public class UnleashMetricServiceImplTest {
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
 
         UnleashMetricService unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor);
+                new UnleashMetricServiceImpl(config, sender, executor, null);
 
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
         verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
@@ -120,13 +123,14 @@ public class UnleashMetricServiceImplTest {
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+        UnleashEngine engine = new UnleashEngine();
 
         UnleashMetricService unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor);
-        unleashMetricService.count("someToggle", true);
-        unleashMetricService.count("someToggle", false);
-        unleashMetricService.count("someToggle", true);
-        unleashMetricService.count("otherToggle", true);
+                new UnleashMetricServiceImpl(config, sender, executor, engine);
+        engine.countToggle("someToggle", true);
+        engine.countToggle("someToggle", false);
+        engine.countToggle("someToggle", true);
+        engine.countToggle("otherToggle", true);
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
@@ -161,14 +165,15 @@ public class UnleashMetricServiceImplTest {
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+        UnleashEngine engine = new UnleashEngine();
 
         UnleashMetricService unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor);
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v2");
-        unleashMetricService.countVariant("someToggle", "disabled");
+                new UnleashMetricServiceImpl(config, sender, executor, engine);
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v2");
+        engine.countVariant("someToggle", "disabled");
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
@@ -208,14 +213,15 @@ public class UnleashMetricServiceImplTest {
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+        UnleashEngine engine = new UnleashEngine();
 
         UnleashMetricServiceImpl unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor);
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v2");
-        unleashMetricService.countVariant("someToggle", "disabled");
+                new UnleashMetricServiceImpl(config, sender, executor, engine);
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v2");
+        engine.countVariant("someToggle", "disabled");
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
@@ -280,14 +286,15 @@ public class UnleashMetricServiceImplTest {
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+        UnleashEngine engine = new UnleashEngine();
 
         UnleashMetricServiceImpl unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor);
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v2");
-        unleashMetricService.countVariant("someToggle", "disabled");
+                new UnleashMetricServiceImpl(config, sender, executor, engine);
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v2");
+        engine.countVariant("someToggle", "disabled");
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
@@ -350,14 +357,15 @@ public class UnleashMetricServiceImplTest {
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+        UnleashEngine engine = new UnleashEngine();
 
         UnleashMetricServiceImpl unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor);
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v2");
-        unleashMetricService.countVariant("someToggle", "disabled");
+                new UnleashMetricServiceImpl(config, sender, executor, engine);
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v2");
+        engine.countVariant("someToggle", "disabled");
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
@@ -387,14 +395,15 @@ public class UnleashMetricServiceImplTest {
 
         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+        UnleashEngine engine = new UnleashEngine();
 
         UnleashMetricServiceImpl unleashMetricService =
-                new UnleashMetricServiceImpl(config, sender, executor);
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v1");
-        unleashMetricService.countVariant("someToggle", "v2");
-        unleashMetricService.countVariant("someToggle", "disabled");
+                new UnleashMetricServiceImpl(config, sender, executor, engine);
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v1");
+        engine.countVariant("someToggle", "v2");
+        engine.countVariant("someToggle", "disabled");
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);

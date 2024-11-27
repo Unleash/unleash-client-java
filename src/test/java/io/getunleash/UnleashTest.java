@@ -6,8 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import io.getunleash.engine.MetricsBucket;
 import io.getunleash.event.EventDispatcher;
-import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.*;
 import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.strategy.Strategy;
@@ -145,7 +145,8 @@ public class UnleashTest {
                                 "test", true, asList(new ActivationStrategy("custom", null))));
         unleash.isEnabled("test");
 
-        // PR-comment: constraints are no longer managed by the SDK but by Yggdrasil, so we removed
+        // PR-comment: constraints are no longer managed by the SDK but by Yggdrasil, so
+        // we removed
         // the third parameter
         verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class));
     }
@@ -303,7 +304,6 @@ public class UnleashTest {
     @Test
     public void getting_variant_when_disabled_should_increment_no_counter() {
         UnleashContext context = UnleashContext.builder().userId("1").build();
-        UnleashMetricService metricService = mock(UnleashMetricService.class);
         UnleashConfig config =
                 new UnleashConfig.Builder()
                         .appName("test")
@@ -318,21 +318,23 @@ public class UnleashTest {
                         toggleRepository,
                         Collections.emptyMap(),
                         contextProvider,
-                        new EventDispatcher(config),
-                        metricService);
+                        new EventDispatcher(config));
+        UnleashEngineStateHandler localStateHandler =
+                new UnleashEngineStateHandler((DefaultUnleash) thisUnleash);
         // Set up a toggleName using UserWithIdStrategy
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy));
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        localStateHandler.setState(featureToggle);
 
         final Variant result = thisUnleash.getVariant("test", context);
 
         assertThat(result).isNotNull();
-        verify(metricService).count(anyString(), eq(false));
-        verify(metricService).countVariant(anyString(), eq(result.getName()));
+        MetricsBucket bucket = localStateHandler.captureMetrics();
+        assertThat(bucket.getToggles().get("test").getYes()).isEqualTo(0);
+        assertThat(bucket.getToggles().get("test").getNo()).isEqualTo(1);
     }
 
     @Test
@@ -544,12 +546,16 @@ public class UnleashTest {
     }
 
     @Test
-    @Disabled // TODO: panicked at 'called `Result::unwrap()` on an `Err` value: Error { variant:
-    // ParsingError { positives: [and, or], negatives: [] }, location: Pos(64), line_col:
+    @Disabled // TODO: panicked at 'called `Result::unwrap()` on an `Err` value: Error {
+    // variant:
+    // ParsingError { positives: [and, or], negatives: [] }, location: Pos(64),
+    // line_col:
     // Pos((1, 65)), path: None, line: "(true and (context[\"wins\"] > 5 and
-    // context[\"dateLastWin\"] > 2022-05-01T12:00:00 and context[\"followers\"] > 1000
+    // context[\"dateLastWin\"] > 2022-05-01T12:00:00 and context[\"followers\"] >
+    // 1000
     // and context[\"single\"] contains_any_ignore_case [\"true\"] and
-    // context[\"catOrDog\"] contains_any_ignore_case [\"cat\"]))", continued_line: None
+    // context[\"catOrDog\"] contains_any_ignore_case [\"cat\"]))", continued_line:
+    // None
     // }', unleash-yggdrasil/src/lib.rs:144:64
     public void should_handle_complex_segment_chains_2() {
         UnleashConfig config =

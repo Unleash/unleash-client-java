@@ -167,16 +167,4 @@ public class FakeUnleashTest {
 
         assertThat(fakeUnleash.getVariant("t1").getName()).isEqualTo("disabled");
     }
-
-    @Test
-    public void should_count_and_not_throw_an_error() {
-        FakeUnleash fakeUnleash = new FakeUnleash();
-        fakeUnleash.more().count("anything", true);
-    }
-
-    @Test
-    public void should_countVariant_and_not_throw_an_error() {
-        FakeUnleash fakeUnleash = new FakeUnleash();
-        fakeUnleash.more().countVariant("toggleName", "variantName");
-    }
 }

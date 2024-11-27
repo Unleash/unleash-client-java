@@ -1,5 +1,8 @@
 package io.getunleash.metric;
 
+import io.getunleash.engine.MetricsBucket;
+import io.getunleash.engine.UnleashEngine;
+import io.getunleash.engine.YggdrasilError;
 import io.getunleash.util.Throttler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
@@ -16,21 +19,25 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
 
     private final MetricSender metricSender;
 
-    // mutable
-    private volatile MetricsBucket currentMetricsBucket;
+    // synchronization is handled in the engine itself
+    private final UnleashEngine engine;
 
     private final Throttler throttler;
 
     public UnleashMetricServiceImpl(
-            UnleashConfig unleashConfig, UnleashScheduledExecutor executor) {
-        this(unleashConfig, unleashConfig.getMetricSenderFactory().apply(unleashConfig), executor);
+            UnleashConfig unleashConfig, UnleashScheduledExecutor executor, UnleashEngine engine) {
+        this(
+                unleashConfig,
+                unleashConfig.getMetricSenderFactory().apply(unleashConfig),
+                executor,
+                engine);
     }
 
     public UnleashMetricServiceImpl(
             UnleashConfig unleashConfig,
             MetricSender metricSender,
-            UnleashScheduledExecutor executor) {
-        this.currentMetricsBucket = new MetricsBucket();
+            UnleashScheduledExecutor executor,
+            UnleashEngine engine) {
         this.started = LocalDateTime.now(ZoneId.of("UTC"));
         this.unleashConfig = unleashConfig;
         this.metricSender = metricSender;
@@ -39,6 +46,7 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
                         (int) unleashConfig.getSendMetricsInterval(),
                         300,
                         unleashConfig.getUnleashURLs().getClientMetricsURL());
+        this.engine = engine;
         long metricsInterval = unleashConfig.getSendMetricsInterval();
         executor.setInterval(sendMetrics(), metricsInterval, metricsInterval);
     }
@@ -50,29 +58,24 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
         metricSender.registerClient(registration);
     }
 
-    @Override
-    public void count(String toggleName, boolean active) {
-        currentMetricsBucket.registerCount(toggleName, active);
-    }
-
-    @Override
-    public void countVariant(String toggleName, String variantName) {
-        currentMetricsBucket.registerCount(toggleName, variantName);
-    }
-
     private Runnable sendMetrics() {
         return () -> {
             if (throttler.performAction()) {
-                MetricsBucket metricsBucket = this.currentMetricsBucket;
-                this.currentMetricsBucket = new MetricsBucket();
-                metricsBucket.end();
-                ClientMetrics metrics = new ClientMetrics(unleashConfig, metricsBucket);
-                int statusCode = metricSender.sendMetrics(metrics);
-                if (statusCode >= 200 && statusCode < 400) {
-                    throttler.decrementFailureCountAndResetSkips();
-                }
-                if (statusCode >= 400) {
-                    throttler.handleHttpErrorCodes(statusCode);
+                try {
+                    MetricsBucket bucket = this.engine.getMetrics();
+
+                    ClientMetrics metrics = new ClientMetrics(unleashConfig, bucket);
+                    int statusCode = metricSender.sendMetrics(metrics);
+                    if (statusCode >= 200 && statusCode < 400) {
+                        throttler.decrementFailureCountAndResetSkips();
+                    }
+                    if (statusCode >= 400) {
+                        throttler.handleHttpErrorCodes(statusCode);
+                    }
+                } catch (YggdrasilError e) {
+                    LOGGER.error(
+                            "Failed to retrieve metrics from the engine, this is a serious error",
+                            e);
                 }
             } else {
                 throttler.skipped();

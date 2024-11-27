@@ -35,7 +35,6 @@ class DefaultUnleashTest {
         strategyMap.put("default", new DefaultStrategy());
         contextProvider = mock(UnleashContextProvider.class);
         eventDispatcher = mock(EventDispatcher.class);
-        metricService = mock(UnleashMetricService.class);
 
         sut =
                 new DefaultUnleash(
@@ -43,8 +42,7 @@ class DefaultUnleashTest {
                         featureRepository,
                         strategyMap,
                         contextProvider,
-                        eventDispatcher,
-                        metricService);
+                        eventDispatcher);
     }
 
     @Test
@@ -57,22 +55,6 @@ class DefaultUnleashTest {
         EvaluatedToggle t1 = toggles.get(0);
         assertThat(t1.getName()).isEqualTo("toggle1");
         assertThat(t1.isEnabled()).isFalse();
-    }
-
-    @Test
-    public void should_count_and_not_throw_an_error() {
-        sut.more().count("toggle1", true);
-        sut.more().count("toggle1", false);
-
-        verify(metricService).count("toggle1", true);
-        verify(metricService).count("toggle1", false);
-    }
-
-    @Test
-    public void should_countVariant_and_not_throw_an_error() {
-        sut.more().countVariant("toggle1", "variant1");
-
-        verify(metricService).countVariant("toggle1", "variant1");
     }
 
     @Test
@@ -145,8 +127,7 @@ class DefaultUnleashTest {
                         featureRepository,
                         new HashMap<>(),
                         contextProvider,
-                        eventDispatcher,
-                        metricService);
+                        eventDispatcher);
 
         ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
         FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
@@ -155,7 +136,9 @@ class DefaultUnleashTest {
 
         sut.isEnabled("toggle1");
 
-        // PR-comment: constraints are no longer managed by the SDK but by Yggdrasil, so we removed
+        // PR-comment: constraints are no longer managed by the SDK but by Yggdrasil,
+        // so we
+        // removed
         // the third parameter
         verify(fallback).isEnabled(any(), any());
     }
@@ -218,7 +201,7 @@ class DefaultUnleashTest {
         assertThatThrownBy(
                         () -> {
                             Unleash unleash2 =
-                                    new DefaultUnleash(config, null, null, null, null, null, true);
+                                    new DefaultUnleash(config, null, null, null, null, true);
                         })
                 .isInstanceOf(RuntimeException.class)
                 .withFailMessage(

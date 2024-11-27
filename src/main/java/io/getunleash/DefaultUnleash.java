@@ -70,7 +70,6 @@ public class DefaultUnleash implements Unleash {
                 buildStrategyMap(strategies),
                 unleashConfig.getContextProvider(),
                 new EventDispatcher(unleashConfig),
-                new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor()),
                 false);
     }
 
@@ -80,15 +79,13 @@ public class DefaultUnleash implements Unleash {
             IFeatureRepository featureRepository,
             Map<String, Strategy> strategyMap,
             UnleashContextProvider contextProvider,
-            EventDispatcher eventDispatcher,
-            UnleashMetricService metricService) {
+            EventDispatcher eventDispatcher) {
         this(
                 unleashConfig,
                 featureRepository,
                 strategyMap,
                 contextProvider,
                 eventDispatcher,
-                metricService,
                 false);
     }
 
@@ -98,7 +95,6 @@ public class DefaultUnleash implements Unleash {
             Map<String, Strategy> strategyMap,
             UnleashContextProvider contextProvider,
             EventDispatcher eventDispatcher,
-            UnleashMetricService metricService,
             boolean failOnMultipleInstantiations) {
 
         this.unleashEngine =
@@ -123,7 +119,9 @@ public class DefaultUnleash implements Unleash {
         this.featureRepository = featureRepository;
         this.contextProvider = contextProvider;
         this.eventDispatcher = eventDispatcher;
-        this.metricService = metricService;
+        this.metricService =
+                new UnleashMetricServiceImpl(
+                        unleashConfig, unleashConfig.getScheduledExecutor(), this.unleashEngine);
         metricService.register(strategyMap.keySet());
         initCounts.compute(
                 config.getClientIdentifier(),
@@ -199,6 +197,13 @@ public class DefaultUnleash implements Unleash {
         return mapped;
     }
 
+    private Variant adaptVariant(VariantDef variant, Variant defaultValue) {
+        if (variant == null) {
+            return defaultValue;
+        }
+        return new Variant(variant.getName(), adapt(variant.getPayload()), variant.isEnabled());
+    }
+
     @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
         return isEnabled(toggleName, contextProvider.getContext(), defaultSetting);
@@ -215,54 +220,26 @@ public class DefaultUnleash implements Unleash {
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction) {
-        FeatureEvaluationResult result =
-                getFeatureEvaluationResult(toggleName, context, fallbackAction, null);
-        count(toggleName, result.isEnabled());
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, result.isEnabled()));
-        dispatchEnabledImpressionDataIfNeeded(toggleName, result.isEnabled(), context);
-        return result.isEnabled();
-    }
 
-    private void dispatchEnabledImpressionDataIfNeeded(
-            String toggleName, boolean enabled, UnleashContext context) {
+        UnleashContext enhancedContext = context.applyStaticFields(config);
         try {
+            Boolean enabled = this.unleashEngine.isEnabled(toggleName, adapt(enhancedContext));
+            if (enabled == null) {
+                enabled = fallbackAction.test(toggleName, enhancedContext);
+            }
+
+            this.unleashEngine.countToggle(toggleName, enabled);
+            eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
             if (this.unleashEngine.shouldEmitImpressionEvent(toggleName)) {
                 eventDispatcher.dispatch(
                         new IsEnabledImpressionEvent(toggleName, enabled, context));
             }
-        } catch (YggdrasilError e) {
-            LOGGER.warn("Unable to check if impression event should be emitted", e);
-        }
-    }
-
-    private FeatureEvaluationResult getFeatureEvaluationResult(
-            String toggleName,
-            UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction,
-            @Nullable Variant defaultVariant) {
-        UnleashContext enhancedContext = context.applyStaticFields(config);
-        try {
-            VariantDef variantResponse =
-                    this.unleashEngine.getVariant(toggleName, adapt(enhancedContext));
-            if (variantResponse != null) {
-                return new FeatureEvaluationResult(
-                        variantResponse.isEnabled(),
-                        new Variant(
-                                variantResponse.getName(),
-                                adapt(variantResponse.getPayload()),
-                                variantResponse.isEnabled()));
-            }
-
-            Boolean isEnabled = this.unleashEngine.isEnabled(toggleName, adapt(enhancedContext));
-            if (isEnabled != null) {
-                return new FeatureEvaluationResult(isEnabled, defaultVariant);
-            }
-
-            return new FeatureEvaluationResult(
-                    fallbackAction.test(toggleName, enhancedContext), defaultVariant);
-
+            return enabled;
         } catch (YggdrasilInvalidInputException | YggdrasilError e) {
-            throw new RuntimeException(e);
+            LOGGER.warn(
+                    "A serious issue occurred when evaluating a feature toggle, defaulting to false",
+                    e);
+            return false;
         }
     }
 
@@ -279,26 +256,37 @@ public class DefaultUnleash implements Unleash {
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
-        FeatureEvaluationResult result =
-                getFeatureEvaluationResult(toggleName, context, (n, c) -> false, defaultValue);
-        Variant variant = result.getVariant();
-        metricService.countVariant(toggleName, variant.getName());
-        // Should count yes/no also when getting variant.
-        metricService.count(toggleName, result.isEnabled());
-        dispatchVariantImpressionDataIfNeeded(
-                toggleName, variant.getName(), result.isEnabled(), context);
-        return variant;
-    }
+        UnleashContext enhancedContext = context.applyStaticFields(config);
 
-    private void dispatchVariantImpressionDataIfNeeded(
-            String toggleName, String variantName, boolean enabled, UnleashContext context) {
         try {
+            Context adaptedContext = adapt(enhancedContext);
+
+            Variant variant =
+                    adaptVariant(
+                            this.unleashEngine.getVariant(toggleName, adaptedContext),
+                            defaultValue);
+
+            Boolean enabled = this.unleashEngine.isEnabled(toggleName, adaptedContext);
+
+            // TODO: Swap this for feature enabled
+            if (enabled == null) {
+                enabled = false;
+            }
+
+            this.unleashEngine.countToggle(toggleName, enabled);
+            this.unleashEngine.countVariant(toggleName, variant.getName());
+            eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isEnabled()));
             if (unleashEngine.shouldEmitImpressionEvent(toggleName)) {
                 eventDispatcher.dispatch(
-                        new VariantImpressionEvent(toggleName, enabled, context, variantName));
+                        new VariantImpressionEvent(
+                                toggleName, enabled, context, variant.getName()));
             }
-        } catch (YggdrasilError e) {
-            LOGGER.warn("Unable to check if impression event should be emitted", e);
+            return variant;
+        } catch (YggdrasilInvalidInputException | YggdrasilError e) {
+            LOGGER.warn(
+                    "A serious issue occurred when evaluating a variant, defaulting to the default value",
+                    e);
+            return defaultValue;
         }
     }
 
@@ -330,12 +318,6 @@ public class DefaultUnleash implements Unleash {
     @Deprecated()
     public List<String> getFeatureToggleNames() {
         return featureRepository.getFeatureNames();
-    }
-
-    /** Use more().count() instead */
-    @Deprecated
-    public void count(final String toggleName, boolean enabled) {
-        metricService.count(toggleName, enabled);
     }
 
     private static Map<String, Strategy> buildStrategyMap(@Nullable Strategy[] strategies) {
@@ -384,24 +366,12 @@ public class DefaultUnleash implements Unleash {
             return getFeatureToggleNames().stream()
                     .map(
                             toggleName -> {
-                                FeatureEvaluationResult result =
-                                        getFeatureEvaluationResult(
-                                                toggleName, context, (n, c) -> false, null);
-
-                                return new EvaluatedToggle(
-                                        toggleName, result.isEnabled(), result.getVariant());
+                                boolean enabled =
+                                        isEnabled(toggleName, context, (name, ctx) -> false);
+                                Variant variant = getVariant(toggleName, context, DISABLED_VARIANT);
+                                return new EvaluatedToggle(toggleName, enabled, variant);
                             })
                     .collect(Collectors.toList());
-        }
-
-        @Override
-        public void count(final String toggleName, boolean enabled) {
-            metricService.count(toggleName, enabled);
-        }
-
-        @Override
-        public void countVariant(final String toggleName, String variantName) {
-            metricService.countVariant(toggleName, variantName);
         }
     }
 }
