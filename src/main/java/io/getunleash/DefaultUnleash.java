@@ -197,7 +197,7 @@ public class DefaultUnleash implements Unleash {
         return mapped;
     }
 
-    private Variant adaptVariant(VariantDef variant, Variant defaultValue) {
+    private Variant adapt(VariantDef variant, Variant defaultValue) {
         if (variant == null) {
             return defaultValue;
         }
@@ -262,7 +262,7 @@ public class DefaultUnleash implements Unleash {
             Context adaptedContext = adapt(enhancedContext);
 
             Variant variant =
-                    adaptVariant(
+                    adapt(
                             this.unleashEngine.getVariant(toggleName, adaptedContext),
                             defaultValue);
 
