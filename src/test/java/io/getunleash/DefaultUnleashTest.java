@@ -153,10 +153,6 @@ class DefaultUnleashTest {
 
         sut.isEnabled("toggle1");
 
-        // PR-comment: constraints are no longer managed by the SDK but by Yggdrasil,
-        // so we
-        // removed
-        // the third parameter
         verify(fallback).isEnabled(any(), any());
     }
 

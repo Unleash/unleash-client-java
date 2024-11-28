@@ -37,8 +37,7 @@ public class HttpFeatureFetcher implements FeatureFetcher {
 
             return getFeatureResponse(connection, true);
         } catch (IOException e) {
-            throw new UnleashException(
-                    String.format("Could not fetch toggles from %s", this.toggleUrl), e);
+            throw new UnleashException("Could not fetch toggles", e);
         } catch (IllegalStateException e) {
             throw new UnleashException(e.getMessage(), e);
         } finally {

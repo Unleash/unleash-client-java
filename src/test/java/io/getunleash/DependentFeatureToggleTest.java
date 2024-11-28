@@ -81,7 +81,6 @@ public class DependentFeatureToggleTest {
         // verify(metricService, never()).count(eq("parent"), anyBoolean());
     }
 
-    // @Test // TODO is this a bug in Yggdrasil for parent-child relationship?
     public void should_trigger_impression_event_for_parent_toggle_when_checking_child_toggle() {
         FeatureToggle child =
                 new FeatureToggle(
@@ -102,9 +101,7 @@ public class DependentFeatureToggleTest {
         boolean enabled = sut.isEnabled("child", UnleashContext.builder().userId("7").build());
         assertThat(enabled).isTrue();
         // if child does not have impression event enabled, even if the parent has
-        // them,
-        // we're not
-        // triggering impression event
+        // them, we're not triggering impression event
         verify(eventDispatcher, never()).dispatch(any(IsEnabledImpressionEvent.class));
     }
 
