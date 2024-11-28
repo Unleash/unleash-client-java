@@ -98,7 +98,15 @@ public class FeatureRepository implements IFeatureRepository {
         }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
-            updateFeatures(null).run();
+            if (this.unleashConfig.getStartupExceptionHandler() != null) {
+                updateFeatures(this.unleashConfig.getStartupExceptionHandler()).run();
+            } else {
+                updateFeatures(
+                                e -> {
+                                    throw e;
+                                })
+                        .run();
+            }
         }
 
         if (!unleashConfig.isDisablePolling()) {
@@ -111,15 +119,11 @@ public class FeatureRepository implements IFeatureRepository {
         }
     }
 
-    private Integer calculateMaxSkips(int fetchTogglesInterval) {
-        return Integer.max(20, 300 / Integer.max(fetchTogglesInterval, 1));
-    }
-
     public void addConsumer(Consumer<FeatureCollection> consumer) {
         this.consumers.add(consumer);
     }
 
-    private Runnable updateFeatures(@Nullable final Consumer<UnleashException> handler) {
+    private Runnable updateFeatures(final Consumer<UnleashException> handler) {
         return () -> {
             if (throttler.performAction()) {
                 try {
@@ -142,11 +146,18 @@ public class FeatureRepository implements IFeatureRepository {
                                         LOGGER.error("Error when calling consumer {}", consumer, e);
                                     }
                                 });
-                        // Note: this could be a consumer as well, but we need to differentiate it
-                        // to be able to read from the backup
                         featureBackupHandler.write(featureCollection);
                     } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
-                        throttler.handleHttpErrorCodes(response.getHttpStatusCode());
+                        if (!ready && unleashConfig.isSynchronousFetchOnInitialisation()) {
+                            throw new UnleashException(
+                                    String.format(
+                                            "Could not initialize Unleash, got response code %d",
+                                            response.getHttpStatusCode()),
+                                    null);
+                        }
+                        if (ready) {
+                            throttler.handleHttpErrorCodes(response.getHttpStatusCode());
+                        }
                         return;
                     }
                     throttler.decrementFailureCountAndResetSkips();
@@ -155,11 +166,7 @@ public class FeatureRepository implements IFeatureRepository {
                         ready = true;
                     }
                 } catch (UnleashException e) {
-                    if (handler != null) {
-                        handler.accept(e);
-                    } else {
-                        throw e;
-                    }
+                    handler.accept(e);
                 }
             } else {
                 throttler.skipped(); // We didn't do anything this iteration, just reduce the count

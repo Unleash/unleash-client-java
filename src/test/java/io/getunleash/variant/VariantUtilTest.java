@@ -388,6 +388,34 @@ public class VariantUtilTest {
     }
 
     @Test
+    public void feature_variants_variant_d_client_spec_tests_with_deprecated_seed() {
+        List<VariantDefinition> variants = new ArrayList<>();
+        variants.add(
+                new VariantDefinition(
+                        "variant1", 1, new Payload("string", "val1"), Collections.emptyList()));
+        variants.add(
+                new VariantDefinition(
+                        "variant2", 49, new Payload("string", "val2"), Collections.emptyList()));
+        variants.add(
+                new VariantDefinition(
+                        "variant3", 50, new Payload("string", "val3"), Collections.emptyList()));
+        FeatureToggle toggle =
+                new FeatureToggle("Feature.Variants.D", true, Collections.emptyList(), variants);
+        Variant variantUser712 =
+                VariantUtil.selectDeprecatedVariantHashingAlgo(
+                        toggle, UnleashContext.builder().userId("712").build(), DISABLED_VARIANT);
+        assertThat(variantUser712.getName()).isEqualTo("variant3");
+        Variant variantUser525 =
+                VariantUtil.selectDeprecatedVariantHashingAlgo(
+                        toggle, UnleashContext.builder().userId("525").build(), DISABLED_VARIANT);
+        assertThat(variantUser525.getName()).isEqualTo("variant3");
+        Variant variantUser537 =
+                VariantUtil.selectDeprecatedVariantHashingAlgo(
+                        toggle, UnleashContext.builder().userId("537").build(), DISABLED_VARIANT);
+        assertThat(variantUser537.getName()).isEqualTo("variant2");
+    }
+
+    @Test
     public void feature_variants_variant_d_with_override_client_spec_tests() {
         List<VariantDefinition> variants = new ArrayList<>();
         variants.add(

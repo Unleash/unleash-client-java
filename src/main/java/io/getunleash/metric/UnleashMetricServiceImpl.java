@@ -16,7 +16,6 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UnleashMetricServiceImpl.class);
     private final LocalDateTime started;
     private final UnleashConfig unleashConfig;
-
     private final MetricSender metricSender;
 
     // synchronization is handled in the engine itself
@@ -48,6 +47,7 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
                         unleashConfig.getUnleashURLs().getClientMetricsURL());
         this.engine = engine;
         long metricsInterval = unleashConfig.getSendMetricsInterval();
+
         executor.setInterval(sendMetrics(), metricsInterval, metricsInterval);
     }
 

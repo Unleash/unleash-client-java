@@ -1,8 +1,8 @@
-name: 'Releases'
+name: "Releases"
 on:
   push:
     tags:
-      - 'unleash-client-java-*'
+      - "unleash-client-java-*"
 
 jobs:
   release:
@@ -10,17 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Build changelog
         id: github_release
-        uses: metcalfc/changelog-generator@v0.4.4
+        uses: metcalfc/changelog-generator@v4.2.0
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
           body: ${{ steps.github_release.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+  finish:
+    needs: build
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@v2
+        with:
+          parallel-finished: true
+          carryforward: run-jvm-8,run-jvm-11,run-jvm-17

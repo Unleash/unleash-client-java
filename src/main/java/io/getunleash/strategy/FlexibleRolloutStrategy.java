@@ -59,8 +59,4 @@ public class FlexibleRolloutStrategy implements Strategy {
                 .map(norm -> percentage > 0 && norm <= percentage)
                 .orElse(false);
     }
-
-    private String getStickiness(Map<String, String> parameters) {
-        return parameters.getOrDefault("stickiness", "default");
-    }
 }

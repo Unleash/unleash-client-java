@@ -13,8 +13,9 @@ This section shows you how to get started quickly and explains some common confi
 
 ### Step 1: Install the Unleash Java SDK
 
-You need to add the Unleash SDK as a dependency for your project. Here's how you would add it to your `pom.xml` file:
+You need to add the Unleash SDK as a dependency for your project. Here's how you would add it to your `pom.xml` and `build.gradle` file:
 
+**pom.xml**
 ```xml
 <dependency>
     <groupId>io.getunleash</groupId>
@@ -22,7 +23,10 @@ You need to add the Unleash SDK as a dependency for your project. Here's how you
     <version>Latest version here</version>
 </dependency>
 ```
-
+**build.gradle**
+```gradle
+ implementation("io.getunleash:unleash-client-java:$unleashedVersion")
+```
 
 ### Step 2: Create a new Unleash instance
 
@@ -467,6 +471,7 @@ The `UnleashConfig$Builder` class (created via `UnleashConfig.builder()`) expose
 | `unleashContextProvider`                   | An [Unleash context provider used to configure Unleash](#2-via-an-unleashcontextprovider).                                                                                                                                                       | No       | `null`                                                                                                               |
 | `unleashFeatureFetcherFactory`             | A factory providing a FeatureFetcher implementation.                                                                                                                                                                                             | No       | [`HttpFeatureFetcher::new`](src/main/java/io/getunleash/repository/HttpFeatureFetcher.java)                          |
 | `unleashMetricsSenderFactory`              | A factory providing a MetricSender implementation.                                                                                                                                                                                               | No       | [`DefaultHttpMetricsSender::new`](src/main/java/io/getunleash/metric/DefaultHttpMetricsSender.java)                  |
+| `startupExceptionHandler`                  | Handler for the behavior in the event of an error when starting the client.                                                                                                                                                                      | No       | `null`                                                                                                               |
 
 When you have set all the desired options, initialize the configuration with the `build` method.
 You can then pass the configuration to the Unleash client constructor.

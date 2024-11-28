@@ -5,6 +5,7 @@ import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
 import io.getunleash.CustomHttpHeadersProvider;
 import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
 import io.getunleash.UnleashContextProvider;
+import io.getunleash.UnleashException;
 import io.getunleash.event.NoOpSubscriber;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
@@ -14,19 +15,15 @@ import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.Strategy;
 import java.io.File;
 import java.math.BigInteger;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
-import java.net.Proxy;
-import java.net.URI;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public class UnleashConfig {
 
@@ -71,6 +68,7 @@ public class UnleashConfig {
     @Nullable private final Strategy fallbackStrategy;
     @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
     @Nullable private final Proxy proxy;
+    @Nullable private final Consumer<UnleashException> startupExceptionHandler;
 
     private UnleashConfig(
             @Nullable URI unleashAPI,
@@ -101,7 +99,8 @@ public class UnleashConfig {
             @Nullable Strategy fallbackStrategy,
             @Nullable ToggleBootstrapProvider unleashBootstrapProvider,
             @Nullable Proxy proxy,
-            @Nullable Authenticator proxyAuthenticator) {
+            @Nullable Authenticator proxyAuthenticator,
+            @Nullable Consumer<UnleashException> startupExceptionHandler) {
 
         if (appName == null) {
             throw new IllegalStateException("You are required to specify the unleash appName");
@@ -165,6 +164,7 @@ public class UnleashConfig {
         this.metricSenderFactory = metricSenderFactory;
         this.clientSpecificationVersion =
                 UnleashProperties.getProperty("client.specification.version");
+        this.startupExceptionHandler = startupExceptionHandler;
     }
 
     public static Builder builder() {
@@ -334,6 +334,11 @@ public class UnleashConfig {
         return this.unleashFeatureFetcherFactory;
     }
 
+    @Nullable
+    public Consumer<UnleashException> getStartupExceptionHandler() {
+        return startupExceptionHandler;
+    }
+
     static class SystemProxyAuthenticator extends Authenticator {
         @Override
         protected @Nullable PasswordAuthentication getPasswordAuthentication() {
@@ -426,6 +431,8 @@ public class UnleashConfig {
         private @Nullable ToggleBootstrapProvider toggleBootstrapProvider;
         private @Nullable Proxy proxy;
         private @Nullable Authenticator proxyAuthenticator;
+
+        private @Nullable Consumer<UnleashException> startupExceptionHandler;
 
         private static String getHostname() {
             String hostName = System.getProperty("hostname");
@@ -657,6 +664,19 @@ public class UnleashConfig {
             return this;
         }
 
+        /**
+         * Used to handle exceptions when starting up synchronously. Allows user the option to
+         * choose how errors should be handled.
+         *
+         * @param startupExceptionHandler - a lambda taking the Exception and doing what it wants to
+         *     the system.
+         */
+        public Builder startupExceptionHandler(
+                @Nullable Consumer<UnleashException> startupExceptionHandler) {
+            this.startupExceptionHandler = startupExceptionHandler;
+            return this;
+        }
+
         public UnleashConfig build() {
             return new UnleashConfig(
                     unleashAPI,
@@ -688,7 +708,8 @@ public class UnleashConfig {
                     fallbackStrategy,
                     toggleBootstrapProvider,
                     proxy,
-                    proxyAuthenticator);
+                    proxyAuthenticator,
+                    startupExceptionHandler);
         }
 
         public String getDefaultSdkVersion() {

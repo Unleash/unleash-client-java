@@ -610,4 +610,12 @@ public class UnleashTest {
                 new VariantDefinition(
                         "to", 50, new Payload("string", "to"), Collections.emptyList()));
     }
+
+    private List<VariantDefinition> getTestVariantsForDeprecatedHash() {
+        return asList(
+                new VariantDefinition(
+                        "en", 65, new Payload("string", "en"), Collections.emptyList()),
+                new VariantDefinition(
+                        "to", 35, new Payload("string", "to"), Collections.emptyList()));
+    }
 }

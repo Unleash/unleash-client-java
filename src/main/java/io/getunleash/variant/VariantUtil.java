@@ -95,6 +95,73 @@ public final class VariantUtil {
     public static @Nullable Variant selectVariant(
             Map<String, String> parameters,
             @Nullable List<VariantDefinition> variants,
+            UnleashContext context,
+            @Nullable String strategyStickiness) {
+        if (variants != null) {
+            int totalWeight = variants.stream().mapToInt(VariantDefinition::getWeight).sum();
+            if (totalWeight <= 0) {
+                return null;
+            }
+            Optional<VariantDefinition> variantOverride = getOverride(variants, context);
+            if (variantOverride.isPresent()) {
+                return variantOverride.get().toVariant();
+            }
+
+            Optional<String> variantCustomStickiness =
+                    variants.stream()
+                            .filter(
+                                    f ->
+                                            f.getStickiness() != null
+                                                    && !"default".equals(f.getStickiness()))
+                            .map(VariantDefinition::getStickiness)
+                            .findFirst();
+            Optional<String> customStickiness;
+            if (!variantCustomStickiness.isPresent()) {
+                customStickiness =
+                        Optional.ofNullable(strategyStickiness)
+                                .filter(stickiness -> !stickiness.equalsIgnoreCase("default"));
+            } else {
+                customStickiness = variantCustomStickiness;
+            }
+            int target =
+                    StrategyUtils.getNormalizedNumber(
+                            getSeed(context, customStickiness),
+                            parameters.get(GROUP_ID_KEY),
+                            totalWeight,
+                            VARIANT_NORMALIZATION_SEED);
+
+            int counter = 0;
+            for (VariantDefinition variant : variants) {
+                if (variant.getWeight() != 0) {
+                    counter += variant.getWeight();
+                    if (counter >= target) {
+                        return variant.toVariant();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static @Nullable Variant selectVariant(
+            Map<String, String> parameters,
+            @Nullable List<VariantDefinition> variants,
+            UnleashContext context) {
+        return selectVariant(parameters, variants, context, null);
+    }
+
+    /**
+     * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     *
+     * @deprecated
+     * @param parameters
+     * @param variants
+     * @param context
+     * @return
+     */
+    public static @Nullable Variant selectDeprecatedVariantHashingAlgo(
+            Map<String, String> parameters,
+            @Nullable List<VariantDefinition> variants,
             UnleashContext context) {
         if (variants != null) {
             int totalWeight = variants.stream().mapToInt(VariantDefinition::getWeight).sum();
@@ -119,7 +186,7 @@ public final class VariantUtil {
                             getSeed(context, customStickiness),
                             parameters.get(GROUP_ID_KEY),
                             totalWeight,
-                            VARIANT_NORMALIZATION_SEED);
+                            0);
 
             int counter = 0;
             for (VariantDefinition variant : variants) {
@@ -132,5 +199,29 @@ public final class VariantUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * Uses the old pre 9.0.0 way of hashing for finding the Variant to return
+     *
+     * @deprecated
+     * @param featureToggle
+     * @param context
+     * @param defaultVariant
+     * @return
+     */
+    public static @Nullable Variant selectDeprecatedVariantHashingAlgo(
+            FeatureToggle featureToggle, UnleashContext context, Variant defaultVariant) {
+        if (featureToggle == null) {
+            return defaultVariant;
+        }
+
+        Variant variant =
+                selectDeprecatedVariantHashingAlgo(
+                        Collections.singletonMap("groupId", featureToggle.getName()),
+                        featureToggle.getVariants(),
+                        context);
+
+        return variant != null ? variant : defaultVariant;
     }
 }
