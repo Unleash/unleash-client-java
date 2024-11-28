@@ -52,7 +52,6 @@ class DefaultUnleashTest {
         strategyMap.put("default", new DefaultStrategy());
         contextProvider = mock(UnleashContextProvider.class);
         eventDispatcher = mock(EventDispatcher.class);
-        metricService = mock(UnleashMetricService.class);
 
         sut =
                 new DefaultUnleash(
@@ -60,8 +59,7 @@ class DefaultUnleashTest {
                         featureRepository,
                         strategyMap,
                         contextProvider,
-                        eventDispatcher,
-                        metricService);
+                        eventDispatcher);
     }
 
     @Test
@@ -77,22 +75,6 @@ class DefaultUnleashTest {
     }
 
     @Test
-    public void should_count_and_not_throw_an_error() {
-        sut.more().count("toggle1", true);
-        sut.more().count("toggle1", false);
-
-        verify(metricService).count("toggle1", true);
-        verify(metricService).count("toggle1", false);
-    }
-
-    @Test
-    public void should_countVariant_and_not_throw_an_error() {
-        sut.more().countVariant("toggle1", "variant1");
-
-        verify(metricService).countVariant("toggle1", "variant1");
-    }
-
-    @Test
     public void should_evaluate_missing_segment_as_false() {
         String toggleName = "F9.withMissingSegment";
         String semVer = "1.2.2";
@@ -104,9 +86,12 @@ class DefaultUnleashTest {
                         asList(semverConstraint),
                         asList(404),
                         Collections.emptyList());
-        when(featureRepository.getToggle(toggleName))
-                .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
-        when(featureRepository.getSegment(404)).thenReturn(Segment.DENY_SEGMENT);
+        new UnleashEngineStateHandler(sut)
+                .setState(
+                        Collections.singletonList(
+                                new FeatureToggle(toggleName, true, asList(withMissingSegment))),
+                        Collections.singletonList(Segment.DENY_SEGMENT));
+
         when(contextProvider.getContext())
                 .thenReturn(UnleashContext.builder().addProperty("version", semVer).build());
         assertThat(sut.isEnabled(toggleName)).isFalse();
@@ -123,18 +108,20 @@ class DefaultUnleashTest {
                         asList(semverConstraint),
                         asList(404, 1),
                         Collections.emptyList());
-        when(featureRepository.getToggle(toggleName))
-                .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
-        when(featureRepository.getSegment(1))
-                .thenReturn(
-                        new Segment(
-                                1,
-                                "always true",
-                                asList(
-                                        new Constraint(
-                                                "always_true",
-                                                Operator.NOT_IN,
-                                                Collections.EMPTY_LIST))));
+        new UnleashEngineStateHandler(sut)
+                .setState(
+                        Collections.singletonList(
+                                new FeatureToggle(toggleName, true, asList(withMissingSegment))),
+                        Collections.singletonList(
+                                new Segment(
+                                        1,
+                                        "always true",
+                                        asList(
+                                                new Constraint(
+                                                        "always_true",
+                                                        Operator.NOT_IN,
+                                                        Collections.EMPTY_LIST)))));
+
         when(contextProvider.getContext())
                 .thenReturn(UnleashContext.builder().addProperty("version", "1.2.2").build());
         assertThat(sut.isEnabled(toggleName)).isFalse();
@@ -157,17 +144,16 @@ class DefaultUnleashTest {
                         featureRepository,
                         new HashMap<>(),
                         contextProvider,
-                        eventDispatcher,
-                        metricService);
+                        eventDispatcher);
 
         ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
         FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
-        when(featureRepository.getToggle("toggle1")).thenReturn(toggle);
+        new UnleashEngineStateHandler(sut).setState(toggle);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
         sut.isEnabled("toggle1");
 
-        verify(fallback).isEnabled(any(), any(), anyList());
+        verify(fallback).isEnabled(any(), any());
     }
 
     @Test
@@ -228,7 +214,7 @@ class DefaultUnleashTest {
         assertThatThrownBy(
                         () -> {
                             Unleash unleash2 =
-                                    new DefaultUnleash(config, null, null, null, null, null, true);
+                                    new DefaultUnleash(config, null, null, null, null, true);
                         })
                 .isInstanceOf(RuntimeException.class)
                 .withFailMessage(

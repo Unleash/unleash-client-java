@@ -11,9 +11,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import io.getunleash.engine.MetricsBucket;
 import io.getunleash.util.UnleashConfig;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import org.junit.jupiter.api.Test;
@@ -60,7 +62,7 @@ public class DefaultHttpMetricsSenderTest {
         UnleashConfig config = UnleashConfig.builder().appName("test-app").unleashAPI(uri).build();
 
         DefaultHttpMetricsSender sender = new DefaultHttpMetricsSender(config);
-        MetricsBucket bucket = new MetricsBucket();
+        MetricsBucket bucket = new MetricsBucket(Instant.now(), Instant.now(), null);
         ClientMetrics metrics = new ClientMetrics(config, bucket);
         sender.sendMetrics(metrics);
 
@@ -82,7 +84,7 @@ public class DefaultHttpMetricsSenderTest {
         UnleashConfig config = UnleashConfig.builder().appName("test-app").unleashAPI(uri).build();
 
         DefaultHttpMetricsSender sender = new DefaultHttpMetricsSender(config);
-        MetricsBucket bucket = new MetricsBucket();
+        MetricsBucket bucket = new MetricsBucket(Instant.now(), Instant.now(), null);
         ClientMetrics metrics = new ClientMetrics(config, bucket);
         sender.sendMetrics(metrics);
 

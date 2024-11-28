@@ -169,18 +169,6 @@ public class FakeUnleashTest {
     }
 
     @Test
-    public void should_count_and_not_throw_an_error() {
-        FakeUnleash fakeUnleash = new FakeUnleash();
-        fakeUnleash.more().count("anything", true);
-    }
-
-    @Test
-    public void should_countVariant_and_not_throw_an_error() {
-        FakeUnleash fakeUnleash = new FakeUnleash();
-        fakeUnleash.more().countVariant("toggleName", "variantName");
-    }
-
-    @Test
     public void
             if_all_is_enabled_should_return_true_even_if_feature_does_not_exist_and_fallback_returns_false() {
         FakeUnleash fakeUnleash = new FakeUnleash();

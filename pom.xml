@@ -57,6 +57,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.getunleash</groupId>
+            <artifactId>yggdrasil-engine</artifactId>
+            <version>0.1.0-alpha.9</version>
+            <classifier>x86_64-linux</classifier>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${version.gson}</version>

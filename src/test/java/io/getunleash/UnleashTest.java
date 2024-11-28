@@ -6,9 +6,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import io.getunleash.engine.MetricsBucket;
 import io.getunleash.event.EventDispatcher;
-import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.*;
+import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.strategy.UserWithIdStrategy;
 import io.getunleash.util.UnleashConfig;
@@ -25,6 +26,8 @@ public class UnleashTest {
     private FeatureRepository toggleRepository;
     private UnleashContextProvider contextProvider;
     private Unleash unleash;
+
+    private UnleashEngineStateHandler stateHandler;
 
     @BeforeEach
     public void setup() {
@@ -43,15 +46,13 @@ public class UnleashTest {
                         .build();
 
         unleash = new DefaultUnleash(config, toggleRepository, new UserWithIdStrategy());
+        stateHandler = new UnleashEngineStateHandler((DefaultUnleash) unleash);
     }
 
     @Test
     public void known_toogle_and_strategy_should_be_active() {
-        when(toggleRepository.getToggle("test"))
-                .thenReturn(
-                        new FeatureToggle(
-                                "test", true, asList(new ActivationStrategy("default", null))));
-
+        stateHandler.setState(
+                new FeatureToggle("test", true, asList(new ActivationStrategy("default", null))));
         assertThat(unleash.isEnabled("test")).isTrue();
     }
 
@@ -113,10 +114,8 @@ public class UnleashTest {
 
     @Test
     void fallback_function_should_not_be_called_when_toggle_is_defined() {
-        when(toggleRepository.getToggle("test"))
-                .thenReturn(
-                        new FeatureToggle(
-                                "test", true, asList(new ActivationStrategy("default", null))));
+        stateHandler.setState(
+                new FeatureToggle("test", true, asList(new ActivationStrategy("default", null))));
 
         BiPredicate<String, UnleashContext> fallbackAction = mock(BiPredicate.class);
         when(fallbackAction.test(eq("test"), any(UnleashContext.class))).thenReturn(false);
@@ -139,14 +138,13 @@ public class UnleashTest {
                         .unleashAPI("http://localhost:4242/api/")
                         .build();
         unleash = new DefaultUnleash(config, toggleRepository, customStrategy);
-        when(toggleRepository.getToggle("test"))
-                .thenReturn(
+        new UnleashEngineStateHandler((DefaultUnleash) unleash)
+                .setState(
                         new FeatureToggle(
                                 "test", true, asList(new ActivationStrategy("custom", null))));
-
         unleash.isEnabled("test");
 
-        verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class), anyList());
+        verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class));
     }
 
     @Test
@@ -157,7 +155,7 @@ public class UnleashTest {
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy1, activeStrategy));
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        stateHandler.setState(featureToggle);
 
         assertThat(unleash.isEnabled("test")).isTrue();
     }
@@ -189,7 +187,7 @@ public class UnleashTest {
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(strategy1, strategy2));
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        stateHandler.setState(featureToggle);
 
         assertThat(unleash.isEnabled("test", UnleashContext.builder().userId("1").build()))
                 .isFalse();
@@ -212,7 +210,7 @@ public class UnleashTest {
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(strategy));
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        stateHandler.setState(featureToggle);
 
         assertThat(unleash.isEnabled("test")).isTrue();
     }
@@ -227,7 +225,7 @@ public class UnleashTest {
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(strategy));
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        stateHandler.setState(featureToggle);
 
         assertThat(unleash.isEnabled("test", context)).isTrue();
     }
@@ -302,7 +300,6 @@ public class UnleashTest {
     @Test
     public void getting_variant_when_disabled_should_increment_no_counter() {
         UnleashContext context = UnleashContext.builder().userId("1").build();
-        UnleashMetricService metricService = mock(UnleashMetricService.class);
         UnleashConfig config =
                 new UnleashConfig.Builder()
                         .appName("test")
@@ -317,21 +314,23 @@ public class UnleashTest {
                         toggleRepository,
                         Collections.emptyMap(),
                         contextProvider,
-                        new EventDispatcher(config),
-                        metricService);
+                        new EventDispatcher(config));
+        UnleashEngineStateHandler localStateHandler =
+                new UnleashEngineStateHandler((DefaultUnleash) thisUnleash);
         // Set up a toggleName using UserWithIdStrategy
         Map<String, String> params = new HashMap<>();
         params.put("userIds", "123, 111, 121, 13");
         ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
         FeatureToggle featureToggle = new FeatureToggle("test", false, asList(strategy));
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        localStateHandler.setState(featureToggle);
 
         final Variant result = thisUnleash.getVariant("test", context);
 
         assertThat(result).isNotNull();
-        verify(metricService).count(anyString(), eq(false));
-        verify(metricService).countVariant(anyString(), eq(result.getName()));
+        MetricsBucket bucket = localStateHandler.captureMetrics();
+        assertThat(bucket.getToggles().get("test").getYes()).isEqualTo(0);
+        assertThat(bucket.getToggles().get("test").getNo()).isEqualTo(1);
     }
 
     @Test
@@ -365,7 +364,7 @@ public class UnleashTest {
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        stateHandler.setState(featureToggle);
 
         final Variant result = unleash.getVariant("test", context);
 
@@ -386,7 +385,7 @@ public class UnleashTest {
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        stateHandler.setState(featureToggle);
 
         final Variant result = unleash.getVariant("test", context);
 
@@ -444,7 +443,7 @@ public class UnleashTest {
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        stateHandler.setState(featureToggle);
 
         final Variant result = unleash.getVariant("test");
 
@@ -467,7 +466,7 @@ public class UnleashTest {
         FeatureToggle featureToggle =
                 new FeatureToggle("test", true, asList(strategy), getTestVariants());
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        stateHandler.setState(featureToggle);
 
         final Variant result = unleash.getVariant("test");
 
@@ -475,36 +474,6 @@ public class UnleashTest {
         assertThat(result.getName()).isEqualTo("to");
         assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("to");
         assertThat(result.isEnabled()).isTrue();
-    }
-
-    @Test
-    public void get_second_variant_with_context_provider_and_deprecated_algorithm() {
-
-        UnleashContext context = UnleashContext.builder().userId("5").build();
-        when(contextProvider.getContext()).thenReturn(context);
-
-        // Set up a toggleName using UserWithIdStrategy
-        Map<String, String> params = new HashMap<>();
-        params.put("userIds", "123, 5, 121");
-        ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-        FeatureToggle featureToggle =
-                new FeatureToggle(
-                        "test", true, asList(strategy), getTestVariantsForDeprecatedHash());
-
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
-
-        final Variant result = unleash.deprecatedGetVariant("test");
-
-        assertThat(result).isNotNull();
-        assertThat(result.getName()).isEqualTo("en");
-        assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("en");
-        assertThat(result.isEnabled()).isTrue();
-
-        final Variant newHash = unleash.getVariant("test");
-        assertThat(newHash).isNotNull();
-        assertThat(newHash.getName()).isEqualTo("to");
-        assertThat(newHash.getPayload().map(Payload::getValue).get()).isEqualTo("to");
-        assertThat(newHash.isEnabled()).isTrue();
     }
 
     @Test
@@ -521,7 +490,7 @@ public class UnleashTest {
 
         FeatureToggle featureToggle = new FeatureToggle("test", true, asList(activeStrategy));
 
-        when(toggleRepository.getToggle("test")).thenReturn(featureToggle);
+        stateHandler.setState(featureToggle);
 
         assertThat(unleash.isEnabled("test")).isTrue();
     }
@@ -550,24 +519,19 @@ public class UnleashTest {
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName("test")
-                        .unleashAPI("http://http://unleash.org")
+                        .unleashAPI("http://unleash.org")
                         .backupFile(
                                 getClass().getResource("/unleash-repo-v2-advanced.json").getFile())
                         .build();
         FeatureBackupHandlerFile backupHandler = new FeatureBackupHandlerFile(config);
         FeatureCollection featureCollection = backupHandler.read();
 
-        when(toggleRepository.getToggle(anyString()))
-                .thenReturn(featureCollection.getToggle("Test.variants"));
-        when(toggleRepository.getSegment(0)).thenReturn(featureCollection.getSegment(0));
-        when(toggleRepository.getSegment(1)).thenReturn(featureCollection.getSegment(1));
-        when(toggleRepository.getSegment(2)).thenReturn(featureCollection.getSegment(2));
-        when(toggleRepository.getSegment(3)).thenReturn(featureCollection.getSegment(3));
+        stateHandler.setState(featureCollection);
 
         UnleashContext context =
                 UnleashContext.builder()
                         .addProperty("wins", "6")
-                        .addProperty("dateLastWin", "2022-06-01T12:00:00")
+                        .addProperty("dateLastWin", "2022-06-01T12:00:00.000Z")
                         .addProperty("followers", "1500")
                         .addProperty("single", "true")
                         .addProperty("catOrDog", "cat")
@@ -589,24 +553,20 @@ public class UnleashTest {
         FeatureBackupHandlerFile backupHandler = new FeatureBackupHandlerFile(config);
         FeatureCollection featureCollection = backupHandler.read();
 
-        when(toggleRepository.getToggle(anyString()))
-                .thenReturn(featureCollection.getToggle("Test.variants"));
-        when(toggleRepository.getSegment(0)).thenReturn(featureCollection.getSegment(0));
-        when(toggleRepository.getSegment(1)).thenReturn(featureCollection.getSegment(1));
-        when(toggleRepository.getSegment(2)).thenReturn(featureCollection.getSegment(2));
-        when(toggleRepository.getSegment(3)).thenReturn(featureCollection.getSegment(3));
+        Unleash overrideUnleash = new DefaultUnleash(config);
+        new UnleashEngineStateHandler((DefaultUnleash) overrideUnleash).setState(featureCollection);
 
         UnleashContext context =
                 UnleashContext.builder()
                         .addProperty("wins", "4")
-                        .addProperty("dateLastWin", "2022-06-01T12:00:00")
+                        .addProperty("dateLastWin", "2022-06-01T12:00:00.000Z")
                         .addProperty("followers", "900")
                         .addProperty("single", "false")
                         .addProperty("catOrDog", "dog")
                         .build();
 
         when(contextProvider.getContext()).thenReturn(context);
-        assertThat(unleash.isEnabled("Test.variants")).isFalse();
+        assertThat(overrideUnleash.isEnabled("Test.variants")).isFalse();
     }
 
     @Test

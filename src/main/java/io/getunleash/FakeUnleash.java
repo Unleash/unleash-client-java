@@ -107,17 +107,6 @@ public class FakeUnleash implements Unleash {
         }
     }
 
-    @Override
-    public Variant deprecatedGetVariant(String toggleName, UnleashContext context) {
-        return null;
-    }
-
-    @Override
-    public Variant deprecatedGetVariant(
-            String toggleName, UnleashContext context, Variant defaultValue) {
-        return null;
-    }
-
     public void resetAll() {
         disableAll = false;
         enableAll = false;
@@ -175,16 +164,6 @@ public class FakeUnleash implements Unleash {
                                             isEnabled(toggleName),
                                             getVariant(toggleName)))
                     .collect(Collectors.toList());
-        }
-
-        @Override
-        public void count(String toggleName, boolean enabled) {
-            // Nothing to count
-        }
-
-        @Override
-        public void countVariant(String toggleName, String variantName) {
-            // Nothing to count
         }
     }
 }

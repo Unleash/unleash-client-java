@@ -17,6 +17,7 @@ import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
+import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.strategy.constraints.DateParser;
 import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
@@ -119,7 +120,8 @@ public class ClientSpecificationTest {
     private Unleash setupUnleash(TestDefinition testDefinition) throws URISyntaxException {
         mockUnleashAPI(testDefinition);
 
-        // Required because the client is available before it may have had the chance to talk with
+        // Required because the client is available before it may have had the chance to
+        // talk with
         // the API
         String backupFile = writeUnleashBackup(testDefinition);
 
@@ -132,7 +134,10 @@ public class ClientSpecificationTest {
                         .backupFile(backupFile)
                         .build();
 
-        return new DefaultUnleash(config);
+        DefaultUnleash defaultUnleash = new DefaultUnleash(config);
+        new UnleashEngineStateHandler(defaultUnleash)
+                .setState(testDefinition.getState().toString());
+        return defaultUnleash;
     }
 
     private void mockUnleashAPI(TestDefinition definition) {
@@ -190,7 +195,8 @@ public class ClientSpecificationTest {
                         + definition.getName()
                         + ".json";
 
-        // TODO: we can probably drop this after introduction of `synchronousFetchOnInitialisation`.
+        // TODO: we can probably drop this after introduction of
+        // `synchronousFetchOnInitialisation`.
         try (FileWriter writer = new FileWriter(backupFile)) {
             writer.write(definition.getState().toString());
         } catch (IOException e) {

@@ -10,6 +10,7 @@ import io.getunleash.util.Throttler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -23,6 +24,8 @@ public class FeatureRepository implements IFeatureRepository {
     private final FeatureBootstrapHandler featureBootstrapHandler;
     private final FeatureFetcher featureFetcher;
     private final EventDispatcher eventDispatcher;
+
+    private List<Consumer<FeatureCollection>> consumers = new LinkedList<>();
 
     private final Throttler throttler;
 
@@ -116,6 +119,10 @@ public class FeatureRepository implements IFeatureRepository {
         }
     }
 
+    public void addConsumer(Consumer<FeatureCollection> consumer) {
+        this.consumers.add(consumer);
+    }
+
     private Runnable updateFeatures(final Consumer<UnleashException> handler) {
         return () -> {
             if (throttler.performAction()) {
@@ -131,6 +138,14 @@ public class FeatureRepository implements IFeatureRepository {
                                                 ? segmentCollection
                                                 : new SegmentCollection(Collections.emptyList()));
 
+                        consumers.forEach(
+                                consumer -> {
+                                    try {
+                                        consumer.accept(featureCollection);
+                                    } catch (Exception e) {
+                                        LOGGER.error("Error when calling consumer {}", consumer, e);
+                                    }
+                                });
                         featureBackupHandler.write(featureCollection);
                     } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
                         if (!ready && unleashConfig.isSynchronousFetchOnInitialisation()) {

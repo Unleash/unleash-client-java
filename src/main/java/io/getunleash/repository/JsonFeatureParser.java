@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.Reader;
 
-final class JsonFeatureParser {
+public final class JsonFeatureParser {
 
     private JsonFeatureParser() {}
 
