@@ -74,7 +74,7 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
                     }
                 } catch (YggdrasilError e) {
                     LOGGER.error(
-                            "Failed to retrieve metrics from the engine, this is a serious error",
+                            "Failed to retrieve metrics from the engine, this is a serious error, please report it",
                             e);
                 }
             } else {
