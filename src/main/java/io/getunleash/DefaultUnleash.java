@@ -16,15 +16,11 @@ import io.getunleash.repository.IFeatureRepository;
 import io.getunleash.repository.JsonFeatureParser;
 import io.getunleash.strategy.*;
 import io.getunleash.util.UnleashConfig;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,10 +96,10 @@ public class DefaultUnleash implements Unleash {
         this.unleashEngine =
                 new UnleashEngine(
                         strategyMap.values().stream()
-                                .map(this::asIStrategy)
+                                .map(YggdrasilAdapters::adapt)
                                 .collect(Collectors.toList()),
                         Optional.ofNullable(unleashConfig.getFallbackStrategy())
-                                .map(this::asIStrategy)
+                                .map(YggdrasilAdapters::adapt)
                                 .orElse(null));
         featureRepository.addConsumer(
                 featureCollection -> {
@@ -145,65 +141,6 @@ public class DefaultUnleash implements Unleash {
                 });
     }
 
-    @NotNull
-    private IStrategy asIStrategy(Strategy s) {
-        return new IStrategy() {
-            @Override
-            public String getName() {
-                return s.getName();
-            }
-
-            @Override
-            public boolean isEnabled(Map<String, String> map, Context context) {
-                return s.isEnabled(map, adapt(context));
-            }
-        };
-    }
-
-    private UnleashContext adapt(Context context) {
-        ZonedDateTime currentTime = ZonedDateTime.now();
-        if (context.getCurrentTime() != null) {
-            try {
-                currentTime = ZonedDateTime.parse(context.getCurrentTime());
-            } catch (DateTimeParseException e) {
-                LOGGER.warn(
-                        "Unable to parse current time from context: {}, using current time instead",
-                        context.getCurrentTime());
-            }
-        }
-
-        return new UnleashContext(
-                        context.getAppName(),
-                        context.getEnvironment(),
-                        context.getUserId(),
-                        context.getSessionId(),
-                        context.getRemoteAddress(),
-                        currentTime,
-                        context.getProperties())
-                .applyStaticFields(config);
-    }
-
-    private Context adapt(UnleashContext context) {
-        Context mapped = new Context();
-        mapped.setAppName(context.getAppName().orElse(null));
-        mapped.setEnvironment(context.getEnvironment().orElse(null));
-        mapped.setUserId(context.getUserId().orElse(null));
-        mapped.setSessionId(context.getSessionId().orElse(null));
-        mapped.setRemoteAddress(context.getRemoteAddress().orElse(null));
-        mapped.setProperties(context.getProperties());
-        mapped.setCurrentTime(
-                DateTimeFormatter.ISO_DATE_TIME.format(
-                        context.getCurrentTime().orElse(ZonedDateTime.now())));
-        return mapped;
-    }
-
-    private Variant adapt(VariantDef variant, Variant defaultValue) {
-        if (variant == null) {
-            return defaultValue;
-        }
-        return new Variant(variant.getName(), adapt(variant.getPayload()), variant.isEnabled());
-    }
-
     @Override
     public boolean isEnabled(final String toggleName, final boolean defaultSetting) {
         return isEnabled(toggleName, contextProvider.getContext(), defaultSetting);
@@ -223,7 +160,9 @@ public class DefaultUnleash implements Unleash {
 
         UnleashContext enhancedContext = context.applyStaticFields(config);
         try {
-            Boolean enabled = this.unleashEngine.isEnabled(toggleName, adapt(enhancedContext));
+            Boolean enabled =
+                    this.unleashEngine.isEnabled(
+                            toggleName, YggdrasilAdapters.adapt(enhancedContext));
             if (enabled == null) {
                 enabled = fallbackAction.test(toggleName, enhancedContext);
             }
@@ -243,12 +182,6 @@ public class DefaultUnleash implements Unleash {
         }
     }
 
-    private @Nullable io.getunleash.variant.Payload adapt(@Nullable Payload payload) {
-        return Optional.ofNullable(payload)
-                .map(p -> new io.getunleash.variant.Payload(p.getType(), p.getValue()))
-                .orElse(new io.getunleash.variant.Payload("string", null));
-    }
-
     @Override
     public Variant getVariant(String toggleName, UnleashContext context) {
         return getVariant(toggleName, context, DISABLED_VARIANT);
@@ -259,10 +192,12 @@ public class DefaultUnleash implements Unleash {
         UnleashContext enhancedContext = context.applyStaticFields(config);
 
         try {
-            Context adaptedContext = adapt(enhancedContext);
+            Context adaptedContext = YggdrasilAdapters.adapt(enhancedContext);
 
             Variant variant =
-                    adapt(this.unleashEngine.getVariant(toggleName, adaptedContext), defaultValue);
+                    YggdrasilAdapters.adapt(
+                            this.unleashEngine.getVariant(toggleName, adaptedContext),
+                            defaultValue);
 
             Boolean enabled = this.unleashEngine.isEnabled(toggleName, adaptedContext);
 
