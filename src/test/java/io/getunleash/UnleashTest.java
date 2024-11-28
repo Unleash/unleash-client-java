@@ -144,9 +144,6 @@ public class UnleashTest {
                                 "test", true, asList(new ActivationStrategy("custom", null))));
         unleash.isEnabled("test");
 
-        // PR-comment: constraints are no longer managed by the SDK but by Yggdrasil, so
-        // we removed
-        // the third parameter
         verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class));
     }
 
