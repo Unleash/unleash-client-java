@@ -19,7 +19,6 @@ import io.getunleash.variant.VariantDefinition;
 import java.util.*;
 import java.util.function.BiPredicate;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class UnleashTest {
@@ -546,17 +545,6 @@ public class UnleashTest {
     }
 
     @Test
-    @Disabled // TODO: panicked at 'called `Result::unwrap()` on an `Err` value: Error {
-    // variant:
-    // ParsingError { positives: [and, or], negatives: [] }, location: Pos(64),
-    // line_col:
-    // Pos((1, 65)), path: None, line: "(true and (context[\"wins\"] > 5 and
-    // context[\"dateLastWin\"] > 2022-05-01T12:00:00 and context[\"followers\"] >
-    // 1000
-    // and context[\"single\"] contains_any_ignore_case [\"true\"] and
-    // context[\"catOrDog\"] contains_any_ignore_case [\"cat\"]))", continued_line:
-    // None
-    // }', unleash-yggdrasil/src/lib.rs:144:64
     public void should_handle_complex_segment_chains_2() {
         UnleashConfig config =
                 UnleashConfig.builder()
