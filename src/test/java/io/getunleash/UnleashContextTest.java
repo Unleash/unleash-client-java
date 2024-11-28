@@ -1,11 +1,11 @@
 package io.getunleash;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.entry;
+
 import io.getunleash.util.UnleashConfig;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.MapEntry.entry;
 
 public class UnleashContextTest {
 
@@ -104,13 +104,14 @@ public class UnleashContextTest {
 
         @Test
         void should_set_special_properties() {
-            final UnleashContext context = UnleashContext.builder()
-                .addProperty("userId", "test@mail.com")
-                .addProperty("sessionId", "123")
-                .addProperty("remoteAddress", "127.0.0.1")
-                .addProperty("environment", "env")
-                .addProperty("appName", "myApp")
-                .build();
+            final UnleashContext context =
+                    UnleashContext.builder()
+                            .addProperty("userId", "test@mail.com")
+                            .addProperty("sessionId", "123")
+                            .addProperty("remoteAddress", "127.0.0.1")
+                            .addProperty("environment", "env")
+                            .addProperty("appName", "myApp")
+                            .build();
 
             assertThat(context.getUserId()).contains("test@mail.com");
             assertThat(context.getSessionId()).contains("123");
@@ -121,13 +122,10 @@ public class UnleashContextTest {
 
         @Test
         void should_set_non_special_properties() {
-            final UnleashContext context = UnleashContext.builder()
-                .addProperty("foo", "bar")
-                .build();
+            final UnleashContext context =
+                    UnleashContext.builder().addProperty("foo", "bar").build();
 
             assertThat(context.getProperties()).containsExactly(entry("foo", "bar"));
         }
-
     }
-
 }
