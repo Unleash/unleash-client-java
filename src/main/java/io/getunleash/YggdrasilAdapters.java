@@ -12,8 +12,12 @@ import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class YggdrasilAdapters {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
 
     @NotNull
     public static IStrategy adapt(Strategy s) {
@@ -36,6 +40,8 @@ final class YggdrasilAdapters {
             try {
                 currentTime = ZonedDateTime.parse(context.getCurrentTime());
             } catch (DateTimeParseException e) {
+                LOGGER.warn("Could not parse current time from context, falling back to system time: ", context.getCurrentTime());
+                currentTime = ZonedDateTime.now();
             }
         }
 
