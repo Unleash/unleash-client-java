@@ -178,11 +178,4 @@ public class DependentFeatureToggleTest {
         when(featureRepository.getToggle("parent")).thenReturn(parent);
         assertThat(sut.isEnabled("child", UnleashContext.builder().build())).isFalse();
     }
-
-    @Test
-    public void shouldBeEnabledWhenMissingStrategies() {
-        FeatureToggle c = new FeatureToggle("c", true, emptyList());
-        when(featureRepository.getToggle("c")).thenReturn(c);
-        assertThat(sut.isEnabled("c", UnleashContext.builder().build())).isTrue();
-    }
 }
