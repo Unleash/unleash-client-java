@@ -588,6 +588,27 @@ public class UnleashTest {
         assertThat(unleash.isEnabled("test")).isFalse();
     }
 
+    @Test
+    public void empty_variants_returns_disabled_variant() {
+        UnleashContext context = UnleashContext.builder().build();
+
+        Map<String, String> params = new HashMap<>();
+        params.put("rollout", "100");
+        params.put("stickiness", "default");
+        params.put("groupId", "test");
+
+        ActivationStrategy strategy = new ActivationStrategy("flexibleRollout", params);
+        FeatureToggle featureToggle =
+                new FeatureToggle("test", true, asList(strategy), Collections.emptyList());
+
+        stateHandler.setState(featureToggle);
+        final Variant result = unleash.getVariant("test", context);
+
+        assertThat(result.getName()).isEqualTo("disabled");
+        assertThat(result.isEnabled()).isFalse();
+        assertThat(result.isFeatureEnabled()).isTrue();
+    }
+
     private List<VariantDefinition> getTestVariants() {
         return asList(
                 new VariantDefinition(

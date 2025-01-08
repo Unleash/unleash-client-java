@@ -113,6 +113,10 @@ public class ClientSpecificationTest {
                                                     test.getExpectedResult().getPayload(),
                                                     result.getPayload(),
                                                     test.getDescription());
+                                            assertEquals(
+                                                    test.getExpectedResult().isFeatureEnabled(),
+                                                    result.isFeatureEnabled(),
+                                                    test.getDescription());
                                         }))
                 .collect(Collectors.toList());
     }
