@@ -475,7 +475,7 @@
             <id>linux-x86_64</id>
             <activation>
                 <os>
-                    <name>Linux</name>
+                    <name>linux</name>
                     <arch>x86_64</arch>
                 </os>
             </activation>
