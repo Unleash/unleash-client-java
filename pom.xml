@@ -475,7 +475,7 @@
             <id>linux-x86_64</id>
             <activation>
                 <os>
-                    <name>linux</name>
+                    <!-- <name>linux</name> -->
                     <arch>x86_64</arch>
                 </os>
             </activation>
@@ -488,7 +488,7 @@
                 </dependency>
             </dependencies>
         </profile>
-        <profile>
+        <!-- <profile>
             <id>windows-x86_64</id>
             <activation>
                 <os>
@@ -555,7 +555,7 @@
                     <classifier>windows-x86_64</classifier>
                 </dependency>
             </dependencies>
-        </profile>
+        </profile> -->
     </profiles>
     <repositories>
         <repository>
