@@ -488,12 +488,12 @@
                 </dependency>
             </dependencies>
         </profile>
-        <!-- <profile>
+        <profile>
             <id>windows-x86_64</id>
             <activation>
                 <os>
                     <name>Windows</name>
-                    <arch>x86_64</arch>
+                    <arch>amd64</arch>
                 </os>
             </activation>
             <dependencies>
@@ -505,7 +505,7 @@
                 </dependency>
             </dependencies>
         </profile>
-        <profile>
+        <!-- <profile>
             <id>macos-x86_64</id>
             <activation>
                 <os>

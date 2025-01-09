@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         version: [11, 17]
-        os: ["ubuntu"]
+        os: ["windows", "ubuntu"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
