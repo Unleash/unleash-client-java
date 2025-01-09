@@ -59,7 +59,7 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>yggdrasil-engine</artifactId>
-            <version>0.1.0-alpha.10</version>
+            <version>0.1.0-alpha.11</version>
             <classifier>${os.detected.classifier}</classifier>
         </dependency>
         <dependency>
