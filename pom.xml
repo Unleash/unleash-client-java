@@ -475,8 +475,8 @@
             <id>linux-x86_64</id>
             <activation>
                 <os>
-                    <!-- <name>linux</name> -->
-                    <arch>x86_64</arch>
+                    <name>Linux</name>
+                    <arch>amd64</arch>
                 </os>
             </activation>
             <dependencies>
