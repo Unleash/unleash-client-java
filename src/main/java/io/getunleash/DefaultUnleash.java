@@ -199,20 +199,16 @@ public class DefaultUnleash implements Unleash {
                             this.unleashEngine.getVariant(toggleName, adaptedContext),
                             defaultValue);
 
-            Boolean enabled = this.unleashEngine.isEnabled(toggleName, adaptedContext);
-
-            // TODO: Swap this for feature enabled
-            if (enabled == null) {
-                enabled = false;
-            }
-
-            this.unleashEngine.countToggle(toggleName, enabled);
+            this.unleashEngine.countToggle(toggleName, variant.isFeatureEnabled());
             this.unleashEngine.countVariant(toggleName, variant.getName());
             eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isEnabled()));
             if (unleashEngine.shouldEmitImpressionEvent(toggleName)) {
                 eventDispatcher.dispatch(
                         new VariantImpressionEvent(
-                                toggleName, enabled, context, variant.getName()));
+                                toggleName,
+                                variant.isFeatureEnabled(),
+                                context,
+                                variant.getName()));
             }
             return variant;
         } catch (YggdrasilInvalidInputException | YggdrasilError e) {

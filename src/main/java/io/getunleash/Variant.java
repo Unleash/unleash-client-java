@@ -12,27 +12,41 @@ public class Variant {
     @Nullable private final Payload payload;
     private final boolean enabled;
     @Nullable private final String stickiness;
+    private final boolean feature_enabled;
 
-    public Variant(String name, @Nullable Payload payload, boolean enabled) {
-        this(name, payload, enabled, null);
+    public Variant(
+            String name, @Nullable Payload payload, boolean enabled, boolean feature_enabled) {
+        this(name, payload, enabled, null, feature_enabled);
     }
 
-    public Variant(String name, @Nullable Payload payload, boolean enabled, String stickiness) {
+    public Variant(
+            String name,
+            @Nullable Payload payload,
+            boolean enabled,
+            String stickiness,
+            boolean feature_enabled) {
         this.name = name;
         this.payload = payload;
         this.enabled = enabled;
         this.stickiness = stickiness;
+        this.feature_enabled = feature_enabled;
     }
 
     public Variant(String name, @Nullable String payload, boolean enabled) {
-        this(name, payload, enabled, null);
+        this(name, payload, enabled, null, false);
     }
 
-    public Variant(String name, @Nullable String payload, boolean enabled, String stickiness) {
+    public Variant(
+            String name,
+            @Nullable String payload,
+            boolean enabled,
+            String stickiness,
+            boolean feature_enabled) {
         this.name = name;
         this.payload = new Payload("string", payload);
         this.enabled = enabled;
         this.stickiness = stickiness;
+        this.feature_enabled = feature_enabled;
     }
 
     public String getName() {
@@ -45,6 +59,10 @@ public class Variant {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public boolean isFeatureEnabled() {
+        return feature_enabled;
     }
 
     @Nullable

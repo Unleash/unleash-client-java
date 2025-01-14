@@ -40,7 +40,9 @@ final class YggdrasilAdapters {
             try {
                 currentTime = ZonedDateTime.parse(context.getCurrentTime());
             } catch (DateTimeParseException e) {
-                LOGGER.warn("Could not parse current time from context, falling back to system time: ", context.getCurrentTime());
+                LOGGER.warn(
+                        "Could not parse current time from context, falling back to system time: ",
+                        context.getCurrentTime());
                 currentTime = ZonedDateTime.now();
             }
         }
@@ -73,7 +75,11 @@ final class YggdrasilAdapters {
         if (variant == null) {
             return defaultValue;
         }
-        return new Variant(variant.getName(), adapt(variant.getPayload()), variant.isEnabled());
+        return new Variant(
+                variant.getName(),
+                adapt(variant.getPayload()),
+                variant.isEnabled(),
+                variant.isFeatureEnabled());
     }
 
     public static @Nullable io.getunleash.variant.Payload adapt(@Nullable Payload payload) {
