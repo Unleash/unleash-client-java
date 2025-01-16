@@ -310,6 +310,7 @@ class DefaultUnleashTest {
                         .build();
 
         Unleash unleash = new DefaultUnleash(config);
+        Thread.sleep(1);
         verify(fetcher, times(1)).fetchFeatures();
         Thread.sleep(1200);
         verify(fetcher, times(2)).fetchFeatures();

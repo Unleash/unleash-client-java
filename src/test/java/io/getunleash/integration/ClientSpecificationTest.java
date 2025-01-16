@@ -1,16 +1,8 @@
 package io.getunleash.integration;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.getunleash.DefaultUnleash;
@@ -21,8 +13,6 @@ import io.getunleash.repository.UnleashEngineStateHandler;
 import io.getunleash.strategy.constraints.DateParser;
 import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,16 +25,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class ClientSpecificationTest {
-
-    @RegisterExtension
-    static WireMockExtension serverMock =
-            WireMockExtension.newInstance()
-                    .configureStaticDsl(true)
-                    .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
-                    .build();
 
     @TestFactory
     public Stream<DynamicTest> clientSpecification() throws IOException, URISyntaxException {
@@ -122,38 +104,20 @@ public class ClientSpecificationTest {
     }
 
     private Unleash setupUnleash(TestDefinition testDefinition) throws URISyntaxException {
-        mockUnleashAPI(testDefinition);
-
-        // Required because the client is available before it may have had the chance to
-        // talk with
-        // the API
-        String backupFile = writeUnleashBackup(testDefinition);
 
         // Set-up a unleash instance, using mocked API and backup-file
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName(testDefinition.getName())
-                        .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
-                        .synchronousFetchOnInitialisation(true)
-                        .backupFile(backupFile)
+                        .disableMetrics()
+                        .disablePolling()
+                        .unleashAPI(new URI("http://notusedbutrequired:9999/api/"))
                         .build();
 
         DefaultUnleash defaultUnleash = new DefaultUnleash(config);
         new UnleashEngineStateHandler(defaultUnleash)
                 .setState(testDefinition.getState().toString());
         return defaultUnleash;
-    }
-
-    private void mockUnleashAPI(TestDefinition definition) {
-        stubFor(
-                get(urlEqualTo("/api/client/features"))
-                        .withHeader("Accept", equalTo("application/json"))
-                        .willReturn(
-                                aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBody(definition.getState().toString())));
-        stubFor(post(urlEqualTo("/api/client/register")).willReturn(aResponse().withStatus(200)));
     }
 
     private TestDefinition getTestDefinition(String fileName) throws IOException {
@@ -189,24 +153,5 @@ public class ClientSpecificationTest {
                         + "You must first run 'mvn test' to download the specifications files");
         InputStreamReader reader = new InputStreamReader(in);
         return new BufferedReader(reader);
-    }
-
-    private String writeUnleashBackup(TestDefinition definition) {
-        String backupFile =
-                System.getProperty("java.io.tmpdir")
-                        + File.separatorChar
-                        + "unleash-test-"
-                        + definition.getName()
-                        + ".json";
-
-        // TODO: we can probably drop this after introduction of
-        // `synchronousFetchOnInitialisation`.
-        try (FileWriter writer = new FileWriter(backupFile)) {
-            writer.write(definition.getState().toString());
-        } catch (IOException e) {
-            System.out.println("Unable to write toggles to file");
-        }
-
-        return backupFile;
     }
 }
