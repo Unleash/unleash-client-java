@@ -448,7 +448,7 @@ public class UnleashMetricServiceImplTest {
         verify(sender, times(1)).sendMetrics(metricsSent.capture());
         ClientMetrics metrics = metricsSent.getValue();
         assertThat(metrics.getSpecVersion()).isNotEmpty();
-        assertThat(metrics.getYggdrasilVersion()).isNull();
+        assertThat(metrics.getYggdrasilVersion()).isNotEmpty();
         assertThat(metrics.getPlatformName()).isNotEmpty();
         assertThat(metrics.getPlatformVersion()).isNotEmpty();
     }
@@ -467,6 +467,6 @@ public class UnleashMetricServiceImplTest {
         assertThat(reg.getPlatformName()).isNotEmpty();
         assertThat(reg.getPlatformVersion()).isNotEmpty();
         assertThat(reg.getSpecVersion()).isEqualTo(config.getClientSpecificationVersion());
-        assertThat(reg.getYggdrasilVersion()).isNull();
+        assertThat(reg.getYggdrasilVersion()).isNotEmpty();
     }
 }

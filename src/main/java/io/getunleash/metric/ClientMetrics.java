@@ -1,6 +1,7 @@
 package io.getunleash.metric;
 
 import io.getunleash.engine.MetricsBucket;
+import io.getunleash.engine.UnleashEngine;
 import io.getunleash.event.UnleashEvent;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.lang.Nullable;
@@ -25,7 +26,7 @@ public class ClientMetrics implements UnleashEvent {
         this.specVersion = config.getClientSpecificationVersion();
         this.platformName = System.getProperty("java.vm.name");
         this.platformVersion = System.getProperty("java.version");
-        this.yggdrasilVersion = null;
+        this.yggdrasilVersion = UnleashEngine.getCoreVersion();
     }
 
     public String getAppName() {
