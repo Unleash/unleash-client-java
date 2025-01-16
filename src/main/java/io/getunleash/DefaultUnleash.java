@@ -106,7 +106,7 @@ public class DefaultUnleash implements Unleash {
                     try {
                         this.unleashEngine.takeState(
                                 JsonFeatureParser.toJsonString(featureCollection));
-                    } catch (YggdrasilInvalidInputException e) {
+                    } catch (YggdrasilInvalidInputException | YggdrasilError e) {
                         LOGGER.error("Unable to update features", e);
                     }
                 });

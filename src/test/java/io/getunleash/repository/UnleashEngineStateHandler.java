@@ -54,8 +54,10 @@ public class UnleashEngineStateHandler {
 
     public void setState(String raw) {
         try {
+            // System.out.println("Setting raw state");
+            // System.out.println(raw);
             this.unleashEngine.takeState(raw);
-        } catch (YggdrasilInvalidInputException e) {
+        } catch (YggdrasilInvalidInputException | YggdrasilError e) {
             throw new RuntimeException(e);
         }
     }
