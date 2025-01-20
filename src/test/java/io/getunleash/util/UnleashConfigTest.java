@@ -1,7 +1,6 @@
 package io.getunleash.util;
 
-import static io.getunleash.util.UnleashConfig.UNLEASH_APP_NAME_HEADER;
-import static io.getunleash.util.UnleashConfig.UNLEASH_INSTANCE_ID_HEADER;
+import static io.getunleash.util.UnleashConfig.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -114,7 +113,7 @@ public class UnleashConfigTest {
         UnleashConfig config =
                 UnleashConfig.builder().appName("my-app").unleashAPI("http://unleash.org").build();
 
-        assertThat(config.getSdkVersion()).isEqualTo("unleash-client-java:development");
+        assertThat(config.getSdkVersion()).isEqualTo("unleash-java@development");
     }
 
     @Test
@@ -139,8 +138,7 @@ public class UnleashConfigTest {
     }
 
     @Test
-    public void should_add_app_name_and_instance_id_and_user_agent_to_connection()
-            throws IOException {
+    public void should_add_client_identification_headers_to_connection() throws IOException {
         String appName = "my-app";
         String instanceId = "my-instance-1";
         String unleashAPI = "http://unleash.org";
@@ -156,8 +154,13 @@ public class UnleashConfigTest {
         HttpURLConnection connection = (HttpURLConnection) someUrl.openConnection();
 
         UnleashConfig.setRequestProperties(connection, unleashConfig);
+        assertThat(connection.getRequestProperty(LEGACY_UNLEASH_APP_NAME_HEADER))
+                .isEqualTo(appName);
         assertThat(connection.getRequestProperty(UNLEASH_APP_NAME_HEADER)).isEqualTo(appName);
         assertThat(connection.getRequestProperty(UNLEASH_INSTANCE_ID_HEADER)).isEqualTo(instanceId);
+        assertThat(connection.getRequestProperty(UNLEASH_CONNECTION_ID_HEADER)).hasSize(36);
+        assertThat(connection.getRequestProperty(UNLEASH_SDK_HEADER))
+                .isEqualTo("unleash-java@development");
         assertThat(connection.getRequestProperty("User-Agent")).isEqualTo(appName);
     }
 
