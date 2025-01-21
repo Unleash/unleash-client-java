@@ -23,12 +23,16 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class UnleashConfig {
 
-    public static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
+    public static final String LEGACY_UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
     public static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
+    public static final String UNLEASH_CONNECTION_ID_HEADER = "X-UNLEASH-CONNECTION-ID";
+    public static final String UNLEASH_APP_NAME_HEADER = "X-UNLEASH-APPNAME";
+    public static final String UNLEASH_SDK_HEADER = "X-UNLEASH-SDK";
 
     private final URI unleashAPI;
     private final UnleashURLs unleashURLs;
@@ -37,6 +41,7 @@ public class UnleashConfig {
     private final String appName;
     private final String environment;
     private final String instanceId;
+    private final String connectionId;
     private final String sdkVersion;
     private final String backupFile;
 
@@ -77,6 +82,7 @@ public class UnleashConfig {
             @Nullable String appName,
             String environment,
             @Nullable String instanceId,
+            String connectionId,
             String sdkVersion,
             String backupFile,
             @Nullable String projectName,
@@ -141,6 +147,7 @@ public class UnleashConfig {
         this.appName = appName;
         this.environment = environment;
         this.instanceId = instanceId;
+        this.connectionId = connectionId;
         this.sdkVersion = sdkVersion;
         this.backupFile = backupFile;
         this.projectName = projectName;
@@ -172,8 +179,11 @@ public class UnleashConfig {
     }
 
     public static void setRequestProperties(HttpURLConnection connection, UnleashConfig config) {
+        connection.setRequestProperty(LEGACY_UNLEASH_APP_NAME_HEADER, config.getAppName());
         connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
         connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
+        connection.setRequestProperty(UNLEASH_CONNECTION_ID_HEADER, config.getConnectionId());
+        connection.setRequestProperty(UNLEASH_SDK_HEADER, config.getSdkVersion());
         connection.setRequestProperty("User-Agent", config.getAppName());
         connection.setRequestProperty(
                 "Unleash-Client-Spec", config.getClientSpecificationVersion());
@@ -209,6 +219,10 @@ public class UnleashConfig {
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    String getConnectionId() {
+        return connectionId;
     }
 
     public String getSdkVersion() {
@@ -401,6 +415,7 @@ public class UnleashConfig {
         private @Nullable String appName;
         private String environment = "default";
         private String instanceId = getDefaultInstanceId();
+        private String connectionId = getDefaultConnectionId();
         private final String sdkVersion = getDefaultSdkVersion();
         private @Nullable String backupFile;
         private @Nullable String projectName;
@@ -447,6 +462,10 @@ public class UnleashConfig {
 
         static String getDefaultInstanceId() {
             return getHostname() + "generated-" + Math.round(Math.random() * 1000000.0D);
+        }
+
+        static String getDefaultConnectionId() {
+            return UUID.randomUUID().toString();
         }
 
         public Builder unleashAPI(URI unleashAPI) {
@@ -685,6 +704,7 @@ public class UnleashConfig {
                     appName,
                     environment,
                     instanceId,
+                    connectionId,
                     sdkVersion,
                     getBackupFile(),
                     projectName,
@@ -716,7 +736,7 @@ public class UnleashConfig {
             String version =
                     Optional.ofNullable(getClass().getPackage().getImplementationVersion())
                             .orElse("development");
-            return "unleash-client-java:" + version;
+            return "unleash-java@" + version;
         }
     }
 }

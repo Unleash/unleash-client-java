@@ -1,7 +1,6 @@
 package io.getunleash.util;
 
-import static io.getunleash.util.UnleashConfig.UNLEASH_APP_NAME_HEADER;
-import static io.getunleash.util.UnleashConfig.UNLEASH_INSTANCE_ID_HEADER;
+import static io.getunleash.util.UnleashConfig.*;
 
 import java.util.Map;
 import okhttp3.OkHttpClient;
@@ -17,10 +16,17 @@ public class OkHttpClientConfigurer {
                                             .newBuilder()
                                             .addHeader("Content-Type", "application/json")
                                             .addHeader("Accept", "application/json")
+                                            .addHeader(
+                                                    LEGACY_UNLEASH_APP_NAME_HEADER,
+                                                    config.getAppName())
                                             .addHeader(UNLEASH_APP_NAME_HEADER, config.getAppName())
                                             .addHeader(
                                                     UNLEASH_INSTANCE_ID_HEADER,
                                                     config.getInstanceId())
+                                            .addHeader(
+                                                    UNLEASH_CONNECTION_ID_HEADER,
+                                                    config.getConnectionId())
+                                            .addHeader(UNLEASH_SDK_HEADER, config.getSdkVersion())
                                             .addHeader("User-Agent", config.getAppName())
                                             .addHeader(
                                                     "Unleash-Client-Spec",
