@@ -90,4 +90,14 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
     protected int getFailures() {
         return this.throttler.getFailures();
     }
+
+    @Override
+    public void countToggle(String name, boolean enabled) {
+        this.engine.countToggle(name, enabled);
+    }
+
+    @Override
+    public void countVariant(String name, String variantName) {
+        this.engine.countVariant(name, variantName);
+    }
 }

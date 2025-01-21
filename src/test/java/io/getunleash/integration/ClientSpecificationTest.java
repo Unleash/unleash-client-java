@@ -9,7 +9,7 @@ import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
 import io.getunleash.Variant;
-import io.getunleash.repository.UnleashEngineStateHandler;
+import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.strategy.constraints.DateParser;
 import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
@@ -105,18 +105,25 @@ public class ClientSpecificationTest {
 
     private Unleash setupUnleash(TestDefinition testDefinition) throws URISyntaxException {
 
-        // Set-up a unleash instance, using mocked API and backup-file
+        ToggleBootstrapProvider bootstrapper =
+                new ToggleBootstrapProvider() {
+                    @Override
+                    public String read() {
+                        return testDefinition.getState().toString();
+                    }
+                };
+
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName(testDefinition.getName())
                         .disableMetrics()
                         .disablePolling()
+                        .toggleBootstrapProvider(bootstrapper)
                         .unleashAPI(new URI("http://notusedbutrequired:9999/api/"))
                         .build();
 
         DefaultUnleash defaultUnleash = new DefaultUnleash(config);
-        new UnleashEngineStateHandler(defaultUnleash)
-                .setState(testDefinition.getState().toString());
+
         return defaultUnleash;
     }
 

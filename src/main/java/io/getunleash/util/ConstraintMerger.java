@@ -5,14 +5,14 @@ import static io.getunleash.Segment.DENY_SEGMENT;
 import io.getunleash.ActivationStrategy;
 import io.getunleash.Constraint;
 import io.getunleash.Segment;
-import io.getunleash.repository.IFeatureRepository;
+import io.getunleash.repository.FeatureRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ConstraintMerger {
     public static List<Constraint> mergeConstraints(
-            IFeatureRepository repository, ActivationStrategy strategy) {
+            FeatureRepository repository, ActivationStrategy strategy) {
         return Stream.of(
                         Optional.ofNullable(strategy.getConstraints())
                                 .orElseGet(Collections::emptyList),

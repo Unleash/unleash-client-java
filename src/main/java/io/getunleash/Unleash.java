@@ -1,6 +1,5 @@
 package io.getunleash;
 
-import java.util.List;
 import java.util.function.BiPredicate;
 
 public interface Unleash {
@@ -42,14 +41,6 @@ public interface Unleash {
     default Variant getVariant(final String toggleName, final Variant defaultValue) {
         return getVariant(toggleName, UnleashContext.builder().build(), defaultValue);
     }
-
-    /**
-     * Use more().getFeatureToggleNames() instead
-     *
-     * @return a list of known toggle names
-     */
-    @Deprecated()
-    List<String> getFeatureToggleNames();
 
     default void shutdown() {}
 

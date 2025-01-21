@@ -1,5 +1,8 @@
-package io.getunleash;
+package io.getunleash.repository;
 
+import io.getunleash.DefaultUnleash;
+import io.getunleash.UnleashContext;
+import io.getunleash.Variant;
 import io.getunleash.engine.Context;
 import io.getunleash.engine.IStrategy;
 import io.getunleash.engine.Payload;
@@ -15,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class YggdrasilAdapters {
+public final class YggdrasilAdapters {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
 

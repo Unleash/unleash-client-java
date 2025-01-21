@@ -89,7 +89,7 @@ public class FakeUnleashTest {
         fakeUnleash.disable("t2");
 
         List<String> expected = Arrays.asList(new String[] {"t1", "t2"});
-        assertThat(fakeUnleash.getFeatureToggleNames()).containsAll(expected);
+        assertThat(fakeUnleash.more().getFeatureToggleNames()).containsAll(expected);
     }
 
     @Test
@@ -107,14 +107,14 @@ public class FakeUnleashTest {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.enable("t1");
 
-        Optional<FeatureToggle> optionalToggle =
+        Optional<FeatureDefinition> optionalToggle =
                 fakeUnleash.more().getFeatureToggleDefinition("t1");
         assertThat(optionalToggle).isPresent();
 
-        FeatureToggle toggle = optionalToggle.get();
+        FeatureDefinition toggle = optionalToggle.get();
         assertThat(toggle.getName()).isEqualTo("t1");
-        assertThat(toggle.getStrategies()).isEmpty();
-        assertThat(toggle.isEnabled()).isTrue();
+        assertThat(toggle.getProject()).isEqualTo("default");
+        assertThat(toggle.getType()).isEqualTo(Optional.of("experiment"));
     }
 
     @Test

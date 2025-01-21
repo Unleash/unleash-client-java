@@ -1,7 +1,5 @@
 package io.getunleash;
 
-import static java.util.Collections.emptyList;
-
 import io.getunleash.lang.Nullable;
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -11,7 +9,7 @@ public class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;
     private Map<String, Boolean> excludedFeatures = new HashMap<>();
-    private Map<String, FeatureToggle> features = new HashMap<>();
+    private Map<String, Boolean> features = new HashMap<>();
     private Map<String, Variant> variants = new HashMap<>();
 
     @Override
@@ -21,9 +19,7 @@ public class FakeUnleash implements Unleash {
         } else if (disableAll) {
             return excludedFeatures.getOrDefault(toggleName, false);
         } else {
-            return more().getFeatureToggleDefinition(toggleName)
-                    .map(FeatureToggle::isEnabled)
-                    .orElse(defaultSetting);
+            return features.containsKey(toggleName) ? features.get(toggleName) : defaultSetting;
         }
     }
 
@@ -70,11 +66,6 @@ public class FakeUnleash implements Unleash {
     }
 
     @Override
-    public List<String> getFeatureToggleNames() {
-        return more().getFeatureToggleNames();
-    }
-
-    @Override
     public MoreOperations more() {
         return new FakeMore();
     }
@@ -117,13 +108,13 @@ public class FakeUnleash implements Unleash {
 
     public void enable(String... features) {
         for (String name : features) {
-            this.features.put(name, new FeatureToggle(name, true, emptyList()));
+            this.features.put(name, true);
         }
     }
 
     public void disable(String... features) {
         for (String name : features) {
-            this.features.put(name, new FeatureToggle(name, false, emptyList()));
+            this.features.put(name, false);
         }
     }
 
@@ -145,8 +136,12 @@ public class FakeUnleash implements Unleash {
         }
 
         @Override
-        public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
-            return Optional.ofNullable(features.get(toggleName));
+        public Optional<FeatureDefinition> getFeatureToggleDefinition(String toggleName) {
+            return Optional.ofNullable(features.get(toggleName))
+                    .map(
+                            value ->
+                                    new FeatureDefinition(
+                                            toggleName, Optional.of("experiment"), "default"));
         }
 
         @Override

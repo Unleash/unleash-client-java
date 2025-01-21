@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class JsonFeatureParserTest {
-    FeatureRepository repository;
+    FeatureRepositoryImpl repository;
 
     @BeforeEach
     void setUp() {
@@ -25,7 +25,7 @@ public class JsonFeatureParserTest {
                         .synchronousFetchOnInitialisation(false)
                         .build();
 
-        this.repository = mock(FeatureRepository.class);
+        this.repository = mock(FeatureRepositoryImpl.class);
     }
 
     @Test
