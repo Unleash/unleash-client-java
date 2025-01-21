@@ -736,7 +736,7 @@ public class UnleashConfig {
             String version =
                     Optional.ofNullable(getClass().getPackage().getImplementationVersion())
                             .orElse("development");
-            return "unleash-java@" + version;
+            return "unleash-client-java:" + version;
         }
     }
 }
