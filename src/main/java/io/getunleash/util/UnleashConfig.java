@@ -221,7 +221,7 @@ public class UnleashConfig {
         return instanceId;
     }
 
-    public String getConnectionId() {
+    String getConnectionId() {
         return connectionId;
     }
 
