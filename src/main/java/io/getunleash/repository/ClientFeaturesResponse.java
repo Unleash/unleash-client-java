@@ -1,56 +1,48 @@
 package io.getunleash.repository;
 
-import io.getunleash.lang.Nullable;
-import java.util.Collections;
+import io.getunleash.event.UnleashEvent;
+import io.getunleash.event.UnleashSubscriber;
+import java.util.Optional;
 
-public final class ClientFeaturesResponse extends FeatureToggleResponse {
-    private final int version;
-    private final @Nullable SegmentCollection segmentCollection;
-
-    public ClientFeaturesResponse(Status status, int httpStatusCode) {
-        super(status, httpStatusCode);
-        this.version = 1;
-        this.segmentCollection = new SegmentCollection(Collections.emptyList());
+public final class ClientFeaturesResponse implements UnleashEvent {
+    public enum Status {
+        NOT_CHANGED,
+        CHANGED,
+        UNAVAILABLE,
     }
 
-    public ClientFeaturesResponse(
-            Status status,
-            int httpStatusCode,
-            @Nullable SegmentCollection segmentCollection,
-            @Nullable int version) {
-        super(status, httpStatusCode);
-        this.version = version;
-        this.segmentCollection = segmentCollection;
+    private final Optional<String> clientFeatures;
+    private final Status statusCode;
+    private final int httpStatusCode;
+
+    private ClientFeaturesResponse(Status status, int httpStatusCode, Optional<String> clientFeatures) {
+        this.statusCode = status;
+        this.clientFeatures = clientFeatures;
+        this.httpStatusCode = httpStatusCode;
     }
 
-    public ClientFeaturesResponse(
-            Status status,
-            ToggleCollection toggleCollection,
-            @Nullable SegmentCollection segmentCollection) {
-        super(status, toggleCollection);
-        this.version = 1;
-        this.segmentCollection = segmentCollection;
+    public static ClientFeaturesResponse notChanged() {
+        return new ClientFeaturesResponse(Status.NOT_CHANGED, 304, Optional.empty());
     }
 
-    public ClientFeaturesResponse(Status status, FeatureCollection featureCollection) {
-        super(status, featureCollection.getToggleCollection());
-        this.version = 1;
-        this.segmentCollection = featureCollection.getSegmentCollection();
+    public static ClientFeaturesResponse updated(String clientFeatures) {
+        return new ClientFeaturesResponse(Status.CHANGED, 200, Optional.of(clientFeatures));
     }
 
-    public ClientFeaturesResponse(Status status, int httpStatusCode, @Nullable String location) {
-        super(status, httpStatusCode, location);
-        this.version = 1;
-        this.segmentCollection = new SegmentCollection(Collections.emptyList());
+    public static ClientFeaturesResponse unavailable(int statusCode) {
+        return new ClientFeaturesResponse(Status.UNAVAILABLE, statusCode, Optional.empty());
     }
 
-    public int getVersion() {
-        return version;
+    public Optional<String> getClientFeatures() {
+        return clientFeatures;
     }
 
-    @Nullable
-    public SegmentCollection getSegmentCollection() {
-        return segmentCollection;
+    public int getHttpStatusCode() {
+        return httpStatusCode;
+    }
+
+    public Status getStatus() {
+        return statusCode;
     }
 
     @Override
@@ -60,5 +52,11 @@ public final class ClientFeaturesResponse extends FeatureToggleResponse {
                 + this.getStatus()
                 + " httpStatus="
                 + this.getHttpStatusCode();
+    }
+
+    @Override
+    public void publishTo(UnleashSubscriber unleashSubscriber) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'publishTo'");
     }
 }

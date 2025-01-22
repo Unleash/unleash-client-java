@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DefaultHttpMetricsSender implements MetricSender {
-    private static final int CONNECT_TIMEOUT = 1000;
 
     private final Gson gson;
     private final EventDispatcher eventDispatcher;

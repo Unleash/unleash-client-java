@@ -1,7 +1,5 @@
 package io.getunleash.util;
 
-import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
-
 import io.getunleash.CustomHttpHeadersProvider;
 import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
 import io.getunleash.UnleashContextProvider;
@@ -41,8 +39,10 @@ public class UnleashConfig {
     private final String backupFile;
 
     private final String clientSpecificationVersion;
-    @Nullable private final String projectName;
-    @Nullable private final String namePrefix;
+    @Nullable
+    private final String projectName;
+    @Nullable
+    private final String namePrefix;
     private final long fetchTogglesInterval;
 
     private final Duration fetchTogglesConnectTimeout;
@@ -65,10 +65,14 @@ public class UnleashConfig {
     private final boolean synchronousFetchOnInitialisation;
     private final UnleashScheduledExecutor unleashScheduledExecutor;
     private final UnleashSubscriber unleashSubscriber;
-    @Nullable private final Strategy fallbackStrategy;
-    @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
-    @Nullable private final Proxy proxy;
-    @Nullable private final Consumer<UnleashException> startupExceptionHandler;
+    @Nullable
+    private Strategy fallbackStrategy;
+    @Nullable
+    private final ToggleBootstrapProvider toggleBootstrapProvider;
+    @Nullable
+    private final Proxy proxy;
+    @Nullable
+    private final Consumer<UnleashException> startupExceptionHandler;
 
     private UnleashConfig(
             @Nullable URI unleashAPI,
@@ -122,9 +126,7 @@ public class UnleashConfig {
             throw new IllegalStateException("You are required to specify a subscriber");
         }
 
-        if (fallbackStrategy == null) {
-            this.fallbackStrategy = UNKNOWN_STRATEGY;
-        } else {
+        if (fallbackStrategy != null) {
             this.fallbackStrategy = fallbackStrategy;
         }
 
@@ -162,8 +164,7 @@ public class UnleashConfig {
         this.proxy = proxy;
         this.unleashFeatureFetcherFactory = unleashFeatureFetcherFactory;
         this.metricSenderFactory = metricSenderFactory;
-        this.clientSpecificationVersion =
-                UnleashProperties.getProperty("client.specification.version");
+        this.clientSpecificationVersion = UnleashProperties.getProperty("client.specification.version");
         this.startupExceptionHandler = startupExceptionHandler;
     }
 
@@ -349,7 +350,8 @@ public class UnleashConfig {
                 final String proxyUser = System.getProperty(proto + ".proxyUser", "");
                 final String proxyPassword = System.getProperty(proto + ".proxyPassword", "");
 
-                // Only apply PasswordAuthentication to requests to the proxy itself - if not set
+                // Only apply PasswordAuthentication to requests to the proxy itself - if not
+                // set
                 // just ignore
                 if (getRequestingHost().equalsIgnoreCase(proxyHost)
                         && Integer.parseInt(proxyPort) == getRequestingPort()) {
@@ -396,8 +398,7 @@ public class UnleashConfig {
 
         private @Nullable URI unleashAPI;
         private Map<String, String> customHttpHeaders = new HashMap<>();
-        private CustomHttpHeadersProvider customHttpHeadersProvider =
-                new DefaultCustomHttpHeadersProviderImpl();
+        private CustomHttpHeadersProvider customHttpHeadersProvider = new DefaultCustomHttpHeadersProviderImpl();
         private @Nullable String appName;
         private String environment = "default";
         private String instanceId = getDefaultInstanceId();
@@ -421,8 +422,7 @@ public class UnleashConfig {
         private UnleashFeatureFetcherFactory unleashFeatureFetcherFactory = HttpFeatureFetcher::new;
 
         private MetricSenderFactory unleashMetricSenderFactory = DefaultHttpMetricsSender::new;
-        private UnleashContextProvider contextProvider =
-                UnleashContextProvider.getDefaultProvider();
+        private UnleashContextProvider contextProvider = UnleashContextProvider.getDefaultProvider();
         private boolean synchronousFetchOnInitialisation = false;
         private @Nullable UnleashScheduledExecutor scheduledExecutor;
         private @Nullable UnleashSubscriber unleashSubscriber;
@@ -622,8 +622,7 @@ public class UnleashConfig {
             this.proxy = proxy;
 
             if (proxyUser != null && proxyPassword != null) {
-                this.proxyAuthenticator =
-                        new CustomProxyAuthenticator(proxy, proxyUser, proxyPassword);
+                this.proxyAuthenticator = new CustomProxyAuthenticator(proxy, proxyUser, proxyPassword);
             }
             return this;
         }
@@ -665,11 +664,13 @@ public class UnleashConfig {
         }
 
         /**
-         * Used to handle exceptions when starting up synchronously. Allows user the option to
+         * Used to handle exceptions when starting up synchronously. Allows user the
+         * option to
          * choose how errors should be handled.
          *
-         * @param startupExceptionHandler - a lambda taking the Exception and doing what it wants to
-         *     the system.
+         * @param startupExceptionHandler - a lambda taking the Exception and doing what
+         *                                it wants to
+         *                                the system.
          */
         public Builder startupExceptionHandler(
                 @Nullable Consumer<UnleashException> startupExceptionHandler) {
@@ -713,9 +714,8 @@ public class UnleashConfig {
         }
 
         public String getDefaultSdkVersion() {
-            String version =
-                    Optional.ofNullable(getClass().getPackage().getImplementationVersion())
-                            .orElse("development");
+            String version = Optional.ofNullable(getClass().getPackage().getImplementationVersion())
+                    .orElse("development");
             return "unleash-client-java:" + version;
         }
     }

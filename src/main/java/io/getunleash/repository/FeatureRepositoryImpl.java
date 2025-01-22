@@ -1,7 +1,6 @@
 package io.getunleash.repository;
 
 import io.getunleash.FeatureDefinition;
-import io.getunleash.Segment;
 import io.getunleash.UnleashContext;
 import io.getunleash.UnleashException;
 import io.getunleash.Variant;
@@ -13,9 +12,7 @@ import io.getunleash.event.UnleashReady;
 import io.getunleash.util.Throttler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -24,17 +21,12 @@ import org.slf4j.LoggerFactory;
 public class FeatureRepositoryImpl implements FeatureRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureRepositoryImpl.class);
     private final UnleashConfig unleashConfig;
-    private final BackupHandler<FeatureCollection> featureBackupHandler;
+    private final BackupHandler featureBackupHandler;
     private final FeatureBootstrapHandler featureBootstrapHandler;
     private final FeatureFetcher featureFetcher;
     private final EventDispatcher eventDispatcher;
     private final UnleashEngine engine;
-
-    private List<Consumer<FeatureCollection>> consumers = new LinkedList<>();
-
     private final Throttler throttler;
-
-    private FeatureCollection featureCollection;
     private boolean ready;
 
     public FeatureRepositoryImpl(UnleashConfig unleashConfig, UnleashEngine engine) {
@@ -43,7 +35,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
 
     public FeatureRepositoryImpl(
             UnleashConfig unleashConfig,
-            BackupHandler<FeatureCollection> featureBackupHandler,
+            BackupHandler featureBackupHandler,
             UnleashEngine engine) {
         this(
                 unleashConfig,
@@ -54,7 +46,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
 
     public FeatureRepositoryImpl(
             UnleashConfig unleashConfig,
-            BackupHandler<FeatureCollection> featureBackupHandler,
+            BackupHandler featureBackupHandler,
             UnleashEngine engine,
             FeatureFetcher fetcher) {
         this(
@@ -67,7 +59,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
 
     public FeatureRepositoryImpl(
             UnleashConfig unleashConfig,
-            BackupHandler<FeatureCollection> featureBackupHandler,
+            BackupHandler featureBackupHandler,
             UnleashEngine engine,
             FeatureFetcher fetcher,
             FeatureBootstrapHandler bootstrapHandler) {
@@ -82,7 +74,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
 
     public FeatureRepositoryImpl(
             UnleashConfig unleashConfig,
-            BackupHandler<FeatureCollection> featureBackupHandler,
+            BackupHandler featureBackupHandler,
             UnleashEngine engine,
             FeatureFetcher fetcher,
             FeatureBootstrapHandler bootstrapHandler,
@@ -93,19 +85,25 @@ public class FeatureRepositoryImpl implements FeatureRepository {
         this.featureFetcher = fetcher;
         this.featureBootstrapHandler = bootstrapHandler;
         this.eventDispatcher = eventDispatcher;
-        this.throttler =
-                new Throttler(
-                        (int) unleashConfig.getFetchTogglesInterval(),
-                        300,
-                        unleashConfig.getUnleashURLs().getFetchTogglesURL());
+        this.throttler = new Throttler(
+                (int) unleashConfig.getFetchTogglesInterval(),
+                300,
+                unleashConfig.getUnleashURLs().getFetchTogglesURL());
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
     private void initCollections(UnleashScheduledExecutor executor) {
-        this.featureCollection = this.featureBackupHandler.read();
-        if (this.featureCollection.getToggleCollection().getFeatures().isEmpty()) {
-            this.featureCollection = this.featureBootstrapHandler.read();
+        Optional<String> features = this.featureBackupHandler.read();
+        if (!features.isPresent()) {
+            features = this.featureBootstrapHandler.read();
+        }
+        if (features.isPresent()) {
+            try {
+                this.engine.takeState(features.get());
+            } catch (YggdrasilInvalidInputException | YggdrasilError e) {
+                LOGGER.error("Error when initializing feature toggles", e);
+            }
         }
 
         if (unleashConfig.isSynchronousFetchOnInitialisation()) {
@@ -113,9 +111,9 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                 updateFeatures(this.unleashConfig.getStartupExceptionHandler()).run();
             } else {
                 updateFeatures(
-                                e -> {
-                                    throw e;
-                                })
+                        e -> {
+                            throw e;
+                        })
                         .run();
             }
         }
@@ -130,10 +128,6 @@ public class FeatureRepositoryImpl implements FeatureRepository {
         }
     }
 
-    public void addConsumer(Consumer<FeatureCollection> consumer) {
-        this.consumers.add(consumer);
-    }
-
     private Runnable updateFeatures(final Consumer<UnleashException> handler) {
         return () -> {
             if (throttler.performAction()) {
@@ -141,25 +135,10 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                     ClientFeaturesResponse response = featureFetcher.fetchFeatures();
                     eventDispatcher.dispatch(response);
                     if (response.getStatus() == ClientFeaturesResponse.Status.CHANGED) {
-                        SegmentCollection segmentCollection = response.getSegmentCollection();
-                        featureCollection =
-                                new FeatureCollection(
-                                        response.getToggleCollection(),
-                                        segmentCollection != null
-                                                ? segmentCollection
-                                                : new SegmentCollection(Collections.emptyList()));
+                        String clientFeatures = response.getClientFeatures().get();
 
-                        consumers.forEach(
-                                consumer -> {
-                                    try {
-                                        consumer.accept(featureCollection);
-                                    } catch (Exception e) {
-                                        LOGGER.error("Error when calling consumer {}", consumer, e);
-                                    }
-                                });
-
-                        this.engine.takeState(featureCollection.toString());
-                        featureBackupHandler.write(featureCollection);
+                        this.engine.takeState(clientFeatures);
+                        featureBackupHandler.write(clientFeatures);
                     } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
                         if (!ready && unleashConfig.isSynchronousFetchOnInitialisation()) {
                             throw new UnleashException(
@@ -187,11 +166,6 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                 throttler.skipped(); // We didn't do anything this iteration, just reduce the count
             }
         };
-    }
-
-    @Override
-    public Segment getSegment(Integer id) {
-        return featureCollection.getSegmentCollection().getSegment(id);
     }
 
     public Integer getFailures() {

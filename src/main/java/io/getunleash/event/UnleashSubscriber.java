@@ -3,9 +3,6 @@ package io.getunleash.event;
 import io.getunleash.UnleashException;
 import io.getunleash.metric.ClientMetrics;
 import io.getunleash.metric.ClientRegistration;
-import io.getunleash.repository.FeatureCollection;
-import io.getunleash.repository.FeatureToggleResponse;
-import io.getunleash.repository.ToggleCollection;
 import org.slf4j.LoggerFactory;
 
 public interface UnleashSubscriber {
@@ -15,29 +12,42 @@ public interface UnleashSubscriber {
                 .warn(unleashException.getMessage(), unleashException);
     }
 
-    default void on(UnleashEvent unleashEvent) {}
+    default void on(UnleashEvent unleashEvent) {
+    }
 
-    default void onReady(UnleashReady unleashReady) {}
+    default void onReady(UnleashReady unleashReady) {
+    }
 
-    default void toggleEvaluated(ToggleEvaluated toggleEvaluated) {}
+    default void toggleEvaluated(ToggleEvaluated toggleEvaluated) {
+    }
 
-    default void togglesFetched(FeatureToggleResponse toggleResponse) {}
+    default void togglesFetched(String toggleResponse) {
+    }
 
-    default void clientMetrics(ClientMetrics clientMetrics) {}
+    default void clientMetrics(ClientMetrics clientMetrics) {
+    }
 
-    default void clientRegistered(ClientRegistration clientRegistration) {}
+    default void clientRegistered(ClientRegistration clientRegistration) {
+    }
 
-    default void togglesBackedUp(ToggleCollection toggleCollection) {}
+    default void togglesBackedUp(String toggleCollection) {
+    }
 
-    default void toggleBackupRestored(ToggleCollection toggleCollection) {}
+    default void toggleBackupRestored(String toggleCollection) {
+    }
 
-    default void togglesBootstrapped(ToggleCollection toggleCollection) {}
+    default void togglesBootstrapped(String toggleCollection) {
+    }
 
-    default void featuresBootstrapped(FeatureCollection featureCollection) {}
+    default void featuresBootstrapped(String featureCollection) {
+    }
 
-    default void featuresBackedUp(FeatureCollection featureCollection) {}
+    default void featuresBackedUp(String featureCollection) {
+    }
 
-    default void featuresBackupRestored(FeatureCollection featureCollection) {}
+    default void featuresBackupRestored(String featureCollection) {
+    }
 
-    default void impression(ImpressionEvent impressionEvent) {}
+    default void impression(ImpressionEvent impressionEvent) {
+    }
 }

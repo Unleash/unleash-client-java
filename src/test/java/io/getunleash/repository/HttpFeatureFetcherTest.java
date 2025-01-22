@@ -61,7 +61,7 @@ public class HttpFeatureFetcherTest {
                                         .withBodyFile("features-v2-with-segments.json")));
 
         ClientFeaturesResponse response = fetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+        FeatureToggle featureX = response.getMessage().getToggle("featureX");
 
         assertThat(featureX.isEnabled()).isTrue();
 

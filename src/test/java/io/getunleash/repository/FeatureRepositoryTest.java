@@ -225,7 +225,7 @@ public class FeatureRepositoryTest {
         // toggles are correct
         repo.addConsumer(
                 (fc) -> {
-                    assertThat(fc.getToggleCollection().getFeatures()).hasSize(5);
+                    assertThat(fc.getMessage().getFeatures()).hasSize(5);
                 });
     }
 

@@ -10,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +25,8 @@ public class HttpFeatureFetcher implements FeatureFetcher {
 
     public HttpFeatureFetcher(UnleashConfig config) {
         this.config = config;
-        this.toggleUrl =
-                config.getUnleashURLs()
-                        .getFetchTogglesURL(config.getProjectName(), config.getNamePrefix());
+        this.toggleUrl = config.getUnleashURLs()
+                .getFetchTogglesURL(config.getProjectName(), config.getNamePrefix());
     }
 
     @Override
@@ -54,16 +55,14 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         if (responseCode < 300) {
             etag = Optional.ofNullable(request.getHeaderField("ETag"));
 
-            try (BufferedReader reader =
-                    new BufferedReader(
-                            new InputStreamReader(
-                                    (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(
+                            (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
-                FeatureCollection features = JsonFeatureParser.fromJson(reader);
-                return new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.CHANGED,
-                        features.getToggleCollection(),
-                        features.getSegmentCollection());
+                String clientFeatures = reader.lines()
+                        .collect(Collectors.joining("\n"));
+
+                return ClientFeaturesResponse.updated(clientFeatures);
             }
         } else if (followRedirect
                 && (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
@@ -71,13 +70,9 @@ public class HttpFeatureFetcher implements FeatureFetcher {
                         || responseCode == HttpURLConnection.HTTP_SEE_OTHER)) {
             return followRedirect(request);
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-            return new ClientFeaturesResponse(
-                    ClientFeaturesResponse.Status.NOT_CHANGED, responseCode);
+            return ClientFeaturesResponse.notChanged();
         } else {
-            return new ClientFeaturesResponse(
-                    ClientFeaturesResponse.Status.UNAVAILABLE,
-                    responseCode,
-                    getLocationHeader(request));
+            return ClientFeaturesResponse.unavailable(responseCode);
         }
     }
 

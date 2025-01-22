@@ -23,8 +23,6 @@ public class DefaultUnleash implements Unleash {
 
     private static ConcurrentHashMap<String, LongAdder> initCounts = new ConcurrentHashMap<>();
 
-    public static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
-
     private final UnleashMetricService metricService;
     private final FeatureRepository featureRepository;
     private final UnleashContextProvider contextProvider;

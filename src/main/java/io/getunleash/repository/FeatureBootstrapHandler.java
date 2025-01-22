@@ -1,14 +1,11 @@
 package io.getunleash.repository;
 
-import com.google.gson.JsonSyntaxException;
-import io.getunleash.UnleashException;
+import java.util.Optional;
+
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashEvent;
 import io.getunleash.event.UnleashSubscriber;
-import io.getunleash.lang.Nullable;
 import io.getunleash.util.UnleashConfig;
-import java.io.StringReader;
-import java.util.Collections;
 
 public class FeatureBootstrapHandler {
     private final EventDispatcher eventDispatcher;
@@ -23,35 +20,19 @@ public class FeatureBootstrapHandler {
         this.eventDispatcher = new EventDispatcher(unleashConfig);
     }
 
-    public FeatureCollection parse(@Nullable String jsonString) {
-        if (jsonString != null) {
-            try (StringReader stringReader = new StringReader(jsonString)) {
-                FeatureCollection featureCollection = JsonFeatureParser.fromJson(stringReader);
-                eventDispatcher.dispatch(new FeatureBootstrapRead(featureCollection));
-                return featureCollection;
-            } catch (IllegalStateException | JsonSyntaxException ise) {
-                eventDispatcher.dispatch(
-                        new UnleashException("Failed to read toggle bootstrap", ise));
-            }
-        }
-        return new FeatureCollection(
-                new ToggleCollection(Collections.emptyList()),
-                new SegmentCollection(Collections.emptyList()));
-    }
-
-    public FeatureCollection read() {
+    public Optional<String> read() {
         if (toggleBootstrapProvider != null) {
-            return parse(toggleBootstrapProvider.read());
+            String toggleBootstrap = toggleBootstrapProvider.read();
+            eventDispatcher.dispatch(new FeatureBootstrapRead(toggleBootstrap));
+            return Optional.of(toggleBootstrap);
         }
-        return new FeatureCollection(
-                new ToggleCollection(Collections.emptyList()),
-                new SegmentCollection(Collections.emptyList()));
+        return Optional.empty();
     }
 
     public static class FeatureBootstrapRead implements UnleashEvent {
-        private final FeatureCollection featureCollection;
+        private final String featureCollection;
 
-        public FeatureBootstrapRead(FeatureCollection featureCollection) {
+        public FeatureBootstrapRead(String featureCollection) {
             this.featureCollection = featureCollection;
         }
 

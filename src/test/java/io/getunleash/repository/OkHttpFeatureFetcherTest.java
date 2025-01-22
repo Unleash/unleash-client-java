@@ -47,7 +47,7 @@ public class OkHttpFeatureFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = okHttpToggleFetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+        FeatureToggle featureX = response.getMessage().getToggle("featureX");
 
         assertThat(featureX.isEnabled()).isTrue();
 
@@ -71,7 +71,7 @@ public class OkHttpFeatureFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+        FeatureToggle featureX = response.getMessage().getToggle("featureX");
 
         assertThat(featureX.isEnabled()).isTrue();
 
@@ -95,7 +95,7 @@ public class OkHttpFeatureFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("Test.variants");
+        FeatureToggle featureX = response.getMessage().getToggle("Test.variants");
 
         assertThat(featureX.isEnabled()).isTrue();
         assertThat(featureX.getVariants().get(0).getName()).isEqualTo("variant1");
@@ -325,7 +325,7 @@ public class OkHttpFeatureFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher fetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+        FeatureToggle featureX = response.getMessage().getToggle("featureX");
 
         assertThat(featureX.isEnabled()).isTrue();
 
@@ -351,7 +351,7 @@ public class OkHttpFeatureFetcherTest {
                                         .withBodyFile("features-v2-with-segments.json")));
         OkHttpFeatureFetcher fetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+        FeatureToggle featureX = response.getMessage().getToggle("featureX");
 
         assertThat(featureX.isEnabled()).isTrue();
 

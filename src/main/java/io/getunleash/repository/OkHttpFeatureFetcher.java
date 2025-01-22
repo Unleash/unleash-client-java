@@ -24,11 +24,10 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
             tempDir = Files.createTempDirectory("http_cache").toFile();
         } catch (IOException ignored) {
         }
-        OkHttpClient.Builder builder =
-                new OkHttpClient.Builder()
-                        .connectTimeout(unleashConfig.getFetchTogglesConnectTimeout())
-                        .callTimeout(unleashConfig.getFetchTogglesReadTimeout())
-                        .followRedirects(true);
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .connectTimeout(unleashConfig.getFetchTogglesConnectTimeout())
+                .callTimeout(unleashConfig.getFetchTogglesReadTimeout())
+                .followRedirects(true);
         if (tempDir != null) {
             builder = builder.cache(new Cache(tempDir, 1024 * 1024 * 50));
         }
@@ -36,62 +35,49 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
             builder = builder.proxy(unleashConfig.getProxy());
         }
 
-        this.toggleUrl =
-                Objects.requireNonNull(
-                        HttpUrl.get(
-                                unleashConfig
-                                        .getUnleashURLs()
-                                        .getFetchTogglesURL(
-                                                unleashConfig.getProjectName(),
-                                                unleashConfig.getNamePrefix())));
+        this.toggleUrl = Objects.requireNonNull(
+                HttpUrl.get(
+                        unleashConfig
+                                .getUnleashURLs()
+                                .getFetchTogglesURL(
+                                        unleashConfig.getProjectName(),
+                                        unleashConfig.getNamePrefix())));
         this.client = OkHttpClientConfigurer.configureInterceptor(unleashConfig, builder.build());
     }
 
     public OkHttpFeatureFetcher(UnleashConfig unleashConfig, OkHttpClient client) {
         this.client = OkHttpClientConfigurer.configureInterceptor(unleashConfig, client);
-        this.toggleUrl =
-                Objects.requireNonNull(
-                        HttpUrl.get(
-                                unleashConfig
-                                        .getUnleashURLs()
-                                        .getFetchTogglesURL(
-                                                unleashConfig.getProjectName(),
-                                                unleashConfig.getNamePrefix())));
+        this.toggleUrl = Objects.requireNonNull(
+                HttpUrl.get(
+                        unleashConfig
+                                .getUnleashURLs()
+                                .getFetchTogglesURL(
+                                        unleashConfig.getProjectName(),
+                                        unleashConfig.getNamePrefix())));
     }
 
     @Override
     public ClientFeaturesResponse fetchFeatures() throws UnleashException {
         Request request = new Request.Builder().url(toggleUrl).get().build();
-        HttpUrl location = toggleUrl;
         int code = 200;
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 if (response.networkResponse() != null
                         && response.networkResponse().code() == 304) {
-                    return new ClientFeaturesResponse(
-                            ClientFeaturesResponse.Status.NOT_CHANGED, 304);
+                    ClientFeaturesResponse.notChanged();
                 }
-                location = response.request().url();
-                code = response.code();
-                FeatureCollection features =
-                        JsonFeatureParser.fromJson(
-                                Objects.requireNonNull(response.body()).charStream());
-                return new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.CHANGED,
-                        features.getToggleCollection(),
-                        features.getSegmentCollection());
+                String features = response.body().string();
+
+                return ClientFeaturesResponse.updated(features);
             } else if (response.code() == 304) {
-                return new ClientFeaturesResponse(
-                        FeatureToggleResponse.Status.NOT_CHANGED, response.code());
+                return ClientFeaturesResponse.notChanged();
             } else {
-                return new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.UNAVAILABLE, response.code());
+                return ClientFeaturesResponse.unavailable(response.code());
             }
         } catch (IOException | NullPointerException ioEx) {
             throw new UnleashException("Could not fetch toggles", ioEx);
         } catch (IllegalStateException | JsonSyntaxException ex) {
-            return new ClientFeaturesResponse(
-                    ClientFeaturesResponse.Status.UNAVAILABLE, code, location.toString());
+            return ClientFeaturesResponse.unavailable(code);
         }
     }
 }

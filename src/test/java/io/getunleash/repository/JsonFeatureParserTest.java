@@ -33,8 +33,8 @@ public class JsonFeatureParserTest {
         Reader content = getFileReader("/features-v2-with-segments.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
 
-        assertThat(featureCollection.getToggleCollection().getFeatures()).hasSize(5);
-        assertThat(featureCollection.getToggleCollection().getToggle("featureX").isEnabled())
+        assertThat(featureCollection.getMessage().getFeatures()).hasSize(5);
+        assertThat(featureCollection.getMessage().getToggle("featureX").isEnabled())
                 .isTrue();
     }
 
@@ -42,7 +42,7 @@ public class JsonFeatureParserTest {
     public void should_deserialize_with_one_strategy() throws IOException {
         Reader content = getFileReader("/features-v2-with-segments.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
-        FeatureToggle featureY = featureCollection.getToggleCollection().getToggle("featureY");
+        FeatureToggle featureY = featureCollection.getMessage().getToggle("featureY");
 
         assertThat(featureY.getStrategies()).hasSize(1);
         assertThat(featureY.getStrategies().get(0).getName()).isEqualTo("baz");
@@ -53,7 +53,7 @@ public class JsonFeatureParserTest {
     public void should_deserialize_with_multiple_strategies() throws IOException {
         Reader content = getFileReader("/features-v2-with-segments.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
-        FeatureToggle feature = featureCollection.getToggleCollection().getToggle("featureZ");
+        FeatureToggle feature = featureCollection.getMessage().getToggle("featureZ");
 
         assertThat(feature.getStrategies()).hasSize(2);
         assertThat(feature.getStrategies().get(1).getName()).isEqualTo("hola");
@@ -77,14 +77,14 @@ public class JsonFeatureParserTest {
         Reader content = getFileReader("/features-v2-empty.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
 
-        assertThat(featureCollection.getToggleCollection().getFeatures()).hasSize(0);
+        assertThat(featureCollection.getMessage().getFeatures()).hasSize(0);
     }
 
     @Test
     public void should_deserialize_list_of_toggles_with_variants() throws IOException {
         Reader content = getFileReader("/features-v2-with-segments.json");
         FeatureCollection featureCollection = JsonFeatureParser.fromJson(content);
-        ToggleCollection toggleCollection = featureCollection.getToggleCollection();
+        ToggleCollection toggleCollection = featureCollection.getMessage();
 
         assertThat(toggleCollection.getFeatures()).hasSize(5);
         assertThat(toggleCollection.getToggle("Test.old").isEnabled()).isTrue();

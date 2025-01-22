@@ -68,7 +68,7 @@ public class HttpToggleFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+        FeatureToggle featureX = response.getMessage().getToggle("featureX");
 
         assertThat(featureX.isEnabled()).isTrue();
 
@@ -92,7 +92,7 @@ public class HttpToggleFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+        FeatureToggle featureX = response.getMessage().getToggle("featureX");
 
         assertThat(featureX.isEnabled()).isTrue();
 
@@ -116,7 +116,7 @@ public class HttpToggleFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         HttpToggleFetcher httpToggleFetcher = new HttpToggleFetcher(config);
         FeatureToggleResponse response = httpToggleFetcher.fetchToggles();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("Test.variants");
+        FeatureToggle featureX = response.getMessage().getToggle("Test.variants");
 
         assertThat(featureX.isEnabled()).isTrue();
         assertThat(featureX.getVariants().get(0).getName()).isEqualTo("variant1");

@@ -1,20 +1,20 @@
 package io.getunleash.repository;
 
 import com.google.gson.JsonParseException;
-import io.getunleash.FeatureToggle;
 import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashEvent;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.util.UnleashConfig;
 import java.io.*;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Deprecated()
-public class ToggleBackupHandlerFile implements BackupHandler<ToggleCollection> {
+public class ToggleBackupHandlerFile implements BackupHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ToggleBackupHandlerFile.class);
 
     private final String backupFile;
@@ -26,13 +26,12 @@ public class ToggleBackupHandlerFile implements BackupHandler<ToggleCollection> 
     }
 
     @Override
-    public ToggleCollection read() {
+    public Optional<String> read() {
         LOG.info("Unleash will try to load feature toggle states from temporary backup");
-        try (FileReader reader = new FileReader(backupFile)) {
-            BufferedReader br = new BufferedReader(reader);
-            ToggleCollection toggleCollection = JsonToggleParser.fromJson(br);
-            eventDispatcher.dispatch(new ToggleBackupRead(toggleCollection));
-            return toggleCollection;
+        try (BufferedReader reader = new BufferedReader(new FileReader(backupFile))) {
+            String clientFeatures = reader.lines().collect(Collectors.joining("\n"));
+            eventDispatcher.dispatch(new ToggleBackupRead(clientFeatures));
+            return Optional.of(clientFeatures);
         } catch (FileNotFoundException e) {
             LOG.info(
                     " Unleash could not find the backup-file '"
@@ -43,15 +42,15 @@ public class ToggleBackupHandlerFile implements BackupHandler<ToggleCollection> 
             eventDispatcher.dispatch(
                     new UnleashException("Failed to read backup file: " + backupFile, e));
         }
-        List<FeatureToggle> emptyList = Collections.emptyList();
-        return new ToggleCollection(emptyList);
+
+        return Optional.empty();
     }
 
     @Override
-    public void write(ToggleCollection toggleCollection) {
+    public void write(String clientFeatures) {
         try (FileWriter writer = new FileWriter(backupFile)) {
-            writer.write(JsonToggleParser.toJsonString(toggleCollection));
-            eventDispatcher.dispatch(new ToggleBackupWritten(toggleCollection));
+            writer.write(clientFeatures);
+            eventDispatcher.dispatch(new ToggleBackupWritten(clientFeatures));
         } catch (IOException e) {
             eventDispatcher.dispatch(
                     new UnleashException(
@@ -62,9 +61,9 @@ public class ToggleBackupHandlerFile implements BackupHandler<ToggleCollection> 
 
     private static class ToggleBackupRead implements UnleashEvent {
 
-        private final ToggleCollection toggleCollection;
+        private final String toggleCollection;
 
-        private ToggleBackupRead(ToggleCollection toggleCollection) {
+        private ToggleBackupRead(String toggleCollection) {
             this.toggleCollection = toggleCollection;
         }
 
@@ -76,9 +75,9 @@ public class ToggleBackupHandlerFile implements BackupHandler<ToggleCollection> 
 
     private static class ToggleBackupWritten implements UnleashEvent {
 
-        private final ToggleCollection toggleCollection;
+        private final String toggleCollection;
 
-        private ToggleBackupWritten(ToggleCollection toggleCollection) {
+        private ToggleBackupWritten(String toggleCollection) {
             this.toggleCollection = toggleCollection;
         }
 

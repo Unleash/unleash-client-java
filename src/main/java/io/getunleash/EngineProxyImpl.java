@@ -4,26 +4,14 @@ import io.getunleash.engine.UnleashEngine;
 import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
-import io.getunleash.repository.FeatureCollection;
 import io.getunleash.repository.FeatureRepositoryImpl;
 import io.getunleash.repository.YggdrasilAdapters;
-import io.getunleash.strategy.ApplicationHostnameStrategy;
-import io.getunleash.strategy.DefaultStrategy;
-import io.getunleash.strategy.FlexibleRolloutStrategy;
-import io.getunleash.strategy.GradualRolloutRandomStrategy;
-import io.getunleash.strategy.GradualRolloutSessionIdStrategy;
-import io.getunleash.strategy.GradualRolloutUserIdStrategy;
-import io.getunleash.strategy.RemoteAddressStrategy;
 import io.getunleash.strategy.Strategy;
-import io.getunleash.strategy.UserWithIdStrategy;
 import io.getunleash.util.UnleashConfig;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,45 +20,23 @@ public class EngineProxyImpl implements EngineProxy {
     UnleashEngine unleashEngine;
     FeatureRepositoryImpl featureRepository;
     UnleashMetricService metricService;
-    private static final List<Strategy> BUILTIN_STRATEGIES =
-            Arrays.asList(
-                    new DefaultStrategy(),
-                    new ApplicationHostnameStrategy(),
-                    new GradualRolloutRandomStrategy(),
-                    new GradualRolloutSessionIdStrategy(),
-                    new GradualRolloutUserIdStrategy(),
-                    new RemoteAddressStrategy(),
-                    new UserWithIdStrategy(),
-                    new FlexibleRolloutStrategy());
 
     public EngineProxyImpl(UnleashConfig unleashConfig, Strategy... strategies) {
         Map<String, Strategy> strategyMap = buildStrategyMap(strategies);
 
-        this.unleashEngine =
-                new UnleashEngine(
-                        strategyMap.values().stream()
-                                .map(YggdrasilAdapters::adapt)
-                                .collect(Collectors.toList()),
-                        Optional.ofNullable(unleashConfig.getFallbackStrategy())
-                                .map(YggdrasilAdapters::adapt)
-                                .orElse(null));
+        this.unleashEngine = new UnleashEngine(
+                strategyMap.values().stream()
+                        .map(YggdrasilAdapters::adapt)
+                        .collect(Collectors.toList()),
+                Optional.ofNullable(unleashConfig.getFallbackStrategy())
+                        .map(YggdrasilAdapters::adapt)
+                        .orElse(null));
 
         this.featureRepository = new FeatureRepositoryImpl(unleashConfig, unleashEngine);
-        this.metricService =
-                new UnleashMetricServiceImpl(
-                        unleashConfig, unleashConfig.getScheduledExecutor(), this.unleashEngine);
+        this.metricService = new UnleashMetricServiceImpl(
+                unleashConfig, unleashConfig.getScheduledExecutor(), this.unleashEngine);
 
         metricService.register(strategyMap.keySet());
-    }
-
-    @Override
-    public Segment getSegment(Integer id) {
-        return this.featureRepository.getSegment(id);
-    }
-
-    @Override
-    public void addConsumer(Consumer<FeatureCollection> consumer) {
-        this.featureRepository.addConsumer(consumer);
     }
 
     @Override
@@ -110,8 +76,6 @@ public class EngineProxyImpl implements EngineProxy {
 
     private static Map<String, Strategy> buildStrategyMap(@Nullable Strategy[] strategies) {
         Map<String, Strategy> map = new HashMap<>();
-
-        BUILTIN_STRATEGIES.forEach(strategy -> map.put(strategy.getName(), strategy));
 
         if (strategies != null) {
             for (Strategy strategy : strategies) {

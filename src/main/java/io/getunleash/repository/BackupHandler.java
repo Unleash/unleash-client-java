@@ -1,7 +1,9 @@
 package io.getunleash.repository;
 
-public interface BackupHandler<T> {
-    T read();
+import java.util.Optional;
 
-    void write(T collection);
+public interface BackupHandler {
+    Optional<String> read();
+
+    void write(String collection);
 }
