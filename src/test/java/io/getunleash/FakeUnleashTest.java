@@ -2,12 +2,11 @@ package io.getunleash;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.getunleash.variant.Variant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-
-import io.getunleash.variant.Variant;
 
 public class FakeUnleashTest {
 

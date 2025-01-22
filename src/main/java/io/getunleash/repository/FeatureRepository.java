@@ -3,7 +3,6 @@ package io.getunleash.repository;
 import io.getunleash.FeatureDefinition;
 import io.getunleash.UnleashContext;
 import io.getunleash.variant.Variant;
-
 import java.util.stream.Stream;
 
 public interface FeatureRepository {

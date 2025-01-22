@@ -1,8 +1,7 @@
 package io.getunleash;
 
-import java.util.function.BiPredicate;
-
 import io.getunleash.variant.Variant;
+import java.util.function.BiPredicate;
 
 public interface Unleash {
     default boolean isEnabled(String toggleName) {

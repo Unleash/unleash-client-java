@@ -9,7 +9,6 @@ import io.getunleash.repository.YggdrasilAdapters;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.Variant;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

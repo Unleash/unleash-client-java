@@ -9,7 +9,6 @@ import io.getunleash.engine.VariantDef;
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.variant.Variant;
-
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;

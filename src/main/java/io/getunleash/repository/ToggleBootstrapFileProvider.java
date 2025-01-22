@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +22,7 @@ public class ToggleBootstrapFileProvider implements ToggleBootstrapProvider {
     }
 
     /**
-     * Accepts path to file to read either as constructor parameter or as
-     * environment variable in
+     * Accepts path to file to read either as constructor parameter or as environment variable in
      * "UNLEASH_BOOTSTRAP_FILE"
      *
      * @param path - path to toggles file
@@ -67,9 +65,10 @@ public class ToggleBootstrapFileProvider implements ToggleBootstrapProvider {
         if (path != null) {
             if (path.startsWith("classpath:")) {
                 try {
-                    URL resource = getClass()
-                            .getClassLoader()
-                            .getResource(path.substring("classpath:".length()));
+                    URL resource =
+                            getClass()
+                                    .getClassLoader()
+                                    .getResource(path.substring("classpath:".length()));
                     if (resource != null) {
                         return Paths.get(resource.toURI()).toFile();
                     }

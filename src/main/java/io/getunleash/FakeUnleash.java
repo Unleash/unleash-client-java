@@ -2,7 +2,6 @@ package io.getunleash;
 
 import io.getunleash.lang.Nullable;
 import io.getunleash.variant.Variant;
-
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;

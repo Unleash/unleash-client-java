@@ -1,7 +1,6 @@
 package io.getunleash.variant;
 
 import io.getunleash.lang.Nullable;
-
 import java.util.Objects;
 import java.util.Optional;
 

@@ -13,7 +13,6 @@ import io.getunleash.util.Throttler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import io.getunleash.variant.Variant;
-
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -85,10 +84,11 @@ public class FeatureRepositoryImpl implements FeatureRepository {
         this.featureFetcher = fetcher;
         this.bootstrapper = bootstrapHandler;
         this.eventDispatcher = eventDispatcher;
-        this.throttler = new Throttler(
-                (int) unleashConfig.getFetchTogglesInterval(),
-                300,
-                unleashConfig.getUnleashURLs().getFetchTogglesURL());
+        this.throttler =
+                new Throttler(
+                        (int) unleashConfig.getFetchTogglesInterval(),
+                        300,
+                        unleashConfig.getUnleashURLs().getFetchTogglesURL());
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
@@ -111,9 +111,9 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                 updateFeatures(this.unleashConfig.getStartupExceptionHandler()).run();
             } else {
                 updateFeatures(
-                        e -> {
-                            throw e;
-                        })
+                                e -> {
+                                    throw e;
+                                })
                         .run();
             }
         }
