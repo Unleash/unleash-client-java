@@ -24,11 +24,11 @@ public interface UnleashSubscriber {
 
     default void clientRegistered(ClientRegistration clientRegistration) {}
 
-    default void featuresBootstrapped(String featureCollection) {}
+    default void featuresBootstrapped(FeatureSet featureCollection) {}
 
-    default void featuresBackedUp(String featureCollection) {}
+    default void featuresBackedUp(FeatureSet featureCollection) {}
 
-    default void featuresBackupRestored(String featureCollection) {}
+    default void featuresBackupRestored(FeatureSet featureCollection) {}
 
     default void impression(ImpressionEvent impressionEvent) {}
 }

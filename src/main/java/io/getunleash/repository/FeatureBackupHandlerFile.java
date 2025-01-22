@@ -3,6 +3,7 @@ package io.getunleash.repository;
 import com.google.gson.JsonParseException;
 import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
+import io.getunleash.event.FeatureSet;
 import io.getunleash.event.UnleashEvent;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.util.UnleashConfig;
@@ -69,7 +70,7 @@ public class FeatureBackupHandlerFile implements BackupHandler {
 
         @Override
         public void publishTo(UnleashSubscriber unleashSubscriber) {
-            unleashSubscriber.featuresBackupRestored(featureCollection);
+            unleashSubscriber.featuresBackupRestored(new FeatureSet(featureCollection));
         }
     }
 
@@ -83,7 +84,7 @@ public class FeatureBackupHandlerFile implements BackupHandler {
 
         @Override
         public void publishTo(UnleashSubscriber unleashSubscriber) {
-            unleashSubscriber.featuresBackedUp(featureCollection);
+            unleashSubscriber.featuresBackedUp((new FeatureSet(featureCollection)));
         }
     }
 }

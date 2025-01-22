@@ -15,7 +15,7 @@ public class FeatureDefinition {
         this.project = source.getProject();
     }
 
-    FeatureDefinition(String name, Optional<String> type, String project) {
+    public FeatureDefinition(String name, Optional<String> type, String project) {
         this.name = name;
         this.type = type;
         this.project = project;
