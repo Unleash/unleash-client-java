@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.Optional;
 import okhttp3.Cache;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -76,12 +77,13 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
             } else if (response.code() == 304) {
                 return ClientFeaturesResponse.notChanged();
             } else {
-                return ClientFeaturesResponse.unavailable(response.code());
+                return ClientFeaturesResponse.unavailable(
+                        response.code(), Optional.of(toggleUrl.toString()));
             }
         } catch (IOException | NullPointerException ioEx) {
             throw new UnleashException("Could not fetch toggles", ioEx);
         } catch (IllegalStateException | JsonSyntaxException ex) {
-            return ClientFeaturesResponse.unavailable(code);
+            return ClientFeaturesResponse.unavailable(code, Optional.of(toggleUrl.toString()));
         }
     }
 }

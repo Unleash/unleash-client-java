@@ -73,12 +73,12 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
             return ClientFeaturesResponse.notChanged();
         } else {
-            return ClientFeaturesResponse.unavailable(responseCode);
+            return ClientFeaturesResponse.unavailable(responseCode, getLocationHeader(request));
         }
     }
 
     private ClientFeaturesResponse followRedirect(HttpURLConnection request) throws IOException {
-        String newUrl = getLocationHeader(request);
+        String newUrl = getLocationHeader(request).get();
 
         request = openConnection(new URL(newUrl));
         request.connect();
@@ -90,8 +90,8 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         return getFeatureResponse(request, false);
     }
 
-    private String getLocationHeader(HttpURLConnection connection) {
-        return connection.getHeaderField("Location");
+    private Optional<String> getLocationHeader(HttpURLConnection connection) {
+        return Optional.ofNullable(connection.getHeaderField("Location"));
     }
 
     private HttpURLConnection openConnection(URL url) throws IOException {
