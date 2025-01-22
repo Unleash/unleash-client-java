@@ -24,17 +24,19 @@ public class EngineProxyImpl implements EngineProxy {
     public EngineProxyImpl(UnleashConfig unleashConfig, Strategy... strategies) {
         Map<String, Strategy> strategyMap = buildStrategyMap(strategies);
 
-        this.unleashEngine = new UnleashEngine(
-                strategyMap.values().stream()
-                        .map(YggdrasilAdapters::adapt)
-                        .collect(Collectors.toList()),
-                Optional.ofNullable(unleashConfig.getFallbackStrategy())
-                        .map(YggdrasilAdapters::adapt)
-                        .orElse(null));
+        this.unleashEngine =
+                new UnleashEngine(
+                        strategyMap.values().stream()
+                                .map(YggdrasilAdapters::adapt)
+                                .collect(Collectors.toList()),
+                        Optional.ofNullable(unleashConfig.getFallbackStrategy())
+                                .map(YggdrasilAdapters::adapt)
+                                .orElse(null));
 
         this.featureRepository = new FeatureRepositoryImpl(unleashConfig, unleashEngine);
-        this.metricService = new UnleashMetricServiceImpl(
-                unleashConfig, unleashConfig.getScheduledExecutor(), this.unleashEngine);
+        this.metricService =
+                new UnleashMetricServiceImpl(
+                        unleashConfig, unleashConfig.getScheduledExecutor(), this.unleashEngine);
 
         metricService.register(strategyMap.keySet());
     }

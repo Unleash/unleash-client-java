@@ -34,9 +34,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
     }
 
     public FeatureRepositoryImpl(
-            UnleashConfig unleashConfig,
-            BackupHandler featureBackupHandler,
-            UnleashEngine engine) {
+            UnleashConfig unleashConfig, BackupHandler featureBackupHandler, UnleashEngine engine) {
         this(
                 unleashConfig,
                 featureBackupHandler,
@@ -85,10 +83,11 @@ public class FeatureRepositoryImpl implements FeatureRepository {
         this.featureFetcher = fetcher;
         this.featureBootstrapHandler = bootstrapHandler;
         this.eventDispatcher = eventDispatcher;
-        this.throttler = new Throttler(
-                (int) unleashConfig.getFetchTogglesInterval(),
-                300,
-                unleashConfig.getUnleashURLs().getFetchTogglesURL());
+        this.throttler =
+                new Throttler(
+                        (int) unleashConfig.getFetchTogglesInterval(),
+                        300,
+                        unleashConfig.getUnleashURLs().getFetchTogglesURL());
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
@@ -111,9 +110,9 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                 updateFeatures(this.unleashConfig.getStartupExceptionHandler()).run();
             } else {
                 updateFeatures(
-                        e -> {
-                            throw e;
-                        })
+                                e -> {
+                                    throw e;
+                                })
                         .run();
             }
         }

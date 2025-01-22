@@ -24,10 +24,11 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
             tempDir = Files.createTempDirectory("http_cache").toFile();
         } catch (IOException ignored) {
         }
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .connectTimeout(unleashConfig.getFetchTogglesConnectTimeout())
-                .callTimeout(unleashConfig.getFetchTogglesReadTimeout())
-                .followRedirects(true);
+        OkHttpClient.Builder builder =
+                new OkHttpClient.Builder()
+                        .connectTimeout(unleashConfig.getFetchTogglesConnectTimeout())
+                        .callTimeout(unleashConfig.getFetchTogglesReadTimeout())
+                        .followRedirects(true);
         if (tempDir != null) {
             builder = builder.cache(new Cache(tempDir, 1024 * 1024 * 50));
         }
@@ -35,25 +36,27 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
             builder = builder.proxy(unleashConfig.getProxy());
         }
 
-        this.toggleUrl = Objects.requireNonNull(
-                HttpUrl.get(
-                        unleashConfig
-                                .getUnleashURLs()
-                                .getFetchTogglesURL(
-                                        unleashConfig.getProjectName(),
-                                        unleashConfig.getNamePrefix())));
+        this.toggleUrl =
+                Objects.requireNonNull(
+                        HttpUrl.get(
+                                unleashConfig
+                                        .getUnleashURLs()
+                                        .getFetchTogglesURL(
+                                                unleashConfig.getProjectName(),
+                                                unleashConfig.getNamePrefix())));
         this.client = OkHttpClientConfigurer.configureInterceptor(unleashConfig, builder.build());
     }
 
     public OkHttpFeatureFetcher(UnleashConfig unleashConfig, OkHttpClient client) {
         this.client = OkHttpClientConfigurer.configureInterceptor(unleashConfig, client);
-        this.toggleUrl = Objects.requireNonNull(
-                HttpUrl.get(
-                        unleashConfig
-                                .getUnleashURLs()
-                                .getFetchTogglesURL(
-                                        unleashConfig.getProjectName(),
-                                        unleashConfig.getNamePrefix())));
+        this.toggleUrl =
+                Objects.requireNonNull(
+                        HttpUrl.get(
+                                unleashConfig
+                                        .getUnleashURLs()
+                                        .getFetchTogglesURL(
+                                                unleashConfig.getProjectName(),
+                                                unleashConfig.getNamePrefix())));
     }
 
     @Override

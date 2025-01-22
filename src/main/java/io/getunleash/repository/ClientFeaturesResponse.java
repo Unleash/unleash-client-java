@@ -15,7 +15,8 @@ public final class ClientFeaturesResponse implements UnleashEvent {
     private final Status statusCode;
     private final int httpStatusCode;
 
-    private ClientFeaturesResponse(Status status, int httpStatusCode, Optional<String> clientFeatures) {
+    private ClientFeaturesResponse(
+            Status status, int httpStatusCode, Optional<String> clientFeatures) {
         this.statusCode = status;
         this.clientFeatures = clientFeatures;
         this.httpStatusCode = httpStatusCode;
@@ -56,7 +57,6 @@ public final class ClientFeaturesResponse implements UnleashEvent {
 
     @Override
     public void publishTo(UnleashSubscriber unleashSubscriber) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'publishTo'");
+        unleashSubscriber.togglesFetched(this);
     }
 }

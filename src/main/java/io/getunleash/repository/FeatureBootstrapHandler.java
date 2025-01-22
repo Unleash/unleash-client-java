@@ -1,11 +1,10 @@
 package io.getunleash.repository;
 
-import java.util.Optional;
-
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashEvent;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.util.UnleashConfig;
+import java.util.Optional;
 
 public class FeatureBootstrapHandler {
     private final EventDispatcher eventDispatcher;

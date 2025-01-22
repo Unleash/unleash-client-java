@@ -11,7 +11,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +24,9 @@ public class HttpFeatureFetcher implements FeatureFetcher {
 
     public HttpFeatureFetcher(UnleashConfig config) {
         this.config = config;
-        this.toggleUrl = config.getUnleashURLs()
-                .getFetchTogglesURL(config.getProjectName(), config.getNamePrefix());
+        this.toggleUrl =
+                config.getUnleashURLs()
+                        .getFetchTogglesURL(config.getProjectName(), config.getNamePrefix());
     }
 
     @Override
@@ -55,12 +55,12 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         if (responseCode < 300) {
             etag = Optional.ofNullable(request.getHeaderField("ETag"));
 
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(
-                            (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
+            try (BufferedReader reader =
+                    new BufferedReader(
+                            new InputStreamReader(
+                                    (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
-                String clientFeatures = reader.lines()
-                        .collect(Collectors.joining("\n"));
+                String clientFeatures = reader.lines().collect(Collectors.joining("\n"));
 
                 return ClientFeaturesResponse.updated(clientFeatures);
             }
