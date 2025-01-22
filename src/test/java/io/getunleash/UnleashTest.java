@@ -4,10 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import io.getunleash.repository.*;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-import java.util.*;
 import java.util.function.BiPredicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,112 +101,53 @@ public class UnleashTest {
 
     // @Test
     // public void should_register_custom_strategies() {
-    //         // custom strategy
-    //         Strategy customStrategy = mock(Strategy.class);
-    //         when(customStrategy.getName()).thenReturn("custom");
-    //         when(customStrategy.getResult(anyMap(), any(), anyList(),
-    //                         anyList())).thenCallRealMethod();
+    // // custom strategy
+    // Strategy customStrategy = mock(Strategy.class);
+    // when(customStrategy.getName()).thenReturn("custom");
+    // when(customStrategy.getResult(anyMap(), any(), anyList(),
+    // anyList())).thenCallRealMethod();
 
-    //         // setup a bootstrapper so our custom strategy is hydrated into the engine
-    //         ToggleBootstrapProvider bootstrapper = new ToggleBootstrapProvider() {
-    //                 @Override
-    //                 public String read() {
-    //                         return "{\"strategies\":[{\"name\":\"custom\"}]}";
-    //                 }
-    //         };
+    // // setup a bootstrapper so our custom strategy is hydrated into the engine
+    // ToggleBootstrapProvider bootstrapper = new ToggleBootstrapProvider() {
+    // @Override
+    // public String read() {
+    // return "{\"strategies\":[{\"name\":\"custom\"}]}";
+    // }
+    // };
 
-    //         UnleashConfig config = new UnleashConfig.Builder()
-    //                         .appName("test")
-    //                         .unleashAPI("http://localhost:4242/api/")
-    //                         .build();
+    // UnleashConfig config = new UnleashConfig.Builder()
+    // .appName("test")
+    // .unleashAPI("http://localhost:4242/api/")
+    // .build();
 
-    //         Unleash unleash = new DefaultUnleash(config, customStrategy);
-    //         // new UnleashEngineStateHandler((DefaultUnleash) unleash)
-    //         //                 .setState(
-    //         //                                 new FeatureToggle(
-    //         //                                                 "test", true,
-    //         //                                                 asList(new
+    // Unleash unleash = new DefaultUnleash(config, customStrategy);
+    // // new UnleashEngineStateHandler((DefaultUnleash) unleash)
+    // // .setState(
+    // // new FeatureToggle(
+    // // "test", true,
+    // // asList(new
     // ActivationStrategy("custom", null))));
-    //         unleash.isEnabled("test");
+    // unleash.isEnabled("test");
 
-    //         verify(customStrategy, times(1)).isEnabled(any(),
-    //                         any(UnleashContext.class));
-    // }
-
-    // @Test
-    // public void should_support_multiple_strategies() {
-    // ActivationStrategy strategy1 = new ActivationStrategy("unknown", null);
-    // ActivationStrategy activeStrategy = new ActivationStrategy("default", null);
-
-    // FeatureToggle featureToggle =
-    // new FeatureToggle("test", true, asList(strategy1, activeStrategy));
-
-    // stateHandler.setState(featureToggle);
-
-    // assertThat(unleash.isEnabled("test")).isTrue();
-    // }
-
-    // @Test
-    // public void shouldSupportMultipleRolloutStrategies() {
-    // Map<String, String> rollout100percent = new HashMap<>();
-    // rollout100percent.put("rollout", "100");
-    // rollout100percent.put("stickiness", "default");
-    // rollout100percent.put("groupId", "rollout");
-
-    // Constraint user6Constraint = new Constraint("userId", Operator.IN,
-    // singletonList("6"));
-    // Constraint user9Constraint = new Constraint("userId", Operator.IN,
-    // singletonList("9"));
-
-    // ActivationStrategy strategy1 =
-    // new ActivationStrategy(
-    // "flexibleRollout",
-    // rollout100percent,
-    // singletonList(user6Constraint),
-    // null,
-    // null);
-    // ActivationStrategy strategy2 =
-    // new ActivationStrategy(
-    // "flexibleRollout",
-    // rollout100percent,
-    // singletonList(user9Constraint),
-    // null,
-    // null);
-
-    // FeatureToggle featureToggle = new FeatureToggle("test", true,
-    // asList(strategy1, strategy2));
-
-    // stateHandler.setState(featureToggle);
-
-    // assertThat(unleash.isEnabled("test",
-    // UnleashContext.builder().userId("1").build()))
-    // .isFalse();
-    // assertThat(unleash.isEnabled("test",
-    // UnleashContext.builder().userId("6").build()))
-    // .isTrue();
-    // assertThat(unleash.isEnabled("test",
-    // UnleashContext.builder().userId("7").build()))
-    // .isFalse();
-    // assertThat(unleash.isEnabled("test",
-    // UnleashContext.builder().userId("9").build()))
-    // .isTrue();
+    // verify(customStrategy, times(1)).isEnabled(any(),
+    // any(UnleashContext.class));
     // }
 
     // @Test
     // public void should_support_context_provider() {
-    // UnleashContext context = UnleashContext.builder().userId("111").build();
-    // when(contextProvider.getContext()).thenReturn(context);
+    //     UnleashContext context = UnleashContext.builder().userId("111").build();
+    //     when(contextProvider.getContext()).thenReturn(context);
 
-    // // Set up a toggleName using UserWithIdStrategy
-    // Map<String, String> params = new HashMap<>();
-    // params.put("userIds", "123, 111, 121");
-    // ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-    // FeatureToggle featureToggle = new FeatureToggle("test", true,
-    // asList(strategy));
+    //     // Set up a toggleName using UserWithIdStrategy
+    //     Map<String, String> params = new HashMap<>();
+    //     params.put("userIds", "123, 111, 121");
+    //     ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
+    //     FeatureToggle featureToggle = new FeatureToggle("test", true,
+    //             asList(strategy));
 
-    // stateHandler.setState(featureToggle);
+    //     stateHandler.setState(featureToggle);
 
-    // assertThat(unleash.isEnabled("test")).isTrue();
+    //     assertThat(unleash.isEnabled("test")).isTrue();
     // }
 
     // @Test
@@ -291,232 +230,4 @@ public class UnleashTest {
     // assertThat(bucket.getToggles().get("test").getNo()).isEqualTo(1);
     // }
 
-    // @Test
-    // public void
-    // get_default_empty_variant_when_disabled_and_no_default_value_is_specified() {
-    // UnleashContext context = UnleashContext.builder().userId("1").build();
-
-    // stateHandler.setState(
-    // new FeatureToggle("test", false, asList(new ActivationStrategy("default",
-    // null))));
-
-    // final Variant result = unleash.getVariant("test", context);
-
-    // assertThat(result).isNotNull();
-    // assertThat(result.getName()).isEqualTo("disabled");
-    // assertThat(result.getPayload().map(Payload::getValue)).isEmpty();
-    // assertThat(result.isEnabled()).isFalse();
-    // }
-
-    // @Test
-    // public void get_first_variant() {
-    // UnleashContext context = UnleashContext.builder().userId("356").build();
-
-    // // Set up a toggleName using UserWithIdStrategy
-    // Map<String, String> params = new HashMap<>();
-    // params.put("userIds", "123, 111, 121, 356");
-    // ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-    // FeatureToggle featureToggle =
-    // new FeatureToggle("test", true, asList(strategy), getTestVariants());
-
-    // stateHandler.setState(featureToggle);
-
-    // final Variant result = unleash.getVariant("test", context);
-
-    // assertThat(result).isNotNull();
-    // assertThat(result.getName()).isEqualTo("en");
-    // assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("en");
-    // assertThat(result.isEnabled()).isTrue();
-    // }
-
-    // @Test
-    // public void get_second_variant() {
-    // UnleashContext context = UnleashContext.builder().userId("5").build();
-
-    // // Set up a toggleName using UserWithIdStrategy
-    // Map<String, String> params = new HashMap<>();
-    // params.put("userIds", "123, 5, 121, 13");
-    // ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-    // FeatureToggle featureToggle =
-    // new FeatureToggle("test", true, asList(strategy), getTestVariants());
-
-    // stateHandler.setState(featureToggle);
-
-    // final Variant result = unleash.getVariant("test", context);
-
-    // assertThat(result).isNotNull();
-    // assertThat(result.getName()).isEqualTo("to");
-    // assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("to");
-    // assertThat(result.isEnabled()).isTrue();
-    // }
-
-    // @Test
-    // public void get_disabled_variant_without_context() {
-
-    // stateHandler.setState(
-    // new FeatureToggle("test", true, asList(new ActivationStrategy("default",
-    // null))));
-
-    // final Variant result = unleash.getVariant("test");
-
-    // assertThat(result).isNotNull();
-    // assertThat(result.getName()).isEqualTo("disabled");
-    // assertThat(result.getPayload().map(Payload::getValue)).isEmpty();
-    // assertThat(result.isEnabled()).isFalse();
-    // }
-
-    // @Test
-    // public void get_first_variant_with_context_provider() {
-
-    // UnleashContext context = UnleashContext.builder().userId("356").build();
-    // when(contextProvider.getContext()).thenReturn(context);
-
-    // // Set up a toggleName using UserWithIdStrategy
-    // Map<String, String> params = new HashMap<>();
-    // params.put("userIds", "123, 111, 356");
-    // ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-    // FeatureToggle featureToggle =
-    // new FeatureToggle("test", true, asList(strategy), getTestVariants());
-
-    // stateHandler.setState(featureToggle);
-
-    // final Variant result = unleash.getVariant("test");
-
-    // assertThat(result).isNotNull();
-    // assertThat(result.getName()).isEqualTo("en");
-    // assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("en");
-    // assertThat(result.isEnabled()).isTrue();
-    // }
-
-    // @Test
-    // public void get_second_variant_with_context_provider() {
-
-    // UnleashContext context = UnleashContext.builder().userId("5").build();
-    // when(contextProvider.getContext()).thenReturn(context);
-
-    // // Set up a toggleName using UserWithIdStrategy
-    // Map<String, String> params = new HashMap<>();
-    // params.put("userIds", "123, 5, 121");
-    // ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-    // FeatureToggle featureToggle =
-    // new FeatureToggle("test", true, asList(strategy), getTestVariants());
-
-    // stateHandler.setState(featureToggle);
-
-    // final Variant result = unleash.getVariant("test");
-
-    // assertThat(result).isNotNull();
-    // assertThat(result.getName()).isEqualTo("to");
-    // assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("to");
-    // assertThat(result.isEnabled()).isTrue();
-    // }
-
-    // @Test
-    // public void should_be_enabled_with_strategy_constraints() {
-    // List<Constraint> constraints = new ArrayList<>();
-    // constraints.add(new Constraint("environment", Operator.IN,
-    // Arrays.asList("test")));
-    // ActivationStrategy activeStrategy =
-    // new ActivationStrategy(
-    // "default",
-    // null,
-    // constraints,
-    // Collections.emptyList(),
-    // Collections.emptyList());
-
-    // FeatureToggle featureToggle = new FeatureToggle("test", true,
-    // asList(activeStrategy));
-
-    // stateHandler.setState(featureToggle);
-
-    // assertThat(unleash.isEnabled("test")).isTrue();
-    // }
-
-    // @Test
-    // public void should_handle_complex_segment_chains() {
-    // UnleashConfig config =
-    // UnleashConfig.builder()
-    // .appName("test")
-    // .unleashAPI("http://unleash.org")
-    // .backupFile(
-    // getClass().getResource("/unleash-repo-v2-advanced.json").getFile())
-    // .build();
-    // FeatureBackupHandlerFile backupHandler = new
-    // FeatureBackupHandlerFile(config);
-    // FeatureCollection featureCollection = backupHandler.read();
-
-    // stateHandler.setState(featureCollection);
-
-    // UnleashContext context =
-    // UnleashContext.builder()
-    // .addProperty("wins", "6")
-    // .addProperty("dateLastWin", "2022-06-01T12:00:00.000Z")
-    // .addProperty("followers", "1500")
-    // .addProperty("single", "true")
-    // .addProperty("catOrDog", "cat")
-    // .build();
-
-    // when(contextProvider.getContext()).thenReturn(context);
-    // assertThat(unleash.isEnabled("Test.variants")).isTrue();
-    // }
-
-    // @Test
-    // public void should_handle_complex_segment_chains_2() {
-    // UnleashConfig config =
-    // UnleashConfig.builder()
-    // .appName("test")
-    // .unleashAPI("http://http://unleash.org")
-    // .backupFile(
-    // getClass().getResource("/unleash-repo-v2-advanced.json").getFile())
-    // .build();
-    // FeatureBackupHandlerFile backupHandler = new
-    // FeatureBackupHandlerFile(config);
-    // FeatureCollection featureCollection = backupHandler.read();
-
-    // Unleash overrideUnleash = new DefaultUnleash(config);
-    // new UnleashEngineStateHandler((DefaultUnleash)
-    // overrideUnleash).setState(featureCollection);
-
-    // UnleashContext context =
-    // UnleashContext.builder()
-    // .addProperty("wins", "4")
-    // .addProperty("dateLastWin", "2022-06-01T12:00:00.000Z")
-    // .addProperty("followers", "900")
-    // .addProperty("single", "false")
-    // .addProperty("catOrDog", "dog")
-    // .build();
-
-    // when(contextProvider.getContext()).thenReturn(context);
-    // assertThat(overrideUnleash.isEnabled("Test.variants")).isFalse();
-    // }
-
-    // @Test
-    // public void empty_variants_returns_disabled_variant() {
-    // UnleashContext context = UnleashContext.builder().build();
-
-    // Map<String, String> params = new HashMap<>();
-    // params.put("rollout", "100");
-    // params.put("stickiness", "default");
-    // params.put("groupId", "test");
-
-    // ActivationStrategy strategy = new ActivationStrategy("flexibleRollout",
-    // params);
-    // FeatureToggle featureToggle =
-    // new FeatureToggle("test", true, asList(strategy), Collections.emptyList());
-
-    // stateHandler.setState(featureToggle);
-    // final Variant result = unleash.getVariant("test", context);
-
-    // assertThat(result.getName()).isEqualTo("disabled");
-    // assertThat(result.isEnabled()).isFalse();
-    // assertThat(result.isFeatureEnabled()).isTrue();
-    // }
-
-    // private List<VariantDefinition> getTestVariants() {
-    // return asList(
-    // new VariantDefinition(
-    // "en", 50, new Payload("string", "en"), Collections.emptyList()),
-    // new VariantDefinition(
-    // "to", 50, new Payload("string", "to"), Collections.emptyList()));
-    // }
 }
