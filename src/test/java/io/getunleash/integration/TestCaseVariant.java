@@ -1,6 +1,6 @@
 package io.getunleash.integration;
 
-import io.getunleash.Variant;
+import io.getunleash.variant.Variant;
 
 public class TestCaseVariant {
     private String description;

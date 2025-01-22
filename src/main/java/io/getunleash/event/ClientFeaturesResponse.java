@@ -1,7 +1,5 @@
-package io.getunleash.repository;
+package io.getunleash.event;
 
-import io.getunleash.event.UnleashEvent;
-import io.getunleash.event.UnleashSubscriber;
 import java.util.Optional;
 
 public final class ClientFeaturesResponse implements UnleashEvent {

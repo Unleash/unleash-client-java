@@ -8,9 +8,10 @@ import com.google.gson.reflect.TypeToken;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
-import io.getunleash.Variant;
 import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.util.UnleashConfig;
+import io.getunleash.variant.Variant;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +27,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
@@ -36,8 +38,8 @@ public class ClientSpecificationTest {
     @TestFactory
     public Stream<DynamicTest> clientSpecification() throws IOException, URISyntaxException {
         Reader content = getFileReader("/client-specification/specifications/index.json");
-        List<String> testDefinitions =
-                new Gson().fromJson(content, new TypeToken<List<String>>() {}.getType());
+        List<String> testDefinitions = new Gson().fromJson(content, new TypeToken<List<String>>() {
+        }.getType());
 
         List<DynamicTest> tests = new ArrayList<>();
         for (String name : testDefinitions) {
@@ -55,19 +57,17 @@ public class ClientSpecificationTest {
         // Create all test cases in testDefinition.
         return testDefinition.getTests().stream()
                 .map(
-                        test ->
-                                DynamicTest.dynamicTest(
-                                        fileName + "/" + test.getDescription(),
-                                        () -> {
-                                            boolean result =
-                                                    unleash.isEnabled(
-                                                            test.getToggleName(),
-                                                            buildContext(test.getContext()));
-                                            assertEquals(
-                                                    test.getExpectedResult(),
-                                                    result,
-                                                    test.getDescription());
-                                        }))
+                        test -> DynamicTest.dynamicTest(
+                                fileName + "/" + test.getDescription(),
+                                () -> {
+                                    boolean result = unleash.isEnabled(
+                                            test.getToggleName(),
+                                            buildContext(test.getContext()));
+                                    assertEquals(
+                                            test.getExpectedResult(),
+                                            result,
+                                            test.getDescription());
+                                }))
                 .collect(Collectors.toList());
     }
 
@@ -80,52 +80,48 @@ public class ClientSpecificationTest {
         // Create all test cases in testDefinition.
         return testDefinition.getVariantTests().stream()
                 .map(
-                        test ->
-                                DynamicTest.dynamicTest(
-                                        fileName + "/" + test.getDescription(),
-                                        () -> {
-                                            Variant result =
-                                                    unleash.getVariant(
-                                                            test.getToggleName(),
-                                                            buildContext(test.getContext()));
-                                            assertEquals(
-                                                    test.getExpectedResult().getName(),
-                                                    result.getName(),
-                                                    test.getDescription());
-                                            assertEquals(
-                                                    test.getExpectedResult().isEnabled(),
-                                                    result.isEnabled(),
-                                                    test.getDescription());
-                                            assertEquals(
-                                                    test.getExpectedResult().getPayload(),
-                                                    result.getPayload(),
-                                                    test.getDescription());
-                                            assertEquals(
-                                                    test.getExpectedResult().isFeatureEnabled(),
-                                                    result.isFeatureEnabled(),
-                                                    test.getDescription());
-                                        }))
+                        test -> DynamicTest.dynamicTest(
+                                fileName + "/" + test.getDescription(),
+                                () -> {
+                                    Variant result = unleash.getVariant(
+                                            test.getToggleName(),
+                                            buildContext(test.getContext()));
+                                    assertEquals(
+                                            test.getExpectedResult().getName(),
+                                            result.getName(),
+                                            test.getDescription());
+                                    assertEquals(
+                                            test.getExpectedResult().isEnabled(),
+                                            result.isEnabled(),
+                                            test.getDescription());
+                                    assertEquals(
+                                            test.getExpectedResult().getPayload(),
+                                            result.getPayload(),
+                                            test.getDescription());
+                                    assertEquals(
+                                            test.getExpectedResult().isFeatureEnabled(),
+                                            result.isFeatureEnabled(),
+                                            test.getDescription());
+                                }))
                 .collect(Collectors.toList());
     }
 
     private Unleash setupUnleash(TestDefinition testDefinition) throws URISyntaxException {
 
-        ToggleBootstrapProvider bootstrapper =
-                new ToggleBootstrapProvider() {
-                    @Override
-                    public String read() {
-                        return testDefinition.getState().toString();
-                    }
-                };
+        ToggleBootstrapProvider bootstrapper = new ToggleBootstrapProvider() {
+            @Override
+            public Optional<String> read() {
+                return Optional.of(testDefinition.getState().toString());
+            }
+        };
 
-        UnleashConfig config =
-                UnleashConfig.builder()
-                        .appName(testDefinition.getName())
-                        .disableMetrics()
-                        .disablePolling()
-                        .toggleBootstrapProvider(bootstrapper)
-                        .unleashAPI(new URI("http://notusedbutrequired:9999/api/"))
-                        .build();
+        UnleashConfig config = UnleashConfig.builder()
+                .appName(testDefinition.getName())
+                .disableMetrics()
+                .disablePolling()
+                .toggleBootstrapProvider(bootstrapper)
+                .unleashAPI(new URI("http://notusedbutrequired:9999/api/"))
+                .build();
 
         DefaultUnleash defaultUnleash = new DefaultUnleash(config);
 
@@ -139,14 +135,13 @@ public class ClientSpecificationTest {
 
     private UnleashContext buildContext(UnleashContextDefinition context) {
         // TODO: All other properties!
-        UnleashContext.Builder builder =
-                UnleashContext.builder()
-                        .userId(context.getUserId())
-                        .sessionId(context.getSessionId())
-                        .remoteAddress(context.getRemoteAddress())
-                        .environment(context.getEnvironment())
-                        .currentTime(DateParser.parseDate(context.getCurrentTime()))
-                        .appName(context.getAppName());
+        UnleashContext.Builder builder = UnleashContext.builder()
+                .userId(context.getUserId())
+                .sessionId(context.getSessionId())
+                .remoteAddress(context.getRemoteAddress())
+                .environment(context.getEnvironment())
+                .currentTime(DateParser.parseDate(context.getCurrentTime()))
+                .appName(context.getAppName());
 
         if (context.getProperties() != null) {
             context.getProperties().forEach(builder::addProperty);
@@ -194,7 +189,7 @@ public class ClientSpecificationTest {
                                 () -> {
                                     try {
                                         return LocalDateTime.parse(
-                                                        date, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                                date, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
                                                 .atZone(ZoneOffset.UTC);
                                     } catch (DateTimeParseException dateTimeParseException) {
                                         return null;

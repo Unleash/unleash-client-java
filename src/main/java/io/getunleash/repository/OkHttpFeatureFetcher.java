@@ -2,6 +2,7 @@ package io.getunleash.repository;
 
 import com.google.gson.JsonSyntaxException;
 import io.getunleash.UnleashException;
+import io.getunleash.event.ClientFeaturesResponse;
 import io.getunleash.util.OkHttpClientConfigurer;
 import io.getunleash.util.UnleashConfig;
 import java.io.File;

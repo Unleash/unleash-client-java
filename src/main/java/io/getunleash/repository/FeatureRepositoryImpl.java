@@ -3,15 +3,17 @@ package io.getunleash.repository;
 import io.getunleash.FeatureDefinition;
 import io.getunleash.UnleashContext;
 import io.getunleash.UnleashException;
-import io.getunleash.Variant;
 import io.getunleash.engine.UnleashEngine;
 import io.getunleash.engine.YggdrasilError;
 import io.getunleash.engine.YggdrasilInvalidInputException;
+import io.getunleash.event.ClientFeaturesResponse;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashReady;
 import io.getunleash.util.Throttler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
+import io.getunleash.variant.Variant;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -22,7 +24,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureRepositoryImpl.class);
     private final UnleashConfig unleashConfig;
     private final BackupHandler featureBackupHandler;
-    private final FeatureBootstrapHandler featureBootstrapHandler;
+    private final ToggleBootstrapProvider bootstrapper;
     private final FeatureFetcher featureFetcher;
     private final EventDispatcher eventDispatcher;
     private final UnleashEngine engine;
@@ -52,7 +54,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                 featureBackupHandler,
                 engine,
                 fetcher,
-                new FeatureBootstrapHandler(unleashConfig));
+                new ToggleBootstrapFileProvider());
     }
 
     public FeatureRepositoryImpl(
@@ -60,7 +62,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
             BackupHandler featureBackupHandler,
             UnleashEngine engine,
             FeatureFetcher fetcher,
-            FeatureBootstrapHandler bootstrapHandler) {
+            ToggleBootstrapProvider bootstrapHandler) {
         this(
                 unleashConfig,
                 featureBackupHandler,
@@ -75,19 +77,18 @@ public class FeatureRepositoryImpl implements FeatureRepository {
             BackupHandler featureBackupHandler,
             UnleashEngine engine,
             FeatureFetcher fetcher,
-            FeatureBootstrapHandler bootstrapHandler,
+            ToggleBootstrapProvider bootstrapHandler,
             EventDispatcher eventDispatcher) {
         this.unleashConfig = unleashConfig;
         this.featureBackupHandler = featureBackupHandler;
         this.engine = engine;
         this.featureFetcher = fetcher;
-        this.featureBootstrapHandler = bootstrapHandler;
+        this.bootstrapper = bootstrapHandler;
         this.eventDispatcher = eventDispatcher;
-        this.throttler =
-                new Throttler(
-                        (int) unleashConfig.getFetchTogglesInterval(),
-                        300,
-                        unleashConfig.getUnleashURLs().getFetchTogglesURL());
+        this.throttler = new Throttler(
+                (int) unleashConfig.getFetchTogglesInterval(),
+                300,
+                unleashConfig.getUnleashURLs().getFetchTogglesURL());
         this.initCollections(unleashConfig.getScheduledExecutor());
     }
 
@@ -95,7 +96,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
     private void initCollections(UnleashScheduledExecutor executor) {
         Optional<String> features = this.featureBackupHandler.read();
         if (!features.isPresent()) {
-            features = this.featureBootstrapHandler.read();
+            features = this.bootstrapper.read();
         }
         if (features.isPresent()) {
             try {
@@ -110,9 +111,9 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                 updateFeatures(this.unleashConfig.getStartupExceptionHandler()).run();
             } else {
                 updateFeatures(
-                                e -> {
-                                    throw e;
-                                })
+                        e -> {
+                            throw e;
+                        })
                         .run();
             }
         }

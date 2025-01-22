@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
+import io.getunleash.variant.Variant;
+
 public class FakeUnleashTest {
 
     @Test

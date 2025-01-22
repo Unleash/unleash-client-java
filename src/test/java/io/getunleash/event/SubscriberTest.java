@@ -2,13 +2,16 @@ package io.getunleash.event;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static io.getunleash.event.ClientFeaturesResponse.Status.CHANGED;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.SynchronousTestExecutor;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashException;
-import io.getunleash.repository.ClientFeaturesResponse;
+import io.getunleash.metric.ClientMetrics;
+import io.getunleash.metric.ClientRegistration;
 import io.getunleash.util.UnleashConfig;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,25 +22,23 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 public class SubscriberTest {
 
     @RegisterExtension
-    static WireMockExtension serverMock =
-            WireMockExtension.newInstance()
-                    .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
-                    .build();
+    static WireMockExtension serverMock = WireMockExtension.newInstance()
+            .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
+            .build();
 
     private TestSubscriber testSubscriber = new TestSubscriber();
     private UnleashConfig unleashConfig;
 
     @BeforeEach
     void setup() {
-        unleashConfig =
-                new UnleashConfig.Builder()
-                        .appName(SubscriberTest.class.getSimpleName())
-                        .instanceId(SubscriberTest.class.getSimpleName())
-                        .synchronousFetchOnInitialisation(true)
-                        .unleashAPI("http://localhost:" + serverMock.getPort())
-                        .subscriber(testSubscriber)
-                        .scheduledExecutor(new SynchronousTestExecutor())
-                        .build();
+        unleashConfig = new UnleashConfig.Builder()
+                .appName(SubscriberTest.class.getSimpleName())
+                .instanceId(SubscriberTest.class.getSimpleName())
+                .synchronousFetchOnInitialisation(true)
+                .unleashAPI("http://localhost:" + serverMock.getPort())
+                .subscriber(testSubscriber)
+                .scheduledExecutor(new SynchronousTestExecutor())
+                .build();
     }
 
     @Test
@@ -55,29 +56,27 @@ public class SubscriberTest {
         unleash.isEnabled("myFeature");
         unleash.isEnabled("myFeature");
 
-        // assertThat(testSubscriber.togglesFetchedCounter)
-        //         .isEqualTo(
-        //                 2); // Server successfully returns, we call synchronous fetch and
+        assertThat(testSubscriber.togglesFetchedCounter)
+                .isEqualTo(2); // Server successfully returns, we call synchronous fetch and
         // schedule
-        // // once, so 2 calls.
-        // assertThat(testSubscriber.status).isEqualTo(CHANGED);
-        // assertThat(testSubscriber.toggleEvaluatedCounter).isEqualTo(3);
-        // assertThat(testSubscriber.toggleName).isEqualTo("myFeature");
-        // assertThat(testSubscriber.toggleEnabled).isFalse();
-        // assertThat(testSubscriber.errors).isEmpty();
+        // once, so 2 calls.
+        assertThat(testSubscriber.status).isEqualTo(CHANGED);
+        assertThat(testSubscriber.toggleEvaluatedCounter).isEqualTo(3);
+        assertThat(testSubscriber.toggleName).isEqualTo("myFeature");
+        assertThat(testSubscriber.toggleEnabled).isFalse();
+        assertThat(testSubscriber.errors).isEmpty();
 
-        //        assertThat(testSubscriber.events).filteredOn(e -> e instanceof
-        // ToggleBootstrapHandler.ToggleBootstrapRead).hasSize(1);
-        // assertThat(testSubscriber.events).filteredOn(e -> e instanceof UnleashReady).hasSize(1);
-        // assertThat(testSubscriber.events).filteredOn(e -> e instanceof
-        // ToggleEvaluated).hasSize(3);
-        // assertThat(testSubscriber.events)
-        //         .filteredOn(e -> e instanceof ClientFeaturesResponse)
-        //         .hasSize(2);
-        // assertThat(testSubscriber.events)
-        //         .filteredOn(e -> e instanceof ClientRegistration)
-        //         .hasSize(1);
-        // assertThat(testSubscriber.events).filteredOn(e -> e instanceof ClientMetrics).hasSize(1);
+        assertThat(testSubscriber.events).filteredOn(e -> e instanceof TogglesBootstrapped)
+                .hasSize(1);
+        assertThat(testSubscriber.events).filteredOn(e -> e instanceof UnleashReady).hasSize(1);
+        assertThat(testSubscriber.events).filteredOn(e -> e instanceof ToggleEvaluated).hasSize(3);
+        assertThat(testSubscriber.events)
+                .filteredOn(e -> e instanceof ClientFeaturesResponse)
+                .hasSize(2);
+        assertThat(testSubscriber.events)
+                .filteredOn(e -> e instanceof ClientRegistration)
+                .hasSize(1);
+        assertThat(testSubscriber.events).filteredOn(e -> e instanceof ClientMetrics).hasSize(1);
     }
 
     private class TestSubscriber implements UnleashSubscriber {
@@ -112,7 +111,7 @@ public class SubscriberTest {
         @Override
         public void togglesFetched(ClientFeaturesResponse toggleResponse) {
             this.togglesFetchedCounter++;
-            // this.status = toggleResponse.getStatus();
+            this.status = toggleResponse.getStatus();
         }
     }
 }

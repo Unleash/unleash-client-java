@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 public class FeatureRepositoryTest {
     FeatureBackupHandlerFile backupHandler;
 
-    FeatureBootstrapHandler bootstrapHandler;
+    ToggleBootstrapProvider bootstrapHandler;
     HttpFeatureFetcher fetcher;
 
     UnleashConfig defaultConfig;
@@ -19,7 +19,7 @@ public class FeatureRepositoryTest {
     @BeforeEach
     public void setUp() {
         backupHandler = mock(FeatureBackupHandlerFile.class);
-        bootstrapHandler = mock(FeatureBootstrapHandler.class);
+        bootstrapHandler = mock(ToggleBootstrapProvider.class);
         fetcher = mock(HttpFeatureFetcher.class);
 
         defaultConfig =

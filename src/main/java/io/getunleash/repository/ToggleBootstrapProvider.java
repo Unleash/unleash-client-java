@@ -1,5 +1,7 @@
 package io.getunleash.repository;
 
+import java.util.Optional;
+
 public interface ToggleBootstrapProvider {
     /**
      * Should return JSON string parsable to /api/client/features format Look in
@@ -8,5 +10,5 @@ public interface ToggleBootstrapProvider {
      *
      * @return JSON string that can be sent to {@link ToggleBootstrapHandler#parse(String)}
      */
-    String read();
+    Optional<String> read();
 }

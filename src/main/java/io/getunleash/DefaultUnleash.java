@@ -1,7 +1,5 @@
 package io.getunleash;
 
-import static io.getunleash.Variant.DISABLED_VARIANT;
-
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.IsEnabledImpressionEvent;
 import io.getunleash.event.ToggleEvaluated;
@@ -10,6 +8,10 @@ import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.FeatureRepository;
 import io.getunleash.strategy.*;
 import io.getunleash.util.UnleashConfig;
+import io.getunleash.variant.Variant;
+
+import static io.getunleash.variant.Variant.DISABLED_VARIANT;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
