@@ -28,7 +28,6 @@ public class FeatureBackupHandlerFile implements BackupHandler {
     public Optional<String> read() {
         LOG.info("Unleash will try to load feature toggle states from temporary backup");
         try (BufferedReader reader = new BufferedReader(new FileReader(backupFile))) {
-
             String clientFeatures = reader.lines().collect(Collectors.joining("\n"));
 
             eventDispatcher.dispatch(new FeatureBackupRead(clientFeatures));

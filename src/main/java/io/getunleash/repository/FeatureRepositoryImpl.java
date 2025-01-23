@@ -53,7 +53,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                 featureBackupHandler,
                 engine,
                 fetcher,
-                new ToggleBootstrapFileProvider());
+                unleashConfig.getToggleBootstrapProvider());
     }
 
     public FeatureRepositoryImpl(
@@ -95,7 +95,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
     @SuppressWarnings("FutureReturnValueIgnored")
     private void initCollections(UnleashScheduledExecutor executor) {
         Optional<String> features = this.featureBackupHandler.read();
-        if (!features.isPresent()) {
+        if (!features.isPresent() && this.bootstrapper != null) {
             features = this.bootstrapper.read();
         }
         if (features.isPresent()) {

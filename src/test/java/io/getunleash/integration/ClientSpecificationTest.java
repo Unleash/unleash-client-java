@@ -124,6 +124,7 @@ public class ClientSpecificationTest {
                         .appName(testDefinition.getName())
                         .disableMetrics()
                         .disablePolling()
+                        .backupFile(null)
                         .toggleBootstrapProvider(bootstrapper)
                         .unleashAPI(new URI("http://notusedbutrequired:9999/api/"))
                         .build();
