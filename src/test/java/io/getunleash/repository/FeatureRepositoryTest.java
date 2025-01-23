@@ -259,199 +259,153 @@ public class FeatureRepositoryTest {
         assertThat(featureRepository.getSkips()).isEqualTo(0);
     }
 
-    // @Test
-    // public void
-    // should_incrementally_increase_interval_as_we_receive_too_many_requests()
-    // throws URISyntaxException, IOException {
-    // TestRunner runner = new TestRunner();
-    // UnleashEngine engine = mock(UnleashEngine.class);
-    // File file =
-    // new
-    // File(getClass().getClassLoader().getResource("unleash-repo-v2.json").toURI());
-    // ToggleBootstrapProvider toggleBootstrapProvider =
-    // mock(ToggleBootstrapProvider.class);
-    // when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
-    // UnleashConfig config =
-    // UnleashConfig.builder()
-    // .synchronousFetchOnInitialisation(false)
-    // .appName("test-sync-update")
-    // .scheduledExecutor(runner.executor)
-    // .unleashAPI("http://localhost:8080")
-    // .build();
-    // when(backupHandler.read()).thenReturn(getFeatureCollection());
-    // FeatureRepositoryImpl featureRepository =
-    // new FeatureRepositoryImpl(
-    // config,
-    // backupHandler,
-    // engine,
-    // fetcher,
-    // bootstrapHandler,
-    // new EventDispatcher(config));
+    @Test
+    public void should_incrementally_increase_interval_as_we_receive_too_many_requests()
+            throws URISyntaxException, IOException {
+        TestRunner runner = new TestRunner();
+        ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
+        when(toggleBootstrapProvider.read())
+                .thenReturn(Optional.of(loadMockFeatures("unleash-repo-v2.json")));
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(false)
+                        .appName("test-sync-update")
+                        .scheduledExecutor(runner.executor)
+                        .unleashAPI("http://localhost:8080")
+                        .build();
+        when(backupHandler.read())
+                .thenReturn(Optional.of(loadMockFeatures("unleash-repo-v2.json")));
 
-    // runner.assertThatFetchesAndReceives(UNAVAILABLE, 429);
-    // // client is not ready don't count errors or skips
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(0);
+        FeatureRepositoryImpl featureRepository =
+                new FeatureRepositoryImpl(
+                        config, backupHandler, new UnleashEngine(), fetcher, bootstrapHandler);
 
-    // runner.assertThatFetchesAndReceives(UNAVAILABLE, 429);
-    // // client is not ready don't count errors or skips
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(0);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.UNAVAILABLE, 429);
+        // client is not ready don't count errors or skips
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(0);
 
-    // // this changes the client to ready
-    // runner.assertThatFetchesAndReceives(CHANGED, 200);
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.UNAVAILABLE, 429);
+        // client is not ready don't count errors or skips
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(0);
 
-    // runner.assertThatFetchesAndReceives(UNAVAILABLE, 429);
-    // assertThat(featureRepository.getSkips()).isEqualTo(1);
-    // assertThat(featureRepository.getFailures()).isEqualTo(1);
+        // this changes the client to ready
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.CHANGED, 200);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
 
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.UNAVAILABLE, 429);
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
 
-    // runner.assertThatFetchesAndReceives(UNAVAILABLE, 429);
-    // assertThat(featureRepository.getSkips()).isEqualTo(2);
-    // assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
 
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(1);
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.UNAVAILABLE, 429);
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
 
-    // runner.assertThatFetchesAndReceives(UNAVAILABLE, 429);
-    // assertThat(featureRepository.getSkips()).isEqualTo(3);
-    // assertThat(featureRepository.getFailures()).isEqualTo(3);
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
 
-    // runner.assertThatSkipsNextRun();
-    // runner.assertThatSkipsNextRun();
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(3);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.UNAVAILABLE, 429);
+        assertThat(featureRepository.getSkips()).isEqualTo(3);
+        assertThat(featureRepository.getFailures()).isEqualTo(3);
 
-    // runner.assertThatFetchesAndReceives(NOT_CHANGED, 304);
-    // assertThat(featureRepository.getSkips()).isEqualTo(2);
-    // assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runner.assertThatSkipsNextRun();
+        runner.assertThatSkipsNextRun();
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(3);
 
-    // runner.assertThatSkipsNextRun();
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.NOT_CHANGED, 304);
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
 
-    // runner.assertThatFetchesAndReceives(NOT_CHANGED, 304);
-    // assertThat(featureRepository.getSkips()).isEqualTo(1);
-    // assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runner.assertThatSkipsNextRun();
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
 
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.NOT_CHANGED, 304);
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
 
-    // runner.assertThatFetchesAndReceives(NOT_CHANGED, 304);
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(0);
-    // }
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
 
-    // @Test
-    // public void server_errors_should_incrementally_increase_interval()
-    // throws URISyntaxException, IOException {
-    // TestRunner runner = new TestRunner();
-    // UnleashEngine engine = mock(UnleashEngine.class);
-    // File file =
-    // new
-    // File(getClass().getClassLoader().getResource("unleash-repo-v2.json").toURI());
-    // ToggleBootstrapProvider toggleBootstrapProvider =
-    // mock(ToggleBootstrapProvider.class);
-    // when(toggleBootstrapProvider.read()).thenReturn(fileToString(file));
-    // UnleashConfig config =
-    // UnleashConfig.builder()
-    // .synchronousFetchOnInitialisation(false)
-    // .appName("test-sync-update")
-    // .scheduledExecutor(runner.executor)
-    // .unleashAPI("http://localhost:8080")
-    // .build();
-    // when(backupHandler.read()).thenReturn(getFeatureCollection());
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.NOT_CHANGED, 304);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(0);
+    }
 
-    // FeatureRepositoryImpl featureRepository =
-    // new FeatureRepositoryImpl(
-    // config,
-    // backupHandler,
-    // engine,
-    // fetcher,
-    // bootstrapHandler,
-    // new EventDispatcher(config));
+    @Test
+    public void server_errors_should_incrementally_increase_interval()
+            throws URISyntaxException, IOException {
+        TestRunner runner = new TestRunner();
+        ToggleBootstrapProvider toggleBootstrapProvider = mock(ToggleBootstrapProvider.class);
+        when(toggleBootstrapProvider.read())
+                .thenReturn(Optional.of(loadMockFeatures("unleash-repo-v2.json")));
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .synchronousFetchOnInitialisation(false)
+                        .appName("test-sync-update")
+                        .scheduledExecutor(runner.executor)
+                        .unleashAPI("http://localhost:8080")
+                        .build();
+        when(backupHandler.read())
+                .thenReturn(Optional.of(loadMockFeatures("unleash-repo-v2.json")));
 
-    // runner.assertThatFetchesAndReceives(CHANGED, 200); // set it ready
+        FeatureRepositoryImpl featureRepository =
+                new FeatureRepositoryImpl(
+                        config, backupHandler, new UnleashEngine(), fetcher, bootstrapHandler);
 
-    // runner.assertThatFetchesAndReceives(UNAVAILABLE, 500);
-    // assertThat(featureRepository.getSkips()).isEqualTo(1);
-    // assertThat(featureRepository.getFailures()).isEqualTo(1);
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(1);
-    // runner.assertThatFetchesAndReceives(UNAVAILABLE, 502);
-    // assertThat(featureRepository.getSkips()).isEqualTo(2);
-    // assertThat(featureRepository.getFailures()).isEqualTo(2);
-    // runner.assertThatSkipsNextRun();
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(2);
-    // runner.assertThatFetchesAndReceives(UNAVAILABLE, 503);
-    // assertThat(featureRepository.getSkips()).isEqualTo(3);
-    // assertThat(featureRepository.getFailures()).isEqualTo(3);
-    // runner.assertThatSkipsNextRun();
-    // runner.assertThatSkipsNextRun();
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(3);
-    // runner.assertThatFetchesAndReceives(NOT_CHANGED, 304);
-    // assertThat(featureRepository.getSkips()).isEqualTo(2);
-    // assertThat(featureRepository.getFailures()).isEqualTo(2);
-    // runner.assertThatSkipsNextRun();
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(2);
-    // runner.assertThatFetchesAndReceives(NOT_CHANGED, 304);
-    // assertThat(featureRepository.getSkips()).isEqualTo(1);
-    // assertThat(featureRepository.getFailures()).isEqualTo(1);
-    // runner.assertThatSkipsNextRun();
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(1);
-    // runner.assertThatFetchesAndReceives(NOT_CHANGED, 304);
-    // assertThat(featureRepository.getSkips()).isEqualTo(0);
-    // assertThat(featureRepository.getFailures()).isEqualTo(0);
-    // }
+        runner.assertThatFetchesAndReceives(
+                ClientFeaturesResponse.Status.CHANGED, 200); // set it ready
 
-    // @NotNull
-    // private FeatureCollection simpleFeatureCollection(boolean enabled) {
-    // return populatedFeatureCollection(
-    // null,
-    // new FeatureToggle(
-    // "toggleFetcherCalled",
-    // enabled,
-    // Arrays.asList(new ActivationStrategy("custom", null))));
-    // }
-
-    // @NotNull
-    // private FeatureCollection getFeatureCollection() {
-    // return populatedFeatureCollection(
-    // Arrays.asList(
-    // new Segment(
-    // 1,
-    // "some-name",
-    // Arrays.asList(
-    // new Constraint(
-    // "some-context", Operator.IN,
-    // "some-value")))),
-    // new FeatureToggle(
-    // "toggleFeatureName1",
-    // true,
-    // Collections.singletonList(new ActivationStrategy("custom", null))),
-    // new FeatureToggle(
-    // "toggleFeatureName2",
-    // true,
-    // Collections.singletonList(new ActivationStrategy("custom", null))));
-    // }
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.UNAVAILABLE, 500);
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.UNAVAILABLE, 502);
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runner.assertThatSkipsNextRun();
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.UNAVAILABLE, 503);
+        assertThat(featureRepository.getSkips()).isEqualTo(3);
+        assertThat(featureRepository.getFailures()).isEqualTo(3);
+        runner.assertThatSkipsNextRun();
+        runner.assertThatSkipsNextRun();
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(3);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.NOT_CHANGED, 304);
+        assertThat(featureRepository.getSkips()).isEqualTo(2);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runner.assertThatSkipsNextRun();
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(2);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.NOT_CHANGED, 304);
+        assertThat(featureRepository.getSkips()).isEqualTo(1);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runner.assertThatSkipsNextRun();
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(1);
+        runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.NOT_CHANGED, 304);
+        assertThat(featureRepository.getSkips()).isEqualTo(0);
+        assertThat(featureRepository.getFailures()).isEqualTo(0);
+    }
 
     private class TestRunner {
 
@@ -484,10 +438,13 @@ public class FeatureRepositoryTest {
                 response = ClientFeaturesResponse.unavailable(statusCode, Optional.of(""));
             } else if (status == ClientFeaturesResponse.Status.NOT_CHANGED) {
                 response = ClientFeaturesResponse.notChanged();
+            } else {
+                throw new IllegalArgumentException("Unknown status: " + status);
             }
 
             when(fetcher.fetchFeatures()).thenReturn(response);
             runnableArgumentCaptor.getValue().run();
+
             verify(fetcher, times(++count)).fetchFeatures();
         }
 
