@@ -1,83 +1,89 @@
 package io.getunleash.event;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import io.getunleash.DefaultUnleash;
+import io.getunleash.EngineProxy;
+import io.getunleash.SynchronousTestExecutor;
 import io.getunleash.Unleash;
+import io.getunleash.UnleashContext;
 import io.getunleash.util.UnleashConfig;
+import io.getunleash.variant.Variant;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 public class ImpressionDataSubscriberTest {
 
-    // private ImpressionTestSubscriber testSubscriber = new ImpressionTestSubscriber();
+    private ImpressionTestSubscriber testSubscriber = new ImpressionTestSubscriber();
 
     private UnleashConfig unleashConfig;
 
-    // private UnleashEngineStateHandler stateHandler;
-    private Unleash unleash;
+    @BeforeEach
+    void setup() {
+        unleashConfig =
+                new UnleashConfig.Builder()
+                        .appName(SubscriberTest.class.getSimpleName())
+                        .instanceId(SubscriberTest.class.getSimpleName())
+                        .unleashAPI("http://localhost:4242/api")
+                        .subscriber(testSubscriber)
+                        .scheduledExecutor(new SynchronousTestExecutor())
+                        .build();
+    }
 
-    // @BeforeEach
-    // void setup() {
-    //     unleashConfig =
-    //             new UnleashConfig.Builder()
-    //                     .appName(SubscriberTest.class.getSimpleName())
-    //                     .instanceId(SubscriberTest.class.getSimpleName())
-    //                     .unleashAPI("http://localhost:4242/api")
-    //                     .subscriber(testSubscriber)
-    //                     .scheduledExecutor(new SynchronousTestExecutor())
-    //                     .build();
-    //     unleash = new DefaultUnleash(unleashConfig);
-    //     // stateHandler = new UnleashEngineStateHandler((DefaultUnleash) unleash);
-    // }
+    @Test
+    public void noEventsIfImpressionDataIsNotEnabled() {
+        String featureWithoutImpressionDataEnabled = "feature.with.no.impressionData";
+        EngineProxy repo = Mockito.mock(EngineProxy.class);
+        when(repo.isEnabled(any(String.class), any(UnleashContext.class))).thenReturn(true);
+        when(repo.shouldEmitImpressionEvent(featureWithoutImpressionDataEnabled)).thenReturn(false);
+        Unleash unleash = new DefaultUnleash(unleashConfig, repo);
 
-    // @Test
-    // public void noEventsIfImpressionDataIsNotEnabled() {
-    //     String featureWithoutImpressionDataEnabled = "feature.with.no.impressionData";
-    //     // stateHandler.setState(
-    //     // new FeatureToggle(featureWithoutImpressionDataEnabled, true, new
-    //     // ArrayList<>()));
-    //     unleash.isEnabled(featureWithoutImpressionDataEnabled);
-    //     assertThat(testSubscriber.isEnabledImpressions).isEqualTo(0);
-    //     assertThat(testSubscriber.variantImpressions).isEqualTo(0);
-    // }
+        unleash.isEnabled(featureWithoutImpressionDataEnabled);
+        assertThat(testSubscriber.isEnabledImpressions).isEqualTo(0);
+        assertThat(testSubscriber.variantImpressions).isEqualTo(0);
+    }
 
-    // @Test
-    // public void isEnabledEventWhenImpressionDataIsEnabled() {
-    //     String featureWithImpressionData = "feature.with.impressionData";
-    //     // new UnleashEngineStateHandler((DefaultUnleash) unleash)
-    //     // .setState(
-    //     // new FeatureToggle(
-    //     // featureWithImpressionData,
-    //     // true,
-    //     // new ArrayList<>(),
-    //     // new ArrayList<>(),
-    //     // true));
-    //     unleash.isEnabled(featureWithImpressionData);
-    //     assertThat(testSubscriber.isEnabledImpressions).isEqualTo(1);
-    //     assertThat(testSubscriber.variantImpressions).isEqualTo(0);
-    // }
+    @Test
+    public void isEnabledEventWhenImpressionDataIsEnabled() {
+        String featureWithImpressionData = "feature.with.impressionData";
+        EngineProxy repo = Mockito.mock(EngineProxy.class);
+        when(repo.isEnabled(any(String.class), any(UnleashContext.class))).thenReturn(true);
+        when(repo.shouldEmitImpressionEvent(featureWithImpressionData)).thenReturn(true);
+        Unleash unleash = new DefaultUnleash(unleashConfig, repo);
 
-    // @Test
-    // public void variantEventWhenVariantIsRequested() {
-    //     String featureWithImpressionData = "feature.with.impressionData";
-    //     VariantDefinition def = new VariantDefinition("blue", 1000, null, null);
-    //     List<VariantDefinition> variants = new ArrayList<>();
-    //     variants.add(def);
-    //     // stateHandler.setState(
-    //     // new FeatureToggle(
-    //     // featureWithImpressionData, true, new ArrayList<>(), variants, true));
-    //     unleash.getVariant(featureWithImpressionData);
-    //     assertThat(testSubscriber.isEnabledImpressions).isEqualTo(0);
-    //     assertThat(testSubscriber.variantImpressions).isEqualTo(1);
-    // }
+        unleash.isEnabled(featureWithImpressionData);
+        assertThat(testSubscriber.isEnabledImpressions).isEqualTo(1);
+        assertThat(testSubscriber.variantImpressions).isEqualTo(0);
+    }
 
-    // private class ImpressionTestSubscriber implements UnleashSubscriber {
-    //     private int variantImpressions;
-    //     private int isEnabledImpressions;
+    @Test
+    public void variantEventWhenVariantIsRequested() {
+        String featureWithImpressionData = "feature.with.impressionData";
+        EngineProxy repo = Mockito.mock(EngineProxy.class);
+        when(repo.shouldEmitImpressionEvent(featureWithImpressionData)).thenReturn(true);
+        when(repo.getVariant(any(String.class), any(UnleashContext.class), any(Variant.class)))
+                .thenReturn(new Variant("variant1", null, true, true));
+        Unleash unleash = new DefaultUnleash(unleashConfig, repo);
 
-    //     @Override
-    //     public void impression(ImpressionEvent impressionEvent) {
-    //         if (impressionEvent instanceof VariantImpressionEvent) {
-    //             variantImpressions++;
-    //         } else if (impressionEvent instanceof IsEnabledImpressionEvent) {
-    //             isEnabledImpressions++;
-    //         }
-    //     }
-    // }
+        unleash.getVariant(featureWithImpressionData);
+        assertThat(testSubscriber.isEnabledImpressions).isEqualTo(0);
+        assertThat(testSubscriber.variantImpressions).isEqualTo(1);
+    }
+
+    private class ImpressionTestSubscriber implements UnleashSubscriber {
+        private int variantImpressions;
+        private int isEnabledImpressions;
+
+        @Override
+        public void impression(ImpressionEvent impressionEvent) {
+            if (impressionEvent instanceof VariantImpressionEvent) {
+                variantImpressions++;
+            } else if (impressionEvent instanceof IsEnabledImpressionEvent) {
+                isEnabledImpressions++;
+            }
+        }
+    }
 }
