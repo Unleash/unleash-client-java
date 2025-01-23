@@ -69,7 +69,7 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
             if (response.isSuccessful()) {
                 if (response.networkResponse() != null
                         && response.networkResponse().code() == 304) {
-                    ClientFeaturesResponse.notChanged();
+                    return ClientFeaturesResponse.notChanged();
                 }
                 String features = response.body().string();
 
