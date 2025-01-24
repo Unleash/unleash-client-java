@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import io.getunleash.repository.ToggleBootstrapProvider;
+import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import io.getunleash.variant.Variant;
@@ -101,39 +103,35 @@ public class UnleashTest {
         verify(fallbackAction, never()).test(anyString(), any(UnleashContext.class));
     }
 
-    // @Test
-    // public void should_register_custom_strategies() {
-    // // custom strategy
-    // Strategy customStrategy = mock(Strategy.class);
-    // when(customStrategy.getName()).thenReturn("custom");
-    // when(customStrategy.getResult(anyMap(), any(), anyList(),
-    // anyList())).thenCallRealMethod();
+    @Test
+    public void should_register_custom_strategies() {
+        // custom strategy
+        Strategy customStrategy = mock(Strategy.class);
+        when(customStrategy.getName()).thenReturn("custom strategy");
+        when(customStrategy.isEnabled(any(), any(UnleashContext.class))).thenReturn(true);
 
-    // // setup a bootstrapper so our custom strategy is hydrated into the engine
-    // ToggleBootstrapProvider bootstrapper = new ToggleBootstrapProvider() {
-    // @Override
-    // public String read() {
-    // return "{\"strategies\":[{\"name\":\"custom\"}]}";
-    // }
-    // };
+        ToggleBootstrapProvider bootstrapper =
+                new ToggleBootstrapProvider() {
+                    @Override
+                    public Optional<String> read() {
+                        return Optional.of(
+                                "{\"version\":1,\"features\":[{\"name\":\"test\",\"enabled\":true,\"strategies\":[{\"name\":\"custom strategy\"}]}]}");
+                    }
+                };
 
-    // UnleashConfig config = new UnleashConfig.Builder()
-    // .appName("test")
-    // .unleashAPI("http://localhost:4242/api/")
-    // .build();
+        UnleashConfig config =
+                new UnleashConfig.Builder()
+                        .appName("test")
+                        .toggleBootstrapProvider(bootstrapper)
+                        .unleashAPI("http://localhost:4242/api/")
+                        .build();
 
-    // Unleash unleash = new DefaultUnleash(config, customStrategy);
-    // // new UnleashEngineStateHandler((DefaultUnleash) unleash)
-    // // .setState(
-    // // new FeatureToggle(
-    // // "test", true,
-    // // asList(new
-    // ActivationStrategy("custom", null))));
-    // unleash.isEnabled("test");
+        Unleash unleash = new DefaultUnleash(config, customStrategy);
+        boolean result = unleash.isEnabled("test");
+        assertThat(result).isTrue();
 
-    // verify(customStrategy, times(1)).isEnabled(any(),
-    // any(UnleashContext.class));
-    // }
+        verify(customStrategy, times(1)).isEnabled(any(), any(UnleashContext.class));
+    }
 
     @Test
     public void should_support_context_provider() {

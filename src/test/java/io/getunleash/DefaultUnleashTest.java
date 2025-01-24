@@ -1,10 +1,13 @@
 package io.getunleash;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -98,32 +101,36 @@ class DefaultUnleashTest {
         assertThat(t1.isEnabled()).isTrue();
     }
 
-    // @Test
-    // public void should_allow_fallback_strategy() {
-    // Strategy fallback = mock(Strategy.class);
-    // when(fallback.getResult(anyMap(), any(), anyList(),
-    // anyList())).thenCallRealMethod();
+    @Test
+    public void should_allow_fallback_strategy() {
+        Strategy fallback = mock(Strategy.class);
+        when(fallback.getName()).thenReturn("custom strategy");
+        when(fallback.isEnabled(any(), any(UnleashContext.class))).thenReturn(true);
 
-    // UnleashConfig unleashConfigWithFallback = UnleashConfig.builder()
-    // .unleashAPI("http://fakeAPI")
-    // .appName("fakeApp")
-    // .fallbackStrategy(fallback)
-    // .build();
-    // sut = new DefaultUnleash(
-    // unleashConfigWithFallback, engineProxy, contextProvider,
-    // eventDispatcher);
+        ToggleBootstrapProvider bootstrapper =
+                new ToggleBootstrapProvider() {
+                    @Override
+                    public Optional<String> read() {
+                        return Optional.of(
+                                "{\"version\":1,\"features\":[{\"name\":\"toggle1\",\"enabled\":true,\"strategies\":[{\"name\":\"nonexistent\"}]}]}");
+                    }
+                };
 
-    // ActivationStrategy as = new ActivationStrategy("forFallback", new
-    // HashMap<>());
-    // FeatureToggle toggle = new FeatureToggle("toggle1", true,
-    // Collections.singletonList(as));
-    // new UnleashEngineStateHandler(sut).setState(toggle);
-    // when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
+        UnleashConfig unleashConfigWithFallback =
+                UnleashConfig.builder()
+                        .unleashAPI("http://fakeAPI")
+                        .appName("fakeApp")
+                        .toggleBootstrapProvider(bootstrapper)
+                        .fallbackStrategy(fallback)
+                        .build();
+        sut = new DefaultUnleash(unleashConfigWithFallback);
 
-    // sut.isEnabled("toggle1");
+        when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
-    // verify(fallback).isEnabled(any(), any());
-    // }
+        sut.isEnabled("toggle1");
+
+        verify(fallback).isEnabled(any(), any());
+    }
 
     @Test
     public void multiple_instantiations_of_the_same_config_gives_errors() {
