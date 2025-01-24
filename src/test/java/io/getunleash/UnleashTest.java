@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
+import io.getunleash.variant.Variant;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -140,12 +142,11 @@ public class UnleashTest {
 
         EngineProxy engineProxy = mock(EngineProxy.class);
         when(engineProxy.isEnabled(
-                        eq("test"),
-                        argThat(UnleashContext -> "111".equals(context.getUserId().orElse(null)))))
+                eq("test"),
+                argThat(UnleashContext -> "111".equals(context.getUserId().orElse(null)))))
                 .thenReturn(Boolean.TRUE);
 
-        UnleashConfig config =
-                createConfigBuilder().unleashContextProvider(contextProvider).build();
+        UnleashConfig config = createConfigBuilder().unleashContextProvider(contextProvider).build();
 
         Unleash unleash = new DefaultUnleash(config, engineProxy);
 
@@ -158,8 +159,8 @@ public class UnleashTest {
 
         EngineProxy engineProxy = mock(EngineProxy.class);
         when(engineProxy.isEnabled(
-                        eq("test"),
-                        argThat(UnleashContext -> "13".equals(context.getUserId().orElse(null)))))
+                eq("test"),
+                argThat(UnleashContext -> "13".equals(context.getUserId().orElse(null)))))
                 .thenReturn(Boolean.TRUE);
 
         Unleash unleash = new DefaultUnleash(baseConfig, engineProxy);
@@ -183,49 +184,31 @@ public class UnleashTest {
     public void get_default_variant_when_disabled() {
         UnleashContext context = UnleashContext.builder().userId("1").build();
 
+        Variant variant = new Variant("Chuck", "Norris", true);
         EngineProxy engineProxy = mock(EngineProxy.class);
-        when(engineProxy.getVariant(any(String.class), any(UnleashContext.class))).thenReturn(null);
+        when(engineProxy.getVariant(any(String.class), any(UnleashContext.class)))
+                .thenReturn(Optional.empty());
 
         Unleash unleash = new DefaultUnleash(baseConfig, engineProxy);
-        // Variant result = unleash.getVariant("test", context);
+        Variant result = unleash.getVariant("test", context, variant);
 
-        // assertThat(result).isNotNull();
-        // assertThat(result.getName()).isEqualTo("Chuck");
-        // assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("Norris");
-        // assertThat(result.isEnabled()).isTrue();
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("Chuck");
     }
 
-    // @Test
-    // public void getting_variant_when_disabled_should_increment_no_counter() {
-    // UnleashContext context = UnleashContext.builder().userId("1").build();
-    // UnleashConfig config =
-    // new UnleashConfig.Builder()
-    // .appName("test")
-    // .unleashAPI("http://localhost:4242/api/")
-    // .environment("test")
-    // .scheduledExecutor(mock(UnleashScheduledExecutor.class))
-    // .unleashContextProvider(contextProvider)
-    // .build();
-    // Unleash thisUnleash =
-    // new DefaultUnleash(
-    // config, engineProxy, contextProvider, new EventDispatcher(config));
-    // UnleashEngineStateHandler localStateHandler =
-    // new UnleashEngineStateHandler((DefaultUnleash) thisUnleash);
-    // // Set up a toggleName using UserWithIdStrategy
-    // Map<String, String> params = new HashMap<>();
-    // params.put("userIds", "123, 111, 121, 13");
-    // ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-    // FeatureToggle featureToggle = new FeatureToggle("test", false,
-    // asList(strategy));
+    @Test
+    public void getting_variant_when_disabled_should_increment_no_counter() {
 
-    // localStateHandler.setState(featureToggle);
+        UnleashContext context = UnleashContext.builder().userId("1").build();
 
-    // final Variant result = thisUnleash.getVariant("test", context);
+        Variant variant = new Variant("Chuck", "Norris", true);
+        EngineProxy engineProxy = mock(EngineProxy.class);
+        when(engineProxy.getVariant(any(String.class), any(UnleashContext.class)))
+                .thenReturn(Optional.empty());
 
-    // assertThat(result).isNotNull();
-    // MetricsBucket bucket = localStateHandler.captureMetrics();
-    // assertThat(bucket.getToggles().get("test").getYes()).isEqualTo(0);
-    // assertThat(bucket.getToggles().get("test").getNo()).isEqualTo(1);
-    // }
+        Unleash unleash = new DefaultUnleash(baseConfig, engineProxy);
+        Variant result = unleash.getVariant("test", context, variant);
 
+        verify(engineProxy, times(1)).countToggle("test", false);
+    }
 }
