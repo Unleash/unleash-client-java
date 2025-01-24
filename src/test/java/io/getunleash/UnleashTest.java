@@ -142,11 +142,12 @@ public class UnleashTest {
 
         EngineProxy engineProxy = mock(EngineProxy.class);
         when(engineProxy.isEnabled(
-                eq("test"),
-                argThat(UnleashContext -> "111".equals(context.getUserId().orElse(null)))))
+                        eq("test"),
+                        argThat(UnleashContext -> "111".equals(context.getUserId().orElse(null)))))
                 .thenReturn(Boolean.TRUE);
 
-        UnleashConfig config = createConfigBuilder().unleashContextProvider(contextProvider).build();
+        UnleashConfig config =
+                createConfigBuilder().unleashContextProvider(contextProvider).build();
 
         Unleash unleash = new DefaultUnleash(config, engineProxy);
 
@@ -159,8 +160,8 @@ public class UnleashTest {
 
         EngineProxy engineProxy = mock(EngineProxy.class);
         when(engineProxy.isEnabled(
-                eq("test"),
-                argThat(UnleashContext -> "13".equals(context.getUserId().orElse(null)))))
+                        eq("test"),
+                        argThat(UnleashContext -> "13".equals(context.getUserId().orElse(null)))))
                 .thenReturn(Boolean.TRUE);
 
         Unleash unleash = new DefaultUnleash(baseConfig, engineProxy);

@@ -2,23 +2,48 @@ package io.getunleash;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import io.getunleash.event.ClientFeaturesResponse;
 import io.getunleash.event.EventDispatcher;
-import io.getunleash.metric.UnleashMetricService;
+import io.getunleash.event.UnleashReady;
+import io.getunleash.event.UnleashSubscriber;
+import io.getunleash.repository.*;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.LoggerFactory;
 
 class DefaultUnleashTest {
     private DefaultUnleash sut;
     private EngineProxy engineProxy;
     private UnleashContextProvider contextProvider;
     private EventDispatcher eventDispatcher;
-    private UnleashMetricService metricService;
+
+    private String loadMockFeatures(String path) {
+        try {
+            File file = new File(getClass().getClassLoader().getResource(path).toURI());
+            return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to load testdata", ex);
+        }
+    }
 
     @RegisterExtension
     static WireMockExtension serverMock =
@@ -39,245 +64,243 @@ class DefaultUnleashTest {
         sut = new DefaultUnleash(unleashConfig, engineProxy, contextProvider, eventDispatcher);
     }
 
-    //     @Test
-    //     public void should_evaluate_all_toggle_with_context() {
-    //         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
+    @Test
+    public void should_evaluate_all_toggle_with_context() {
 
-    //         new UnleashEngineStateHandler(sut)
-    //                 .setState(
-    //                         asList(
-    //                                 new FeatureToggle("toggle1", true, Collections.emptyList()),
-    //                                 new FeatureToggle("toggle2", false,
-    //                                         Collections.emptyList())),
-    //                         Collections.emptyList());
+        ToggleBootstrapProvider bootstrapper =
+                new ToggleBootstrapProvider() {
 
-    //         List<EvaluatedToggle> toggles = sut.more().evaluateAllToggles();
-    //         assertThat(toggles).hasSize(2);
-    //         // EvaluatedToggle t1 = toggles.get(0);
-    //         // rather than getting the first toggle, we need to find the toggle with the
-    //         // correct name since this now comes from Yggdrasil and the feature set is
-    //         // backed by
-    //         // hashmap, we can't guarantee a stable ordering
-    //         EvaluatedToggle t1 = toggles.stream().filter(t ->
-    // t.getName().equals("toggle1")).findFirst().get();
+                    @Override
+                    public Optional<String> read() {
+                        return Optional.of(loadMockFeatures("unleash-repo-v2.json"));
+                    }
+                };
 
-    //         assertThat(t1.getName()).isEqualTo("toggle1");
-    //         assertThat(t1.isEnabled()).isTrue();
-    //     }u
+        UnleashConfig unleashConfig =
+                UnleashConfig.builder()
+                        .unleashAPI("http://fakeAPI")
+                        .appName("fakeApp")
+                        .toggleBootstrapProvider(bootstrapper)
+                        .build();
 
-    //     @Test
-    //     public void should_allow_fallback_strategy() {
-    //         Strategy fallback = mock(Strategy.class);
-    //         when(fallback.getResult(anyMap(), any(), anyList(),
-    //                 anyList())).thenCallRealMethod();
+        Unleash unleash = new DefaultUnleash(unleashConfig);
+        List<EvaluatedToggle> toggles = unleash.more().evaluateAllToggles();
+        assertThat(toggles).hasSize(5);
 
-    //         UnleashConfig unleashConfigWithFallback = UnleashConfig.builder()
-    //                 .unleashAPI("http://fakeAPI")
-    //                 .appName("fakeApp")
-    //                 .fallbackStrategy(fallback)
-    //                 .build();
-    //         sut = new DefaultUnleash(
-    //                 unleashConfigWithFallback, engineProxy, contextProvider,
-    //                 eventDispatcher);
+        // rather than getting the first toggle, we need to find the toggle with the
+        // correct name since this now comes from Yggdrasil and the feature set is
+        // backed by
+        // hashmap, we can't guarantee a stable ordering
+        EvaluatedToggle t1 =
+                toggles.stream().filter(t -> t.getName().equals("featureX")).findFirst().get();
 
-    //         ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
-    //         FeatureToggle toggle = new FeatureToggle("toggle1", true,
-    //                 Collections.singletonList(as));
-    //         new UnleashEngineStateHandler(sut).setState(toggle);
-    //         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
+        assertThat(t1.getName()).isEqualTo("featureX");
+        assertThat(t1.isEnabled()).isTrue();
+    }
 
-    //         sut.isEnabled("toggle1");
+    // @Test
+    // public void should_allow_fallback_strategy() {
+    // Strategy fallback = mock(Strategy.class);
+    // when(fallback.getResult(anyMap(), any(), anyList(),
+    // anyList())).thenCallRealMethod();
 
-    //         verify(fallback).isEnabled(any(), any());
-    //     }
+    // UnleashConfig unleashConfigWithFallback = UnleashConfig.builder()
+    // .unleashAPI("http://fakeAPI")
+    // .appName("fakeApp")
+    // .fallbackStrategy(fallback)
+    // .build();
+    // sut = new DefaultUnleash(
+    // unleashConfigWithFallback, engineProxy, contextProvider,
+    // eventDispatcher);
 
-    //     @Test
-    //     public void multiple_instantiations_of_the_same_config_gives_errors() {
-    //         ListAppender<ILoggingEvent> appender = new ListAppender();
-    //         appender.start();
-    //         Logger unleashLogger = (Logger) LoggerFactory.getLogger(DefaultUnleash.class);
-    //         unleashLogger.addAppender(appender);
-    //         String appName = "multiple_connection_logging";
-    //         String instanceId = "multiple_connection_instance_id";
-    //         UnleashConfig config = UnleashConfig.builder()
-    //                 .unleashAPI("http://test:4242")
-    //                 .appName(appName)
-    //                 .apiKey("default:development:1234567890123456")
-    //                 .instanceId(instanceId)
-    //                 .build();
-    //         Unleash unleash1 = new DefaultUnleash(config);
-    //         // We've only instantiated the client once, so no errors should've been logged
-    //         assertThat(appender.list).isEmpty();
-    //         Unleash unleash2 = new DefaultUnleash(config);
-    //         // We've now instantiated the client twice, so we expect an error log line.
-    //         assertThat(appender.list).hasSize(1);
-    //         String id = config.getClientIdentifier();
-    //         assertThat(appender.list)
-    //                 .extracting(ILoggingEvent::getFormattedMessage)
-    //                 .containsExactly(
-    //                         "You already have 1 clients for AppName ["
-    //                                 + appName
-    //                                 + "] with instanceId: ["
-    //                                 + instanceId
-    //                                 + "] running. Please double check your code where you are
-    // instantiating the Unleash SDK");
-    //         appender.list.clear();
-    //         Unleash unleash3 = new DefaultUnleash(config);
-    //         // We've now instantiated the client twice, so we expect an error log line.
-    //         assertThat(appender.list).hasSize(1);
-    //         assertThat(appender.list)
-    //                 .extracting(ILoggingEvent::getFormattedMessage)
-    //                 .containsExactly(
-    //                         "You already have 2 clients for AppName ["
-    //                                 + appName
-    //                                 + "] with instanceId: ["
-    //                                 + instanceId
-    //                                 + "] running. Please double check your code where you are
-    // instantiating the Unleash SDK");
-    //     }
+    // ActivationStrategy as = new ActivationStrategy("forFallback", new
+    // HashMap<>());
+    // FeatureToggle toggle = new FeatureToggle("toggle1", true,
+    // Collections.singletonList(as));
+    // new UnleashEngineStateHandler(sut).setState(toggle);
+    // when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
-    //     @Test
-    //     public void supports_failing_hard_on_multiple_instantiations() {
-    //         UnleashConfig config = UnleashConfig.builder()
-    //                 .unleashAPI("http://test:4242")
-    //                 .appName("multiple_connection_exception")
-    //                 .apiKey("default:development:1234567890123456")
-    //                 .instanceId("multiple_connection_exception")
-    //                 .build();
-    //         String id = config.getClientIdentifier();
-    //         Unleash unleash1 = new DefaultUnleash(config);
-    //         assertThatThrownBy(
-    //                 () -> {
-    //                     Unleash unleash2 = new DefaultUnleash(config, null, null, null, true);
-    //                 })
-    //                 .isInstanceOf(RuntimeException.class)
-    //                 .withFailMessage(
-    //                         "You already have 1 clients for Unleash Configuration ["
-    //                                 + id
-    //                                 + "] running. Please double check your code where you are
-    // instantiating the Unleash SDK");
-    //     }
+    // sut.isEnabled("toggle1");
 
-    //     @Test
-    //     public void synchronous_fetch_on_initialisation_fails_on_initialization() {
-    //         IsReadyTestSubscriber readySubscriber = new IsReadyTestSubscriber();
-    //         UnleashConfig config = UnleashConfig.builder()
-    //                 .unleashAPI("http://wrong:4242")
-    //                 .appName("wrong_upstream")
-    //                 .apiKey("default:development:1234567890123456")
-    //                 .instanceId("multiple_connection_exception")
-    //                 .synchronousFetchOnInitialisation(true)
-    //                 .subscriber(readySubscriber)
-    //                 .build();
+    // verify(fallback).isEnabled(any(), any());
+    // }
 
-    //         assertThatThrownBy(() -> new
-    // DefaultUnleash(config)).isInstanceOf(UnleashException.class);
-    //         assertThat(readySubscriber.ready).isFalse();
-    //     }
+    @Test
+    public void multiple_instantiations_of_the_same_config_gives_errors() {
+        ListAppender<ILoggingEvent> appender = new ListAppender();
+        appender.start();
+        Logger unleashLogger = (Logger) LoggerFactory.getLogger(DefaultUnleash.class);
+        unleashLogger.addAppender(appender);
+        String appName = "multiple_connection_logging";
+        String instanceId = "multiple_connection_instance_id";
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://test:4242")
+                        .appName(appName)
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId(instanceId)
+                        .build();
+        Unleash unleash1 = new DefaultUnleash(config);
+        // We've only instantiated the client once, so no errors should've been logged
+        assertThat(appender.list).isEmpty();
+        Unleash unleash2 = new DefaultUnleash(config);
+        // We've now instantiated the client twice, so we expect an error log line.
+        assertThat(appender.list).hasSize(1);
+        String id = config.getClientIdentifier();
+        assertThat(appender.list)
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .containsExactly(
+                        "You already have 1 clients for AppName ["
+                                + appName
+                                + "] with instanceId: ["
+                                + instanceId
+                                + "] running. Please double check your code where you are instantiating the Unleash SDK");
+        appender.list.clear();
+        Unleash unleash3 = new DefaultUnleash(config);
+        // We've now instantiated the client twice, so we expect an error log line.
+        assertThat(appender.list).hasSize(1);
+        assertThat(appender.list)
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .containsExactly(
+                        "You already have 2 clients for AppName ["
+                                + appName
+                                + "] with instanceId: ["
+                                + instanceId
+                                + "] running. Please double check your code where you are instantiating the Unleash SDK");
+    }
 
-    //     @ParameterizedTest
-    //     @ValueSource(ints = { 401, 403, 404, 500 })
-    //     public void synchronous_fetch_on_initialisation_fails_on_non_200_response(int code)
-    //             throws URISyntaxException {
-    //         mockUnleashAPI(code);
-    //         IsReadyTestSubscriber readySubscriber = new IsReadyTestSubscriber();
-    //         UnleashConfig config = UnleashConfig.builder()
-    //                 .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
-    //                 .appName("wrong_upstream")
-    //                 .apiKey("default:development:1234567890123456")
-    //                 .instanceId("non-200")
-    //                 .synchronousFetchOnInitialisation(true)
-    //                 .subscriber(readySubscriber)
-    //                 .build();
+    @Test
+    public void supports_failing_hard_on_multiple_instantiations() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://test:4242")
+                        .appName("multiple_connection_exception")
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId("multiple_connection_exception")
+                        .build();
+        String id = config.getClientIdentifier();
+        Unleash unleash1 = new DefaultUnleash(config);
+        assertThatThrownBy(
+                        () -> {
+                            Unleash unleash2 = new DefaultUnleash(config, null, null, null, true);
+                        })
+                .isInstanceOf(RuntimeException.class)
+                .withFailMessage(
+                        "You already have 1 clients for Unleash Configuration ["
+                                + id
+                                + "] running. Please double check your code where you are instantiating the Unleash SDK");
+    }
 
-    //         assertThatThrownBy(() -> new
-    // DefaultUnleash(config)).isInstanceOf(UnleashException.class);
-    //         assertThat(readySubscriber.ready).isFalse();
-    //     }
+    @Test
+    public void synchronous_fetch_on_initialisation_fails_on_initialization() {
+        IsReadyTestSubscriber readySubscriber = new IsReadyTestSubscriber();
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://wrong:4242")
+                        .appName("wrong_upstream")
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId("multiple_connection_exception")
+                        .synchronousFetchOnInitialisation(true)
+                        .subscriber(readySubscriber)
+                        .build();
 
-    //     @Test
-    //     public void synchronous_fetch_on_initialisation_switches_to_ready_on_200()
-    //             throws URISyntaxException {
-    //         mockUnleashAPI(200);
-    //         IsReadyTestSubscriber readySubscriber = new IsReadyTestSubscriber();
-    //         UnleashConfig config = UnleashConfig.builder()
-    //                 .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
-    //                 .appName("wrong_upstream")
-    //                 .apiKey("default:development:1234567890123456")
-    //                 .instanceId("with-success-response")
-    //                 .synchronousFetchOnInitialisation(true)
-    //                 .subscriber(readySubscriber)
-    //                 .build();
-    //         new DefaultUnleash(config);
-    //         assertThat(readySubscriber.ready).isTrue();
-    //     }
+        assertThatThrownBy(() -> new DefaultUnleash(config)).isInstanceOf(UnleashException.class);
+        assertThat(readySubscriber.ready).isFalse();
+    }
 
-    //     private void mockUnleashAPI(int featuresStatusCode) {
-    //         stubFor(
-    //                 get(urlEqualTo("/api/client/features"))
-    //                         .withHeader("Accept", equalTo("application/json"))
-    //                         .willReturn(
-    //                                 aResponse()
-    //                                         .withStatus(featuresStatusCode)
-    //                                         .withHeader("Content-Type", "application/json")
-    //
-    // .withBody(loadMockFeatures("unleash-repo-v2.json"))));
+    @ParameterizedTest
+    @ValueSource(ints = {401, 403, 404, 500})
+    public void synchronous_fetch_on_initialisation_fails_on_non_200_response(int code)
+            throws URISyntaxException {
+        mockUnleashAPI(code);
+        IsReadyTestSubscriber readySubscriber = new IsReadyTestSubscriber();
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
+                        .appName("wrong_upstream")
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId("non-200")
+                        .synchronousFetchOnInitialisation(true)
+                        .subscriber(readySubscriber)
+                        .build();
 
-    //
-    // stubFor(post(urlEqualTo("/api/client/register")).willReturn(aResponse().withStatus(200)));
-    //     }
+        assertThatThrownBy(() -> new DefaultUnleash(config)).isInstanceOf(UnleashException.class);
+        assertThat(readySubscriber.ready).isFalse();
+    }
 
-    //     @Test
-    //     public void asynchronous_fetch_on_initialisation_fails_silently_and_retries()
-    //             throws InterruptedException {
-    //         FeatureFetcher fetcher = mock(FeatureFetcher.class);
-    //         when(fetcher.fetchFeatures())
-    //                 .thenThrow(UnleashException.class)
-    //                 .thenReturn(ClientFeaturesResponse.updated("doesn't matter for this test"));
-    //         UnleashConfig config = UnleashConfig.builder()
-    //                 .unleashAPI("http://wrong:4242")
-    //                 .appName("wrong_upstream")
-    //                 .apiKey("default:development:1234567890123456")
-    //                 .instanceId("multiple_connection_exception")
-    //                 .fetchTogglesInterval(1)
-    //                 .unleashFeatureFetcherFactory((UnleashConfig c) -> fetcher)
-    //                 .build();
+    @Test
+    public void synchronous_fetch_on_initialisation_switches_to_ready_on_200()
+            throws URISyntaxException {
+        mockUnleashAPI(200);
+        IsReadyTestSubscriber readySubscriber = new IsReadyTestSubscriber();
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
+                        .appName("wrong_upstream")
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId("with-success-response")
+                        .synchronousFetchOnInitialisation(true)
+                        .subscriber(readySubscriber)
+                        .build();
+        new DefaultUnleash(config);
+        assertThat(readySubscriber.ready).isTrue();
+    }
 
-    //         Unleash unleash = new DefaultUnleash(config);
-    //         Thread.sleep(1);
-    //         verify(fetcher, times(1)).fetchFeatures();
-    //         Thread.sleep(1200);
-    //         verify(fetcher, times(2)).fetchFeatures();
-    //     }
+    private void mockUnleashAPI(int featuresStatusCode) {
+        stubFor(
+                get(urlEqualTo("/api/client/features"))
+                        .withHeader("Accept", equalTo("application/json"))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(featuresStatusCode)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody(loadMockFeatures("unleash-repo-v2.json"))));
 
-    //     @Test
-    //     public void client_identifier_handles_api_key_being_null() {
-    //         UnleashConfig config =
-    //                 UnleashConfig.builder()
-    //                         .unleashAPI("http://test:4242")
-    //                         .appName("multiple_connection")
-    //                         .instanceId("testing_multiple")
-    //                         .build();
-    // `        String id = config.getClientIdentifier();
-    //         assertThat(id)
-    //
-    // .isEqualTo("f83eb743f4c8dc41294aafb96f454763e5a90b96db8b7040ddc505d636bdb243");
-    //     }
+        stubFor(post(urlEqualTo("/api/client/register")).willReturn(aResponse().withStatus(200)));
+    }
 
-    //     private static class IsReadyTestSubscriber implements UnleashSubscriber {
-    //         public boolean ready = false;
+    @Test
+    public void asynchronous_fetch_on_initialisation_fails_silently_and_retries()
+            throws InterruptedException {
+        FeatureFetcher fetcher = mock(FeatureFetcher.class);
+        when(fetcher.fetchFeatures())
+                .thenThrow(UnleashException.class)
+                .thenReturn(ClientFeaturesResponse.updated("doesn't matter for this test"));
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://wrong:4242")
+                        .appName("wrong_upstream")
+                        .apiKey("default:development:1234567890123456")
+                        .instanceId("multiple_connection_exception")
+                        .fetchTogglesInterval(1)
+                        .unleashFeatureFetcherFactory((UnleashConfig c) -> fetcher)
+                        .build();
 
-    //         public void onReady(UnleashReady unleashReady) {
-    //             this.ready = true;
-    //         }
-    //     }
+        Unleash unleash = new DefaultUnleash(config);
+        Thread.sleep(1);
+        verify(fetcher, times(1)).fetchFeatures();
+        Thread.sleep(1200);
+        verify(fetcher, times(2)).fetchFeatures();
+    }
 
-    //     private String loadMockFeatures(String path) {
-    //         try {
-    //             File file = new File(getClass().getClassLoader().getResource(path).toURI());
-    //             return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
-    //         } catch (Exception ex) {
-    //             throw new RuntimeException("Failed to load testdata", ex);
-    //         }
-    //     }
+    @Test
+    public void client_identifier_handles_api_key_being_null() {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .unleashAPI("http://test:4242")
+                        .appName("multiple_connection")
+                        .instanceId("testing_multiple")
+                        .build();
+        String id = config.getClientIdentifier();
+        assertThat(id)
+                .isEqualTo("f83eb743f4c8dc41294aafb96f454763e5a90b96db8b7040ddc505d636bdb243");
+    }
+
+    private static class IsReadyTestSubscriber implements UnleashSubscriber {
+        public boolean ready = false;
+
+        public void onReady(UnleashReady unleashReady) {
+            this.ready = true;
+        }
+    }
 }
