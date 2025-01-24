@@ -1,6 +1,7 @@
 package io.getunleash;
 
 import io.getunleash.engine.UnleashEngine;
+import io.getunleash.engine.VariantDef;
 import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.metric.UnleashMetricServiceImpl;
@@ -8,7 +9,6 @@ import io.getunleash.repository.FeatureRepositoryImpl;
 import io.getunleash.repository.YggdrasilAdapters;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
-import io.getunleash.variant.Variant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -48,8 +48,8 @@ public class EngineProxyImpl implements EngineProxy {
     }
 
     @Override
-    public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
-        return this.featureRepository.getVariant(toggleName, context, defaultValue);
+    public Optional<VariantDef> getVariant(String toggleName, UnleashContext context) {
+        return this.featureRepository.getVariant(toggleName, context);
     }
 
     @Override

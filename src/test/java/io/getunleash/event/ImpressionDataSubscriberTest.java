@@ -9,8 +9,9 @@ import io.getunleash.EngineProxy;
 import io.getunleash.SynchronousTestExecutor;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
+import io.getunleash.engine.VariantDef;
 import io.getunleash.util.UnleashConfig;
-import io.getunleash.variant.Variant;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -61,11 +62,12 @@ public class ImpressionDataSubscriberTest {
 
     @Test
     public void variantEventWhenVariantIsRequested() {
+        VariantDef mockVariant = Mockito.mock(VariantDef.class);
         String featureWithImpressionData = "feature.with.impressionData";
         EngineProxy repo = Mockito.mock(EngineProxy.class);
         when(repo.shouldEmitImpressionEvent(featureWithImpressionData)).thenReturn(true);
-        when(repo.getVariant(any(String.class), any(UnleashContext.class), any(Variant.class)))
-                .thenReturn(new Variant("variant1", null, true, true));
+        when(repo.getVariant(any(String.class), any(UnleashContext.class)))
+                .thenReturn(Optional.of(mockVariant));
         Unleash unleash = new DefaultUnleash(unleashConfig, repo);
 
         unleash.getVariant(featureWithImpressionData);

@@ -74,15 +74,16 @@ public final class YggdrasilAdapters {
         return mapped;
     }
 
-    public static Variant adapt(VariantDef variant, Variant defaultValue) {
-        if (variant == null) {
+    public static Variant adapt(Optional<VariantDef> variant, Variant defaultValue) {
+        if (!variant.isPresent()) {
             return defaultValue;
         }
+        VariantDef unwrapped = variant.get();
         return new Variant(
-                variant.getName(),
-                adapt(variant.getPayload()),
-                variant.isEnabled(),
-                variant.isFeatureEnabled());
+                unwrapped.getName(),
+                adapt(unwrapped.getPayload()),
+                unwrapped.isEnabled(),
+                unwrapped.isFeatureEnabled());
     }
 
     public static @Nullable io.getunleash.variant.Payload adapt(@Nullable Payload payload) {

@@ -8,6 +8,7 @@ import io.getunleash.event.ToggleEvaluated;
 import io.getunleash.event.VariantImpressionEvent;
 import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.FeatureRepository;
+import io.getunleash.repository.YggdrasilAdapters;
 import io.getunleash.strategy.*;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.variant.Variant;
@@ -143,7 +144,9 @@ public class DefaultUnleash implements Unleash {
         UnleashContext enhancedContext = context.applyStaticFields(config);
 
         Variant variant =
-                this.featureRepository.getVariant(toggleName, enhancedContext, defaultValue);
+                YggdrasilAdapters.adapt(
+                        this.featureRepository.getVariant(toggleName, enhancedContext),
+                        defaultValue);
         this.metricService.countToggle(toggleName, variant.isFeatureEnabled());
         this.metricService.countVariant(toggleName, variant.getName());
         eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isEnabled()));
@@ -197,8 +200,10 @@ public class DefaultUnleash implements Unleash {
                             toggleName -> {
                                 UnleashContext enhancedContext = context.applyStaticFields(config);
                                 Variant variant =
-                                        featureRepository.getVariant(
-                                                toggleName, enhancedContext, DISABLED_VARIANT);
+                                        YggdrasilAdapters.adapt(
+                                                featureRepository.getVariant(
+                                                        toggleName, enhancedContext),
+                                                DISABLED_VARIANT);
                                 return new EvaluatedToggle(
                                         toggleName, variant.isFeatureEnabled(), variant);
                             })

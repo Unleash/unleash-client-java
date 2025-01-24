@@ -2,14 +2,15 @@ package io.getunleash.repository;
 
 import io.getunleash.FeatureDefinition;
 import io.getunleash.UnleashContext;
-import io.getunleash.variant.Variant;
+import io.getunleash.engine.VariantDef;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface FeatureRepository {
 
     Boolean isEnabled(String toggleName, UnleashContext context);
 
-    Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue);
+    Optional<VariantDef> getVariant(String toggleName, UnleashContext context);
 
     Stream<FeatureDefinition> listKnownToggles();
 

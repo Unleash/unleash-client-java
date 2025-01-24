@@ -4,6 +4,7 @@ import io.getunleash.FeatureDefinition;
 import io.getunleash.UnleashContext;
 import io.getunleash.UnleashException;
 import io.getunleash.engine.UnleashEngine;
+import io.getunleash.engine.VariantDef;
 import io.getunleash.engine.YggdrasilError;
 import io.getunleash.engine.YggdrasilInvalidInputException;
 import io.getunleash.event.ClientFeaturesResponse;
@@ -12,7 +13,6 @@ import io.getunleash.event.UnleashReady;
 import io.getunleash.util.Throttler;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
-import io.getunleash.variant.Variant;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -187,11 +187,10 @@ public class FeatureRepositoryImpl implements FeatureRepository {
     }
 
     @Override
-    public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
+    public Optional<VariantDef> getVariant(String toggleName, UnleashContext context) {
         try {
-            return YggdrasilAdapters.adapt(
-                    this.engine.getVariant(toggleName, YggdrasilAdapters.adapt(context)),
-                    defaultValue);
+            return Optional.ofNullable(
+                    this.engine.getVariant(toggleName, YggdrasilAdapters.adapt(context)));
         } catch (YggdrasilInvalidInputException | YggdrasilError e) {
             LOGGER.error("Error when checking feature toggle {}", toggleName, e);
             return null;

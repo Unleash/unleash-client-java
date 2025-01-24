@@ -12,9 +12,18 @@ import org.junit.jupiter.api.Test;
 
 public class UnleashTest {
 
-    private EngineProxyImpl engineProxy;
     private UnleashContextProvider contextProvider;
     private UnleashConfig baseConfig;
+
+    private UnleashConfig.Builder createConfigBuilder() {
+        return new UnleashConfig.Builder()
+                .appName("test")
+                .environment("test")
+                .unleashAPI("http://localhost:4242/api/")
+                .disableMetrics()
+                .disablePolling()
+                .scheduledExecutor(mock(UnleashScheduledExecutor.class));
+    }
 
     @BeforeEach
     public void setup() {
@@ -22,16 +31,7 @@ public class UnleashTest {
         contextProvider = mock(UnleashContextProvider.class);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
-        baseConfig =
-                new UnleashConfig.Builder()
-                        .appName("test")
-                        .environment("test")
-                        .unleashAPI("http://localhost:4242/api/")
-                        .disableMetrics()
-                        .disablePolling()
-                        .scheduledExecutor(mock(UnleashScheduledExecutor.class))
-                        .unleashContextProvider(contextProvider)
-                        .build();
+        baseConfig = createConfigBuilder().unleashContextProvider(contextProvider).build();
     }
 
     @Test
@@ -133,69 +133,67 @@ public class UnleashTest {
     // any(UnleashContext.class));
     // }
 
-    // @Test
-    // public void should_support_context_provider() {
-    //     UnleashContext context = UnleashContext.builder().userId("111").build();
-    //     when(contextProvider.getContext()).thenReturn(context);
+    @Test
+    public void should_support_context_provider() {
+        UnleashContext context = UnleashContext.builder().userId("111").build();
+        when(contextProvider.getContext()).thenReturn(context);
 
-    //     // Set up a toggleName using UserWithIdStrategy
-    //     Map<String, String> params = new HashMap<>();
-    //     params.put("userIds", "123, 111, 121");
-    //     ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-    //     FeatureToggle featureToggle = new FeatureToggle("test", true,
-    //             asList(strategy));
+        EngineProxy engineProxy = mock(EngineProxy.class);
+        when(engineProxy.isEnabled(
+                        eq("test"),
+                        argThat(UnleashContext -> "111".equals(context.getUserId().orElse(null)))))
+                .thenReturn(Boolean.TRUE);
 
-    //     stateHandler.setState(featureToggle);
+        UnleashConfig config =
+                createConfigBuilder().unleashContextProvider(contextProvider).build();
 
-    //     assertThat(unleash.isEnabled("test")).isTrue();
-    // }
+        Unleash unleash = new DefaultUnleash(config, engineProxy);
 
-    // @Test
-    // public void should_support_context_as_part_of_is_enabled_call() {
-    // UnleashContext context = UnleashContext.builder().userId("13").build();
+        assertThat(unleash.isEnabled("test")).isTrue();
+    }
 
-    // // Set up a toggleName using UserWithIdStrategy
-    // Map<String, String> params = new HashMap<>();
-    // params.put("userIds", "123, 111, 121, 13");
-    // ActivationStrategy strategy = new ActivationStrategy("userWithId", params);
-    // FeatureToggle featureToggle = new FeatureToggle("test", true,
-    // asList(strategy));
+    @Test
+    public void should_support_context_as_part_of_is_enabled_call() {
+        UnleashContext context = UnleashContext.builder().userId("13").build();
 
-    // stateHandler.setState(featureToggle);
+        EngineProxy engineProxy = mock(EngineProxy.class);
+        when(engineProxy.isEnabled(
+                        eq("test"),
+                        argThat(UnleashContext -> "13".equals(context.getUserId().orElse(null)))))
+                .thenReturn(Boolean.TRUE);
 
-    // assertThat(unleash.isEnabled("test", context)).isTrue();
-    // }
+        Unleash unleash = new DefaultUnleash(baseConfig, engineProxy);
 
-    // @Test
-    // public void
-    // should_support_context_as_part_of_is_enabled_call_and_use_default() {
-    // UnleashContext context = UnleashContext.builder().userId("13").build();
+        assertThat(unleash.isEnabled("test", context)).isTrue();
+    }
 
-    // // Set up a toggle using UserWithIdStrategy
-    // Map<String, String> params = new HashMap<>();
-    // params.put("userIds", "123, 111, 121, 13");
+    @Test
+    public void should_support_context_as_part_of_is_enabled_call_and_use_default() {
+        UnleashContext context = UnleashContext.builder().userId("13").build();
 
-    // assertThat(unleash.isEnabled("test", context, true)).isTrue();
-    // }
+        EngineProxy engineProxy = mock(EngineProxy.class);
+        when(engineProxy.isEnabled(any(String.class), any(UnleashContext.class))).thenReturn(null);
 
-    // @Test
-    // public void get_default_variant_when_disabled() {
-    // UnleashContext context = UnleashContext.builder().userId("1").build();
+        Unleash unleash = new DefaultUnleash(baseConfig, engineProxy);
 
-    // stateHandler.setState(
-    // new FeatureToggle(
-    // "toggleFeatureName1",
-    // true,
-    // asList(new ActivationStrategy("default", null))));
+        assertThat(unleash.isEnabled("test", context, true)).isTrue();
+    }
 
-    // final Variant result =
-    // unleash.getVariant("test", context, new Variant("Chuck", "Norris", true));
+    @Test
+    public void get_default_variant_when_disabled() {
+        UnleashContext context = UnleashContext.builder().userId("1").build();
 
-    // assertThat(result).isNotNull();
-    // assertThat(result.getName()).isEqualTo("Chuck");
-    // assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("Norris");
-    // assertThat(result.isEnabled()).isTrue();
-    // }
+        EngineProxy engineProxy = mock(EngineProxy.class);
+        when(engineProxy.getVariant(any(String.class), any(UnleashContext.class))).thenReturn(null);
+
+        Unleash unleash = new DefaultUnleash(baseConfig, engineProxy);
+        // Variant result = unleash.getVariant("test", context);
+
+        // assertThat(result).isNotNull();
+        // assertThat(result.getName()).isEqualTo("Chuck");
+        // assertThat(result.getPayload().map(Payload::getValue).get()).isEqualTo("Norris");
+        // assertThat(result.isEnabled()).isTrue();
+    }
 
     // @Test
     // public void getting_variant_when_disabled_should_increment_no_counter() {
