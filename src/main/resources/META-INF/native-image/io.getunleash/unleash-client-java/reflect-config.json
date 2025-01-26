@@ -1,0 +1,8 @@
+[
+  {
+    "name": "io.getunleash.FeatureToggle",
+    "allDeclaredFields": true,
+    "allDeclaredConstructors": true,
+    "unsafeAllocated": true
+  }
+]
