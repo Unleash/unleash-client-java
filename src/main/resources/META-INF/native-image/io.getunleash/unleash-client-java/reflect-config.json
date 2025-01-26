@@ -1,8 +1,56 @@
 [
-  {
-    "name": "io.getunleash.FeatureToggle",
-    "allDeclaredFields": true,
-    "allDeclaredConstructors": true,
-    "unsafeAllocated": true
-  }
+    {
+        "name": "io.getunleash.repository.FeatureCollection",
+        "allDeclaredFields": true,
+        "allDeclaredConstructors": true,
+        "unsafeAllocated": true
+    },
+    {
+        "name": "io.getunleash.repository.ToggleCollection",
+        "allDeclaredFields": true,
+        "allDeclaredConstructors": true,
+        "unsafeAllocated": true
+    },
+    {
+        "name": "io.getunleash.FeatureToggle",
+        "allDeclaredFields": true,
+        "allDeclaredConstructors": true,
+        "unsafeAllocated": true
+    },
+    {
+        "name": "io.getunleash.ActivationStrategy",
+        "allDeclaredFields": true,
+        "allDeclaredConstructors": true,
+        "unsafeAllocated": true
+    },
+    {
+        "name": "io.getunleash.Constraint",
+        "allDeclaredFields": true,
+        "allDeclaredConstructors": true,
+        "unsafeAllocated": true
+    },
+    {
+        "name": "io.getunleash.variant.VariantDefinition",
+        "allDeclaredFields": true,
+        "allDeclaredConstructors": true,
+        "unsafeAllocated": true
+    },
+    {
+        "name": "io.getunleash.variant.VariantOverride",
+        "allDeclaredFields": true,
+        "allDeclaredConstructors": true,
+        "unsafeAllocated": true
+    },
+    {
+        "name": "io.getunleash.repository.SegmentCollection",
+        "allDeclaredFields": true,
+        "allDeclaredConstructors": true,
+        "unsafeAllocated": true
+    },
+    {
+        "name": "io.getunleash.Segment",
+        "allDeclaredFields": true,
+        "allDeclaredConstructors": true,
+        "unsafeAllocated": true
+    }
 ]
