@@ -1,21 +1,17 @@
 package io.getunleash;
 
-import static io.getunleash.Variant.DISABLED_VARIANT;
-import static java.util.Optional.ofNullable;
+import static io.getunleash.variant.Variant.DISABLED_VARIANT;
 
-import io.getunleash.engine.*;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.IsEnabledImpressionEvent;
 import io.getunleash.event.ToggleEvaluated;
 import io.getunleash.event.VariantImpressionEvent;
-import io.getunleash.lang.Nullable;
 import io.getunleash.metric.UnleashMetricService;
-import io.getunleash.metric.UnleashMetricServiceImpl;
 import io.getunleash.repository.FeatureRepository;
-import io.getunleash.repository.IFeatureRepository;
-import io.getunleash.repository.JsonFeatureParser;
+import io.getunleash.repository.YggdrasilAdapters;
 import io.getunleash.strategy.*;
 import io.getunleash.util.UnleashConfig;
+import io.getunleash.variant.Variant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
@@ -28,42 +24,26 @@ public class DefaultUnleash implements Unleash {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
 
     private static ConcurrentHashMap<String, LongAdder> initCounts = new ConcurrentHashMap<>();
-    private static final List<Strategy> BUILTIN_STRATEGIES =
-            Arrays.asList(
-                    new DefaultStrategy(),
-                    new ApplicationHostnameStrategy(),
-                    new GradualRolloutRandomStrategy(),
-                    new GradualRolloutSessionIdStrategy(),
-                    new GradualRolloutUserIdStrategy(),
-                    new RemoteAddressStrategy(),
-                    new UserWithIdStrategy(),
-                    new FlexibleRolloutStrategy());
 
-    public static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
-
-    private final UnleashEngine unleashEngine;
     private final UnleashMetricService metricService;
-    private final IFeatureRepository featureRepository;
+    private final FeatureRepository featureRepository;
     private final UnleashContextProvider contextProvider;
     private final EventDispatcher eventDispatcher;
     private final UnleashConfig config;
 
-    private static IFeatureRepository defaultToggleRepository(UnleashConfig unleashConfig) {
-        return new FeatureRepository(unleashConfig);
+    private static EngineProxy defaultToggleRepository(
+            UnleashConfig unleashConfig, Strategy... strategies) {
+        return new EngineProxyImpl(unleashConfig, strategies);
     }
 
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {
-        this(unleashConfig, defaultToggleRepository(unleashConfig), strategies);
+        this(unleashConfig, defaultToggleRepository(unleashConfig, strategies));
     }
 
-    public DefaultUnleash(
-            UnleashConfig unleashConfig,
-            IFeatureRepository featureRepository,
-            Strategy... strategies) {
+    public DefaultUnleash(UnleashConfig unleashConfig, EngineProxy engineProxy) {
         this(
                 unleashConfig,
-                featureRepository,
-                buildStrategyMap(strategies),
+                engineProxy,
                 unleashConfig.getContextProvider(),
                 new EventDispatcher(unleashConfig),
                 false);
@@ -72,53 +52,24 @@ public class DefaultUnleash implements Unleash {
     // Visible for testing
     public DefaultUnleash(
             UnleashConfig unleashConfig,
-            IFeatureRepository featureRepository,
-            Map<String, Strategy> strategyMap,
+            EngineProxy engineProxy,
             UnleashContextProvider contextProvider,
             EventDispatcher eventDispatcher) {
-        this(
-                unleashConfig,
-                featureRepository,
-                strategyMap,
-                contextProvider,
-                eventDispatcher,
-                false);
+        this(unleashConfig, engineProxy, contextProvider, eventDispatcher, false);
     }
 
     public DefaultUnleash(
             UnleashConfig unleashConfig,
-            IFeatureRepository featureRepository,
-            Map<String, Strategy> strategyMap,
+            EngineProxy engineProxy,
             UnleashContextProvider contextProvider,
             EventDispatcher eventDispatcher,
             boolean failOnMultipleInstantiations) {
 
-        this.unleashEngine =
-                new UnleashEngine(
-                        strategyMap.values().stream()
-                                .map(YggdrasilAdapters::adapt)
-                                .collect(Collectors.toList()),
-                        Optional.ofNullable(unleashConfig.getFallbackStrategy())
-                                .map(YggdrasilAdapters::adapt)
-                                .orElse(null));
-        featureRepository.addConsumer(
-                featureCollection -> {
-                    try {
-                        this.unleashEngine.takeState(
-                                JsonFeatureParser.toJsonString(featureCollection));
-                    } catch (YggdrasilInvalidInputException | YggdrasilError e) {
-                        LOGGER.error("Unable to update features", e);
-                    }
-                });
-
         this.config = unleashConfig;
-        this.featureRepository = featureRepository;
+        this.featureRepository = engineProxy;
+        this.metricService = engineProxy;
         this.contextProvider = contextProvider;
         this.eventDispatcher = eventDispatcher;
-        this.metricService =
-                new UnleashMetricServiceImpl(
-                        unleashConfig, unleashConfig.getScheduledExecutor(), this.unleashEngine);
-        metricService.register(strategyMap.keySet());
         initCounts.compute(
                 config.getClientIdentifier(),
                 (key, inits) -> {
@@ -159,64 +110,23 @@ public class DefaultUnleash implements Unleash {
             BiPredicate<String, UnleashContext> fallbackAction) {
 
         UnleashContext enhancedContext = context.applyStaticFields(config);
-        try {
-            Boolean enabled =
-                    this.unleashEngine.isEnabled(
-                            toggleName, YggdrasilAdapters.adapt(enhancedContext));
-            if (enabled == null) {
-                enabled = fallbackAction.test(toggleName, enhancedContext);
-            }
 
-            this.unleashEngine.countToggle(toggleName, enabled);
-            eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
-            if (this.unleashEngine.shouldEmitImpressionEvent(toggleName)) {
-                eventDispatcher.dispatch(
-                        new IsEnabledImpressionEvent(toggleName, enabled, context));
-            }
-            return enabled;
-        } catch (YggdrasilInvalidInputException | YggdrasilError e) {
-            LOGGER.warn(
-                    "A serious issue occurred when evaluating a feature toggle, defaulting to false",
-                    e);
-            return false;
+        Boolean enabled = this.featureRepository.isEnabled(toggleName, enhancedContext);
+        if (enabled == null) {
+            enabled = fallbackAction.test(toggleName, enhancedContext);
         }
+
+        this.metricService.countToggle(toggleName, enabled);
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
+        if (this.featureRepository.shouldEmitImpressionEvent(toggleName)) {
+            eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
+        }
+        return enabled;
     }
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context) {
         return getVariant(toggleName, context, DISABLED_VARIANT);
-    }
-
-    @Override
-    public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
-        UnleashContext enhancedContext = context.applyStaticFields(config);
-
-        try {
-            Context adaptedContext = YggdrasilAdapters.adapt(enhancedContext);
-
-            Variant variant =
-                    YggdrasilAdapters.adapt(
-                            this.unleashEngine.getVariant(toggleName, adaptedContext),
-                            defaultValue);
-
-            this.unleashEngine.countToggle(toggleName, variant.isFeatureEnabled());
-            this.unleashEngine.countVariant(toggleName, variant.getName());
-            eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isEnabled()));
-            if (unleashEngine.shouldEmitImpressionEvent(toggleName)) {
-                eventDispatcher.dispatch(
-                        new VariantImpressionEvent(
-                                toggleName,
-                                variant.isFeatureEnabled(),
-                                context,
-                                variant.getName()));
-            }
-            return variant;
-        } catch (YggdrasilInvalidInputException | YggdrasilError e) {
-            LOGGER.warn(
-                    "A serious issue occurred when evaluating a variant, defaulting to the default value",
-                    e);
-            return defaultValue;
-        }
     }
 
     @Override
@@ -229,38 +139,23 @@ public class DefaultUnleash implements Unleash {
         return getVariant(toggleName, contextProvider.getContext(), defaultValue);
     }
 
-    /**
-     * Use more().getFeatureToggleDefinition() instead
-     *
-     * @return the feature toggle
-     */
-    @Deprecated
-    public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
-        return ofNullable(featureRepository.getToggle(toggleName));
-    }
+    @Override
+    public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
+        UnleashContext enhancedContext = context.applyStaticFields(config);
 
-    /**
-     * Use more().getFeatureToggleNames() instead
-     *
-     * @return a list of known toggle names
-     */
-    @Deprecated()
-    public List<String> getFeatureToggleNames() {
-        return featureRepository.getFeatureNames();
-    }
-
-    private static Map<String, Strategy> buildStrategyMap(@Nullable Strategy[] strategies) {
-        Map<String, Strategy> map = new HashMap<>();
-
-        BUILTIN_STRATEGIES.forEach(strategy -> map.put(strategy.getName(), strategy));
-
-        if (strategies != null) {
-            for (Strategy strategy : strategies) {
-                map.put(strategy.getName(), strategy);
-            }
+        Variant variant =
+                YggdrasilAdapters.adapt(
+                        this.featureRepository.getVariant(toggleName, enhancedContext),
+                        defaultValue);
+        this.metricService.countToggle(toggleName, variant.isFeatureEnabled());
+        this.metricService.countVariant(toggleName, variant.getName());
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isFeatureEnabled()));
+        if (this.featureRepository.shouldEmitImpressionEvent(toggleName)) {
+            eventDispatcher.dispatch(
+                    new VariantImpressionEvent(
+                            toggleName, variant.isFeatureEnabled(), context, variant.getName()));
         }
-
-        return map;
+        return variant;
     }
 
     @Override
@@ -277,12 +172,18 @@ public class DefaultUnleash implements Unleash {
 
         @Override
         public List<String> getFeatureToggleNames() {
-            return featureRepository.getFeatureNames();
+            return featureRepository
+                    .listKnownToggles()
+                    .map(FeatureDefinition::getName)
+                    .collect(Collectors.toList());
         }
 
         @Override
-        public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
-            return ofNullable(featureRepository.getToggle(toggleName));
+        public Optional<FeatureDefinition> getFeatureToggleDefinition(String toggleName) {
+            return featureRepository
+                    .listKnownToggles()
+                    .filter(toggle -> toggle.getName().equals(toggleName))
+                    .findFirst();
         }
 
         @Override
@@ -292,13 +193,19 @@ public class DefaultUnleash implements Unleash {
 
         @Override
         public List<EvaluatedToggle> evaluateAllToggles(UnleashContext context) {
-            return getFeatureToggleNames().stream()
+            return featureRepository
+                    .listKnownToggles()
+                    .map(FeatureDefinition::getName)
                     .map(
                             toggleName -> {
-                                boolean enabled =
-                                        isEnabled(toggleName, context, (name, ctx) -> false);
-                                Variant variant = getVariant(toggleName, context, DISABLED_VARIANT);
-                                return new EvaluatedToggle(toggleName, enabled, variant);
+                                UnleashContext enhancedContext = context.applyStaticFields(config);
+                                Variant variant =
+                                        YggdrasilAdapters.adapt(
+                                                featureRepository.getVariant(
+                                                        toggleName, enhancedContext),
+                                                DISABLED_VARIANT);
+                                return new EvaluatedToggle(
+                                        toggleName, variant.isFeatureEnabled(), variant);
                             })
                     .collect(Collectors.toList());
         }

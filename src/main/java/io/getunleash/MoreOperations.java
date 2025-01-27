@@ -7,7 +7,7 @@ public interface MoreOperations {
 
     List<String> getFeatureToggleNames();
 
-    Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName);
+    Optional<FeatureDefinition> getFeatureToggleDefinition(String toggleName);
 
     List<EvaluatedToggle> evaluateAllToggles();
 

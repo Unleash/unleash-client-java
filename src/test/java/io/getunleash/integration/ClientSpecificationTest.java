@@ -8,10 +8,9 @@ import com.google.gson.reflect.TypeToken;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
-import io.getunleash.Variant;
-import io.getunleash.repository.UnleashEngineStateHandler;
-import io.getunleash.strategy.constraints.DateParser;
+import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.util.UnleashConfig;
+import io.getunleash.variant.Variant;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,8 +18,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
@@ -105,18 +111,26 @@ public class ClientSpecificationTest {
 
     private Unleash setupUnleash(TestDefinition testDefinition) throws URISyntaxException {
 
-        // Set-up a unleash instance, using mocked API and backup-file
+        ToggleBootstrapProvider bootstrapper =
+                new ToggleBootstrapProvider() {
+                    @Override
+                    public Optional<String> read() {
+                        return Optional.of(testDefinition.getState().toString());
+                    }
+                };
+
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName(testDefinition.getName())
                         .disableMetrics()
                         .disablePolling()
+                        .backupFile(null)
+                        .toggleBootstrapProvider(bootstrapper)
                         .unleashAPI(new URI("http://notusedbutrequired:9999/api/"))
                         .build();
 
         DefaultUnleash defaultUnleash = new DefaultUnleash(config);
-        new UnleashEngineStateHandler(defaultUnleash)
-                .setState(testDefinition.getState().toString());
+
         return defaultUnleash;
     }
 
@@ -153,5 +167,44 @@ public class ClientSpecificationTest {
                         + "You must first run 'mvn test' to download the specifications files");
         InputStreamReader reader = new InputStreamReader(in);
         return new BufferedReader(reader);
+    }
+
+    static class DateParser {
+        private static final List<DateTimeFormatter> formatters = new ArrayList<>();
+
+        static {
+            formatters.add(DateTimeFormatter.ISO_INSTANT);
+            formatters.add(DateTimeFormatter.ISO_DATE_TIME);
+            formatters.add(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            formatters.add(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+        }
+
+        public static ZonedDateTime parseDate(String date) {
+            if (date != null && date.length() > 0) {
+                return formatters.stream()
+                        .map(
+                                f -> {
+                                    try {
+                                        return ZonedDateTime.parse(date, f);
+                                    } catch (DateTimeParseException dateTimeParseException) {
+                                        return null;
+                                    }
+                                })
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .orElseGet(
+                                () -> {
+                                    try {
+                                        return LocalDateTime.parse(
+                                                        date, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                                .atZone(ZoneOffset.UTC);
+                                    } catch (DateTimeParseException dateTimeParseException) {
+                                        return null;
+                                    }
+                                });
+            } else {
+                return null;
+            }
+        }
     }
 }

@@ -1,11 +1,14 @@
-package io.getunleash;
+package io.getunleash.repository;
 
+import io.getunleash.DefaultUnleash;
+import io.getunleash.UnleashContext;
 import io.getunleash.engine.Context;
 import io.getunleash.engine.IStrategy;
 import io.getunleash.engine.Payload;
 import io.getunleash.engine.VariantDef;
 import io.getunleash.lang.Nullable;
 import io.getunleash.strategy.Strategy;
+import io.getunleash.variant.Variant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -15,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class YggdrasilAdapters {
+public final class YggdrasilAdapters {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
 
@@ -71,15 +74,16 @@ final class YggdrasilAdapters {
         return mapped;
     }
 
-    public static Variant adapt(VariantDef variant, Variant defaultValue) {
-        if (variant == null) {
+    public static Variant adapt(Optional<VariantDef> variant, Variant defaultValue) {
+        if (!variant.isPresent()) {
             return defaultValue;
         }
+        VariantDef unwrapped = variant.get();
         return new Variant(
-                variant.getName(),
-                adapt(variant.getPayload()),
-                variant.isEnabled(),
-                variant.isFeatureEnabled());
+                unwrapped.getName(),
+                adapt(unwrapped.getPayload()),
+                unwrapped.isEnabled(),
+                unwrapped.isFeatureEnabled());
     }
 
     public static @Nullable io.getunleash.variant.Payload adapt(@Nullable Payload payload) {

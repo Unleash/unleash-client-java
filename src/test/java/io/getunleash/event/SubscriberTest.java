@@ -2,7 +2,7 @@ package io.getunleash.event;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static io.getunleash.repository.FeatureToggleResponse.Status.CHANGED;
+import static io.getunleash.event.ClientFeaturesResponse.Status.CHANGED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
@@ -12,7 +12,6 @@ import io.getunleash.Unleash;
 import io.getunleash.UnleashException;
 import io.getunleash.metric.ClientMetrics;
 import io.getunleash.metric.ClientRegistration;
-import io.getunleash.repository.FeatureToggleResponse;
 import io.getunleash.util.UnleashConfig;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +59,8 @@ public class SubscriberTest {
         unleash.isEnabled("myFeature");
 
         assertThat(testSubscriber.togglesFetchedCounter)
-                .isEqualTo(
-                        2); // Server successfully returns, we call synchronous fetch and schedule
+                .isEqualTo(2); // Server successfully returns, we call synchronous fetch and
+        // schedule
         // once, so 2 calls.
         assertThat(testSubscriber.status).isEqualTo(CHANGED);
         assertThat(testSubscriber.toggleEvaluatedCounter).isEqualTo(3);
@@ -69,12 +68,12 @@ public class SubscriberTest {
         assertThat(testSubscriber.toggleEnabled).isFalse();
         assertThat(testSubscriber.errors).isEmpty();
 
-        //        assertThat(testSubscriber.events).filteredOn(e -> e instanceof
-        // ToggleBootstrapHandler.ToggleBootstrapRead).hasSize(1);
+        // assertThat(testSubscriber.events).filteredOn(e -> e instanceof TogglesBootstrapped)
+        //         .hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof UnleashReady).hasSize(1);
         assertThat(testSubscriber.events).filteredOn(e -> e instanceof ToggleEvaluated).hasSize(3);
         assertThat(testSubscriber.events)
-                .filteredOn(e -> e instanceof FeatureToggleResponse)
+                .filteredOn(e -> e instanceof ClientFeaturesResponse)
                 .hasSize(2);
         assertThat(testSubscriber.events)
                 .filteredOn(e -> e instanceof ClientRegistration)
@@ -85,7 +84,7 @@ public class SubscriberTest {
     private class TestSubscriber implements UnleashSubscriber {
 
         private int togglesFetchedCounter;
-        private FeatureToggleResponse.Status status;
+        private ClientFeaturesResponse.Status status;
 
         private int toggleEvaluatedCounter;
         private String toggleName;
@@ -112,7 +111,7 @@ public class SubscriberTest {
         }
 
         @Override
-        public void togglesFetched(FeatureToggleResponse toggleResponse) {
+        public void togglesFetched(ClientFeaturesResponse toggleResponse) {
             this.togglesFetchedCounter++;
             this.status = toggleResponse.getStatus();
         }

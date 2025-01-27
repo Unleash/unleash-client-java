@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,20 +32,19 @@ public class ToggleBootstrapFileProvider implements ToggleBootstrapProvider {
     }
 
     @Override
-    @Nullable
-    public String read() {
+    public Optional<String> read() {
         LOG.info("Trying to read feature toggles from bootstrap file found at {}", path);
         try {
             File file = getFile(path);
             if (file != null) {
-                return fileAsString(file);
+                return Optional.of(fileAsString(file));
             }
         } catch (FileNotFoundException ioEx) {
             LOG.warn("Could not find file {}", path, ioEx);
         } catch (IOException ioEx) {
             LOG.warn("Generic IOException when trying to read file at {}", path, ioEx);
         }
-        return null;
+        return Optional.empty();
     }
 
     @Nullable

@@ -14,11 +14,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import io.getunleash.FeatureToggle;
+import io.getunleash.FeatureDefinition;
+import io.getunleash.event.ClientFeaturesResponse;
 import io.getunleash.util.UnleashConfig;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,9 +63,13 @@ public class HttpFeatureFetcherTest {
                                         .withBodyFile("features-v2-with-segments.json")));
 
         ClientFeaturesResponse response = fetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
-        assertThat(featureX.isEnabled()).isTrue();
+        Optional<FeatureDefinition> featureX =
+                response.getFeatures().stream()
+                        .filter(f -> f.getName().equals("featureX"))
+                        .findFirst();
+
+        assertThat(featureX).isPresent();
 
         verify(
                 getRequestedFor(urlMatching("/api/client/features"))
@@ -212,6 +218,7 @@ public class HttpFeatureFetcherTest {
                                         .withHeader("Content-Type", "application/json")));
 
         ClientFeaturesResponse response = fetcher.fetchFeatures();
+
         assertThat(response.getStatus()).isEqualTo(ClientFeaturesResponse.Status.UNAVAILABLE);
         assertThat(response.getHttpStatusCode()).isEqualTo(httpCode);
 
@@ -278,7 +285,7 @@ public class HttpFeatureFetcherTest {
         String name = "^!#$!$?";
         UnleashConfig config =
                 UnleashConfig.builder().appName("test").unleashAPI(uri).projectName(name).build();
-        assertThatThrownBy(() -> new HttpToggleFetcher(config))
+        assertThatThrownBy(() -> new HttpFeatureFetcher(config))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("?project=" + name + "] was not URL friendly.");
     }
