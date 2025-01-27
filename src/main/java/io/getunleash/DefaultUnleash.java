@@ -149,7 +149,7 @@ public class DefaultUnleash implements Unleash {
                         defaultValue);
         this.metricService.countToggle(toggleName, variant.isFeatureEnabled());
         this.metricService.countVariant(toggleName, variant.getName());
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isEnabled()));
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isFeatureEnabled()));
         if (this.featureRepository.shouldEmitImpressionEvent(toggleName)) {
             eventDispatcher.dispatch(
                     new VariantImpressionEvent(
