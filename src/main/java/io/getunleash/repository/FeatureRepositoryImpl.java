@@ -193,7 +193,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                     this.engine.getVariant(toggleName, YggdrasilAdapters.adapt(context)));
         } catch (YggdrasilInvalidInputException | YggdrasilError e) {
             LOGGER.error("Error when checking feature toggle {}", toggleName, e);
-            return null;
+            return Optional.empty();
         }
     }
 
