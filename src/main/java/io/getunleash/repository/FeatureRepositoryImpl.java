@@ -113,7 +113,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                 updateFeatures(
                                 e -> {
                                     throw e;
-                                })
+                                }) // just throw exception handler
                         .run();
             }
         }
