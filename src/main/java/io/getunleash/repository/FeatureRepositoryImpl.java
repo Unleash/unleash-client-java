@@ -103,6 +103,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                 this.engine.takeState(features.get());
             } catch (YggdrasilInvalidInputException | YggdrasilError e) {
                 LOGGER.error("Error when initializing feature toggles", e);
+                eventDispatcher.dispatch(new UnleashException("Failed to read backup file:", e));
             }
         }
 
