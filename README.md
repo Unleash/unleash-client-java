@@ -7,6 +7,10 @@ This is the Unleash Client SDK for Java. It is compatible with the [Unleash-host
 [![Maven Central](https://img.shields.io/maven-central/v/io.getunleash/unleash-client-java)](https://mvnrepository.com/artifact/io.getunleash/unleash-client-java)
 
 
+>  **Migrating to v10**
+>
+> If you're using `MoreOperations`, custom or fallback strategies, subscribers or bootstrapping, please see the full [migration guide](../v10_MIGRATION_GUIDE) for details. If you use GraalVM or Quarkus, please hold off on upgrading to v10, support is planned but not implemented.
+
 ## Getting started
 
 This section shows you how to get started quickly and explains some common configuration scenarios. For a full overview of Unleash configuration options, check out [the _Configuration options_ section](#configuration-options).
@@ -355,7 +359,7 @@ assertThat(fakeUnleash.isEnabled("unknown"), is(false));
 // example 3: variants
 FakeUnleash fakeUnleash = new FakeUnleash();
 fakeUnleash.enable("t1", "t2");
-fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
+fakeUnleash.setVariant("t1", new Variant("a", (String) null, true, true));
 
 assertThat(fakeUnleash.getVariant("t1").getName(), is("a"));
 ```
