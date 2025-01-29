@@ -9,7 +9,7 @@ This is the Unleash Client SDK for Java. It is compatible with the [Unleash-host
 
 >  **Migrating to v10**
 >
-> A number of APIs have changed in the SDK, please see the full [migration guide](../v10_MIGRATION_GUIDE) for details. If you use GraalVM or Quarkus, please hold off on upgrading to v10, support is planned but not implemented.
+> If you're using `MoreOperations`, custom or fallback strategies, subscribers or bootstrapping, please see the full [migration guide](../v10_MIGRATION_GUIDE) for details. If you use GraalVM or Quarkus, please hold off on upgrading to v10, support is planned but not implemented.
 
 ## Getting started
 
