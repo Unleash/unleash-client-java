@@ -1,0 +1,67 @@
+{
+    "version": 2,
+    "features": [
+        {
+            "name": "Test.impressionDataPresent",
+            "description": "It's true, we do have impression data",
+            "enabled": true,
+            "strategies": [
+                {
+                    "name": "default"
+                }
+            ],
+            "impressionData": true,
+            "variants": null,
+            "createdAt": "2019-01-24T10:38:10.370Z"
+        },
+        {
+            "name": "Test.variants",
+            "description": null,
+            "enabled": true,
+            "strategies": [
+                {
+                    "name": "default",
+                    "segments": [
+                        1
+                    ]
+                }
+            ],
+            "variants": [
+                {
+                    "name": "variant1",
+                    "weight": 50
+                },
+                {
+                    "name": "variant2",
+                    "weight": 50
+                }
+            ],
+            "createdAt": "2019-01-24T10:41:45.236Z"
+        },
+        {
+            "name": "Test.impressionDataSetToOff",
+            "description": "Explicitly no impression data",
+            "enabled": true,
+            "strategies": [
+                {
+                    "name": "default"
+                }
+            ],
+            "impressionData": false,
+            "variants": null,
+            "createdAt": "2019-01-24T10:38:10.370Z"
+        },
+        {
+            "name": "Test.impressionDataMissing",
+            "description": "No field defined",
+            "enabled": true,
+            "strategies": [
+                {
+                    "name": "default"
+                }
+            ],
+            "variants": null,
+            "createdAt": "2019-01-24T10:38:10.370Z"
+        }
+    ]
+}
