@@ -1,60 +1,62 @@
 # Migrating to Unleash-Client-Java 10.0.0
 
-This guide highlights the key changes you should be aware of when upgrading to v10.0.0 of the Unleash client.
+This guide highlights the key changes you need to be aware of when upgrading to v10.0.0 of the Unleash client.
 
-## Custom Bootstrapping
+## Custom bootstrapping
 
-The Bootstrapping interface now requires an `Optional<String>` to be returned rather than a `String`. An `Optional` of empty should be returned if the bootstrapper fails to load the feature set.
+The Bootstrapping interface now requires an `Optional<String>` to be returned rather than a `String`. If the bootstrapper fails to load the feature set, return an `Optional` of empty.
 
-## More Operations
+## `MoreOperations`
 
-MoreOperations no longer lists `count` or `countVariant`, these are considered internal APIs and are no longer publicly exposed.
+`MoreOperations` no longer lists `count` or `countVariant`, these are considered internal APIs and are no longer publicly exposed.
 
-`getFeatureToggleDefinition` no longer returns the complete feature toggle definition. Instead it returns a lightweight Java object that contains the name of the toggle, the project that it's bound to and an optional type parameter that describes the feature toggle type in Unleash, e.g. "experiment" or "killswitch".
+`getFeatureToggleDefinition` no longer returns the complete feature flag definition. Instead, it returns a lightweight Java object that contains the name of the flag, the project that it's bound to, and an optional type parameter that describes the feature flag type in Unleash, such as "experiment" or "killswitch".
 
 ## Strategies
 
-The strategy interface has changed to only include the two methods `getName` and `isEnabled`. `isEnabled` now requires both a parameter map and an `UnleashContext`. This should only affect users who are implementing custom or fallback strategies.
+The strategy interface has changed to only include the two methods `getName` and `isEnabled`. `isEnabled` now requires both a parameter map and an `UnleashContext`. This only affects users who are implementing custom or fallback strategies.
 
 ## Events
 
- The following subscriber functions are no longer available: `togglesBackedUp`, `toggleBackupRestored` and`togglesBootstrapped`. Subscribing to `featuresBackedUp`, `featuresBackupRestored` and `featuresBootstrapped` respectively serves the same purpose. These subscriber no longer yield events that contain the full feature toggle definition, instead they expose a `getFeatures` method which returns a list of lightweight Java objects containing the feature name, the type of toggle and the project its bound to.
+The following subscriber functions are no longer available: `togglesBackedUp`, `toggleBackupRestored`, and `togglesBootstrapped`. Subscribing to `featuresBackedUp`, `featuresBackupRestored`, and `featuresBootstrapped` respectively serves the same purpose. These subscribers no longer yield events that contain the full feature flag definition, instead, they expose a `getFeatures` method which returns a list of lightweight Java objects containing the feature name, the type of flag, and the project it's bound to.
 
- The `togglesFetched` listener now returns a `ClientFeaturesResponse` event, which has an identical `getFeatures` method instead of the full feature toggle definitions.
+The `togglesFetched` listener now returns a `ClientFeaturesResponse` event, which has an identical `getFeatures` method instead of the full feature flag definitions.
 
-## Name Changes
+## Name changes
 
-- `Variant` has been moved to the `io.getunleash.variant` namespace
-- The public interface, `IFeatureRepository` has been renamed to `FeatureRepository`
-- The concrete implementor of `FeatureRepository` has been renamed to `FeatureRepositoryImpl`
+- `Variant` has been moved to the `io.getunleash.variant` namespace.
+- The public interface `IFeatureRepository` has been renamed to `FeatureRepository`.
+- The concrete implementor of `FeatureRepository` has been renamed to `FeatureRepositoryImpl`.
 
 
-## Removal of Deprecated APIs
+## Removal of deprecated APIs
 
 The following public deprecated APIs have been removed:
 
-Methods on `DefaultUnleash`
-- `deprecatedGetVariant`, this computes a variant with an old hash seed. This is no longer supported
-- `getFeatureToggleDefinition` - `DefaultUnleash.more().getFeatureToggleDefinition`
-- `getFeatureToggleNames` - Use `DefaultUnleash.more().getFeatureToggleNames()` instead
-- `count` - No longer publicly accessible
+### Methods on `DefaultUnleash`:
+- `deprecatedGetVariant` - This computes a variant with an old hash seed. This is no longer supported.
+- `getFeatureToggleDefinition` - `DefaultUnleash.more().getFeatureToggleDefinition()`.
+- `getFeatureToggleNames` - Use `DefaultUnleash.more().getFeatureToggleNames()` instead.
+- `count` - No longer publicly accessible.
 
-Methods on `FakeUnleash`:
-- `deprecatedGetVariant` - no longer present on the parent interface, removed for consistency
+### Methods on `FakeUnleash`:
+- `deprecatedGetVariant` - No longer present on the parent interface, removed for consistency.
 
-Methods on `VariantUtil`
-- `selectDeprecatedVariantHashingAlgo` - removed since it's no longer required for `deprecatedGetVariant`.
+### Methods on `VariantUtil`:
+- `selectDeprecatedVariantHashingAlgo` - Removed since it's no longer required for `deprecatedGetVariant`.
 
-`FeatureToggleRepository` - use `FeatureRepositoryImpl` instead.
+### Other classes and interfaces:
 
-`ToggleRepository` - use `FeatureRepository` instead.
+`FeatureToggleRepository` - Use `FeatureRepositoryImpl` instead.
 
-`HttpToggleFetcher` - use `HttpFeatureFetcher` instead.
+`ToggleRepository` - Use `FeatureRepository` instead.
 
-`ToggleFetcher` - use `FeatureFetcher` instead.
+`HttpToggleFetcher` - Use `HttpFeatureFetcher` instead.
 
-`JsonToggleCollectionDeserializer` - no alternative should be needed.
+`ToggleFetcher` - Use `FeatureFetcher` instead.
 
-`JsonToggleParser` - no alternative should be needed.
+`JsonToggleCollectionDeserializer` - No alternative needed.
 
-`ToggleBackupHandlerFile` - no alternative should be needed.
+`JsonToggleParser` - No alternative needed.
+
+`ToggleBackupHandlerFile` - No alternative needed.
