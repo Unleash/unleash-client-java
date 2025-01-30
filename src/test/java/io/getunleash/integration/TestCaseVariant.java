@@ -1,6 +1,6 @@
 package io.getunleash.integration;
 
-import io.getunleash.Variant;
+import io.getunleash.variant.Variant;
 
 public class TestCaseVariant {
     private String description;
@@ -22,7 +22,14 @@ public class TestCaseVariant {
 
     public Variant getExpectedResult() {
         if (expectedResult.getName().equals("disabled")) {
-            return Variant.DISABLED_VARIANT;
+            Variant clone =
+                    new Variant(
+                            Variant.DISABLED_VARIANT.getName(),
+                            Variant.DISABLED_VARIANT.getPayload().orElse(null),
+                            Variant.DISABLED_VARIANT.isEnabled(),
+                            Variant.DISABLED_VARIANT.getStickiness(),
+                            expectedResult.isFeatureEnabled());
+            return clone;
         }
 
         return expectedResult;

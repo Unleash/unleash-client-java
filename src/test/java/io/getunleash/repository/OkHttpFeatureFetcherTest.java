@@ -13,11 +13,13 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import io.getunleash.FeatureToggle;
+import io.getunleash.FeatureDefinition;
+import io.getunleash.event.ClientFeaturesResponse;
 import io.getunleash.util.UnleashConfig;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -33,7 +35,7 @@ public class OkHttpFeatureFetcherTest {
                     .build();
 
     @Test
-    public void happy_path_test_version0() throws URISyntaxException {
+    public void happy_path_test() throws URISyntaxException {
         stubFor(
                 get(urlEqualTo("/api/client/features"))
                         .withHeader("Accept", equalTo("application/json"))
@@ -47,58 +49,13 @@ public class OkHttpFeatureFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = okHttpToggleFetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
-        assertThat(featureX.isEnabled()).isTrue();
+        Optional<FeatureDefinition> featureX =
+                response.getFeatures().stream()
+                        .filter(f -> f.getName().equals("featureX"))
+                        .findFirst();
 
-        verify(
-                getRequestedFor(urlMatching("/api/client/features"))
-                        .withHeader("Content-Type", matching("application/json")));
-    }
-
-    @Test
-    public void happy_path_test_version1() throws URISyntaxException {
-        stubFor(
-                get(urlEqualTo("/api/client/features"))
-                        .withHeader("Accept", equalTo("application/json"))
-                        .willReturn(
-                                aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBodyFile("features-v1.json")));
-
-        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
-        FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
-
-        assertThat(featureX.isEnabled()).isTrue();
-
-        verify(
-                getRequestedFor(urlMatching("/api/client/features"))
-                        .withHeader("Content-Type", matching("application/json")));
-    }
-
-    @Test
-    public void happy_path_test_version_with_variants() throws URISyntaxException {
-        stubFor(
-                get(urlEqualTo("/api/client/features"))
-                        .withHeader("Accept", equalTo("application/json"))
-                        .willReturn(
-                                aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBodyFile("features-v1-with-variants.json")));
-
-        URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
-        UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
-        OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
-        FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("Test.variants");
-
-        assertThat(featureX.isEnabled()).isTrue();
-        assertThat(featureX.getVariants().get(0).getName()).isEqualTo("variant1");
+        assertThat(featureX).isNotEmpty();
 
         verify(
                 getRequestedFor(urlMatching("/api/client/features"))
@@ -131,8 +88,8 @@ public class OkHttpFeatureFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
 
-        FeatureToggleResponse response1 = okHttpToggleFetcher.fetchFeatures();
-        FeatureToggleResponse response2 = okHttpToggleFetcher.fetchFeatures();
+        ClientFeaturesResponse response1 = okHttpToggleFetcher.fetchFeatures();
+        ClientFeaturesResponse response2 = okHttpToggleFetcher.fetchFeatures();
         verify(
                 1,
                 getRequestedFor(urlEqualTo("/api/client/features")).withoutHeader("If-None-Match"));
@@ -140,8 +97,9 @@ public class OkHttpFeatureFetcherTest {
                 1,
                 getRequestedFor(urlEqualTo("/api/client/features"))
                         .withHeader("If-None-Match", equalTo("AZ12")));
-        assertThat(response1.getStatus()).isEqualTo(FeatureToggleResponse.Status.CHANGED);
-        assertThat(response2.getStatus()).isEqualTo(FeatureToggleResponse.Status.NOT_CHANGED);
+        assertThat(response1.getStatus()).isEqualTo(ClientFeaturesResponse.Status.CHANGED);
+
+        assertThat(response2.getStatus()).isEqualTo(ClientFeaturesResponse.Status.NOT_CHANGED);
     }
 
     @Test
@@ -200,8 +158,8 @@ public class OkHttpFeatureFetcherTest {
         URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
-        FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
-        assertThat(response.getStatus()).isEqualTo(FeatureToggleResponse.Status.NOT_CHANGED);
+        ClientFeaturesResponse response = okHttpToggleFetcher.fetchFeatures();
+        assertThat(response.getStatus()).isEqualTo(ClientFeaturesResponse.Status.NOT_CHANGED);
 
         verify(
                 getRequestedFor(urlMatching("/api/client/features"))
@@ -239,8 +197,8 @@ public class OkHttpFeatureFetcherTest {
         URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
-        FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
-        assertThat(response.getStatus()).isEqualTo(FeatureToggleResponse.Status.CHANGED);
+        ClientFeaturesResponse response = okHttpToggleFetcher.fetchFeatures();
+        assertThat(response.getStatus()).isEqualTo(ClientFeaturesResponse.Status.CHANGED);
 
         verify(
                 getRequestedFor(urlMatching("/api/client/features"))
@@ -264,8 +222,8 @@ public class OkHttpFeatureFetcherTest {
         URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
-        FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
-        assertThat(response.getStatus()).isEqualTo(FeatureToggleResponse.Status.UNAVAILABLE);
+        ClientFeaturesResponse response = okHttpToggleFetcher.fetchFeatures();
+        assertThat(response.getStatus()).isEqualTo(ClientFeaturesResponse.Status.UNAVAILABLE);
         assertThat(response.getHttpStatusCode()).isEqualTo(httpCode);
 
         verify(
@@ -287,7 +245,7 @@ public class OkHttpFeatureFetcherTest {
         URI uri = new URI("http://localhost:" + serverMock.getPort() + "/api/");
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher okHttpToggleFetcher = new OkHttpFeatureFetcher(config);
-        FeatureToggleResponse response = okHttpToggleFetcher.fetchFeatures();
+        ClientFeaturesResponse response = okHttpToggleFetcher.fetchFeatures();
 
         verify(getRequestedFor(urlMatching("/api/client/features")).withoutHeader("If-None-Match"));
     }
@@ -307,7 +265,7 @@ public class OkHttpFeatureFetcherTest {
         UnleashConfig config =
                 UnleashConfig.builder().appName("test").unleashAPI(uri).projectName("name").build();
         OkHttpFeatureFetcher okHttpFeatureFetcher = new OkHttpFeatureFetcher(config);
-        FeatureToggleResponse response = okHttpFeatureFetcher.fetchFeatures();
+        ClientFeaturesResponse response = okHttpFeatureFetcher.fetchFeatures();
         verify(getRequestedFor(urlMatching("/api/client/features\\?project=name")));
     }
 
@@ -325,9 +283,13 @@ public class OkHttpFeatureFetcherTest {
         UnleashConfig config = UnleashConfig.builder().appName("test").unleashAPI(uri).build();
         OkHttpFeatureFetcher fetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
 
-        assertThat(featureX.isEnabled()).isTrue();
+        Optional<FeatureDefinition> featureX =
+                response.getFeatures().stream()
+                        .filter(f -> f.getName().equals("featureX"))
+                        .findFirst();
+
+        assertThat(featureX).isNotEmpty();
 
         verify(
                 getRequestedFor(urlMatching("/api/client/features"))
@@ -351,9 +313,12 @@ public class OkHttpFeatureFetcherTest {
                                         .withBodyFile("features-v2-with-segments.json")));
         OkHttpFeatureFetcher fetcher = new OkHttpFeatureFetcher(config);
         ClientFeaturesResponse response = fetcher.fetchFeatures();
-        FeatureToggle featureX = response.getToggleCollection().getToggle("featureX");
+        Optional<FeatureDefinition> featureX =
+                response.getFeatures().stream()
+                        .filter(f -> f.getName().equals("featureX"))
+                        .findFirst();
 
-        assertThat(featureX.isEnabled()).isTrue();
+        assertThat(featureX).isNotEmpty();
 
         verify(
                 getRequestedFor(urlMatching("/api/client/features"))

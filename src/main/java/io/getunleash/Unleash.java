@@ -1,6 +1,6 @@
 package io.getunleash;
 
-import java.util.List;
+import io.getunleash.variant.Variant;
 import java.util.function.BiPredicate;
 
 public interface Unleash {
@@ -42,27 +42,6 @@ public interface Unleash {
     default Variant getVariant(final String toggleName, final Variant defaultValue) {
         return getVariant(toggleName, UnleashContext.builder().build(), defaultValue);
     }
-
-    Variant deprecatedGetVariant(final String toggleName, final UnleashContext context);
-
-    Variant deprecatedGetVariant(
-            final String toggleName, final UnleashContext context, final Variant defaultValue);
-
-    default Variant deprecatedGetVariant(final String toggleName) {
-        return deprecatedGetVariant(toggleName, UnleashContext.builder().build());
-    }
-
-    default Variant deprecatedGetVariant(final String toggleName, final Variant defaultValue) {
-        return deprecatedGetVariant(toggleName, UnleashContext.builder().build(), defaultValue);
-    }
-
-    /**
-     * Use more().getFeatureToggleNames() instead
-     *
-     * @return a list of known toggle names
-     */
-    @Deprecated()
-    List<String> getFeatureToggleNames();
 
     default void shutdown() {}
 

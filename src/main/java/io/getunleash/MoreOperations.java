@@ -7,7 +7,7 @@ public interface MoreOperations {
 
     List<String> getFeatureToggleNames();
 
-    Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName);
+    Optional<FeatureDefinition> getFeatureToggleDefinition(String toggleName);
 
     List<EvaluatedToggle> evaluateAllToggles();
 
@@ -19,8 +19,4 @@ public interface MoreOperations {
      * @return
      */
     List<EvaluatedToggle> evaluateAllToggles(UnleashContext context);
-
-    void count(String toggleName, boolean enabled);
-
-    void countVariant(String toggleName, String variantName);
 }

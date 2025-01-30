@@ -2,6 +2,7 @@ package io.getunleash;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.getunleash.variant.Variant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -89,7 +90,7 @@ public class FakeUnleashTest {
         fakeUnleash.disable("t2");
 
         List<String> expected = Arrays.asList(new String[] {"t1", "t2"});
-        assertThat(fakeUnleash.getFeatureToggleNames()).containsAll(expected);
+        assertThat(fakeUnleash.more().getFeatureToggleNames()).containsAll(expected);
     }
 
     @Test
@@ -107,14 +108,14 @@ public class FakeUnleashTest {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.enable("t1");
 
-        Optional<FeatureToggle> optionalToggle =
+        Optional<FeatureDefinition> optionalToggle =
                 fakeUnleash.more().getFeatureToggleDefinition("t1");
         assertThat(optionalToggle).isPresent();
 
-        FeatureToggle toggle = optionalToggle.get();
+        FeatureDefinition toggle = optionalToggle.get();
         assertThat(toggle.getName()).isEqualTo("t1");
-        assertThat(toggle.getStrategies()).isEmpty();
-        assertThat(toggle.isEnabled()).isTrue();
+        assertThat(toggle.getProject()).isEqualTo("default");
+        assertThat(toggle.getType()).isEqualTo(Optional.of("experiment"));
     }
 
     @Test
@@ -166,18 +167,6 @@ public class FakeUnleashTest {
         fakeUnleash.setVariant("t1", new Variant("a", (String) null, true));
 
         assertThat(fakeUnleash.getVariant("t1").getName()).isEqualTo("disabled");
-    }
-
-    @Test
-    public void should_count_and_not_throw_an_error() {
-        FakeUnleash fakeUnleash = new FakeUnleash();
-        fakeUnleash.more().count("anything", true);
-    }
-
-    @Test
-    public void should_countVariant_and_not_throw_an_error() {
-        FakeUnleash fakeUnleash = new FakeUnleash();
-        fakeUnleash.more().countVariant("toggleName", "variantName");
     }
 
     @Test

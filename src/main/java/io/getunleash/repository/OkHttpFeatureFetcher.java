@@ -2,12 +2,14 @@ package io.getunleash.repository;
 
 import com.google.gson.JsonSyntaxException;
 import io.getunleash.UnleashException;
+import io.getunleash.event.ClientFeaturesResponse;
 import io.getunleash.util.OkHttpClientConfigurer;
 import io.getunleash.util.UnleashConfig;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.Optional;
 import okhttp3.Cache;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -62,36 +64,26 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
     @Override
     public ClientFeaturesResponse fetchFeatures() throws UnleashException {
         Request request = new Request.Builder().url(toggleUrl).get().build();
-        HttpUrl location = toggleUrl;
         int code = 200;
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 if (response.networkResponse() != null
                         && response.networkResponse().code() == 304) {
-                    return new ClientFeaturesResponse(
-                            ClientFeaturesResponse.Status.NOT_CHANGED, 304);
+                    return ClientFeaturesResponse.notChanged();
                 }
-                location = response.request().url();
-                code = response.code();
-                FeatureCollection features =
-                        JsonFeatureParser.fromJson(
-                                Objects.requireNonNull(response.body()).charStream());
-                return new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.CHANGED,
-                        features.getToggleCollection(),
-                        features.getSegmentCollection());
+                String features = response.body().string();
+
+                return ClientFeaturesResponse.updated(features);
             } else if (response.code() == 304) {
-                return new ClientFeaturesResponse(
-                        FeatureToggleResponse.Status.NOT_CHANGED, response.code());
+                return ClientFeaturesResponse.notChanged();
             } else {
-                return new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.UNAVAILABLE, response.code());
+                return ClientFeaturesResponse.unavailable(
+                        response.code(), Optional.of(toggleUrl.toString()));
             }
         } catch (IOException | NullPointerException ioEx) {
             throw new UnleashException("Could not fetch toggles", ioEx);
         } catch (IllegalStateException | JsonSyntaxException ex) {
-            return new ClientFeaturesResponse(
-                    ClientFeaturesResponse.Status.UNAVAILABLE, code, location.toString());
+            return ClientFeaturesResponse.unavailable(code, Optional.of(toggleUrl.toString()));
         }
     }
 }

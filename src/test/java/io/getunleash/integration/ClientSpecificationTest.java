@@ -1,49 +1,38 @@
 package io.getunleash.integration;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
-import io.getunleash.Variant;
-import io.getunleash.strategy.constraints.DateParser;
+import io.getunleash.repository.ToggleBootstrapProvider;
 import io.getunleash.util.UnleashConfig;
+import io.getunleash.variant.Variant;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class ClientSpecificationTest {
-
-    @RegisterExtension
-    static WireMockExtension serverMock =
-            WireMockExtension.newInstance()
-                    .configureStaticDsl(true)
-                    .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
-                    .build();
 
     @TestFactory
     public Stream<DynamicTest> clientSpecification() throws IOException, URISyntaxException {
@@ -112,39 +101,37 @@ public class ClientSpecificationTest {
                                                     test.getExpectedResult().getPayload(),
                                                     result.getPayload(),
                                                     test.getDescription());
+                                            assertEquals(
+                                                    test.getExpectedResult().isFeatureEnabled(),
+                                                    result.isFeatureEnabled(),
+                                                    test.getDescription());
                                         }))
                 .collect(Collectors.toList());
     }
 
     private Unleash setupUnleash(TestDefinition testDefinition) throws URISyntaxException {
-        mockUnleashAPI(testDefinition);
 
-        // Required because the client is available before it may have had the chance to talk with
-        // the API
-        String backupFile = writeUnleashBackup(testDefinition);
+        ToggleBootstrapProvider bootstrapper =
+                new ToggleBootstrapProvider() {
+                    @Override
+                    public Optional<String> read() {
+                        return Optional.of(testDefinition.getState().toString());
+                    }
+                };
 
-        // Set-up a unleash instance, using mocked API and backup-file
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName(testDefinition.getName())
-                        .unleashAPI(new URI("http://localhost:" + serverMock.getPort() + "/api/"))
-                        .synchronousFetchOnInitialisation(true)
-                        .backupFile(backupFile)
+                        .disableMetrics()
+                        .disablePolling()
+                        .backupFile(null)
+                        .toggleBootstrapProvider(bootstrapper)
+                        .unleashAPI(new URI("http://notusedbutrequired:9999/api/"))
                         .build();
 
-        return new DefaultUnleash(config);
-    }
+        DefaultUnleash defaultUnleash = new DefaultUnleash(config);
 
-    private void mockUnleashAPI(TestDefinition definition) {
-        stubFor(
-                get(urlEqualTo("/api/client/features"))
-                        .withHeader("Accept", equalTo("application/json"))
-                        .willReturn(
-                                aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBody(definition.getState().toString())));
-        stubFor(post(urlEqualTo("/api/client/register")).willReturn(aResponse().withStatus(200)));
+        return defaultUnleash;
     }
 
     private TestDefinition getTestDefinition(String fileName) throws IOException {
@@ -182,21 +169,42 @@ public class ClientSpecificationTest {
         return new BufferedReader(reader);
     }
 
-    private String writeUnleashBackup(TestDefinition definition) {
-        String backupFile =
-                System.getProperty("java.io.tmpdir")
-                        + File.separatorChar
-                        + "unleash-test-"
-                        + definition.getName()
-                        + ".json";
+    static class DateParser {
+        private static final List<DateTimeFormatter> formatters = new ArrayList<>();
 
-        // TODO: we can probably drop this after introduction of `synchronousFetchOnInitialisation`.
-        try (FileWriter writer = new FileWriter(backupFile)) {
-            writer.write(definition.getState().toString());
-        } catch (IOException e) {
-            System.out.println("Unable to write toggles to file");
+        static {
+            formatters.add(DateTimeFormatter.ISO_INSTANT);
+            formatters.add(DateTimeFormatter.ISO_DATE_TIME);
+            formatters.add(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            formatters.add(DateTimeFormatter.ISO_ZONED_DATE_TIME);
         }
 
-        return backupFile;
+        public static ZonedDateTime parseDate(String date) {
+            if (date != null && date.length() > 0) {
+                return formatters.stream()
+                        .map(
+                                f -> {
+                                    try {
+                                        return ZonedDateTime.parse(date, f);
+                                    } catch (DateTimeParseException dateTimeParseException) {
+                                        return null;
+                                    }
+                                })
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .orElseGet(
+                                () -> {
+                                    try {
+                                        return LocalDateTime.parse(
+                                                        date, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                                .atZone(ZoneOffset.UTC);
+                                    } catch (DateTimeParseException dateTimeParseException) {
+                                        return null;
+                                    }
+                                });
+            } else {
+                return null;
+            }
+        }
     }
 }

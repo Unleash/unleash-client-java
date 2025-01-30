@@ -5,7 +5,7 @@ import java.util.Set;
 public interface UnleashMetricService {
     void register(Set<String> strategies);
 
-    void count(String toggleName, boolean active);
+    void countToggle(String name, boolean enabled);
 
-    void countVariant(String toggleName, String variantName);
+    void countVariant(String name, String variantName);
 }

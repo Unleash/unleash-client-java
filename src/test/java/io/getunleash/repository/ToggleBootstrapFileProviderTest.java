@@ -3,6 +3,7 @@ package io.getunleash.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class ToggleBootstrapFileProviderTest {
@@ -30,7 +31,7 @@ class ToggleBootstrapFileProviderTest {
         System.setProperty("UNLEASH_BOOTSTRAP_FILE", "classpath:unleash-repo-v0.json");
         ToggleBootstrapFileProvider bootstrap = new ToggleBootstrapFileProvider();
 
-        String read = bootstrap.read();
-        assertThat(read).isNotBlank();
+        Optional<String> read = bootstrap.read();
+        assertThat(read).isPresent();
     }
 }

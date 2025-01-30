@@ -5,17 +5,18 @@ import io.getunleash.UnleashException;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.util.AtomicLongSerializer;
 import io.getunleash.util.DateTimeSerializer;
+import io.getunleash.util.InstantSerializer;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashURLs;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DefaultHttpMetricsSender implements MetricSender {
-    private static final int CONNECT_TIMEOUT = 1000;
 
     private final Gson gson;
     private final EventDispatcher eventDispatcher;
@@ -33,6 +34,7 @@ public class DefaultHttpMetricsSender implements MetricSender {
         this.gson =
                 new GsonBuilder()
                         .registerTypeAdapter(LocalDateTime.class, new DateTimeSerializer())
+                        .registerTypeAdapter(Instant.class, new InstantSerializer())
                         .registerTypeAdapter(AtomicLong.class, new AtomicLongSerializer())
                         .create();
     }

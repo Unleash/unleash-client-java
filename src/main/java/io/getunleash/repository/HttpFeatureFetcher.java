@@ -1,6 +1,7 @@
 package io.getunleash.repository;
 
 import io.getunleash.UnleashException;
+import io.getunleash.event.ClientFeaturesResponse;
 import io.getunleash.util.UnleashConfig;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,11 +61,9 @@ public class HttpFeatureFetcher implements FeatureFetcher {
                             new InputStreamReader(
                                     (InputStream) request.getContent(), StandardCharsets.UTF_8))) {
 
-                FeatureCollection features = JsonFeatureParser.fromJson(reader);
-                return new ClientFeaturesResponse(
-                        ClientFeaturesResponse.Status.CHANGED,
-                        features.getToggleCollection(),
-                        features.getSegmentCollection());
+                String clientFeatures = reader.lines().collect(Collectors.joining("\n"));
+
+                return ClientFeaturesResponse.updated(clientFeatures);
             }
         } else if (followRedirect
                 && (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
@@ -71,18 +71,14 @@ public class HttpFeatureFetcher implements FeatureFetcher {
                         || responseCode == HttpURLConnection.HTTP_SEE_OTHER)) {
             return followRedirect(request);
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-            return new ClientFeaturesResponse(
-                    ClientFeaturesResponse.Status.NOT_CHANGED, responseCode);
+            return ClientFeaturesResponse.notChanged();
         } else {
-            return new ClientFeaturesResponse(
-                    ClientFeaturesResponse.Status.UNAVAILABLE,
-                    responseCode,
-                    getLocationHeader(request));
+            return ClientFeaturesResponse.unavailable(responseCode, getLocationHeader(request));
         }
     }
 
     private ClientFeaturesResponse followRedirect(HttpURLConnection request) throws IOException {
-        String newUrl = getLocationHeader(request);
+        String newUrl = getLocationHeader(request).orElseThrow(() -> new IllegalStateException("No Location header found in redirect response."));
 
         request = openConnection(new URL(newUrl));
         request.connect();
@@ -94,8 +90,8 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         return getFeatureResponse(request, false);
     }
 
-    private String getLocationHeader(HttpURLConnection connection) {
-        return connection.getHeaderField("Location");
+    private Optional<String> getLocationHeader(HttpURLConnection connection) {
+        return Optional.ofNullable(connection.getHeaderField("Location"));
     }
 
     private HttpURLConnection openConnection(URL url) throws IOException {

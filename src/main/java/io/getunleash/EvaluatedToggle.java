@@ -1,6 +1,7 @@
 package io.getunleash;
 
 import io.getunleash.lang.Nullable;
+import io.getunleash.variant.Variant;
 
 public class EvaluatedToggle {
     private final boolean enabled;

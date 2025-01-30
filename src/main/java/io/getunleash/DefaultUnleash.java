@@ -1,24 +1,22 @@
 package io.getunleash;
 
-import static io.getunleash.Variant.DISABLED_VARIANT;
-import static java.util.Optional.ofNullable;
+import static io.getunleash.variant.Variant.DISABLED_VARIANT;
 
-import io.getunleash.event.*;
-import io.getunleash.lang.Nullable;
+import io.getunleash.event.EventDispatcher;
+import io.getunleash.event.IsEnabledImpressionEvent;
+import io.getunleash.event.ToggleEvaluated;
+import io.getunleash.event.VariantImpressionEvent;
 import io.getunleash.metric.UnleashMetricService;
-import io.getunleash.metric.UnleashMetricServiceImpl;
 import io.getunleash.repository.FeatureRepository;
-import io.getunleash.repository.IFeatureRepository;
+import io.getunleash.repository.YggdrasilAdapters;
 import io.getunleash.strategy.*;
-import io.getunleash.util.ConstraintMerger;
 import io.getunleash.util.UnleashConfig;
-import io.getunleash.variant.VariantUtil;
+import io.getunleash.variant.Variant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,81 +24,52 @@ public class DefaultUnleash implements Unleash {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUnleash.class);
 
     private static ConcurrentHashMap<String, LongAdder> initCounts = new ConcurrentHashMap<>();
-    private static final List<Strategy> BUILTIN_STRATEGIES =
-            Arrays.asList(
-                    new DefaultStrategy(),
-                    new ApplicationHostnameStrategy(),
-                    new GradualRolloutRandomStrategy(),
-                    new GradualRolloutSessionIdStrategy(),
-                    new GradualRolloutUserIdStrategy(),
-                    new RemoteAddressStrategy(),
-                    new UserWithIdStrategy(),
-                    new FlexibleRolloutStrategy());
-
-    public static final UnknownStrategy UNKNOWN_STRATEGY = new UnknownStrategy();
 
     private final UnleashMetricService metricService;
-    private final IFeatureRepository featureRepository;
-    private final Map<String, Strategy> strategyMap;
+    private final FeatureRepository featureRepository;
     private final UnleashContextProvider contextProvider;
     private final EventDispatcher eventDispatcher;
     private final UnleashConfig config;
 
-    private static IFeatureRepository defaultToggleRepository(UnleashConfig unleashConfig) {
-        return new FeatureRepository(unleashConfig);
+    private static EngineProxy defaultToggleRepository(
+            UnleashConfig unleashConfig, Strategy... strategies) {
+        return new EngineProxyImpl(unleashConfig, strategies);
     }
 
     public DefaultUnleash(UnleashConfig unleashConfig, Strategy... strategies) {
-        this(unleashConfig, defaultToggleRepository(unleashConfig), strategies);
+        this(unleashConfig, defaultToggleRepository(unleashConfig, strategies));
     }
 
-    public DefaultUnleash(
-            UnleashConfig unleashConfig,
-            IFeatureRepository featureRepository,
-            Strategy... strategies) {
+    public DefaultUnleash(UnleashConfig unleashConfig, EngineProxy engineProxy) {
         this(
                 unleashConfig,
-                featureRepository,
-                buildStrategyMap(strategies),
+                engineProxy,
                 unleashConfig.getContextProvider(),
                 new EventDispatcher(unleashConfig),
-                new UnleashMetricServiceImpl(unleashConfig, unleashConfig.getScheduledExecutor()),
                 false);
     }
 
     // Visible for testing
     public DefaultUnleash(
             UnleashConfig unleashConfig,
-            IFeatureRepository featureRepository,
-            Map<String, Strategy> strategyMap,
+            EngineProxy engineProxy,
             UnleashContextProvider contextProvider,
-            EventDispatcher eventDispatcher,
-            UnleashMetricService metricService) {
-        this(
-                unleashConfig,
-                featureRepository,
-                strategyMap,
-                contextProvider,
-                eventDispatcher,
-                metricService,
-                false);
+            EventDispatcher eventDispatcher) {
+        this(unleashConfig, engineProxy, contextProvider, eventDispatcher, false);
     }
 
     public DefaultUnleash(
             UnleashConfig unleashConfig,
-            IFeatureRepository featureRepository,
-            Map<String, Strategy> strategyMap,
+            EngineProxy engineProxy,
             UnleashContextProvider contextProvider,
             EventDispatcher eventDispatcher,
-            UnleashMetricService metricService,
             boolean failOnMultipleInstantiations) {
+
         this.config = unleashConfig;
-        this.featureRepository = featureRepository;
-        this.strategyMap = strategyMap;
+        this.featureRepository = engineProxy;
+        this.metricService = engineProxy;
         this.contextProvider = contextProvider;
         this.eventDispatcher = eventDispatcher;
-        this.metricService = metricService;
-        metricService.register(strategyMap.keySet());
         initCounts.compute(
                 config.getClientIdentifier(),
                 (key, inits) -> {
@@ -139,239 +108,25 @@ public class DefaultUnleash implements Unleash {
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction) {
-        return isEnabled(toggleName, context, fallbackAction, false);
-    }
 
-    public boolean isEnabled(
-            String toggleName,
-            UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction,
-            boolean isParent) {
-        FeatureEvaluationResult result =
-                getFeatureEvaluationResult(toggleName, context, fallbackAction, null);
-        if (!isParent) {
-            count(toggleName, result.isEnabled());
+        UnleashContext enhancedContext = context.applyStaticFields(config);
+
+        Boolean enabled = this.featureRepository.isEnabled(toggleName, enhancedContext);
+        if (enabled == null) {
+            enabled = fallbackAction.test(toggleName, enhancedContext);
         }
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, result.isEnabled()));
-        dispatchEnabledImpressionDataIfNeeded("isEnabled", toggleName, result.isEnabled(), context);
-        return result.isEnabled();
-    }
 
-    private void dispatchEnabledImpressionDataIfNeeded(
-            String eventType, String toggleName, boolean enabled, UnleashContext context) {
-        FeatureToggle toggle = featureRepository.getToggle(toggleName);
-        if (toggle != null && toggle.hasImpressionData()) {
+        this.metricService.countToggle(toggleName, enabled);
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
+        if (this.featureRepository.shouldEmitImpressionEvent(toggleName)) {
             eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
         }
-    }
-
-    private FeatureEvaluationResult getFeatureEvaluationResult(
-            String toggleName,
-            UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction,
-            @Nullable Variant defaultVariant) {
-        checkIfToggleMatchesNamePrefix(toggleName);
-        FeatureToggle featureToggle = featureRepository.getToggle(toggleName);
-
-        UnleashContext enhancedContext = context.applyStaticFields(config);
-        if (featureToggle == null) {
-            return new FeatureEvaluationResult(
-                    fallbackAction.test(toggleName, enhancedContext), defaultVariant);
-        } else if (!featureToggle.isEnabled()) {
-            return new FeatureEvaluationResult(false, defaultVariant);
-        } else if (isParentDependencySatisfied(featureToggle, context, fallbackAction)) {
-            // Dependent toggles, no point in evaluating child strategies if our dependencies are
-            // not satisfied
-            if (featureToggle.getStrategies().isEmpty()) {
-                return new FeatureEvaluationResult(
-                        true, VariantUtil.selectVariant(featureToggle, context, defaultVariant));
-            }
-            for (ActivationStrategy strategy : featureToggle.getStrategies()) {
-                Strategy configuredStrategy = getStrategy(strategy.getName());
-                if (configuredStrategy == UNKNOWN_STRATEGY) {
-                    LOGGER.warn(
-                            "Unable to find matching strategy for toggle:{} strategy:{}",
-                            toggleName,
-                            strategy.getName());
-                }
-
-                FeatureEvaluationResult result =
-                        configuredStrategy.getResult(
-                                strategy.getParameters(),
-                                enhancedContext,
-                                ConstraintMerger.mergeConstraints(featureRepository, strategy),
-                                strategy.getVariants());
-
-                if (result.isEnabled()) {
-                    Variant variant = result.getVariant();
-                    // If strategy variant is null, look for a variant in the featureToggle
-                    if (variant == null) {
-                        variant = VariantUtil.selectVariant(featureToggle, context, defaultVariant);
-                    }
-                    result.setVariant(variant);
-                    return result;
-                }
-            }
-        }
-        return new FeatureEvaluationResult(false, defaultVariant);
-    }
-
-    /**
-     * Uses the old, statistically broken Variant seed for finding the correct variant
-     *
-     * @param toggleName Name of the toggle
-     * @param context The UnleashContext
-     * @param fallbackAction What to do if we fail to find the toggle
-     * @param defaultVariant If we can't resolve a variant, what are we returning
-     * @return A wrapper containing whether the feature was enabled as well which Variant was
-     *     selected
-     * @deprecated
-     */
-    private FeatureEvaluationResult deprecatedGetFeatureEvaluationResult(
-            String toggleName,
-            UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction,
-            @Nullable Variant defaultVariant) {
-        checkIfToggleMatchesNamePrefix(toggleName);
-        FeatureToggle featureToggle = featureRepository.getToggle(toggleName);
-
-        UnleashContext enhancedContext = context.applyStaticFields(config);
-        if (featureToggle == null) {
-            return new FeatureEvaluationResult(
-                    fallbackAction.test(toggleName, enhancedContext), defaultVariant);
-        } else if (!featureToggle.isEnabled()) {
-            return new FeatureEvaluationResult(false, defaultVariant);
-        } else if (isParentDependencySatisfied(featureToggle, context, fallbackAction)) {
-            if (featureToggle.getStrategies().isEmpty()) {
-                return new FeatureEvaluationResult(
-                        true,
-                        VariantUtil.selectDeprecatedVariantHashingAlgo(
-                                featureToggle, context, defaultVariant));
-            }
-            for (ActivationStrategy strategy : featureToggle.getStrategies()) {
-                Strategy configuredStrategy = getStrategy(strategy.getName());
-                if (configuredStrategy == UNKNOWN_STRATEGY) {
-                    LOGGER.warn(
-                            "Unable to find matching strategy for toggle:{} strategy:{}",
-                            toggleName,
-                            strategy.getName());
-                }
-
-                FeatureEvaluationResult result =
-                        configuredStrategy.getDeprecatedHashingAlgoResult(
-                                strategy.getParameters(),
-                                enhancedContext,
-                                ConstraintMerger.mergeConstraints(featureRepository, strategy),
-                                strategy.getVariants());
-
-                if (result.isEnabled()) {
-                    Variant variant = result.getVariant();
-                    // If strategy variant is null, look for a variant in the featureToggle
-                    if (variant == null) {
-                        variant =
-                                VariantUtil.selectDeprecatedVariantHashingAlgo(
-                                        featureToggle, context, defaultVariant);
-                    }
-                    result.setVariant(variant);
-                    return result;
-                }
-            }
-        }
-        return new FeatureEvaluationResult(false, defaultVariant);
-    }
-
-    private boolean isParentDependencySatisfied(
-            @Nonnull FeatureToggle featureToggle,
-            @Nonnull UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction) {
-        if (!featureToggle.hasDependencies()) {
-            return true;
-        } else {
-            return featureToggle.getDependencies().stream()
-                    .allMatch(
-                            parent -> {
-                                FeatureToggle parentToggle =
-                                        featureRepository.getToggle(parent.getFeature());
-                                if (parentToggle == null) {
-                                    LOGGER.warn(
-                                            "Missing dependency [{}] for toggle: [{}]",
-                                            parent.getFeature(),
-                                            featureToggle.getName());
-                                    return false;
-                                }
-                                if (!parentToggle.getDependencies().isEmpty()) {
-                                    LOGGER.warn(
-                                            "[{}] depends on feature [{}] which also depends on something. We don't currently support more than one level of dependency resolution",
-                                            featureToggle.getName(),
-                                            parent.getFeature());
-                                    return false;
-                                }
-                                boolean parentSatisfied =
-                                        isEnabled(
-                                                parent.getFeature(), context, fallbackAction, true);
-                                if (parentSatisfied) {
-                                    if (!parent.getVariants().isEmpty()) {
-                                        return parent.getVariants()
-                                                .contains(
-                                                        getVariant(
-                                                                        parent.feature,
-                                                                        context,
-                                                                        DISABLED_VARIANT,
-                                                                        true)
-                                                                .getName());
-                                    } else {
-                                        return parent.isEnabled();
-                                    }
-                                } else {
-                                    return !parent.isEnabled();
-                                }
-                            });
-        }
-    }
-
-    private void checkIfToggleMatchesNamePrefix(String toggleName) {
-        if (config.getNamePrefix() != null) {
-            if (!toggleName.startsWith(config.getNamePrefix())) {
-                LOGGER.warn(
-                        "Toggle [{}] doesnt start with configured name prefix of [{}] so it will always be disabled",
-                        toggleName,
-                        config.getNamePrefix());
-            }
-        }
+        return enabled;
     }
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context) {
         return getVariant(toggleName, context, DISABLED_VARIANT);
-    }
-
-    @Override
-    public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
-        return getVariant(toggleName, context, defaultValue, false);
-    }
-
-    private Variant getVariant(
-            String toggleName, UnleashContext context, Variant defaultValue, boolean isParent) {
-        FeatureEvaluationResult result =
-                getFeatureEvaluationResult(toggleName, context, (n, c) -> false, defaultValue);
-        Variant variant = result.getVariant();
-        if (!isParent) {
-            metricService.countVariant(toggleName, variant.getName());
-            // Should count yes/no also when getting variant.
-            metricService.count(toggleName, result.isEnabled());
-        }
-        dispatchVariantImpressionDataIfNeeded(
-                toggleName, variant.getName(), result.isEnabled(), context);
-        return variant;
-    }
-
-    private void dispatchVariantImpressionDataIfNeeded(
-            String toggleName, String variantName, boolean enabled, UnleashContext context) {
-        FeatureToggle toggle = featureRepository.getToggle(toggleName);
-        if (toggle != null && toggle.hasImpressionData()) {
-            eventDispatcher.dispatch(
-                    new VariantImpressionEvent(toggleName, enabled, context, variantName));
-        }
     }
 
     @Override
@@ -384,117 +139,23 @@ public class DefaultUnleash implements Unleash {
         return getVariant(toggleName, contextProvider.getContext(), defaultValue);
     }
 
-    /**
-     * Uses the old, statistically broken Variant seed for finding the correct variant
-     *
-     * @param toggleName
-     * @param context
-     * @return
-     * @deprecated
-     */
     @Override
-    public Variant deprecatedGetVariant(String toggleName, UnleashContext context) {
-        return deprecatedGetVariant(toggleName, context, DISABLED_VARIANT);
-    }
+    public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
+        UnleashContext enhancedContext = context.applyStaticFields(config);
 
-    /**
-     * Uses the old, statistically broken Variant seed for finding the correct variant
-     *
-     * @param toggleName
-     * @param context
-     * @param defaultValue
-     * @return
-     * @deprecated
-     */
-    @Override
-    public Variant deprecatedGetVariant(
-            String toggleName, UnleashContext context, Variant defaultValue) {
-        return deprecatedGetVariant(toggleName, context, defaultValue, false);
-    }
-
-    private Variant deprecatedGetVariant(
-            String toggleName, UnleashContext context, Variant defaultValue, boolean isParent) {
-        FeatureEvaluationResult result =
-                deprecatedGetFeatureEvaluationResult(
-                        toggleName, context, (n, c) -> false, defaultValue);
-        Variant variant = result.getVariant();
-        if (!isParent) {
-            metricService.countVariant(toggleName, variant.getName());
-            // Should count yes/no also when getting variant.
-            metricService.count(toggleName, result.isEnabled());
+        Variant variant =
+                YggdrasilAdapters.adapt(
+                        this.featureRepository.getVariant(toggleName, enhancedContext),
+                        defaultValue);
+        this.metricService.countToggle(toggleName, variant.isFeatureEnabled());
+        this.metricService.countVariant(toggleName, variant.getName());
+        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isFeatureEnabled()));
+        if (this.featureRepository.shouldEmitImpressionEvent(toggleName)) {
+            eventDispatcher.dispatch(
+                    new VariantImpressionEvent(
+                            toggleName, variant.isFeatureEnabled(), context, variant.getName()));
         }
-        dispatchVariantImpressionDataIfNeeded(
-                toggleName, variant.getName(), result.isEnabled(), context);
         return variant;
-    }
-
-    /**
-     * Uses the old, statistically broken Variant seed for finding the correct variant
-     *
-     * @param toggleName
-     * @return
-     * @deprecated
-     */
-    @Override
-    public Variant deprecatedGetVariant(String toggleName) {
-        return deprecatedGetVariant(toggleName, contextProvider.getContext());
-    }
-
-    /**
-     * Uses the old, statistically broken Variant seed for finding the correct variant
-     *
-     * @param toggleName
-     * @param defaultValue
-     * @return
-     * @deprecated
-     */
-    @Override
-    public Variant deprecatedGetVariant(String toggleName, Variant defaultValue) {
-        return deprecatedGetVariant(toggleName, contextProvider.getContext(), defaultValue);
-    }
-
-    /**
-     * Use more().getFeatureToggleDefinition() instead
-     *
-     * @return the feature toggle
-     */
-    @Deprecated
-    public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
-        return ofNullable(featureRepository.getToggle(toggleName));
-    }
-
-    /**
-     * Use more().getFeatureToggleNames() instead
-     *
-     * @return a list of known toggle names
-     */
-    @Deprecated()
-    public List<String> getFeatureToggleNames() {
-        return featureRepository.getFeatureNames();
-    }
-
-    /** Use more().count() instead */
-    @Deprecated
-    public void count(final String toggleName, boolean enabled) {
-        metricService.count(toggleName, enabled);
-    }
-
-    private static Map<String, Strategy> buildStrategyMap(@Nullable Strategy[] strategies) {
-        Map<String, Strategy> map = new HashMap<>();
-
-        BUILTIN_STRATEGIES.forEach(strategy -> map.put(strategy.getName(), strategy));
-
-        if (strategies != null) {
-            for (Strategy strategy : strategies) {
-                map.put(strategy.getName(), strategy);
-            }
-        }
-
-        return map;
-    }
-
-    private Strategy getStrategy(String strategy) {
-        return strategyMap.getOrDefault(strategy, config.getFallbackStrategy());
     }
 
     @Override
@@ -511,12 +172,18 @@ public class DefaultUnleash implements Unleash {
 
         @Override
         public List<String> getFeatureToggleNames() {
-            return featureRepository.getFeatureNames();
+            return featureRepository
+                    .listKnownToggles()
+                    .map(FeatureDefinition::getName)
+                    .collect(Collectors.toList());
         }
 
         @Override
-        public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
-            return ofNullable(featureRepository.getToggle(toggleName));
+        public Optional<FeatureDefinition> getFeatureToggleDefinition(String toggleName) {
+            return featureRepository
+                    .listKnownToggles()
+                    .filter(toggle -> toggle.getName().equals(toggleName))
+                    .findFirst();
         }
 
         @Override
@@ -526,27 +193,21 @@ public class DefaultUnleash implements Unleash {
 
         @Override
         public List<EvaluatedToggle> evaluateAllToggles(UnleashContext context) {
-            return getFeatureToggleNames().stream()
+            return featureRepository
+                    .listKnownToggles()
+                    .map(FeatureDefinition::getName)
                     .map(
                             toggleName -> {
-                                FeatureEvaluationResult result =
-                                        getFeatureEvaluationResult(
-                                                toggleName, context, (n, c) -> false, null);
-
+                                UnleashContext enhancedContext = context.applyStaticFields(config);
+                                Variant variant =
+                                        YggdrasilAdapters.adapt(
+                                                featureRepository.getVariant(
+                                                        toggleName, enhancedContext),
+                                                DISABLED_VARIANT);
                                 return new EvaluatedToggle(
-                                        toggleName, result.isEnabled(), result.getVariant());
+                                        toggleName, variant.isFeatureEnabled(), variant);
                             })
                     .collect(Collectors.toList());
-        }
-
-        @Override
-        public void count(final String toggleName, boolean enabled) {
-            metricService.count(toggleName, enabled);
-        }
-
-        @Override
-        public void countVariant(final String toggleName, String variantName) {
-            metricService.countVariant(toggleName, variantName);
         }
     }
 }

@@ -1,26 +1,30 @@
 package io.getunleash;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import io.getunleash.event.ClientFeaturesResponse;
 import io.getunleash.event.EventDispatcher;
 import io.getunleash.event.UnleashReady;
 import io.getunleash.event.UnleashSubscriber;
-import io.getunleash.metric.UnleashMetricService;
 import io.getunleash.repository.*;
-import io.getunleash.strategy.DefaultStrategy;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,10 +35,18 @@ import org.slf4j.LoggerFactory;
 
 class DefaultUnleashTest {
     private DefaultUnleash sut;
-    private FeatureRepository featureRepository;
+    private EngineProxy engineProxy;
     private UnleashContextProvider contextProvider;
     private EventDispatcher eventDispatcher;
-    private UnleashMetricService metricService;
+
+    private String loadMockFeatures(String path) {
+        try {
+            File file = new File(getClass().getClassLoader().getResource(path).toURI());
+            return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to load testdata", ex);
+        }
+    }
 
     @RegisterExtension
     static WireMockExtension serverMock =
@@ -47,127 +59,77 @@ class DefaultUnleashTest {
     public void setup() {
         UnleashConfig unleashConfig =
                 UnleashConfig.builder().unleashAPI("http://fakeAPI").appName("fakeApp").build();
-        featureRepository = mock(FeatureRepository.class);
+        engineProxy = mock(EngineProxy.class);
         Map<String, Strategy> strategyMap = new HashMap<>();
-        strategyMap.put("default", new DefaultStrategy());
         contextProvider = mock(UnleashContextProvider.class);
         eventDispatcher = mock(EventDispatcher.class);
-        metricService = mock(UnleashMetricService.class);
 
-        sut =
-                new DefaultUnleash(
-                        unleashConfig,
-                        featureRepository,
-                        strategyMap,
-                        contextProvider,
-                        eventDispatcher,
-                        metricService);
+        sut = new DefaultUnleash(unleashConfig, engineProxy, contextProvider, eventDispatcher);
     }
 
     @Test
     public void should_evaluate_all_toggle_with_context() {
-        when(featureRepository.getFeatureNames()).thenReturn(asList("toggle1", "toggle2"));
-        when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
-        List<EvaluatedToggle> toggles = sut.more().evaluateAllToggles();
-        assertThat(toggles).hasSize(2);
-        EvaluatedToggle t1 = toggles.get(0);
-        assertThat(t1.getName()).isEqualTo("toggle1");
-        assertThat(t1.isEnabled()).isFalse();
-    }
+        ToggleBootstrapProvider bootstrapper =
+                new ToggleBootstrapProvider() {
 
-    @Test
-    public void should_count_and_not_throw_an_error() {
-        sut.more().count("toggle1", true);
-        sut.more().count("toggle1", false);
+                    @Override
+                    public Optional<String> read() {
+                        return Optional.of(loadMockFeatures("unleash-repo-v2.json"));
+                    }
+                };
 
-        verify(metricService).count("toggle1", true);
-        verify(metricService).count("toggle1", false);
-    }
+        UnleashConfig unleashConfig =
+                UnleashConfig.builder()
+                        .unleashAPI("http://fakeAPI")
+                        .appName("fakeApp")
+                        .toggleBootstrapProvider(bootstrapper)
+                        .build();
 
-    @Test
-    public void should_countVariant_and_not_throw_an_error() {
-        sut.more().countVariant("toggle1", "variant1");
+        Unleash unleash = new DefaultUnleash(unleashConfig);
+        List<EvaluatedToggle> toggles = unleash.more().evaluateAllToggles();
+        assertThat(toggles).hasSize(5);
 
-        verify(metricService).countVariant("toggle1", "variant1");
-    }
+        // rather than getting the first toggle, we need to find the toggle with the
+        // correct name since this now comes from Yggdrasil and the feature set is
+        // backed by
+        // hashmap, we can't guarantee a stable ordering
+        EvaluatedToggle t1 =
+                toggles.stream().filter(t -> t.getName().equals("featureX")).findFirst().get();
 
-    @Test
-    public void should_evaluate_missing_segment_as_false() {
-        String toggleName = "F9.withMissingSegment";
-        String semVer = "1.2.2";
-        Constraint semverConstraint = new Constraint("version", Operator.SEMVER_EQ, semVer);
-        ActivationStrategy withMissingSegment =
-                new ActivationStrategy(
-                        "default",
-                        Collections.emptyMap(),
-                        asList(semverConstraint),
-                        asList(404),
-                        Collections.emptyList());
-        when(featureRepository.getToggle(toggleName))
-                .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
-        when(featureRepository.getSegment(404)).thenReturn(Segment.DENY_SEGMENT);
-        when(contextProvider.getContext())
-                .thenReturn(UnleashContext.builder().addProperty("version", semVer).build());
-        assertThat(sut.isEnabled(toggleName)).isFalse();
-    }
-
-    @Test
-    public void should_evaluate_segment_collection_with_one_missing_segment_as_false() {
-        String toggleName = "F9.withMissingSegment";
-        Constraint semverConstraint = new Constraint("version", Operator.SEMVER_EQ, "1.2.2");
-        ActivationStrategy withMissingSegment =
-                new ActivationStrategy(
-                        "default",
-                        Collections.emptyMap(),
-                        asList(semverConstraint),
-                        asList(404, 1),
-                        Collections.emptyList());
-        when(featureRepository.getToggle(toggleName))
-                .thenReturn(new FeatureToggle(toggleName, true, asList(withMissingSegment)));
-        when(featureRepository.getSegment(1))
-                .thenReturn(
-                        new Segment(
-                                1,
-                                "always true",
-                                asList(
-                                        new Constraint(
-                                                "always_true",
-                                                Operator.NOT_IN,
-                                                Collections.EMPTY_LIST))));
-        when(contextProvider.getContext())
-                .thenReturn(UnleashContext.builder().addProperty("version", "1.2.2").build());
-        assertThat(sut.isEnabled(toggleName)).isFalse();
+        assertThat(t1.getName()).isEqualTo("featureX");
+        assertThat(t1.isEnabled()).isTrue();
     }
 
     @Test
     public void should_allow_fallback_strategy() {
         Strategy fallback = mock(Strategy.class);
-        when(fallback.getResult(anyMap(), any(), anyList(), anyList())).thenCallRealMethod();
+        when(fallback.getName()).thenReturn("custom strategy");
+        when(fallback.isEnabled(any(), any(UnleashContext.class))).thenReturn(true);
+
+        ToggleBootstrapProvider bootstrapper =
+                new ToggleBootstrapProvider() {
+                    @Override
+                    public Optional<String> read() {
+                        return Optional.of(
+                                "{\"version\":1,\"features\":[{\"name\":\"toggle1\",\"enabled\":true,\"strategies\":[{\"name\":\"nonexistent\"}]}]}");
+                    }
+                };
 
         UnleashConfig unleashConfigWithFallback =
                 UnleashConfig.builder()
                         .unleashAPI("http://fakeAPI")
                         .appName("fakeApp")
+                        .toggleBootstrapProvider(bootstrapper)
                         .fallbackStrategy(fallback)
                         .build();
-        sut =
-                new DefaultUnleash(
-                        unleashConfigWithFallback,
-                        featureRepository,
-                        new HashMap<>(),
-                        contextProvider,
-                        eventDispatcher,
-                        metricService);
+        sut = new DefaultUnleash(unleashConfigWithFallback);
 
-        ActivationStrategy as = new ActivationStrategy("forFallback", new HashMap<>());
-        FeatureToggle toggle = new FeatureToggle("toggle1", true, Collections.singletonList(as));
-        when(featureRepository.getToggle("toggle1")).thenReturn(toggle);
         when(contextProvider.getContext()).thenReturn(UnleashContext.builder().build());
 
         sut.isEnabled("toggle1");
 
-        verify(fallback).isEnabled(any(), any(), anyList());
+        verify(fallback).isEnabled(any(), any());
     }
 
     @Test
@@ -227,8 +189,7 @@ class DefaultUnleashTest {
         Unleash unleash1 = new DefaultUnleash(config);
         assertThatThrownBy(
                         () -> {
-                            Unleash unleash2 =
-                                    new DefaultUnleash(config, null, null, null, null, null, true);
+                            Unleash unleash2 = new DefaultUnleash(config, null, null, null, true);
                         })
                 .isInstanceOf(RuntimeException.class)
                 .withFailMessage(
@@ -300,7 +261,8 @@ class DefaultUnleashTest {
                                 aResponse()
                                         .withStatus(featuresStatusCode)
                                         .withHeader("Content-Type", "application/json")
-                                        .withBody("{\"features\": []}")));
+                                        .withBody(loadMockFeatures("unleash-repo-v2.json"))));
+
         stubFor(post(urlEqualTo("/api/client/register")).willReturn(aResponse().withStatus(200)));
     }
 
@@ -308,11 +270,9 @@ class DefaultUnleashTest {
     public void asynchronous_fetch_on_initialisation_fails_silently_and_retries()
             throws InterruptedException {
         FeatureFetcher fetcher = mock(FeatureFetcher.class);
-        FeatureCollection expectedResponse = new FeatureCollection();
-        FeatureToggleResponse.Status expectedStatus = FeatureToggleResponse.Status.CHANGED;
         when(fetcher.fetchFeatures())
                 .thenThrow(UnleashException.class)
-                .thenReturn(new ClientFeaturesResponse(expectedStatus, expectedResponse));
+                .thenReturn(ClientFeaturesResponse.updated("doesn't matter for this test"));
         UnleashConfig config =
                 UnleashConfig.builder()
                         .unleashAPI("http://wrong:4242")

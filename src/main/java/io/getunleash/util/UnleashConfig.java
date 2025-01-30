@@ -1,7 +1,5 @@
 package io.getunleash.util;
 
-import static io.getunleash.DefaultUnleash.UNKNOWN_STRATEGY;
-
 import io.getunleash.CustomHttpHeadersProvider;
 import io.getunleash.DefaultCustomHttpHeadersProviderImpl;
 import io.getunleash.UnleashContextProvider;
@@ -70,7 +68,7 @@ public class UnleashConfig {
     private final boolean synchronousFetchOnInitialisation;
     private final UnleashScheduledExecutor unleashScheduledExecutor;
     private final UnleashSubscriber unleashSubscriber;
-    @Nullable private final Strategy fallbackStrategy;
+    @Nullable private Strategy fallbackStrategy;
     @Nullable private final ToggleBootstrapProvider toggleBootstrapProvider;
     @Nullable private final Proxy proxy;
     @Nullable private final Consumer<UnleashException> startupExceptionHandler;
@@ -128,9 +126,7 @@ public class UnleashConfig {
             throw new IllegalStateException("You are required to specify a subscriber");
         }
 
-        if (fallbackStrategy == null) {
-            this.fallbackStrategy = UNKNOWN_STRATEGY;
-        } else {
+        if (fallbackStrategy != null) {
             this.fallbackStrategy = fallbackStrategy;
         }
 
@@ -363,7 +359,8 @@ public class UnleashConfig {
                 final String proxyUser = System.getProperty(proto + ".proxyUser", "");
                 final String proxyPassword = System.getProperty(proto + ".proxyPassword", "");
 
-                // Only apply PasswordAuthentication to requests to the proxy itself - if not set
+                // Only apply PasswordAuthentication to requests to the proxy itself - if not
+                // set
                 // just ignore
                 if (getRequestingHost().equalsIgnoreCase(proxyHost)
                         && Integer.parseInt(proxyPort) == getRequestingPort()) {

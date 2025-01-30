@@ -1,8 +1,7 @@
 package io.getunleash;
 
-import static java.util.Collections.emptyList;
-
 import io.getunleash.lang.Nullable;
+import io.getunleash.variant.Variant;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -11,7 +10,7 @@ public class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;
     private Map<String, Boolean> excludedFeatures = new HashMap<>();
-    private Map<String, FeatureToggle> features = new HashMap<>();
+    private Map<String, Boolean> features = new HashMap<>();
     private Map<String, Variant> variants = new HashMap<>();
 
     @Override
@@ -21,9 +20,7 @@ public class FakeUnleash implements Unleash {
         } else if (disableAll) {
             return excludedFeatures.getOrDefault(toggleName, false);
         } else {
-            return more().getFeatureToggleDefinition(toggleName)
-                    .map(FeatureToggle::isEnabled)
-                    .orElse(defaultSetting);
+            return features.containsKey(toggleName) ? features.get(toggleName) : defaultSetting;
         }
     }
 
@@ -70,11 +67,6 @@ public class FakeUnleash implements Unleash {
     }
 
     @Override
-    public List<String> getFeatureToggleNames() {
-        return more().getFeatureToggleNames();
-    }
-
-    @Override
     public MoreOperations more() {
         return new FakeMore();
     }
@@ -107,17 +99,6 @@ public class FakeUnleash implements Unleash {
         }
     }
 
-    @Override
-    public Variant deprecatedGetVariant(String toggleName, UnleashContext context) {
-        return null;
-    }
-
-    @Override
-    public Variant deprecatedGetVariant(
-            String toggleName, UnleashContext context, Variant defaultValue) {
-        return null;
-    }
-
     public void resetAll() {
         disableAll = false;
         enableAll = false;
@@ -128,13 +109,13 @@ public class FakeUnleash implements Unleash {
 
     public void enable(String... features) {
         for (String name : features) {
-            this.features.put(name, new FeatureToggle(name, true, emptyList()));
+            this.features.put(name, true);
         }
     }
 
     public void disable(String... features) {
         for (String name : features) {
-            this.features.put(name, new FeatureToggle(name, false, emptyList()));
+            this.features.put(name, false);
         }
     }
 
@@ -156,8 +137,12 @@ public class FakeUnleash implements Unleash {
         }
 
         @Override
-        public Optional<FeatureToggle> getFeatureToggleDefinition(String toggleName) {
-            return Optional.ofNullable(features.get(toggleName));
+        public Optional<FeatureDefinition> getFeatureToggleDefinition(String toggleName) {
+            return Optional.ofNullable(features.get(toggleName))
+                    .map(
+                            value ->
+                                    new FeatureDefinition(
+                                            toggleName, Optional.of("experiment"), "default"));
         }
 
         @Override
@@ -175,16 +160,6 @@ public class FakeUnleash implements Unleash {
                                             isEnabled(toggleName),
                                             getVariant(toggleName)))
                     .collect(Collectors.toList());
-        }
-
-        @Override
-        public void count(String toggleName, boolean enabled) {
-            // Nothing to count
-        }
-
-        @Override
-        public void countVariant(String toggleName, String variantName) {
-            // Nothing to count
         }
     }
 }
