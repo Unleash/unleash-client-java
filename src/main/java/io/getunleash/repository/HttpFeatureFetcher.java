@@ -78,7 +78,12 @@ public class HttpFeatureFetcher implements FeatureFetcher {
     }
 
     private ClientFeaturesResponse followRedirect(HttpURLConnection request) throws IOException {
-        String newUrl = getLocationHeader(request).orElseThrow(() -> new IllegalStateException("No Location header found in redirect response."));
+        String newUrl =
+                getLocationHeader(request)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "No Location header found in redirect response."));
 
         request = openConnection(new URL(newUrl));
         request.connect();
