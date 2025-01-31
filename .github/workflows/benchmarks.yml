@@ -1,0 +1,26 @@
+name: Run benchmarks
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  jmh_benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Build and run benchmark
+        run: |
+          cd ./benches/jmh/unleash-client-benches
+          mvn clean install
+          java -jar target/benchmarks.jar -w1 -rf json -rff output.json
+
+

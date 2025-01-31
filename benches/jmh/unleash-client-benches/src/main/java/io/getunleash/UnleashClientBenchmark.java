@@ -47,11 +47,11 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Benchmark)
 @Fork(value = 1)
-@Warmup(iterations = 5, timeUnit = TimeUnit.MILLISECONDS, time = 5000)
+@Warmup(iterations = 3, timeUnit = TimeUnit.MILLISECONDS, time = 2000)
 @Measurement(iterations = 5, timeUnit = TimeUnit.MILLISECONDS, time = 5000)
 public class UnleashClientBenchmark {
 
-    @State(Scope.Thread)
+    @State(Scope.Benchmark)
     public static class MyState {
 
         public Unleash unleash;
@@ -60,7 +60,7 @@ public class UnleashClientBenchmark {
         @Setup(Level.Trial)
         public void doSetup() {
             System.out.println("dosetup");
-            unleash = new DefaultUnleash(UnleashConfig.builder().unleashAPI("https://localhost:1500").apiKey("irrelevant").appName("UnleashBenchmarks").toggleBootstrapProvider(new ToggleBootstrapFileProvider("classpath:unleash-repo-v2-with-impression-data.json"))
+            unleash = new DefaultUnleash(UnleashConfig.builder().unleashAPI("https://localhost:1500").apiKey("irrelevant").appName("UnleashBenchmarks").toggleBootstrapProvider(new ToggleBootstrapFileProvider("classpath:./unleash-repo-v2-with-impression-data.json"))
                 .fetchTogglesInterval(0).disablePolling().disableMetrics().build());
             context = new UnleashContext.Builder().environment("benchmarking").build();
         }
