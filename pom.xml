@@ -59,8 +59,7 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>yggdrasil-engine</artifactId>
-            <version>0.1.0-alpha.15</version>
-            <classifier>${os.detected.classifier}</classifier>
+            <version>0.1.0-alpha.16</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -162,13 +161,6 @@
     </dependencies>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.7.0</version>
-            </extension>
-        </extensions>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
