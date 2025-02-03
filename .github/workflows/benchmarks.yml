@@ -33,7 +33,7 @@ jobs:
       - name: Build and run benchmark
         run: |
           cd ./benches/jmh/unleash-client-benches
-          mvn clean install -Dunleash.version=${{ steps.unleash.version }}
+          mvn clean install -Dunleash.version=${{ steps.unleash.outputs.version }}
           java -jar target/benchmarks.jar -w1 -rf json -rff output.json
       - name: JMH Benchmark Action
         uses: kitlangton/jmh-benchmark-action@main
