@@ -42,9 +42,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
-
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Benchmark)
 @Fork(value = 1)
 @Warmup(iterations = 3, timeUnit = TimeUnit.MILLISECONDS, time = 2000)
@@ -60,8 +57,11 @@ public class UnleashClientBenchmark {
         @Setup(Level.Trial)
         public void doSetup() {
             System.out.println("dosetup");
-            unleash = new DefaultUnleash(UnleashConfig.builder().unleashAPI("https://localhost:1500").apiKey("irrelevant").appName("UnleashBenchmarks").toggleBootstrapProvider(new ToggleBootstrapFileProvider("classpath:./unleash-repo-v2-with-impression-data.json"))
-                .fetchTogglesInterval(0).disablePolling().disableMetrics().build());
+            unleash = new DefaultUnleash(UnleashConfig.builder().unleashAPI("https://localhost:1500")
+                    .apiKey("irrelevant").appName("UnleashBenchmarks")
+                    .toggleBootstrapProvider(
+                            new ToggleBootstrapFileProvider("classpath:./unleash-repo-v2-with-impression-data.json"))
+                    .fetchTogglesInterval(0).disablePolling().disableMetrics().build());
             context = new UnleashContext.Builder().environment("benchmarking").build();
         }
 
