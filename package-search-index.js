@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.getunleash"},{"l":"io.getunleash.event"},{"l":"io.getunleash.lang"},{"l":"io.getunleash.metric"},{"l":"io.getunleash.repository"},{"l":"io.getunleash.strategy"},{"l":"io.getunleash.util"},{"l":"io.getunleash.variant"}];updateSearchResults();
