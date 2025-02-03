@@ -60,7 +60,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>9.3.2</version>
+            <version>${unleash.version}</version>
         </dependency>
     </dependencies>
 

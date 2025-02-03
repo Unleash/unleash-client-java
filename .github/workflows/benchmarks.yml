@@ -6,6 +6,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   jmh_benchmark:
@@ -17,10 +18,16 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - name: Build client
+        run: |
+          mvn clean install
+      - name: Get project version
+        id: unleash
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "::set-output name=version::$VERSION"
       - name: Build and run benchmark
         run: |
           cd ./benches/jmh/unleash-client-benches
-          mvn clean install
+          mvn clean install -Dunleash.version=${{ steps.unleash.version }}
           java -jar target/benchmarks.jar -w1 -rf json -rff output.json
-
-
