@@ -24,7 +24,7 @@ jobs:
           java-version: 17
       - name: Build client
         run: |
-          mvn clean install
+          mvn clean install -DskipTests
       - name: Get project version
         id: unleash
         run: |
