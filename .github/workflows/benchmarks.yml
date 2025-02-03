@@ -8,6 +8,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   jmh_benchmark:
     runs-on: ubuntu-latest
@@ -31,3 +35,8 @@ jobs:
           cd ./benches/jmh/unleash-client-benches
           mvn clean install -Dunleash.version=${{ steps.unleash.version }}
           java -jar target/benchmarks.jar -w1 -rf json -rff output.json
+      - name: JMH Benchmark Action
+        uses: kitlangton/jmh-benchmark-action@main
+        with:
+          jmh-output-path: benches/jmh/unleash-client-benches/output.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
