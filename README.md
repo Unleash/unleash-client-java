@@ -1,11 +1,12 @@
 # Unleash Client SDK for Java
-This is the Unleash Client SDK for Java. It is compatible with the [Unleash-hosted.com SaaS](https://www.unleash-hosted.com/) offering and [Unleash Open-Source](https://github.com/unleash/unleash).
-
 
 [![Build Status](https://github.com/Unleash/unleash-client-java/workflows/Build/badge.svg)](https://github.com/Unleash/unleash-client-java/actions)
 [![Coverage Status](https://coveralls.io/repos/github/Unleash/unleash-client-java/badge.svg?branch=main)](https://coveralls.io/github/Unleash/unleash-client-java?branch=main)
 [![Maven Central](https://img.shields.io/maven-central/v/io.getunleash/unleash-client-java)](https://mvnrepository.com/artifact/io.getunleash/unleash-client-java)
 
+Unleash is a private, secure, and scalable [feature management platform](https://www.getunleash.io/) built to reduce the risk of releasing new features and accelerate software development. This server-side Java SDK is designed to help you integrate with Unleash and evaluate feature flags inside your application.
+
+You can use this client with [Unleash Enterprise](https://www.getunleash.io/pricing?utm_source=readme&utm_medium=java) or [Unleash Open Source](https://github.com/Unleash/unleash).
 
 >  **Migrating to v10**
 >
@@ -36,7 +37,7 @@ You need to add the Unleash SDK as a dependency for your project. Here's how you
 
 ---
 
-**⚠️ Important:** In almost every case, you only want a **single, shared instance of the `Unleash`  class (a *singleton*)** in your application . You would typically use a dependency injection framework (such as Spring or Guice) to inject it where you need it. Having multiple instances of the client in your application could lead to inconsistencies and performance degradation.
+**⚠️ Important:** In almost every case, you only want a **single, shared instance of the `Unleash`  class (a *singleton*)** in your application. You would typically use a dependency injection framework (such as Spring or Guice) to inject it where you need it. Having multiple instances of the client in your application could lead to inconsistencies and performance degradation.
 
 To help you detect cases where you configure multiple instances by mistake, the SDK will print an error message if you create multiple instances with the same configuration values. You can also tell Unleash to fail when this happens by setting the constructor parameter `failOnMultipleInstantiations` to `true`.
 
@@ -83,7 +84,7 @@ Unleash unleash = new DefaultUnleash(config);
 
 ## Step 3: Use the feature toggle
 
-With the SDK initialized, you can use the `isEnabled` method to check the state of your feature toggles. The method returns a boolean indicating whether a feature is enabled for the current request or not.
+With the SDK initialized, you can use the `isEnabled` method to check the state of your feature toggles. The method returns a boolean indicating whether a feature is enabled for the current request.
 
 ```java
 if(unleash.isEnabled("AwesomeFeature")) {
@@ -93,14 +94,13 @@ if(unleash.isEnabled("AwesomeFeature")) {
 }
 ```
 
-The `isEnabled` method also accepts a second, boolean argument. The SDK uses this as a fallback value if it can't find the feature you're trying to check. In other words, `unleash.isEnabled("non-existing-toggle")` would usually return `false` (assuming that` "non-existing-toggle"`) doesn't exist). If you instead do  `unleash.isEnabled("non-existing-toggle", true)`, then Unleash would return `true` if it didn't find the toggle.
+The `isEnabled` method also accepts a second boolean argument. The SDK uses this as a fallback value if it can't find the feature you're trying to check. For example, if `unleash.isEnabled("non-existing-toggle")` returns `false` when ` "non-existing-toggle"` doesn't exist, calling `unleash.isEnabled("non-existing-toggle", true)`, will return `true`.
 
 You can also **provide an [Unleash context](https://docs.getunleash.io/reference/unleash-context)** to the `isEnabled` method. Refer to the [Unleash context](#unleash-context) section for more information about using the Unleash context in the Java SDK.
 
 ### Activation strategies
 
-The Java client comes with implementations for the built-in activation strategies
-provided by unleash.
+The Java client comes with implementations for the built-in activation strategies provided by Unleash:
 
 - DefaultStrategy
 - UserWithIdStrategy
@@ -114,22 +114,21 @@ Read more about the strategies in the [activation strategies reference documenta
 
 #### Custom strategies
 You may also specify and implement your own strategy. The specification must be registered in the Unleash UI and
-you must register the strategy implementation when you wire up unleash.
+you must register the strategy implementation when you set up Unleash.
 
 ```java
 Strategy s1 = new MyAwesomeStrategy();
 Strategy s2 = new MySuperAwesomeStrategy();
-Unleash unleash return new DefaultUnleash(config, s1, s2);
-
+Unleash unleash = new DefaultUnleash(config, s1, s2);
 ```
 
 ### Unleash context
 
 In order to use some of the common activation strategies you must provide an [Unleash context](https://docs.getunleash.io/reference/unleash-context).
-This client SDK provides two ways of provide the unleash-context:
+This client SDK provides two ways of providing the Unleash context:
 
-#### 1. As part of isEnabled call
-This is the simplest and most explicit way of providing the unleash context.
+#### 1. As part of the `isEnabled` call
+This is the simplest and most explicit way of providing the Unleash context.
 You just add it as an argument to the `isEnabled` call.
 
 
@@ -182,7 +181,7 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
 ```
 
 ### Dynamic custom HTTP headers
-If you need custom http headers that change during the lifetime of the client, a provider can be defined via the `UnleashConfig`.
+If you need custom HTTP headers that change during the lifetime of the client, a provider can be defined via the `UnleashConfig`.
 ```java
 public class CustomHttpHeadersProviderImpl implements CustomHttpHeadersProvider {
     @Override
@@ -206,7 +205,8 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
 
 
 ### Subscriber API
-*(Introduced in 3.2.2)*
+
+> Introduced in 3.2.2
 
 Sometimes you want to know when Unleash updates internally. This can be achieved by registering a subscriber. An example on how to configure a custom subscriber is shown below. Have a look at [UnleashSubscriber.java](https://github.com/Unleash/unleash-client-java/blob/main/src/main/java/io/getunleash/event/UnleashSubscriber.java) to get a complete overview of all methods you can override.
 
@@ -239,14 +239,14 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
 ### Options
 
 - **appName** - Required. Should be a unique name identifying the client application using Unleash.
-- **synchronousFetchOnInitialisation** - Allows the user to specify that the unleash-client should do one synchronous fetch to the `unleash-api` at initialisation. This will slow down the initialisation (the client must wait for a http response). If the `unleash-api` is unavailable the client will silently move on and assume the api will be available later.
+- **synchronousFetchOnInitialisation** - Allows the user to specify that the Unleash client should do one synchronous fetch to the `unleash-api` at initialisation. This will slow down the initialisation (the client must wait for an HTTP response). If the `unleash-api` is unavailable the client will silently move on and assume the api will be available later.
 - **disablePolling** - Stops the client from polling. If used without synchronousFetchOnInitialisation will cause the client to never fetch toggles from the `unleash-api`.
 - **fetchTogglesInterval** - Sets the interval (in seconds) between each poll to the `unleash-api`. Set this to `0` to do a single fetch and then stop refreshing while the process lives.
 ### HTTP Proxy with Authentication
-The Unleash Java client uses `HttpURLConnection` as HTTP Client which already recognizes the common JVM proxy settings such as `http.proxyHost` and
+The Unleash Java client uses `HttpURLConnection` as HTTP client which already recognizes the common JVM proxy settings such as `http.proxyHost` and
 `http.proxyPort`. So if you are using a Proxy without authentication, everything works out of the box. However, if you have to use Basic Auth
 authentication with your proxy, the related settings such as `http.proxyUser` and `http.proxyPassword` do not get recognized by default. In order
-to enable support for basic auth against a http proxy, you can simply enable the following option on the configuration builder:
+to enable support for basic auth against an HTTP proxy, you can simply enable the following option on the configuration builder:
 
 ```java
 UnleashConfig config = UnleashConfig.builder()
@@ -258,8 +258,8 @@ UnleashConfig config = UnleashConfig.builder()
 ```
 
 ### Toggle fetcher
-The Unleash Java client now supports using your own toggle fetcher.
-The Config builder has been expanded to accept a `io.getunleash.util.UnleashFeatureFetcherFactory` which should be a `Function<UnleashConfig, FeatureFetcher>`.
+The Unleash Java client supports using your own toggle fetcher.
+The Config builder has been expanded to accept an `io.getunleash.util.UnleashFeatureFetcherFactory` which should be a `Function<UnleashConfig, FeatureFetcher>`.
 If you want to use OkHttp instead of HttpURLConnection you'll need a dependency on okhttp
 
 ```xml
@@ -283,7 +283,7 @@ UnleashConfig config = UnleashConfig.builder()
 This will then start using OkHttp instead of HttpURLConnection.
 
 ### Metrics sender
-The Unleash Java client now supports using your own metrics sender.
+The Unleash Java client supports using your own metrics sender.
 The Config builder has been expanded to accept a `io.getunleash.util.MetricsSenderFactory` which should be a `Function<UnleashConfig, MetricsSender>`.
 
 If you want to use OkHttp instead of HttpURLConnection you'll need a dependency on okhttp
@@ -306,7 +306,7 @@ UnleashConfig config = UnleashConfig.builder()
     .build();
 ```
 
-This will then start using OkHttp instead of HttpURLConnection to send metrics
+This will then start using OkHttp instead of HttpURLConnection to send metrics.
 
 ## Local backup
 By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the
@@ -315,17 +315,17 @@ the unleash-server becomes unavailable, the unleash-client will still be able to
 based on the values stored in `unleash-repo.json`. As a result of this, the second argument of
 `isEnabled` will be returned in two cases:
 
-* When `unleash-repo.json` does not exists
-* When the named feature toggle does not exist in `unleash-repo.json`
+* When `unleash-repo.json` does not exist.
+* When the named feature toggle does not exist in `unleash-repo.json`.
 
 ## Bootstrapping
 * Unleash supports bootstrapping from a JSON string.
-* Configure your own custom provider implementing the `ToggleBootstrapProvider` interface's single method `String read()`.
-  This should return a JSON string in the same format returned from `/api/client/features`
-* Example bootstrap files can be found in the json files located in [src/test/resources](src/test/resources)
-* Our assumption is this can be use for applications deployed to ephemeral containers or more locked down file systems where Unleash's need to write the backup file is not desirable or possible.
+* Configure your own custom provider implementing the `ToggleBootstrapProvider` interface's single method `String read()`. This should return a JSON string in the same format returned from `/api/client/features`.
+* Example bootstrap files can be found in the JSON files located in [src/test/resources](src/test/resources).
+* This setup can be useful for applications deployed to ephemeral containers or restricted  file systems where Unleash's need to write the backup file is not desirable or possible.
 
 ### Provided Bootstrappers
+
 #### ToggleBootstrapFileProvider
 * Unleash comes configured with a `ToggleBootstrapFileProvider` which implements the `ToggleBootstrapProvider` interface.
 * It is the default implementation used if not overridden via the `setToggleBootstrapProvider` on UnleashConfig.
@@ -334,10 +334,10 @@ based on the values stored in `unleash-repo.json`. As a result of this, the seco
 * It supports both `classpath:` paths and absolute file paths.
 
 ## Unit testing
-You might want to control the state of the toggles during unit-testing.
-Unleash do come with a ```FakeUnleash``` implementation for doing this.
+You might want to control the state of the toggles during unit testing.
+Unleash comes with a ```FakeUnleash``` implementation for doing this.
 
-Some examples on how to use it below:
+Example usage:
 
 
 ```java
@@ -364,7 +364,7 @@ fakeUnleash.setVariant("t1", new Variant("a", (String) null, true, true));
 assertThat(fakeUnleash.getVariant("t1").getName(), is("a"));
 ```
 
-Se more in [FakeUnleashTest.java](https://github.com/Unleash/unleash-client-java/blob/main/src/test/java/io/getunleash/FakeUnleashTest.java)
+See more in [FakeUnleashTest.java](https://github.com/Unleash/unleash-client-java/blob/main/src/test/java/io/getunleash/FakeUnleashTest.java)
 
 ## Development
 
@@ -377,31 +377,30 @@ Jacoco coverage reports:
 ```bash
 mvn jacoco:report
 ```
-The generated report will be available at ```target/site/jacoco/index.html```
+The generated report will be available at ```target/site/jacoco/index.html```.
 
 ## Formatting
 
-* We're using AOSP Java code style, enforced by [spotless](https://github.com/diffplug/spotless).
-  For formatting, use `mvn spotless:apply` and spotless will do the job for you
-* It should apply spotless automatically upon compilation for you, but only on code that is changed since origin/main
-* For Intelij you can use https://plugins.jetbrains.com/plugin/8527-google-java-format
-* For VSCode you can use https://marketplace.visualstudio.com/items?itemName=wx-chevalier.google-java-format
-* For VIM there's https://github.com/google/vim-codefmt
+- We follow the AOSP Java code style, enforced by Spotless. To format your code, run `mvn spotless:apply`. Spotless automatically applies formatting during compilation to code that has changed since `origin/main`.
+- For IDE-specific formatting support:
+  - IntelliJ: Install the [Google Java Format plugin](https://plugins.jetbrains.com/plugin/8527-google-java-format).
+  - VS Code: Use the [Google Java Format extension](https://marketplace.visualstudio.com/items?itemName=wx-chevalier.google-java-format).
+  - Vim: Install the [vim-codefmt plugin](https://github.com/google/vim-codefmt).
 
 ## Releasing
 
 ### Deployment
 
- - You'll need an account with Sonatype's JIRA - https://issues.sonatype.org
- - In addition your account needs access to publish under io.getunleash
+ - You'll need an account with [Sonatype's JIRA](https://issues.sonatype.org).
+ - In addition, your account needs access to publish under io.getunleash.
 
 ### GPG signing
 
- - You'll need gpg installed and a configured gpg key for signing the artifacts
+ - You'll need GPG installed and a configured GPG key for signing the artifacts.
 
 #### Example settings.xml
 
- - In ~/.m2/settings.xml put
+ - In `~/.m2/settings.xml`, put:
 ```xml
 <settings>
     ...
@@ -451,12 +450,12 @@ The `UnleashConfig$Builder` class (created via `UnleashConfig.builder()`) expose
 
 | Method name                                | Description                                                                                                                                                                                                                                      | Required | Default value                                                                                                        |
 |--------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------|
-| `apiKey`                                   | The api key to use for authenticating against the Unleash API.                                                                                                                                                                                   | Yes      | `null`                                                                                                               |
+| `apiKey`                                   | The API key to use for authenticating against the Unleash API.                                                                                                                                                                                   | Yes      | `null`                                                                                                               |
 | `appName`                                  | The name of the application as shown in the Unleash UI. Registered applications are listed on the Applications page.                                                                                                                             | Yes      | `null`                                                                                                               |
 | `backupFile`                               | The path to the file where [local backups](#local-backup) get stored.                                                                                                                                                                            | No       | Synthesized from your system's `java.io.tmpdir` and your `appName`: `"<java.io.tmpdir>/unleash-<appName>-repo.json"` |
 | `customHttpHeader`                         | Add a [custom HTTP header](#custom-http-headers) to the list of HTTP headers that will the client sends to the Unleash API. Each method call will add a new header. Note: in most cases, you'll need to use this method to provide an API token. | No       | N/A                                                                                                                  |
 | `customHttpHeadersProvider`                | Add a custom HTTP header provider. Useful for [dynamic custom HTTP headers](#dynamic-custom-http-headers).                                                                                                                                       | No       | `null`                                                                                                               |
-| `disablePolling`                           | A boolean indicating whether the client should poll the unleash api for updates to toggles.                                                                                                                                                      |
+| `disablePolling`                           | A boolean indicating whether the client should poll the Unleash API for updates to toggles.                                                                                                                                                      |
 | `disableMetrics`                           | A boolean indicating whether the client should disable sending usage metrics to the Unleash server.                                                                                                                                              | No       | `false`                                                                                                              |
 | `enableProxyAuthenticationByJvmProperties` | Enable support for [using JVM properties for HTTP proxy authentication](#http-proxy-with-authentication).                                                                                                                                        | No       | `false`                                                                                                              |
 | `environment`                              | The value to set for the Unleash context's `environment` property. **Not** the same as [Unleash's environments](https://docs.getunleash.io/reference/environments).| No       | `null`                                                                                                               |
