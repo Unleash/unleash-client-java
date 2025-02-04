@@ -162,7 +162,6 @@ public class UnleashConfigTest {
         assertThat(connection.getRequestProperty("User-Agent")).isEqualTo(appName);
     }
 
-
     @Test
     public void should_add_custom_headers_to_connection_if_present() throws IOException {
         String unleashAPI = "http://unleash.org";
