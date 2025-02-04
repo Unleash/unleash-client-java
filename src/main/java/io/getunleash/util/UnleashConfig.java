@@ -26,11 +26,10 @@ import java.util.function.Consumer;
 
 public class UnleashConfig {
 
-    public static final String LEGACY_UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
     public static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
-    public static final String UNLEASH_CONNECTION_ID_HEADER = "X-UNLEASH-CONNECTION-ID";
-    public static final String UNLEASH_APP_NAME_HEADER = "X-UNLEASH-APPNAME";
-    public static final String UNLEASH_SDK_HEADER = "X-UNLEASH-SDK";
+    public static final String UNLEASH_CONNECTION_ID_HEADER = "UNLEASH-CONNECTION-ID";
+    public static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
+    public static final String UNLEASH_SDK_HEADER = "UNLEASH-SDK";
 
     private final URI unleashAPI;
     private final UnleashURLs unleashURLs;
@@ -175,7 +174,6 @@ public class UnleashConfig {
     }
 
     public static void setRequestProperties(HttpURLConnection connection, UnleashConfig config) {
-        connection.setRequestProperty(LEGACY_UNLEASH_APP_NAME_HEADER, config.getAppName());
         connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
         connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
         connection.setRequestProperty(UNLEASH_CONNECTION_ID_HEADER, config.getConnectionId());

@@ -16,9 +16,6 @@ public class OkHttpClientConfigurer {
                                             .newBuilder()
                                             .addHeader("Content-Type", "application/json")
                                             .addHeader("Accept", "application/json")
-                                            .addHeader(
-                                                    LEGACY_UNLEASH_APP_NAME_HEADER,
-                                                    config.getAppName())
                                             .addHeader(UNLEASH_APP_NAME_HEADER, config.getAppName())
                                             .addHeader(
                                                     UNLEASH_INSTANCE_ID_HEADER,
