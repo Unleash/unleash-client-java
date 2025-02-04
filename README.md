@@ -94,7 +94,7 @@ if(unleash.isEnabled("AwesomeFeature")) {
 }
 ```
 
-The `isEnabled` method also accepts a second boolean argument. The SDK uses this as a fallback value if it can't find the feature you're trying to check. For example, if `unleash.isEnabled("non-existing-toggle")` returns `false` when ` "non-existing-toggle"` doesn't exist, calling `unleash.isEnabled("non-existing-toggle", true)`, will return `true`.
+The `isEnabled` method also accepts a second boolean argument. The SDK uses this as a fallback value if it can't find the feature you're trying to check. For example, if `unleash.isEnabled("non-existing-toggle")` returns `false` when `"non-existing-toggle"` doesn't exist, calling `unleash.isEnabled("non-existing-toggle", true)`, will return `true`.
 
 You can also **provide an [Unleash context](https://docs.getunleash.io/reference/unleash-context)** to the `isEnabled` method. Refer to the [Unleash context](#unleash-context) section for more information about using the Unleash context in the Java SDK.
 
@@ -146,7 +146,7 @@ With a context provider, you don't need to rebuild or pass the Unleash context t
 
 
 The provider typically binds the context to the same thread as the request.
-If you use Spring, the `UnleashContextProvider` will typically be a 'request scoped' bean.
+If you use Spring, the `UnleashContextProvider` will typically be a request-scoped bean.
 
 
 ```java
@@ -242,11 +242,12 @@ UnleashConfig unleashConfig = UnleashConfig.builder()
 - **synchronousFetchOnInitialisation** - Allows the user to specify that the Unleash client should do one synchronous fetch to the `unleash-api` at initialisation. This will slow down the initialisation (the client must wait for an HTTP response). If the `unleash-api` is unavailable the client will silently move on and assume the api will be available later.
 - **disablePolling** - Stops the client from polling. If used without synchronousFetchOnInitialisation will cause the client to never fetch toggles from the `unleash-api`.
 - **fetchTogglesInterval** - Sets the interval (in seconds) between each poll to the `unleash-api`. Set this to `0` to do a single fetch and then stop refreshing while the process lives.
+
 ### HTTP Proxy with Authentication
-The Unleash Java client uses `HttpURLConnection` as HTTP client which already recognizes the common JVM proxy settings such as `http.proxyHost` and
-`http.proxyPort`. So if you are using a Proxy without authentication, everything works out of the box. However, if you have to use Basic Auth
-authentication with your proxy, the related settings such as `http.proxyUser` and `http.proxyPassword` do not get recognized by default. In order
-to enable support for basic auth against an HTTP proxy, you can simply enable the following option on the configuration builder:
+
+The Unleash Java client uses `HttpURLConnection` as its HTTP client, which automatically recognizes common JVM proxy settings such as `http.proxyHost` and
+`http.proxyPort`. If your proxy does not require authentication, it works without additional configuration. However, if you have to use Basic Authentication, settings such as `http.proxyUser` and `http.proxyPassword` are not recognized by default.
+To enable Basic Authentication for an HTTP proxy, enable the following option on the configuration builder:
 
 ```java
 UnleashConfig config = UnleashConfig.builder()
@@ -258,6 +259,7 @@ UnleashConfig config = UnleashConfig.builder()
 ```
 
 ### Toggle fetcher
+
 The Unleash Java client supports using your own toggle fetcher.
 The Config builder has been expanded to accept an `io.getunleash.util.UnleashFeatureFetcherFactory` which should be a `Function<UnleashConfig, FeatureFetcher>`.
 If you want to use OkHttp instead of HttpURLConnection you'll need a dependency on okhttp
@@ -312,30 +314,32 @@ This will then start using OkHttp instead of HttpURLConnection to send metrics.
 By default unleash-client fetches the feature toggles from unleash-server every 10s, and stores the
 result in `unleash-repo.json` which is located in the `java.io.tmpdir` directory. This means that if
 the unleash-server becomes unavailable, the unleash-client will still be able to toggle the features
-based on the values stored in `unleash-repo.json`. As a result of this, the second argument of
-`isEnabled` will be returned in two cases:
+based on the values stored in `unleash-repo.json`.
 
-* When `unleash-repo.json` does not exist.
-* When the named feature toggle does not exist in `unleash-repo.json`.
+As a result of this, the second argument of `isEnabled` will be returned in two cases:
+- When `unleash-repo.json` does not exist.
+- When the named feature toggle does not exist in `unleash-repo.json`.
 
 ## Bootstrapping
-* Unleash supports bootstrapping from a JSON string.
-* Configure your own custom provider implementing the `ToggleBootstrapProvider` interface's single method `String read()`. This should return a JSON string in the same format returned from `/api/client/features`.
-* Example bootstrap files can be found in the JSON files located in [src/test/resources](src/test/resources).
-* This setup can be useful for applications deployed to ephemeral containers or restricted  file systems where Unleash's need to write the backup file is not desirable or possible.
+
+Unleash supports bootstrapping from a JSON string. You can configure your own custom provider implementing the `ToggleBootstrapProvider` interface's single method `String read()`. This should return a JSON string in the same format returned from `/api/client/features`.
+
+Example bootstrap files can be found in the JSON files located in [src/test/resources](src/test/resources).
+
+This setup can be useful for applications deployed to ephemeral containers or restricted  file systems where Unleash's need to write the backup file is not desirable or possible.
 
 ### Provided Bootstrappers
 
 #### ToggleBootstrapFileProvider
-* Unleash comes configured with a `ToggleBootstrapFileProvider` which implements the `ToggleBootstrapProvider` interface.
-* It is the default implementation used if not overridden via the `setToggleBootstrapProvider` on UnleashConfig.
+
+Unleash comes configured with a `ToggleBootstrapFileProvider` which implements the `ToggleBootstrapProvider` interface. This is the default implementation used if not overridden via the `setToggleBootstrapProvider` on UnleashConfig.
+
 ##### Configure ToggleBootstrapFileProvider
-* The `ToggleBootstrapFileProvider` reads the file located at the path defined by the `UNLEASH_BOOTSTRAP_FILE` environment variable.
-* It supports both `classpath:` paths and absolute file paths.
+
+The `ToggleBootstrapFileProvider` reads the file located at the path defined by the `UNLEASH_BOOTSTRAP_FILE` environment variable. It supports both `classpath:` paths and absolute file paths.
 
 ## Unit testing
-You might want to control the state of the toggles during unit testing.
-Unleash comes with a ```FakeUnleash``` implementation for doing this.
+You might want to control the state of the toggles during unit testing. Unleash comes with a ```FakeUnleash``` implementation for doing this.
 
 Example usage:
 
@@ -493,6 +497,6 @@ UnleashConfig config = UnleashConfig.builder()
 Unleash unleash = new DefaultUnleash(config);
 ```
 
-### Other information
+### Next steps
 
-- Check out our guide for more information on how to build and scale [feature flag](https://docs.getunleash.io/topics/feature-flags/feature-flag-best-practices) systems
+Check out our documentation for tips and best practices on [building and scaling feature flag systems](https://docs.getunleash.io/topics/feature-flags/feature-flag-best-practices).
