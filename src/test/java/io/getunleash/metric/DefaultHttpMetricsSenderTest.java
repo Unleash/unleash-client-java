@@ -34,7 +34,7 @@ public class DefaultHttpMetricsSenderTest {
     public void should_send_client_registration() throws URISyntaxException {
         stubFor(
                 post(urlEqualTo("/client/register"))
-                        .withHeader("X-UNLEASH-APPNAME", matching("test-app"))
+                        .withHeader("UNLEASH-APPNAME", matching("test-app"))
                         .willReturn(aResponse().withStatus(200)));
 
         URI uri = new URI("http://localhost:" + serverMock.getPort());
@@ -48,14 +48,14 @@ public class DefaultHttpMetricsSenderTest {
                 postRequestedFor(urlMatching("/client/register"))
                         .withRequestBody(matching(".*appName.*"))
                         .withRequestBody(matching(".*strategies.*"))
-                        .withHeader("X-UNLEASH-APPNAME", matching("test-app")));
+                        .withHeader("UNLEASH-APPNAME", matching("test-app")));
     }
 
     @Test
     public void should_send_client_metrics() throws URISyntaxException {
         stubFor(
                 post(urlEqualTo("/client/metrics"))
-                        .withHeader("X-UNLEASH-APPNAME", matching("test-app"))
+                        .withHeader("UNLEASH-APPNAME", matching("test-app"))
                         .willReturn(aResponse().withStatus(200)));
 
         URI uri = new URI("http://localhost:" + serverMock.getPort());
@@ -70,14 +70,14 @@ public class DefaultHttpMetricsSenderTest {
                 postRequestedFor(urlMatching("/client/metrics"))
                         .withRequestBody(matching(".*appName.*"))
                         .withRequestBody(matching(".*bucket.*"))
-                        .withHeader("X-UNLEASH-APPNAME", matching("test-app")));
+                        .withHeader("UNLEASH-APPNAME", matching("test-app")));
     }
 
     @Test
     public void should_handle_service_failure_when_sending_metrics() throws URISyntaxException {
         stubFor(
                 post(urlEqualTo("/client/metrics"))
-                        .withHeader("X-UNLEASH-APPNAME", matching("test-app"))
+                        .withHeader("UNLEASH-APPNAME", matching("test-app"))
                         .willReturn(aResponse().withStatus(500)));
 
         URI uri = new URI("http://localhost:" + serverMock.getPort());
@@ -92,6 +92,6 @@ public class DefaultHttpMetricsSenderTest {
                 postRequestedFor(urlMatching("/client/metrics"))
                         .withRequestBody(matching(".*appName.*"))
                         .withRequestBody(matching(".*bucket.*"))
-                        .withHeader("X-UNLEASH-APPNAME", matching("test-app")));
+                        .withHeader("UNLEASH-APPNAME", matching("test-app")));
     }
 }
