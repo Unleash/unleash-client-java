@@ -176,13 +176,14 @@ public class UnleashConfig {
     public static void setRequestProperties(HttpURLConnection connection, UnleashConfig config) {
         connection.setRequestProperty(UNLEASH_APP_NAME_HEADER, config.getAppName());
         connection.setRequestProperty(UNLEASH_INSTANCE_ID_HEADER, config.getInstanceId());
-        connection.setRequestProperty(UNLEASH_CONNECTION_ID_HEADER, config.getConnectionId());
         connection.setRequestProperty(UNLEASH_SDK_HEADER, config.getSdkVersion());
         connection.setRequestProperty("User-Agent", config.getAppName());
         connection.setRequestProperty(
                 "Unleash-Client-Spec", config.getClientSpecificationVersion());
         config.getCustomHttpHeaders().forEach(connection::setRequestProperty);
         config.customHttpHeadersProvider.getCustomHeaders().forEach(connection::setRequestProperty);
+        // prevent overwrite
+        connection.setRequestProperty(UNLEASH_CONNECTION_ID_HEADER, config.getConnectionId());
     }
 
     private void enableProxyAuthentication() {

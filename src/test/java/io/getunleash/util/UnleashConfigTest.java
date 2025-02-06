@@ -148,6 +148,7 @@ public class UnleashConfigTest {
                         .appName(appName)
                         .instanceId(instanceId)
                         .unleashAPI(unleashAPI)
+                        .customHttpHeader(UNLEASH_CONNECTION_ID_HEADER, "ignore")
                         .build();
 
         URL someUrl = new URL(unleashAPI + "/some/arbitrary/path");
