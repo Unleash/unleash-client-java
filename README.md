@@ -10,7 +10,7 @@ You can use this client with [Unleash Enterprise](https://www.getunleash.io/pric
 
 >  **Migrating to v10**
 >
-> If you're using `MoreOperations`, custom or fallback strategies, subscribers or bootstrapping, please see the full [migration guide](../v10_MIGRATION_GUIDE) for details. If you use GraalVM or Quarkus, please hold off on upgrading to v10, support is planned but not implemented.
+> If you're using `MoreOperations`, custom or fallback strategies, subscribers or bootstrapping, please see the full [migration guide](v10_MIGRATION_GUIDE.md) for details. If you use GraalVM or Quarkus, please hold off on upgrading to v10, support is planned but not implemented.
 
 ## Getting started
 
