@@ -30,16 +30,6 @@ jobs:
           base-path: src/main/java
           parallel: true
           flag-name: run-jvm-${{ join(matrix.*, '-') }}
-      - name: Notify Slack of pipeline completion
-        uses: 8398a7/action-slack@v2
-        with:
-          status: ${{ job.status }}
-          author_name: Github Action
-          text: Build on Java ${{ matrix.version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook }}
-        if: always()
   finish:
     needs: build
     if: ${{ always() }}
