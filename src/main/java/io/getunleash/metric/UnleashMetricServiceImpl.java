@@ -93,11 +93,19 @@ public class UnleashMetricServiceImpl implements UnleashMetricService {
 
     @Override
     public void countToggle(String name, boolean enabled) {
-        this.engine.countToggle(name, enabled);
+        try {
+            this.engine.countToggle(name, enabled);
+        } catch (YggdrasilError e) {
+            LOGGER.error("Failed to count toggle", e);
+        }
     }
 
     @Override
     public void countVariant(String name, String variantName) {
-        this.engine.countVariant(name, variantName);
+        try {
+            this.engine.countVariant(name, variantName);
+        } catch (YggdrasilError e) {
+            LOGGER.error("Failed to count variant", e);
+        }
     }
 }

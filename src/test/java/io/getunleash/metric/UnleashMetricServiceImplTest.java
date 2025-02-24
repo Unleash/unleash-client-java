@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import io.getunleash.engine.MetricsBucket;
 import io.getunleash.engine.UnleashEngine;
+import io.getunleash.engine.YggdrasilError;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.time.LocalDateTime;
@@ -114,7 +115,7 @@ public class UnleashMetricServiceImplTest {
     }
 
     @Test
-    public void should_record_and_send_metrics() {
+    public void should_record_and_send_metrics() throws YggdrasilError {
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName("test")
@@ -157,7 +158,7 @@ public class UnleashMetricServiceImplTest {
     }
 
     @Test
-    public void should_record_and_send_variant_metrics() {
+    public void should_record_and_send_variant_metrics() throws YggdrasilError {
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName("test")
@@ -205,7 +206,7 @@ public class UnleashMetricServiceImplTest {
     }
 
     @Test
-    public void should_backoff_when_told_to_by_429_code() {
+    public void should_backoff_when_told_to_by_429_code() throws YggdrasilError {
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName("test")
@@ -278,7 +279,7 @@ public class UnleashMetricServiceImplTest {
     }
 
     @Test
-    public void server_errors_should_also_incrementally_backoff() {
+    public void server_errors_should_also_incrementally_backoff() throws YggdrasilError {
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName("test")
@@ -349,7 +350,8 @@ public class UnleashMetricServiceImplTest {
     }
 
     @Test
-    public void failure_to_authenticate_immediately_increases_interval_to_max() {
+    public void failure_to_authenticate_immediately_increases_interval_to_max()
+            throws YggdrasilError {
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName("test")
@@ -387,7 +389,7 @@ public class UnleashMetricServiceImplTest {
     }
 
     @Test
-    public void url_not_found_immediately_increases_interval_to_max() {
+    public void url_not_found_immediately_increases_interval_to_max() throws YggdrasilError {
         UnleashConfig config =
                 UnleashConfig.builder()
                         .appName("test")
