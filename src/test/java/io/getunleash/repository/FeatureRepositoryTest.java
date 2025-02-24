@@ -248,8 +248,8 @@ public class FeatureRepositoryTest {
 
         runner.assertThatFetchesAndReceives(ClientFeaturesResponse.Status.UNAVAILABLE, code);
         assertThat(featureRepository.getFailures()).isEqualTo(1);
-        assertThat(featureRepository.getSkips()).isEqualTo(30);
-        for (int i = 0; i < 30; i++) {
+        assertThat(featureRepository.getSkips()).isEqualTo(20);
+        for (int i = 0; i < 20; i++) {
             runner.assertThatSkipsNextRun();
         }
         assertThat(featureRepository.getFailures()).isEqualTo(1);

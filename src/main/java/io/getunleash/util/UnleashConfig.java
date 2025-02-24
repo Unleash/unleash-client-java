@@ -416,7 +416,7 @@ public class UnleashConfig {
         private @Nullable String backupFile;
         private @Nullable String projectName;
         private @Nullable String namePrefix;
-        private long fetchTogglesInterval = 10;
+        private long fetchTogglesInterval = 15;
 
         private Duration fetchTogglesConnectTimeout = Duration.ofSeconds(10);
 
