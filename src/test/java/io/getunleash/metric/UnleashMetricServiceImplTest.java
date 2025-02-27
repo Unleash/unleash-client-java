@@ -150,6 +150,7 @@ public class UnleashMetricServiceImplTest {
         assertThat(clientMetrics.getAppName()).isEqualTo(config.getAppName());
         assertThat(clientMetrics.getEnvironment()).isEqualTo(config.getEnvironment());
         assertThat(clientMetrics.getInstanceId()).isEqualTo(config.getInstanceId());
+        assertThat(clientMetrics.getConnectionId()).isEqualTo(config.getConnectionId());
         assertThat(bucket.getStart()).isNotNull();
         assertThat(bucket.getStop()).isNotNull();
         assertThat(bucket.getToggles()).hasSize(2);
@@ -192,6 +193,7 @@ public class UnleashMetricServiceImplTest {
 
         assertThat(clientMetrics.getAppName()).isEqualTo(config.getAppName());
         assertThat(clientMetrics.getInstanceId()).isEqualTo(config.getInstanceId());
+        assertThat(clientMetrics.getConnectionId()).isEqualTo(config.getConnectionId());
         assertThat(bucket.getStart()).isNotNull();
         assertThat(bucket.getStop()).isNotNull();
         assertThat(bucket.getToggles()).hasSize(1);

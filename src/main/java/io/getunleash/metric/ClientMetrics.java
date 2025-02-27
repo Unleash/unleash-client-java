@@ -11,6 +11,7 @@ public class ClientMetrics implements UnleashEvent {
 
     private final String appName;
     private final String instanceId;
+    private final String connectionId;
     private final MetricsBucket bucket;
     private final String environment;
     private final String specVersion;
@@ -22,6 +23,7 @@ public class ClientMetrics implements UnleashEvent {
         this.environment = config.getEnvironment();
         this.appName = config.getAppName();
         this.instanceId = config.getInstanceId();
+        this.connectionId = config.getConnectionId();
         this.bucket = bucket;
         this.specVersion = config.getClientSpecificationVersion();
         this.platformName = System.getProperty("java.vm.name");
@@ -35,6 +37,10 @@ public class ClientMetrics implements UnleashEvent {
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    public String getConnectionId() {
+        return connectionId;
     }
 
     public MetricsBucket getBucket() {
@@ -71,6 +77,12 @@ public class ClientMetrics implements UnleashEvent {
 
     @Override
     public String toString() {
-        return "metrics:" + " appName=" + appName + " instanceId=" + instanceId;
+        return "metrics:"
+                + " appName="
+                + appName
+                + " instanceId="
+                + instanceId
+                + " connectionId="
+                + connectionId;
     }
 }
