@@ -11,6 +11,7 @@ import java.util.Set;
 public class ClientRegistration implements UnleashEvent {
     private final String appName;
     private final String instanceId;
+    private final String connectionId;
     private final String sdkVersion;
     private final Set<String> strategies;
     private final LocalDateTime started;
@@ -26,6 +27,7 @@ public class ClientRegistration implements UnleashEvent {
         this.appName = config.getAppName();
         this.instanceId = config.getInstanceId();
         this.sdkVersion = config.getSdkVersion();
+        this.connectionId = config.getConnectionId();
         this.started = started;
         this.strategies = strategies;
         this.interval = config.getSendMetricsInterval();
@@ -41,6 +43,10 @@ public class ClientRegistration implements UnleashEvent {
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    public String getConnectionId() {
+        return connectionId;
     }
 
     public String getSdkVersion() {

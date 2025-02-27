@@ -28,6 +28,7 @@ public class UnleashConfig {
 
     public static final String UNLEASH_INSTANCE_ID_HEADER = "UNLEASH-INSTANCEID";
     public static final String UNLEASH_CONNECTION_ID_HEADER = "UNLEASH-CONNECTION-ID";
+    public static final String UNLEASH_INTERVAL = "UNLEASH-INTERVAL";
     public static final String UNLEASH_APP_NAME_HEADER = "UNLEASH-APPNAME";
     public static final String UNLEASH_SDK_HEADER = "UNLEASH-SDK";
 
@@ -184,6 +185,7 @@ public class UnleashConfig {
         config.customHttpHeadersProvider.getCustomHeaders().forEach(connection::setRequestProperty);
         // prevent overwrite
         connection.setRequestProperty(UNLEASH_CONNECTION_ID_HEADER, config.getConnectionId());
+        connection.setRequestProperty(UNLEASH_INTERVAL, config.getFetchTogglesIntervalMillis());
     }
 
     private void enableProxyAuthentication() {
@@ -216,7 +218,7 @@ public class UnleashConfig {
         return instanceId;
     }
 
-    String getConnectionId() {
+    public String getConnectionId() {
         return connectionId;
     }
 
@@ -234,6 +236,10 @@ public class UnleashConfig {
 
     public long getFetchTogglesInterval() {
         return fetchTogglesInterval;
+    }
+
+    public String getFetchTogglesIntervalMillis() {
+        return String.valueOf(fetchTogglesInterval * 1000);
     }
 
     public Duration getFetchTogglesConnectTimeout() {

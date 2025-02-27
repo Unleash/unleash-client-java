@@ -9,6 +9,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static io.getunleash.util.UnleashConfig.UNLEASH_CONNECTION_ID_HEADER;
+import static io.getunleash.util.UnleashConfig.UNLEASH_INTERVAL;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.getunleash.engine.MetricsBucket;
@@ -41,13 +43,14 @@ public class DefaultHttpMetricsSenderTest {
         UnleashConfig config = UnleashConfig.builder().appName("test-app").unleashAPI(uri).build();
 
         DefaultHttpMetricsSender sender = new DefaultHttpMetricsSender(config);
-        sender.registerClient(
-                new ClientRegistration(config, LocalDateTime.now(), new HashSet<String>()));
+        sender.registerClient(new ClientRegistration(config, LocalDateTime.now(), new HashSet<>()));
 
         verify(
                 postRequestedFor(urlMatching("/client/register"))
                         .withRequestBody(matching(".*appName.*"))
                         .withRequestBody(matching(".*strategies.*"))
+                        .withHeader(
+                                UNLEASH_CONNECTION_ID_HEADER, matching(config.getConnectionId()))
                         .withHeader("UNLEASH-APPNAME", matching("test-app")));
     }
 
@@ -70,6 +73,10 @@ public class DefaultHttpMetricsSenderTest {
                 postRequestedFor(urlMatching("/client/metrics"))
                         .withRequestBody(matching(".*appName.*"))
                         .withRequestBody(matching(".*bucket.*"))
+                        .withHeader(
+                                UNLEASH_INTERVAL, matching(config.getFetchTogglesIntervalMillis()))
+                        .withHeader(
+                                UNLEASH_CONNECTION_ID_HEADER, matching(config.getConnectionId()))
                         .withHeader("UNLEASH-APPNAME", matching("test-app")));
     }
 
@@ -81,7 +88,13 @@ public class DefaultHttpMetricsSenderTest {
                         .willReturn(aResponse().withStatus(500)));
 
         URI uri = new URI("http://localhost:" + serverMock.getPort());
-        UnleashConfig config = UnleashConfig.builder().appName("test-app").unleashAPI(uri).build();
+        long metricsInterval = 0;
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test-app")
+                        .unleashAPI(uri)
+                        .fetchTogglesInterval(metricsInterval)
+                        .build();
 
         DefaultHttpMetricsSender sender = new DefaultHttpMetricsSender(config);
         MetricsBucket bucket = new MetricsBucket(Instant.now(), Instant.now(), null);
@@ -92,6 +105,7 @@ public class DefaultHttpMetricsSenderTest {
                 postRequestedFor(urlMatching("/client/metrics"))
                         .withRequestBody(matching(".*appName.*"))
                         .withRequestBody(matching(".*bucket.*"))
+                        .withHeader(UNLEASH_INTERVAL, matching(String.valueOf(metricsInterval)))
                         .withHeader("UNLEASH-APPNAME", matching("test-app")));
     }
 }

@@ -21,6 +21,9 @@ public class OkHttpClientConfigurer {
                                                     UNLEASH_INSTANCE_ID_HEADER,
                                                     config.getInstanceId())
                                             .addHeader(
+                                                    UNLEASH_INTERVAL,
+                                                    config.getFetchTogglesIntervalMillis())
+                                            .addHeader(
                                                     UNLEASH_CONNECTION_ID_HEADER,
                                                     config.getConnectionId())
                                             .addHeader(UNLEASH_SDK_HEADER, config.getSdkVersion())
