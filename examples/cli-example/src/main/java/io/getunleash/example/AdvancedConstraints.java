@@ -3,8 +3,6 @@ package io.getunleash.example;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
-import io.getunleash.event.UnleashSubscriber;
-import io.getunleash.repository.FeatureToggleResponse;
 import io.getunleash.util.UnleashConfig;
 
 public class AdvancedConstraints {
@@ -15,38 +13,22 @@ public class AdvancedConstraints {
                 .customHttpHeader(
                         "Authorization",
                         getOrElse("UNLEASH_API_TOKEN",
-                                "default:default.a45fede67f99b17f67312c93e00f448340e7af4ace2b0de2650f5a99"))
-                .unleashAPI(getOrElse("UNLEASH_API_URL", "http://localhost:3063/api"))
+                                "*:development.25a06b75248528f8ca93ce179dcdd141aedfb632231e0d21fd8ff349"))
+                .unleashAPI(getOrElse("UNLEASH_API_URL", "https://app.unleash-hosted.com/demo/api"))
                 .instanceId("java-example")
                 .synchronousFetchOnInitialisation(true)
-                .sendMetricsInterval(30)
-                .subscriber(
-                        new UnleashSubscriber() {
-                            @Override
-                            public void togglesFetched(
-                                    FeatureToggleResponse toggleResponse) {
-                                System.out.println(toggleResponse);
-                                System.out.println(
-                                        toggleResponse
-                                                .getToggleCollection()
-                                                .getFeatures()
-                                                .size());
-                            }
-                        })
-                .build();
+                .sendMetricsInterval(30).build();
+
         Unleash unleash = new DefaultUnleash(config);
+        UnleashContext context = UnleashContext.builder()
+            .addProperty("semver", "1.5.2")
+            .build();
+        UnleashContext smallerSemver = UnleashContext.builder()
+            .addProperty("semver", "1.1.0")
+            .build();
         while (true) {
-            Thread.sleep(2000);
-            UnleashContext context = UnleashContext.builder()
-                    .addProperty("semver", "1.5.2")
-                    .build();
-            System.out.println(
-                    unleash.isEnabled("advanced.constraints", context)); // expect this to be true
-            UnleashContext smallerSemver = UnleashContext.builder()
-                    .addProperty("semver", "1.1.0")
-                    .build();
-            System.out.println(
-                    unleash.isEnabled("advanced.constraints", smallerSemver)); // expect this to be false
+                    unleash.isEnabled("advanced.constraints", context); // expect this to be true
+                    unleash.isEnabled("advanced.constraints", smallerSemver); // expect this to be false
         }
     }
 
