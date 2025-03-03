@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.getunleash.util.UnleashConfig.UNLEASH_INTERVAL;
+
 public class HttpFeatureFetcher implements FeatureFetcher {
     private static final Logger LOG = LoggerFactory.getLogger(HttpFeatureFetcher.class);
     private Optional<String> etag = Optional.empty();
@@ -35,6 +37,7 @@ public class HttpFeatureFetcher implements FeatureFetcher {
         HttpURLConnection connection = null;
         try {
             connection = openConnection(this.toggleUrl);
+            connection.setRequestProperty(UNLEASH_INTERVAL, this.config.getFetchTogglesIntervalMillis());
             connection.connect();
 
             return getFeatureResponse(connection, true);

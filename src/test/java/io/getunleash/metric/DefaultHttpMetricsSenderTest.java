@@ -74,7 +74,7 @@ public class DefaultHttpMetricsSenderTest {
                         .withRequestBody(matching(".*appName.*"))
                         .withRequestBody(matching(".*bucket.*"))
                         .withHeader(
-                                UNLEASH_INTERVAL, matching(config.getFetchTogglesIntervalMillis()))
+                                UNLEASH_INTERVAL, matching(config.getSendMetricsIntervalMillis()))
                         .withHeader(
                                 UNLEASH_CONNECTION_ID_HEADER, matching(config.getConnectionId()))
                         .withHeader("UNLEASH-APPNAME", matching("test-app")));
@@ -93,7 +93,7 @@ public class DefaultHttpMetricsSenderTest {
                 UnleashConfig.builder()
                         .appName("test-app")
                         .unleashAPI(uri)
-                        .fetchTogglesInterval(metricsInterval)
+                        .sendMetricsInterval(metricsInterval)
                         .build();
 
         DefaultHttpMetricsSender sender = new DefaultHttpMetricsSender(config);

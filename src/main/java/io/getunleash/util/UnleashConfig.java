@@ -185,7 +185,6 @@ public class UnleashConfig {
         config.customHttpHeadersProvider.getCustomHeaders().forEach(connection::setRequestProperty);
         // prevent overwrite
         connection.setRequestProperty(UNLEASH_CONNECTION_ID_HEADER, config.getConnectionId());
-        connection.setRequestProperty(UNLEASH_INTERVAL, config.getFetchTogglesIntervalMillis());
     }
 
     private void enableProxyAuthentication() {
@@ -241,6 +240,10 @@ public class UnleashConfig {
     public String getFetchTogglesIntervalMillis() {
         return String.valueOf(fetchTogglesInterval * 1000);
     }
+    public String getSendMetricsIntervalMillis() {
+        return String.valueOf(sendMetricsInterval * 1000);
+    }
+
 
     public Duration getFetchTogglesConnectTimeout() {
         return fetchTogglesConnectTimeout;

@@ -156,8 +156,6 @@ public class UnleashConfigTest {
         UnleashConfig.setRequestProperties(connection, unleashConfig);
         assertThat(connection.getRequestProperty(UNLEASH_APP_NAME_HEADER)).isEqualTo(appName);
         assertThat(connection.getRequestProperty(UNLEASH_INSTANCE_ID_HEADER)).isEqualTo(instanceId);
-        assertThat(connection.getRequestProperty(UNLEASH_INTERVAL))
-                .isEqualTo(unleashConfig.getFetchTogglesIntervalMillis());
         assertThat(connection.getRequestProperty(UNLEASH_CONNECTION_ID_HEADER))
                 .isEqualTo(unleashConfig.getConnectionId());
         assertThat(connection.getRequestProperty(UNLEASH_SDK_HEADER))
