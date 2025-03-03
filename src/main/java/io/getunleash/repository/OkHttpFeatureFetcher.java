@@ -21,10 +21,10 @@ import static io.getunleash.util.UnleashConfig.UNLEASH_INTERVAL;
 public class OkHttpFeatureFetcher implements FeatureFetcher {
     private final HttpUrl toggleUrl;
     private final OkHttpClient client;
-    private final UnleashConfig config;
+    private final String interval;
 
     public OkHttpFeatureFetcher(UnleashConfig unleashConfig) {
-        this.config = unleashConfig;
+        this.interval = unleashConfig.getFetchTogglesIntervalMillis();
         File tempDir = null;
         try {
             tempDir = Files.createTempDirectory("http_cache").toFile();
@@ -54,7 +54,7 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
     }
 
     public OkHttpFeatureFetcher(UnleashConfig unleashConfig, OkHttpClient client) {
-        this.config = unleashConfig;
+        this.interval = unleashConfig.getFetchTogglesIntervalMillis();
         this.client = OkHttpClientConfigurer.configureInterceptor(unleashConfig, client);
         this.toggleUrl =
                 Objects.requireNonNull(
@@ -69,7 +69,7 @@ public class OkHttpFeatureFetcher implements FeatureFetcher {
     @Override
     public ClientFeaturesResponse fetchFeatures() throws UnleashException {
         Request request = new Request.Builder().url(toggleUrl).get()
-            .addHeader(UNLEASH_INTERVAL, config.getFetchTogglesIntervalMillis())
+            .addHeader(UNLEASH_INTERVAL, interval)
             .build();
         int code = 200;
         try (Response response = client.newCall(request).execute()) {
