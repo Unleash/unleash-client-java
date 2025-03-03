@@ -15,6 +15,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicLong;
+import static io.getunleash.util.UnleashConfig.UNLEASH_INTERVAL;
 
 public class DefaultHttpMetricsSender implements MetricSender {
 
@@ -82,6 +83,7 @@ public class DefaultHttpMetricsSender implements MetricSender {
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty(UNLEASH_INTERVAL, this.unleashConfig.getSendMetricsIntervalMillis());
             UnleashConfig.setRequestProperties(connection, this.unleashConfig);
             connection.setUseCaches(false);
             connection.setDoInput(true);
