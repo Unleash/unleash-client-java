@@ -240,10 +240,10 @@ public class UnleashConfig {
     public String getFetchTogglesIntervalMillis() {
         return String.valueOf(fetchTogglesInterval * 1000);
     }
+
     public String getSendMetricsIntervalMillis() {
         return String.valueOf(sendMetricsInterval * 1000);
     }
-
 
     public Duration getFetchTogglesConnectTimeout() {
         return fetchTogglesConnectTimeout;
