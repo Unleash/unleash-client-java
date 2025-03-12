@@ -52,8 +52,7 @@
         <url>https://github.com/Unleash/unleash-client-java</url>
         <connection>scm:git:https://github.com/Unleash/unleash-client-java.git</connection>
         <developerConnection>scm:git:https://github.com/Unleash/unleash-client-java.git</developerConnection>
-      <tag>unleash-client-java-10.0.0-beta.1</tag>
-  </scm>
+    </scm>
 
     <dependencies>
         <dependency>
@@ -184,6 +183,7 @@
                 <version>3.13.0</version>
                 <configuration>
                     <release>8</release>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
