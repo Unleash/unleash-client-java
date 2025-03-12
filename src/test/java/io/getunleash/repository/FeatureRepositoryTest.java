@@ -183,6 +183,29 @@ public class FeatureRepositoryTest {
     }
 
     @Test
+    public void should_return_enabled_property_on_known_toggles() {
+        when(backupHandler.read())
+                .thenReturn(Optional.of(loadMockFeatures("unleash-repo-v2.json")));
+
+        when(bootstrapHandler.read()).thenReturn(Optional.empty());
+
+        FeatureRepository featureRepository =
+                new FeatureRepositoryImpl(defaultConfig, backupHandler, new UnleashEngine());
+
+        List<FeatureDefinition> knownToggles =
+                featureRepository.listKnownToggles().collect(Collectors.toList());
+
+        assertEquals(5, knownToggles.size());
+        FeatureDefinition featureY =
+                knownToggles.stream().filter(f -> f.getName().equals("featureY")).findFirst().get();
+        assertThat(featureY.environmentEnabled()).isFalse();
+
+        FeatureDefinition featureX =
+                knownToggles.stream().filter(f -> f.getName().equals("featureX")).findFirst().get();
+        assertThat(featureX.environmentEnabled()).isTrue();
+    }
+
+    @Test
     public void should_not_read_bootstrap_if_backup_was_found() {
 
         when(backupHandler.read())

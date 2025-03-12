@@ -142,7 +142,10 @@ public class FakeUnleash implements Unleash {
                     .map(
                             value ->
                                     new FeatureDefinition(
-                                            toggleName, Optional.of("experiment"), "default"));
+                                            toggleName,
+                                            Optional.of("experiment"),
+                                            "default",
+                                            true));
         }
 
         @Override
