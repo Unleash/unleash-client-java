@@ -330,6 +330,8 @@
                          <active>ALWAYS</active>
                          <url>https://central.sonatype.com/api/v1/publisher</url>
                          <stagingRepositories>target/staging-deploy</stagingRepositories>
+                           <retryDelay>60</retryDelay>
+                           <maxRetries>40</maxRetries>
                       </sonatype>
                       </mavenCentral>
                     </maven>
