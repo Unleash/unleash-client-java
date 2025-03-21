@@ -5,7 +5,6 @@ import io.getunleash.variant.Variant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class FakeUnleash implements Unleash {
@@ -22,7 +21,7 @@ public class FakeUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(String toggleName, boolean defaultSetting) {
-        return isEnabled(toggleName, UnleashContext.builder().build(), context -> defaultSetting);
+        return isEnabled0(toggleName, UnleashContext.builder().build(), (t, c) -> defaultSetting);
     }
 
     @Override
@@ -30,20 +29,19 @@ public class FakeUnleash implements Unleash {
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction) {
-        return isEnabled(toggleName, context, ctx -> fallbackAction.test(toggleName, ctx));
+        return isEnabled0(toggleName, context, fallbackAction);
     }
 
     @Override
     public boolean isEnabled(
             String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
-        return isEnabled(
-                toggleName,
-                UnleashContext.builder().build(),
-                ctx -> fallbackAction.test(toggleName, ctx));
+        return isEnabled0(toggleName, UnleashContext.builder().build(), fallbackAction);
     }
 
-    private boolean isEnabled(
-            String toggleName, UnleashContext context, Function<UnleashContext, Boolean> fallback) {
+    private boolean isEnabled0(
+            String toggleName,
+            UnleashContext context,
+            BiPredicate<String, UnleashContext> fallbackAction) {
         if (enableAll) {
             return excludedFeatures.getOrDefault(toggleName, true);
         } else if (disableAll) {
@@ -51,7 +49,7 @@ public class FakeUnleash implements Unleash {
         } else {
             Queue<FakeContextMatcher> fakeContextMatchers = features.get(toggleName);
             if (fakeContextMatchers == null) {
-                return fallback.apply(context);
+                return fallbackAction.test(toggleName, context);
             } else {
                 return fakeContextMatchers.stream()
                         .anyMatch(fakeContextMatcher -> fakeContextMatcher.matches(context));
