@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.getunleash.variant.Variant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
@@ -15,17 +14,7 @@ public class FakeUnleashTest {
     void should_evaluate_against_context_if_conditionally_enabled() throws Exception {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.conditionallyEnable(
-                new FakeUnleash.FakeContextMatcher() {
-                    @Override
-                    public boolean matches(UnleashContext context) {
-                        Map<String, String> properties = context.getProperties();
-                        String testProperty = properties.get("test");
-                        if (testProperty == null) {
-                            return false;
-                        }
-                        return testProperty.equals("expected_test_value");
-                    }
-                },
+                context -> "expected_test_value".equals(context.getProperties().get("test")),
                 "t1",
                 "t2");
 
@@ -50,50 +39,12 @@ public class FakeUnleashTest {
     }
 
     @Test
-    void should_evaluate_against_context_if_conditionally_enabled_using_equals() throws Exception {
-        FakeUnleash fakeUnleash = new FakeUnleash();
-        fakeUnleash.conditionallyEnable(
-                FakeUnleash.FakeContextMatcher.equals(
-                        UnleashContext.builder()
-                                .addProperty("test", "expected_test_value")
-                                .build()),
-                "t1",
-                "t2");
-
-        // Matches because the context is an exact match
-        assertThat(
-                        fakeUnleash.isEnabled(
-                                "t1",
-                                UnleashContext.builder()
-                                        .addProperty("test", "expected_test_value")
-                                        .build()))
-                .isTrue();
-        // Does not match because the context has extra properties
-        assertThat(
-                        fakeUnleash.isEnabled(
-                                "t2",
-                                UnleashContext.builder()
-                                        .addProperty("test", "expected_test_value")
-                                        .addProperty("other", "other")
-                                        .build()))
-                .isFalse();
-        assertThat(fakeUnleash.isEnabled("t1")).isFalse();
-        assertThat(fakeUnleash.isEnabled("unknown")).isFalse();
-    }
-
-    @Test
     void should_evaluate_multiple_conditional_contexts() throws Exception {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.conditionallyEnable(
-                FakeUnleash.FakeContextMatcher.equals(
-                        UnleashContext.builder().addProperty("test", "v1").build()),
-                "t1",
-                "t2");
+                context -> "v1".equals(context.getProperties().get("test")), "t1", "t2");
         fakeUnleash.conditionallyEnable(
-                FakeUnleash.FakeContextMatcher.equals(
-                        UnleashContext.builder().addProperty("test", "v2").build()),
-                "t1",
-                "t2");
+                context -> "v2".equals(context.getProperties().get("test")), "t1", "t2");
 
         assertThat(
                         fakeUnleash.isEnabled(
