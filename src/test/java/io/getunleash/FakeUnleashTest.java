@@ -2,7 +2,6 @@ package io.getunleash;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.getunleash.lang.Nullable;
 import io.getunleash.variant.Variant;
 import java.util.Arrays;
 import java.util.List;
@@ -18,12 +17,12 @@ public class FakeUnleashTest {
         fakeUnleash.conditionallyEnable(
                 new FakeUnleash.FakeContextMatcher() {
                     @Override
-                    public boolean matches(@Nullable UnleashContext context) {
-                        if (context == null) {
-                            return false;
-                        }
+                    public boolean matches(UnleashContext context) {
                         Map<String, String> properties = context.getProperties();
                         String testProperty = properties.get("test");
+                        if (testProperty == null) {
+                            return false;
+                        }
                         return testProperty.equals("expected_test_value");
                     }
                 },

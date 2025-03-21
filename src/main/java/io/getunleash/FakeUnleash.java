@@ -5,6 +5,7 @@ import io.getunleash.variant.Variant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class FakeUnleash implements Unleash {
@@ -21,19 +22,7 @@ public class FakeUnleash implements Unleash {
 
     @Override
     public boolean isEnabled(String toggleName, boolean defaultSetting) {
-        if (enableAll) {
-            return excludedFeatures.getOrDefault(toggleName, true);
-        } else if (disableAll) {
-            return excludedFeatures.getOrDefault(toggleName, false);
-        } else {
-            Queue<FakeContextMatcher> fakeContextMatchers = features.get(toggleName);
-            if (fakeContextMatchers == null) {
-                return defaultSetting;
-            } else {
-                return fakeContextMatchers.stream()
-                        .anyMatch(fakeContextMatcher -> fakeContextMatcher.matches(null));
-            }
-        }
+        return isEnabled(toggleName, UnleashContext.builder().build(), context -> defaultSetting);
     }
 
     @Override
@@ -41,26 +30,33 @@ public class FakeUnleash implements Unleash {
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction) {
-        if (!enableAll && !disableAll || excludedFeatures.containsKey(toggleName)) {
-            Queue<FakeContextMatcher> fakeContextMatchers = features.get(toggleName);
-            if (fakeContextMatchers == null) {
-                return fallbackAction.test(toggleName, UnleashContext.builder().build());
-            } else {
-                return fakeContextMatchers.stream()
-                        .anyMatch(fakeContextMatcher -> fakeContextMatcher.matches(context));
-            }
-        }
-        return isEnabled(toggleName);
+        return isEnabled(toggleName, context, ctx -> fallbackAction.test(toggleName, ctx));
     }
 
     @Override
     public boolean isEnabled(
             String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
-        if ((!enableAll && !disableAll || excludedFeatures.containsKey(toggleName))
-                && !features.containsKey(toggleName)) {
-            return fallbackAction.test(toggleName, UnleashContext.builder().build());
+        return isEnabled(
+                toggleName,
+                UnleashContext.builder().build(),
+                ctx -> fallbackAction.test(toggleName, ctx));
+    }
+
+    private boolean isEnabled(
+            String toggleName, UnleashContext context, Function<UnleashContext, Boolean> fallback) {
+        if (enableAll) {
+            return excludedFeatures.getOrDefault(toggleName, true);
+        } else if (disableAll) {
+            return excludedFeatures.getOrDefault(toggleName, false);
+        } else {
+            Queue<FakeContextMatcher> fakeContextMatchers = features.get(toggleName);
+            if (fakeContextMatchers == null) {
+                return fallback.apply(context);
+            } else {
+                return fakeContextMatchers.stream()
+                        .anyMatch(fakeContextMatcher -> fakeContextMatcher.matches(context));
+            }
         }
-        return isEnabled(toggleName);
     }
 
     @Override
@@ -232,16 +228,12 @@ public class FakeUnleash implements Unleash {
          *
          * @param expectedContext the context you want to match
          * @return a matcher that returns {@code true} iff the {@code expectedContext} is equal to
-         *     the {@code actualContext}. If no context is passed, such as when using {@link
-         *     Unleash#isEnabled(String)}, this method will return {@code false}.
+         *     the {@code actualContext}.
          */
         static FakeContextMatcher equals(UnleashContext expectedContext) {
             return new FakeContextMatcher() {
                 @Override
-                public boolean matches(@Nullable UnleashContext actualContext) {
-                    if (actualContext == null) {
-                        return false;
-                    }
+                public boolean matches(UnleashContext actualContext) {
                     return Objects.equals(
                             expectedContext.getProperties(), actualContext.getProperties());
                 }
@@ -254,10 +246,10 @@ public class FakeUnleash implements Unleash {
          * than what {@link #equals(UnleashContext)} offers.
          *
          * @param context the context passed to {@link Unleash#isEnabled(String, UnleashContext)}
-         *     and related methods. This is {@code null} is no context was provided, such as when
-         *     calling {@link Unleash#isEnabled(String)}
+         *     and related methods. This is empty but not null if no context was provided, such as
+         *     when calling {@link Unleash#isEnabled(String)}
          * @return {@code true} iff {@code context} matches the check, otherwise {@code false}.
          */
-        boolean matches(@Nullable UnleashContext context);
+        boolean matches(UnleashContext context);
     }
 }
