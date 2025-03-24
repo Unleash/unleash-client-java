@@ -22,25 +22,7 @@ public class FakeUnleash implements Unleash {
     private final Map<String, Variant> variants = new ConcurrentHashMap<>();
 
     @Override
-    public boolean isEnabled(String toggleName, boolean defaultSetting) {
-        return isEnabled0(toggleName, UnleashContext.builder().build(), (t, c) -> defaultSetting);
-    }
-
-    @Override
     public boolean isEnabled(
-            String toggleName,
-            UnleashContext context,
-            BiPredicate<String, UnleashContext> fallbackAction) {
-        return isEnabled0(toggleName, context, fallbackAction);
-    }
-
-    @Override
-    public boolean isEnabled(
-            String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
-        return isEnabled0(toggleName, UnleashContext.builder().build(), fallbackAction);
-    }
-
-    private boolean isEnabled0(
             String toggleName,
             UnleashContext context,
             BiPredicate<String, UnleashContext> fallbackAction) {
