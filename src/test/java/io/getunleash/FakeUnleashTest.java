@@ -66,7 +66,7 @@ public class FakeUnleashTest {
     }
 
     @Test
-    void should_evaluate_against_context_if_conditionally_enabled() throws Exception {
+    void should_conditionally_enable_feature_only_for_matching_context() throws Exception {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.conditionallyEnable(
                 context -> "expected_test_value".equals(context.getProperties().get("test")),
@@ -126,6 +126,36 @@ public class FakeUnleashTest {
                         fakeUnleash.isEnabled(
                                 "t1", UnleashContext.builder().addProperty("test", "v2").build()))
                 .isFalse();
+    }
+
+    @Test
+    void should_return_variant_only_if_conditionally_enabled() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.conditionallyEnable(
+                context -> "v1".equals(context.getProperties().get("test")), "t1");
+        Variant variant = new Variant("a", "some payload", true);
+        fakeUnleash.setVariant("t1", variant);
+
+        assertThat(
+                        fakeUnleash.getVariant(
+                                "t1", UnleashContext.builder().addProperty("test", "v1").build()))
+                .isEqualTo(variant);
+        assertThat(
+                        fakeUnleash.getVariant(
+                                "t1", UnleashContext.builder().addProperty("test", "v2").build()))
+                .isEqualTo(Variant.DISABLED_VARIANT);
+    }
+
+    @Test
+    void should_reset_conditional_features_when_resetting_entire_feature() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.conditionallyEnable(ctx -> true, "t1");
+
+        assertThat(fakeUnleash.isEnabled("t1", UnleashContext.builder().build())).isTrue();
+
+        fakeUnleash.reset("t1");
+
+        assertThat(fakeUnleash.isEnabled("t1", UnleashContext.builder().build())).isFalse();
     }
 
     @Test

@@ -49,12 +49,18 @@ public class FakeUnleash implements Unleash {
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context) {
-        return getVariant(toggleName, Variant.DISABLED_VARIANT);
+        return getVariant(toggleName, context, Variant.DISABLED_VARIANT);
     }
 
     @Override
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
-        return getVariant(toggleName, defaultValue);
+        if (isEnabled(toggleName, context)) {
+            Variant variant = variants.get(toggleName);
+            if (variant != null) {
+                return variant;
+            }
+        }
+        return defaultValue;
     }
 
     @Override
@@ -64,11 +70,7 @@ public class FakeUnleash implements Unleash {
 
     @Override
     public Variant getVariant(String toggleName, Variant defaultValue) {
-        if (isEnabled(toggleName) && variants.containsKey(toggleName)) {
-            return variants.get(toggleName);
-        } else {
-            return defaultValue;
-        }
+        return getVariant(toggleName, UnleashContext.builder().build(), defaultValue);
     }
 
     @Override
@@ -156,8 +158,8 @@ public class FakeUnleash implements Unleash {
         }
     }
 
-    public void setVariant(String t1, Variant a) {
-        variants.put(t1, a);
+    public void setVariant(String toggleName, Variant variant) {
+        variants.put(toggleName, variant);
     }
 
     public class FakeMore implements MoreOperations {
