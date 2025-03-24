@@ -10,10 +10,6 @@ import org.junit.jupiter.api.Test;
 
 public class FakeUnleashTest {
 
-    /**
-     * If it doesn't, then we keep "always enabled" in the list of conditions, and since we OR them
-     * together, the conditional feature toggle is effectively ignored.
-     */
     @Test
     void conditionally_enabling_a_feature_should_replace_always_enabled() throws Exception {
         FakeUnleash fakeUnleash = new FakeUnleash();
@@ -37,10 +33,6 @@ public class FakeUnleashTest {
                 .isFalse();
     }
 
-    /**
-     * If it doesn't, then we keep "always enabled" in the list of conditions, and since we OR them
-     * together, the conditional feature toggle is effectively ignored.
-     */
     @Test
     void unconditionally_enabling_a_feature_should_replace_conditionally_enabled()
             throws Exception {

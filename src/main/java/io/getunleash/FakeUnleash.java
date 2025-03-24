@@ -81,6 +81,7 @@ public class FakeUnleash implements Unleash {
     public void enableAll() {
         disableAll = false;
         enableAll = true;
+        features.clear();
         excludedFeatures.clear();
         conditionalFeatures.clear();
     }
@@ -95,6 +96,7 @@ public class FakeUnleash implements Unleash {
     public void disableAll() {
         disableAll = true;
         enableAll = false;
+        features.clear();
         excludedFeatures.clear();
         conditionalFeatures.clear();
     }
