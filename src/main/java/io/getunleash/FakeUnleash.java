@@ -115,12 +115,14 @@ public class FakeUnleash implements Unleash {
 
     public void enable(String... features) {
         for (String name : features) {
+            this.conditionalFeatures.remove(name);
             this.features.put(name, true);
         }
     }
 
     public void disable(String... features) {
         for (String name : features) {
+            this.conditionalFeatures.remove(name);
             this.features.put(name, false);
         }
     }
