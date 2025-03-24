@@ -7,18 +7,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;
-    private final Map<String, Boolean> excludedFeatures = new ConcurrentHashMap<>();
     /**
      * @implNote This uses {@link Queue} instead of {@link List}, as there are concurrent queues,
      *     but no concurrent lists, in the jdk. This will never be drained. Only iterated over.
      */
-    private final Map<String, Queue<Predicate<UnleashContext>>> features =
+    private final Map<String, Queue<Predicate<UnleashContext>>> conditionalFeatures =
             new ConcurrentHashMap<>();
 
+    private final Map<String, Boolean> excludedFeatures = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> features = new ConcurrentHashMap<>();
     private final Map<String, Variant> variants = new ConcurrentHashMap<>();
 
     @Override
@@ -31,7 +33,11 @@ public class FakeUnleash implements Unleash {
         } else if (disableAll) {
             return excludedFeatures.getOrDefault(toggleName, false);
         } else {
-            Queue<Predicate<UnleashContext>> contextMatchers = features.get(toggleName);
+            Boolean unconditionallyEnabled = features.get(toggleName);
+            if (unconditionallyEnabled != null) {
+                return unconditionallyEnabled;
+            }
+            Queue<Predicate<UnleashContext>> contextMatchers = conditionalFeatures.get(toggleName);
             if (contextMatchers == null) {
                 return fallbackAction.test(toggleName, context);
             } else {
@@ -74,7 +80,7 @@ public class FakeUnleash implements Unleash {
         disableAll = false;
         enableAll = true;
         excludedFeatures.clear();
-        features.clear();
+        conditionalFeatures.clear();
     }
 
     public void enableAllExcept(String... excludedFeatures) {
@@ -88,7 +94,7 @@ public class FakeUnleash implements Unleash {
         disableAll = true;
         enableAll = false;
         excludedFeatures.clear();
-        features.clear();
+        conditionalFeatures.clear();
     }
 
     public void disableAllExcept(String... excludedFeatures) {
@@ -103,23 +109,25 @@ public class FakeUnleash implements Unleash {
         enableAll = false;
         excludedFeatures.clear();
         features.clear();
+        conditionalFeatures.clear();
         variants.clear();
     }
 
     public void enable(String... features) {
         for (String name : features) {
-            this.features.put(name, only(context -> true));
+            this.features.put(name, true);
         }
     }
 
     public void disable(String... features) {
         for (String name : features) {
-            this.features.put(name, only(context -> false));
+            this.features.put(name, false);
         }
     }
 
     public void reset(String... features) {
         for (String name : features) {
+            this.conditionalFeatures.remove(name);
             this.features.remove(name);
         }
     }
@@ -128,23 +136,22 @@ public class FakeUnleash implements Unleash {
      * Enables or disables feature toggles depending on the evaluation of the {@code
      * contextMatcher}. This can be called multiple times. If <b>any</b> of the context matchers
      * match, the feature is enabled. This lets you conditionally configure multiple different tests
-     * to do different things, while running concurrently. This will be overwritten if {@link
-     * #enable(String...)} or {@link #disable(String...)} are called.
+     * to do different things, while running concurrently.
+     *
+     * <p>This will be overwritten if {@link #enable(String...)} or {@link #disable(String...)} are
+     * called and vice versa.
      *
      * @param contextMatcher the context matcher to evaluate
      * @param features the features for which the context matcher will be invoked
      */
     public void conditionallyEnable(Predicate<UnleashContext> contextMatcher, String... features) {
         for (String name : features) {
-            this.features.computeIfAbsent(name, ignored -> new ArrayDeque<>()).add(contextMatcher);
+            // calling conditionallyEnable() should override having called enable() or disable()
+            this.features.remove(name);
+            this.conditionalFeatures
+                    .computeIfAbsent(name, ignored -> new ArrayDeque<>())
+                    .add(contextMatcher);
         }
-    }
-
-    private static Queue<Predicate<UnleashContext>> only(
-            Predicate<UnleashContext> fakeContextMatcher) {
-        Queue<Predicate<UnleashContext>> only = new ArrayDeque<>();
-        only.add(fakeContextMatcher);
-        return only;
     }
 
     public void setVariant(String t1, Variant a) {
@@ -155,19 +162,20 @@ public class FakeUnleash implements Unleash {
 
         @Override
         public List<String> getFeatureToggleNames() {
-            return new ArrayList<>(features.keySet());
+            return Stream.concat(features.keySet().stream(), conditionalFeatures.keySet().stream())
+                    .distinct()
+                    .collect(Collectors.toList());
         }
 
         @Override
         public Optional<FeatureDefinition> getFeatureToggleDefinition(String toggleName) {
-            return Optional.ofNullable(features.get(toggleName))
-                    .map(
-                            value ->
-                                    new FeatureDefinition(
-                                            toggleName,
-                                            Optional.of("experiment"),
-                                            "default",
-                                            true));
+            if (conditionalFeatures.containsKey(toggleName) || features.containsKey(toggleName)) {
+                return Optional.of(
+                        new FeatureDefinition(
+                                toggleName, Optional.of("experiment"), "default", true));
+            } else {
+                return Optional.empty();
+            }
         }
 
         @Override

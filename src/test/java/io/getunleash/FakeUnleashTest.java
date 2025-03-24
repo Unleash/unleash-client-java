@@ -10,6 +10,61 @@ import org.junit.jupiter.api.Test;
 
 public class FakeUnleashTest {
 
+    /**
+     * If it doesn't, then we keep "always enabled" in the list of conditions, and since we OR them
+     * together, the conditional feature toggle is effectively ignored.
+     */
+    @Test
+    void conditionally_enabling_a_feature_should_replace_always_enabled() throws Exception {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.enable("t1");
+        fakeUnleash.conditionallyEnable(
+                context -> "expected_test_value".equals(context.getProperties().get("test")), "t1");
+
+        assertThat(
+                        fakeUnleash.isEnabled(
+                                "t1",
+                                UnleashContext.builder()
+                                        .addProperty("test", "expected_test_value")
+                                        .build()))
+                .isTrue();
+        assertThat(
+                        fakeUnleash.isEnabled(
+                                "t1",
+                                UnleashContext.builder()
+                                        .addProperty("test", "unexpected_test_value")
+                                        .build()))
+                .isFalse();
+    }
+
+    /**
+     * If it doesn't, then we keep "always enabled" in the list of conditions, and since we OR them
+     * together, the conditional feature toggle is effectively ignored.
+     */
+    @Test
+    void unconditionally_enabling_a_feature_should_replace_conditionally_enabled()
+            throws Exception {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+        fakeUnleash.conditionallyEnable(
+                context -> "expected_test_value".equals(context.getProperties().get("test")), "t1");
+        fakeUnleash.enable("t1");
+
+        assertThat(
+                        fakeUnleash.isEnabled(
+                                "t1",
+                                UnleashContext.builder()
+                                        .addProperty("test", "expected_test_value")
+                                        .build()))
+                .isTrue();
+        assertThat(
+                        fakeUnleash.isEnabled(
+                                "t1",
+                                UnleashContext.builder()
+                                        .addProperty("test", "unexpected_test_value")
+                                        .build()))
+                .isTrue();
+    }
+
     @Test
     void should_evaluate_against_context_if_conditionally_enabled() throws Exception {
         FakeUnleash fakeUnleash = new FakeUnleash();
