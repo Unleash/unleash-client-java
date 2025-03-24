@@ -151,6 +151,18 @@ public class FakeUnleashTest {
     }
 
     @Test
+    void should_use_fallback_if_no_matchers_defined() {
+        FakeUnleash fakeUnleash = new FakeUnleash();
+
+        assertThat(
+                        fakeUnleash.isEnabled(
+                                "unknown-toggle",
+                                UnleashContext.builder().addProperty("test", "v1").build(),
+                                (name, context) -> true))
+                .isTrue();
+    }
+
+    @Test
     public void should_enable_all_toggles() throws Exception {
         FakeUnleash fakeUnleash = new FakeUnleash();
         fakeUnleash.enableAll();

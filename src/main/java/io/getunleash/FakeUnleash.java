@@ -4,6 +4,7 @@ import io.getunleash.lang.Nullable;
 import io.getunleash.variant.Variant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -158,7 +159,7 @@ public class FakeUnleash implements Unleash {
             // calling conditionallyEnable() should override having called enable() or disable()
             this.features.remove(name);
             this.conditionalFeatures
-                    .computeIfAbsent(name, ignored -> new ArrayDeque<>())
+                    .computeIfAbsent(name, ignored -> new LinkedBlockingQueue<>())
                     .add(contextMatcher);
         }
     }
