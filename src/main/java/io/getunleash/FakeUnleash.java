@@ -37,12 +37,15 @@ public class FakeUnleash implements Unleash {
             if (unconditionallyEnabled != null) {
                 return unconditionallyEnabled;
             }
-            Queue<Predicate<UnleashContext>> contextMatchers = conditionalFeatures.get(toggleName);
-            if (contextMatchers == null) {
+            Queue<Predicate<UnleashContext>> conditionalFeaturePredicates =
+                    conditionalFeatures.get(toggleName);
+            if (conditionalFeaturePredicates == null) {
                 return fallbackAction.test(toggleName, context);
             } else {
-                return contextMatchers.stream()
-                        .anyMatch(fakeContextMatcher -> fakeContextMatcher.test(context));
+                return conditionalFeaturePredicates.stream()
+                        .anyMatch(
+                                conditionalFeaturePredicate ->
+                                        conditionalFeaturePredicate.test(context));
             }
         }
     }
