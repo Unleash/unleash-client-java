@@ -14,7 +14,7 @@ public class FakeUnleash implements Unleash {
     private final Map<String, Boolean> excludedFeatures = new ConcurrentHashMap<>();
     /**
      * @implNote This uses {@link Queue} instead of {@link List}, as there are concurrent queues,
-     *     but no concurrent lists in the jdk.
+     *     but no concurrent lists, in the jdk. This will never be drained. Only iterated over.
      */
     private final Map<String, Queue<Predicate<UnleashContext>>> features =
             new ConcurrentHashMap<>();
