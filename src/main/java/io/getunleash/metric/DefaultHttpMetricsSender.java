@@ -56,7 +56,7 @@ public class DefaultHttpMetricsSender implements MetricSender {
     }
 
     public int sendMetrics(ClientMetrics metrics) {
-        if (!unleashConfig.isDisableMetrics()) {
+        if (!unleashConfig.isDisableMetrics() && metrics.getBucket() != null) {
             try {
                 int statusCode = post(clientMetricsURL, metrics);
                 eventDispatcher.dispatch(metrics);

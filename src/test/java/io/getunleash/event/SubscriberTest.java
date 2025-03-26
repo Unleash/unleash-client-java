@@ -78,7 +78,6 @@ public class SubscriberTest {
         assertThat(testSubscriber.events)
                 .filteredOn(e -> e instanceof ClientRegistration)
                 .hasSize(1);
-        assertThat(testSubscriber.events).filteredOn(e -> e instanceof ClientMetrics).hasSize(1);
     }
 
     private class TestSubscriber implements UnleashSubscriber {
