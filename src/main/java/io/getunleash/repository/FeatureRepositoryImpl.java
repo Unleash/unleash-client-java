@@ -5,7 +5,7 @@ import io.getunleash.UnleashContext;
 import io.getunleash.UnleashException;
 import io.getunleash.engine.UnleashEngine;
 import io.getunleash.engine.VariantDef;
-import io.getunleash.engine.YggdrasilError;
+import io.getunleash.engine.WasmResponse;
 import io.getunleash.engine.YggdrasilInvalidInputException;
 import io.getunleash.event.ClientFeaturesResponse;
 import io.getunleash.event.EventDispatcher;
@@ -101,7 +101,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
         if (features.isPresent()) {
             try {
                 this.engine.takeState(features.get());
-            } catch (YggdrasilInvalidInputException | YggdrasilError e) {
+            } catch (YggdrasilInvalidInputException e) {
                 LOGGER.error("Error when initializing feature toggles", e);
                 eventDispatcher.dispatch(new UnleashException("Failed to read backup file:", e));
             }
@@ -137,7 +137,6 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                     eventDispatcher.dispatch(response);
                     if (response.getStatus() == ClientFeaturesResponse.Status.CHANGED) {
                         String clientFeatures = response.getClientFeatures().get();
-
                         this.engine.takeState(clientFeatures);
                         featureBackupHandler.write(clientFeatures);
                     } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
@@ -160,7 +159,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                     }
                 } catch (UnleashException e) {
                     handler.accept(e);
-                } catch (YggdrasilInvalidInputException | YggdrasilError e) {
+                } catch (YggdrasilInvalidInputException e) {
                     handler.accept(new UnleashException("Error when fetching features", e));
                 }
             } else {
@@ -178,43 +177,27 @@ public class FeatureRepositoryImpl implements FeatureRepository {
     }
 
     @Override
-    public Boolean isEnabled(String toggleName, UnleashContext context) {
+    public WasmResponse<Boolean> isEnabled(String toggleName, UnleashContext context) {
         try {
             return this.engine.isEnabled(toggleName, YggdrasilAdapters.adapt(context));
-        } catch (YggdrasilInvalidInputException | YggdrasilError e) {
+        } catch (YggdrasilInvalidInputException e) {
             LOGGER.error("Error when checking feature toggle {}", toggleName, e);
             return null;
         }
     }
 
     @Override
-    public Optional<VariantDef> getVariant(String toggleName, UnleashContext context) {
+    public WasmResponse<VariantDef> getVariant(String toggleName, UnleashContext context) {
         try {
-            return Optional.ofNullable(
-                    this.engine.getVariant(toggleName, YggdrasilAdapters.adapt(context)));
-        } catch (YggdrasilInvalidInputException | YggdrasilError e) {
+            return this.engine.getVariant(toggleName, YggdrasilAdapters.adapt(context));
+        } catch (YggdrasilInvalidInputException e) {
             LOGGER.error("Error when checking feature toggle {}", toggleName, e);
-            return Optional.empty();
+            return null;
         }
     }
 
     @Override
     public Stream<FeatureDefinition> listKnownToggles() {
-        try {
-            return this.engine.listKnownToggles().stream().map(FeatureDefinition::new);
-        } catch (YggdrasilError e) {
-            LOGGER.error("Error getting feature toggle definitions", e);
-            return Stream.empty();
-        }
-    }
-
-    @Override
-    public boolean shouldEmitImpressionEvent(String toggleName) {
-        try {
-            return this.engine.shouldEmitImpressionEvent(toggleName);
-        } catch (YggdrasilError e) {
-            LOGGER.error("Error checking impression event status on toggle{}", toggleName, e);
-            return false;
-        }
+        return this.engine.listKnownToggles().stream().map(FeatureDefinition::new);
     }
 }
