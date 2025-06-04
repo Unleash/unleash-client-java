@@ -3,8 +3,11 @@ package io.getunleash.metric;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+import io.getunleash.engine.Context;
+import io.getunleash.engine.MetricsBucket;
 import io.getunleash.engine.UnleashEngine;
 import io.getunleash.engine.YggdrasilError;
+import io.getunleash.engine.YggdrasilInvalidInputException;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 import java.time.LocalDateTime;
@@ -113,101 +116,49 @@ public class UnleashMetricServiceImplTest {
         verify(sender, times(1)).sendMetrics(any(ClientMetrics.class));
     }
 
-    //     @Test
-    //     public void should_record_and_send_metrics() throws YggdrasilError {
-    //         UnleashConfig config =
-    //                 UnleashConfig.builder()
-    //                         .appName("test")
-    //                         .environment("prod")
-    //                         .sendMetricsInterval(10)
-    //                         .unleashAPI("http://unleash.com")
-    //                         .build();
+    @Test
+    public void should_record_and_send_metrics()
+            throws YggdrasilError, YggdrasilInvalidInputException {
+        UnleashConfig config =
+                UnleashConfig.builder()
+                        .appName("test")
+                        .environment("prod")
+                        .sendMetricsInterval(10)
+                        .unleashAPI("http://unleash.com")
+                        .build();
 
-    //         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-    //         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
-    //         UnleashEngine engine = new UnleashEngine();
+        UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
+        DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
+        UnleashEngine engine = new UnleashEngine();
 
-    //         UnleashMetricService unleashMetricService =
-    //                 new UnleashMetricServiceImpl(config, sender, executor, engine);
-    //         // engine.countToggle("someToggle", true);
-    //         // engine.countToggle("someToggle", false);
-    //         // engine.countToggle("someToggle", true);
-    //         // engine.countToggle("otherToggle", true);
+        UnleashMetricService unleashMetricService =
+                new UnleashMetricServiceImpl(config, sender, executor, engine);
 
-    //         // Call the sendMetricsCallback
-    //         ArgumentCaptor<Runnable> sendMetricsCallback =
-    // ArgumentCaptor.forClass(Runnable.class);
-    //         verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
-    //         sendMetricsCallback.getValue().run();
+        engine.isEnabled("someToggle", new Context());
+        engine.isEnabled("someToggle", new Context());
 
-    //         ArgumentCaptor<ClientMetrics> clientMetricsArgumentCaptor =
-    //                 ArgumentCaptor.forClass(ClientMetrics.class);
-    //         verify(sender).sendMetrics(clientMetricsArgumentCaptor.capture());
+        // Call the sendMetricsCallback
+        ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
+        verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
+        sendMetricsCallback.getValue().run();
 
-    //         ClientMetrics clientMetrics = clientMetricsArgumentCaptor.getValue();
-    //         MetricsBucket bucket = clientMetricsArgumentCaptor.getValue().getBucket();
+        ArgumentCaptor<ClientMetrics> clientMetricsArgumentCaptor =
+                ArgumentCaptor.forClass(ClientMetrics.class);
+        verify(sender).sendMetrics(clientMetricsArgumentCaptor.capture());
 
-    //         assertThat(clientMetrics.getAppName()).isEqualTo(config.getAppName());
-    //         assertThat(clientMetrics.getEnvironment()).isEqualTo(config.getEnvironment());
-    //         assertThat(clientMetrics.getInstanceId()).isEqualTo(config.getInstanceId());
-    //         assertThat(clientMetrics.getConnectionId()).isEqualTo(config.getConnectionId());
-    //         assertThat(bucket.getStart()).isNotNull();
-    //         assertThat(bucket.getStop()).isNotNull();
-    //         assertThat(bucket.getToggles()).hasSize(2);
-    //         assertThat(bucket.getToggles().get("someToggle").getYes()).isEqualTo(2l);
-    //         assertThat(bucket.getToggles().get("someToggle").getNo()).isEqualTo(1l);
-    //     }
+        ClientMetrics clientMetrics = clientMetricsArgumentCaptor.getValue();
+        MetricsBucket bucket = clientMetricsArgumentCaptor.getValue().getBucket();
 
-    //     @Test
-    //     public void should_record_and_send_variant_metrics() throws YggdrasilError {
-    //         UnleashConfig config =
-    //                 UnleashConfig.builder()
-    //                         .appName("test")
-    //                         .sendMetricsInterval(10)
-    //                         .unleashAPI("http://unleash.com")
-    //                         .build();
-
-    //         UnleashScheduledExecutor executor = mock(UnleashScheduledExecutor.class);
-    //         DefaultHttpMetricsSender sender = mock(DefaultHttpMetricsSender.class);
-    //         UnleashEngine engine = new UnleashEngine();
-
-    //         UnleashMetricService unleashMetricService =
-    //                 new UnleashMetricServiceImpl(config, sender, executor, engine);
-    //         // engine.countVariant("someToggle", "v1");
-    //         // engine.countVariant("someToggle", "v1");
-    //         // engine.countVariant("someToggle", "v1");
-    //         // engine.countVariant("someToggle", "v2");
-    //         // engine.countVariant("someToggle", "disabled");
-
-    //         // Call the sendMetricsCallback
-    //         ArgumentCaptor<Runnable> sendMetricsCallback =
-    // ArgumentCaptor.forClass(Runnable.class);
-    //         verify(executor).setInterval(sendMetricsCallback.capture(), anyLong(), anyLong());
-    //         sendMetricsCallback.getValue().run();
-
-    //         ArgumentCaptor<ClientMetrics> clientMetricsArgumentCaptor =
-    //                 ArgumentCaptor.forClass(ClientMetrics.class);
-    //         verify(sender).sendMetrics(clientMetricsArgumentCaptor.capture());
-
-    //         ClientMetrics clientMetrics = clientMetricsArgumentCaptor.getValue();
-    //         MetricsBucket bucket = clientMetricsArgumentCaptor.getValue().getBucket();
-
-    //         assertThat(clientMetrics.getAppName()).isEqualTo(config.getAppName());
-    //         assertThat(clientMetrics.getInstanceId()).isEqualTo(config.getInstanceId());
-    //         assertThat(clientMetrics.getConnectionId()).isEqualTo(config.getConnectionId());
-    //         assertThat(bucket.getStart()).isNotNull();
-    //         assertThat(bucket.getStop()).isNotNull();
-    //         assertThat(bucket.getToggles()).hasSize(1);
-    //         assertThat(bucket.getToggles().get("someToggle").getVariants().get("v1").longValue())
-    //                 .isEqualTo(3l);
-    //         assertThat(bucket.getToggles().get("someToggle").getVariants().get("v2").longValue())
-    //                 .isEqualTo(1l);
-    //
-    // assertThat(bucket.getToggles().get("someToggle").getVariants().get("disabled").longValue())
-    //                 .isEqualTo(1l);
-    //         assertThat(bucket.getToggles().get("someToggle").getYes()).isEqualTo(0l);
-    //         assertThat(bucket.getToggles().get("someToggle").getNo()).isEqualTo(0l);
-    //     }
+        assertThat(clientMetrics.getAppName()).isEqualTo(config.getAppName());
+        assertThat(clientMetrics.getEnvironment()).isEqualTo(config.getEnvironment());
+        assertThat(clientMetrics.getInstanceId()).isEqualTo(config.getInstanceId());
+        assertThat(clientMetrics.getConnectionId()).isEqualTo(config.getConnectionId());
+        assertThat(bucket.getStart()).isNotNull();
+        assertThat(bucket.getStop()).isNotNull();
+        assertThat(bucket.getToggles()).hasSize(1);
+        assertThat(bucket.getToggles().get("someToggle").getYes()).isEqualTo(0l);
+        assertThat(bucket.getToggles().get("someToggle").getNo()).isEqualTo(2l);
+    }
 
     @Test
     public void should_backoff_when_told_to_by_429_code() throws YggdrasilError {
