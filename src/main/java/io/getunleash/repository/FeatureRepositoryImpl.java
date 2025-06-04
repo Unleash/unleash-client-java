@@ -137,6 +137,7 @@ public class FeatureRepositoryImpl implements FeatureRepository {
                     eventDispatcher.dispatch(response);
                     if (response.getStatus() == ClientFeaturesResponse.Status.CHANGED) {
                         String clientFeatures = response.getClientFeatures().get();
+
                         this.engine.takeState(clientFeatures);
                         featureBackupHandler.write(clientFeatures);
                     } else if (response.getStatus() == ClientFeaturesResponse.Status.UNAVAILABLE) {
