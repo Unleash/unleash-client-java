@@ -224,11 +224,6 @@ public class UnleashMetricServiceImplTest {
 
         UnleashMetricServiceImpl unleashMetricService =
                 new UnleashMetricServiceImpl(config, sender, executor, engine);
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v2");
-        // engine.countVariant("someToggle", "disabled");
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
@@ -297,11 +292,6 @@ public class UnleashMetricServiceImplTest {
 
         UnleashMetricServiceImpl unleashMetricService =
                 new UnleashMetricServiceImpl(config, sender, executor, engine);
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v2");
-        // engine.countVariant("someToggle", "disabled");
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
@@ -369,11 +359,6 @@ public class UnleashMetricServiceImplTest {
 
         UnleashMetricServiceImpl unleashMetricService =
                 new UnleashMetricServiceImpl(config, sender, executor, engine);
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v2");
-        // engine.countVariant("someToggle", "disabled");
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
@@ -407,11 +392,6 @@ public class UnleashMetricServiceImplTest {
 
         UnleashMetricServiceImpl unleashMetricService =
                 new UnleashMetricServiceImpl(config, sender, executor, engine);
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v1");
-        // engine.countVariant("someToggle", "v2");
-        // engine.countVariant("someToggle", "disabled");
 
         // Call the sendMetricsCallback
         ArgumentCaptor<Runnable> sendMetricsCallback = ArgumentCaptor.forClass(Runnable.class);
