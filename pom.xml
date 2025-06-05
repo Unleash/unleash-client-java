@@ -192,9 +192,6 @@
                 <version>3.5.2</version>
                 <configuration>
                     <forkCount>1</forkCount>
-                    <argLine>
-                        -XX:CompileCommand=dontinline,com/dylibso/chicory/runtime/OpcodeImpl.*
-                    </argLine>
                 </configuration>
             </plugin>
             <plugin>
