@@ -202,20 +202,4 @@ public class UnleashTest {
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo("Chuck");
     }
-
-    @Test
-    public void getting_variant_when_disabled_should_increment_no_counter() {
-
-        UnleashContext context = UnleashContext.builder().userId("1").build();
-
-        Variant variant = new Variant("Chuck", "Norris", true);
-        EngineProxy engineProxy = mock(EngineProxy.class);
-        when(engineProxy.getVariant(any(String.class), any(UnleashContext.class)))
-                .thenReturn(new WasmResponse<VariantDef>(true, null));
-
-        Unleash unleash = new DefaultUnleash(baseConfig, engineProxy);
-        Variant result = unleash.getVariant("test", context, variant);
-
-        // verify(engineProxy, times(1)).countToggle("test", false);
-    }
 }
