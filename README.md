@@ -18,7 +18,7 @@ As of version 10.2.3, this library requires Java 11 or newer.
 
 - Java 8+ is supported on versions 10.2.2 and below
 
-- Java 11+ is supported starting from 10.2.3
+- Java 11+ is required starting from 10.2.3
 
 If you're using Java 8, please pin your dependency to 10.2.2 or earlier.
 
