@@ -14,11 +14,11 @@ You can use this client with [Unleash Enterprise](https://www.getunleash.io/pric
 
 ## Java Version Compatibility
 
-As of version 10.2.3, this library requires Java 11 or newer.
+As of version 11, this library requires Java 11 or newer.
 
-- Java 8+ is supported on versions 10.2.2 and below
+- Java 8+ is supported on versions 10.2.x and below
 
-- Java 11+ is required starting from 10.2.3
+- Java 11+ is required starting from version 11 of the SDK
 
 If you're using Java 8, please pin your dependency to 10.2.2 or earlier.
 
