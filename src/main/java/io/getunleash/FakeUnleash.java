@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 public class FakeUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;
+
     /**
      * @implNote This uses {@link Queue} instead of {@link List}, as there are concurrent queues,
      *     but no concurrent lists, in the jdk. This will never be drained. Only iterated over.
