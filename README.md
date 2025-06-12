@@ -12,6 +12,16 @@ You can use this client with [Unleash Enterprise](https://www.getunleash.io/pric
 >
 > If you're using `MoreOperations`, custom or fallback strategies, subscribers or bootstrapping, please see the full [migration guide](v10_MIGRATION_GUIDE.md) for details. If you use GraalVM or Quarkus, please hold off on upgrading to v10, support is planned but not implemented.
 
+## Java Version Compatibility
+
+As of version 10.2.3, this library requires Java 11 or newer.
+
+- Java 8+ is supported on versions 10.2.2 and below
+
+- Java 11+ is supported starting from 10.2.3
+
+If you're using Java 8, please pin your dependency to 10.2.2 or earlier.
+
 ## Getting started
 
 This section shows you how to get started quickly and explains some common configuration scenarios. For a full overview of Unleash configuration options, check out [the _Configuration options_ section](#configuration-options).
