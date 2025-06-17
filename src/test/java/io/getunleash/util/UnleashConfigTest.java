@@ -383,4 +383,16 @@ public class UnleashConfigTest {
                         .build();
         assertDoesNotThrow(config::getClientIdentifier);
     }
+
+    @Test
+    public void should_require_unleash_uri() {
+        Executable ex =
+            () ->
+                UnleashConfig.builder()
+                    .apiKey("someapikey")
+                    .appName("my-app")
+                    .build();
+
+        assertThrows(IllegalStateException.class, ex);
+    }
 }
