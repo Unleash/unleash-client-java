@@ -127,8 +127,11 @@ public class DefaultUnleash implements Unleash {
         boolean enabled =
                 response.flatMap(r -> Optional.ofNullable(r.value))
                         .orElseGet(() -> fallbackAction.test(toggleName, enhancedContext));
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
-        if (response.map(r -> r.impressionData).orElse(false)) {
+        if (eventDispatcher.isSubscribedTo(ToggleEvaluated.class)) {
+            eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
+        }
+        if (eventDispatcher.isSubscribedTo(IsEnabledImpressionEvent.class)
+                && response.map(r -> r.impressionData).orElse(false)) {
             eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
         }
         return enabled;
@@ -153,8 +156,11 @@ public class DefaultUnleash implements Unleash {
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         Optional<FlatResponse<VariantDef>> response = getVariantResponse(toggleName, context);
         Variant variant = resolveVariant(response, defaultValue);
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isFeatureEnabled()));
-        if (response.map(r -> r.impressionData).orElse(false)) {
+        if (eventDispatcher.isSubscribedTo(ToggleEvaluated.class)) {
+            eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isFeatureEnabled()));
+        }
+        if (eventDispatcher.isSubscribedTo(VariantImpressionEvent.class)
+                && response.map(r -> r.impressionData).orElse(false)) {
             eventDispatcher.dispatch(
                     new VariantImpressionEvent(
                             toggleName, variant.isFeatureEnabled(), context, variant.getName()));
