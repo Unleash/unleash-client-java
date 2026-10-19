@@ -97,10 +97,6 @@ class EventDispatcherTest {
     void defaultSubscriberGetsNoPerEvaluationEvents() {
         EventDispatcher dispatcher = dispatcherFor(new NoOpSubscriber());
 
-        assertThat(dispatcher.isSubscribedTo(ToggleEvaluated.class)).isFalse();
-        assertThat(dispatcher.isSubscribedTo(IsEnabledImpressionEvent.class)).isFalse();
-        assertThat(dispatcher.isSubscribedTo(VariantImpressionEvent.class)).isFalse();
-
         dispatcher.dispatch(new ToggleEvaluated("some-toggle", true));
         dispatcher.dispatch(impressionEvent());
 
@@ -111,9 +107,6 @@ class EventDispatcherTest {
     void subscriberListeningOnlyForReadyGetsNoPerEvaluationEvents() {
         OnlyOnReady subscriber = new OnlyOnReady();
         EventDispatcher dispatcher = dispatcherFor(subscriber);
-
-        assertThat(dispatcher.isSubscribedTo(ToggleEvaluated.class)).isFalse();
-        assertThat(dispatcher.isSubscribedTo(IsEnabledImpressionEvent.class)).isFalse();
 
         dispatcher.dispatch(new ToggleEvaluated("some-toggle", true));
         dispatcher.dispatch(impressionEvent());
@@ -128,9 +121,6 @@ class EventDispatcherTest {
         OnlyToggleEvaluated subscriber = new OnlyToggleEvaluated();
         EventDispatcher dispatcher = dispatcherFor(subscriber);
 
-        assertThat(dispatcher.isSubscribedTo(ToggleEvaluated.class)).isTrue();
-        assertThat(dispatcher.isSubscribedTo(IsEnabledImpressionEvent.class)).isFalse();
-
         dispatcher.dispatch(new ToggleEvaluated("some-toggle", true));
         dispatcher.dispatch(impressionEvent());
 
@@ -142,10 +132,6 @@ class EventDispatcherTest {
     void subscriberListeningForImpressionsStillGetsThem() {
         OnlyImpressions subscriber = new OnlyImpressions();
         EventDispatcher dispatcher = dispatcherFor(subscriber);
-
-        assertThat(dispatcher.isSubscribedTo(ToggleEvaluated.class)).isFalse();
-        assertThat(dispatcher.isSubscribedTo(IsEnabledImpressionEvent.class)).isTrue();
-        assertThat(dispatcher.isSubscribedTo(VariantImpressionEvent.class)).isTrue();
 
         dispatcher.dispatch(new ToggleEvaluated("some-toggle", true));
         dispatcher.dispatch(impressionEvent());
@@ -161,9 +147,6 @@ class EventDispatcherTest {
         CatchAll subscriber = new CatchAll();
         EventDispatcher dispatcher = dispatcherFor(subscriber);
 
-        assertThat(dispatcher.isSubscribedTo(ToggleEvaluated.class)).isTrue();
-        assertThat(dispatcher.isSubscribedTo(IsEnabledImpressionEvent.class)).isTrue();
-
         dispatcher.dispatch(new ToggleEvaluated("some-toggle", true));
         dispatcher.dispatch(impressionEvent());
 
@@ -175,8 +158,6 @@ class EventDispatcherTest {
         NoOpSubclassThatListens subscriber = new NoOpSubclassThatListens();
         EventDispatcher dispatcher = dispatcherFor(subscriber);
 
-        assertThat(dispatcher.isSubscribedTo(ToggleEvaluated.class)).isTrue();
-
         dispatcher.dispatch(new ToggleEvaluated("some-toggle", true));
 
         assertThat(subscriber.received).hasSize(1);
@@ -186,10 +167,76 @@ class EventDispatcherTest {
     void eventTypesOutsideTheEvaluationPathAlwaysDispatch() {
         EventDispatcher dispatcher = dispatcherFor(new NoOpSubscriber());
 
-        assertThat(dispatcher.isSubscribedTo(UnleashReady.class)).isTrue();
-
         dispatcher.dispatch(new UnleashReady());
 
         assertThat(executor.scheduled).hasSize(1);
+    }
+
+    @Test
+    void typedDispatchSchedulesNothingForDefaultSubscriber() {
+        EventDispatcher dispatcher = dispatcherFor(new NoOpSubscriber());
+
+        dispatcher.dispatchToggleEvaluated("some-toggle", true);
+        dispatcher.dispatchIsEnabledImpression(
+                "some-toggle", true, UnleashContext.builder().build());
+        dispatcher.dispatchVariantImpression(
+                "some-toggle", true, UnleashContext.builder().build(), "blue");
+
+        assertThat(executor.scheduled).isEmpty();
+    }
+
+    @Test
+    void typedDispatchDeliversToggleEvaluatedOnlyToItsListener() {
+        OnlyToggleEvaluated subscriber = new OnlyToggleEvaluated();
+        EventDispatcher dispatcher = dispatcherFor(subscriber);
+
+        dispatcher.dispatchToggleEvaluated("some-toggle", true);
+        dispatcher.dispatchIsEnabledImpression(
+                "some-toggle", true, UnleashContext.builder().build());
+
+        assertThat(executor.scheduled).hasSize(1);
+        assertThat(subscriber.received).hasSize(1);
+        assertThat(subscriber.received.get(0).getToggleName()).isEqualTo("some-toggle");
+        assertThat(subscriber.received.get(0).isEnabled()).isTrue();
+    }
+
+    @Test
+    void typedDispatchDeliversImpressionsOnlyToTheirListener() {
+        OnlyImpressions subscriber = new OnlyImpressions();
+        EventDispatcher dispatcher = dispatcherFor(subscriber);
+        UnleashContext context = UnleashContext.builder().userId("user-1").build();
+
+        dispatcher.dispatchToggleEvaluated("some-toggle", true);
+        dispatcher.dispatchIsEnabledImpression("some-toggle", true, context);
+        dispatcher.dispatchVariantImpression("other-toggle", false, context, "blue");
+
+        assertThat(executor.scheduled).hasSize(2);
+        assertThat(subscriber.received).hasSize(2);
+
+        ImpressionEvent isEnabled = subscriber.received.get(0);
+        assertThat(isEnabled).isInstanceOf(IsEnabledImpressionEvent.class);
+        assertThat(isEnabled.getFeatureName()).isEqualTo("some-toggle");
+        assertThat(isEnabled.isEnabled()).isTrue();
+        assertThat(isEnabled.getContext()).isSameAs(context);
+
+        ImpressionEvent variant = subscriber.received.get(1);
+        assertThat(variant).isInstanceOf(VariantImpressionEvent.class);
+        assertThat(variant.getFeatureName()).isEqualTo("other-toggle");
+        assertThat(variant.isEnabled()).isFalse();
+        assertThat(((VariantImpressionEvent) variant).getVariantName()).isEqualTo("blue");
+    }
+
+    @Test
+    void typedDispatchReachesTheCatchAll() {
+        CatchAll subscriber = new CatchAll();
+        EventDispatcher dispatcher = dispatcherFor(subscriber);
+
+        dispatcher.dispatchToggleEvaluated("some-toggle", true);
+        dispatcher.dispatchIsEnabledImpression(
+                "some-toggle", true, UnleashContext.builder().build());
+        dispatcher.dispatchVariantImpression(
+                "some-toggle", true, UnleashContext.builder().build(), "blue");
+
+        assertThat(subscriber.received).hasSize(3);
     }
 }

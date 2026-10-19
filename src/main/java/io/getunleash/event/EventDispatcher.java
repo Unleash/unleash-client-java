@@ -1,5 +1,6 @@
 package io.getunleash.event;
 
+import io.getunleash.UnleashContext;
 import io.getunleash.util.UnleashConfig;
 import io.getunleash.util.UnleashScheduledExecutor;
 
@@ -28,31 +29,37 @@ public class EventDispatcher {
                         || overridesCallback(subscriberType, "impression", ImpressionEvent.class);
     }
 
-    /**
-     * Whether an event of this type would reach anything on the configured subscriber.
-     *
-     * <p>Callers on the evaluation path use this to skip constructing events nobody will receive.
-     * Only the per-evaluation event types can report {@code false}; every other event type always
-     * dispatches.
-     *
-     * @param eventType the concrete event class the caller is about to construct
-     * @return false only when the subscriber inherits the no-op default for every callback this
-     *     event would reach
-     */
-    public boolean isSubscribedTo(Class<? extends UnleashEvent> eventType) {
-        if (ToggleEvaluated.class.equals(eventType)) {
-            return subscribedToToggleEvaluated;
+    // The per-evaluation dispatch methods take the event's fields rather than the event, so the
+    // event is only constructed when something will receive it and the evaluation path stays free.
+
+    public void dispatchToggleEvaluated(String toggleName, boolean enabled) {
+        if (subscribedToToggleEvaluated) {
+            schedule(new ToggleEvaluated(toggleName, enabled));
         }
-        if (ImpressionEvent.class.isAssignableFrom(eventType)) {
-            return subscribedToImpressions;
+    }
+
+    public void dispatchIsEnabledImpression(
+            String toggleName, boolean enabled, UnleashContext context) {
+        if (subscribedToImpressions) {
+            schedule(new IsEnabledImpressionEvent(toggleName, enabled, context));
         }
-        return true;
+    }
+
+    public void dispatchVariantImpression(
+            String toggleName, boolean enabled, UnleashContext context, String variantName) {
+        if (subscribedToImpressions) {
+            schedule(new VariantImpressionEvent(toggleName, enabled, context, variantName));
+        }
     }
 
     public void dispatch(UnleashEvent unleashEvent) {
         if (!shouldDispatch(unleashEvent)) {
             return;
         }
+        schedule(unleashEvent);
+    }
+
+    private void schedule(UnleashEvent unleashEvent) {
         unleashScheduledExecutor.scheduleOnce(
                 () -> {
                     unleashSubscriber.on(unleashEvent);
