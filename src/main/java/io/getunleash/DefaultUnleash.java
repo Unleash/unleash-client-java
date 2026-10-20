@@ -5,9 +5,6 @@ import static io.getunleash.variant.Variant.DISABLED_VARIANT;
 import io.getunleash.engine.FlatResponse;
 import io.getunleash.engine.VariantDef;
 import io.getunleash.event.EventDispatcher;
-import io.getunleash.event.IsEnabledImpressionEvent;
-import io.getunleash.event.ToggleEvaluated;
-import io.getunleash.event.VariantImpressionEvent;
 import io.getunleash.impactmetrics.ImpactMetricContext;
 import io.getunleash.impactmetrics.ImpactMetricRegistryAndDataSource;
 import io.getunleash.impactmetrics.MetricsAPI;
@@ -127,9 +124,9 @@ public class DefaultUnleash implements Unleash {
         boolean enabled =
                 response.flatMap(r -> Optional.ofNullable(r.value))
                         .orElseGet(() -> fallbackAction.test(toggleName, enhancedContext));
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, enabled));
+        eventDispatcher.dispatchToggleEvaluated(toggleName, enabled);
         if (response.map(r -> r.impressionData).orElse(false)) {
-            eventDispatcher.dispatch(new IsEnabledImpressionEvent(toggleName, enabled, context));
+            eventDispatcher.dispatchIsEnabledImpression(toggleName, enabled, context);
         }
         return enabled;
     }
@@ -153,11 +150,10 @@ public class DefaultUnleash implements Unleash {
     public Variant getVariant(String toggleName, UnleashContext context, Variant defaultValue) {
         Optional<FlatResponse<VariantDef>> response = getVariantResponse(toggleName, context);
         Variant variant = resolveVariant(response, defaultValue);
-        eventDispatcher.dispatch(new ToggleEvaluated(toggleName, variant.isFeatureEnabled()));
+        eventDispatcher.dispatchToggleEvaluated(toggleName, variant.isFeatureEnabled());
         if (response.map(r -> r.impressionData).orElse(false)) {
-            eventDispatcher.dispatch(
-                    new VariantImpressionEvent(
-                            toggleName, variant.isFeatureEnabled(), context, variant.getName()));
+            eventDispatcher.dispatchVariantImpression(
+                    toggleName, variant.isFeatureEnabled(), context, variant.getName());
         }
         return variant;
     }
